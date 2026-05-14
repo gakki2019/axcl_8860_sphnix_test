@@ -1,0 +1,4 @@
+version: 1
+groups:
+  - id: mockApi
+    reason: Mock APIs are not part of public reference documentation.
