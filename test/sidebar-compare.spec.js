@@ -41,6 +41,10 @@ async function readStyles(page, selectors) {
   }, selectors);
 }
 
+function normalizeNavKeys(keys) {
+  return keys.map((key) => String(key || '').replace(/^(zh|en)\//, ''));
+}
+
 test.describe('AXCL sidebar comparison', () => {
   test.skip(!preflight.ok, skipReason);
 
@@ -155,5 +159,33 @@ test.describe('AXCL sidebar comparison', () => {
 
     expect(beforeScrollTop).toBe(0);
     expect(scrollTop).toBe(0);
+  });
+
+  test('keeps Device API aligned when switching languages', async ({ page }) => {
+    await page.goto('/zh/develop/c/device_api.html', { waitUntil: 'networkidle' });
+
+    const zhState = await page.evaluate(() => ({
+      title: document.title,
+      heading: document.querySelector('h1') ? document.querySelector('h1').textContent.trim() : null,
+      openKeys: [...document.querySelectorAll('.axcl-nav-node.is-open[data-node-key]')].map((el) => el.getAttribute('data-node-key')),
+      englishHref: document.querySelector('.axcl-language-switch .axcl-language-link[href]')?.getAttribute('href') || null,
+    }));
+
+    expect(zhState.title).toContain('设备 API');
+    expect(zhState.heading).toContain('设备 API');
+    expect(zhState.englishHref).toContain('/en/develop/c/device_api.html');
+
+    await page.locator('.axcl-language-switch .axcl-language-link[href]').click();
+    await page.waitForLoadState('networkidle');
+
+    const enState = await page.evaluate(() => ({
+      title: document.title,
+      heading: document.querySelector('h1') ? document.querySelector('h1').textContent.trim() : null,
+      openKeys: [...document.querySelectorAll('.axcl-nav-node.is-open[data-node-key]')].map((el) => el.getAttribute('data-node-key')),
+    }));
+
+    expect(enState.title).toContain('Device API');
+    expect(enState.heading).toContain('Device API');
+    expect(normalizeNavKeys(enState.openKeys)).toEqual(normalizeNavKeys(zhState.openKeys));
   });
 });
