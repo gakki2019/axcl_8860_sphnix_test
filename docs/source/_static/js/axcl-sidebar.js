@@ -1,4 +1,8 @@
 (function () {
+  function isExternalHref(href) {
+    return /^(?:[a-z]+:)?\/\//i.test(href) || href.startsWith('mailto:');
+  }
+
   function getStateKey(lang) {
     return `axcl-sidebar-state-${lang}`;
   }
@@ -19,58 +23,93 @@
     }
   }
 
-  function translateKey(key, fromLang, toLang) {
-    const fromPrefix = `${fromLang}/`;
-    const toPrefix = `${toLang}/`;
-    if (key === fromLang) {
-      return toLang;
+  function normalizeHref(href) {
+    if (!href || href.startsWith('#') || isExternalHref(href)) {
+      return href;
     }
-    if (key.startsWith(fromPrefix)) {
-      return toPrefix + key.slice(fromPrefix.length);
+    return href.replace(/^(?:\.\.\/)?(?:zh|en)\//, '');
+  }
+
+  function getBranchItems(tree) {
+    return Array.from(tree.querySelectorAll('li')).filter((node) => {
+      const hasDirectList = Array.from(node.children).some((child) => child.tagName === 'UL');
+      const link = Array.from(node.children).find((child) => child.tagName === 'A') || null;
+      const href = link ? link.getAttribute('href') || '' : '';
+      return hasDirectList && Boolean(link) && href !== '#';
+    });
+  }
+
+  function getBranchLink(node) {
+    return Array.from(node.children).find((child) => child.tagName === 'A') || null;
+  }
+
+  function getLanguageRoot(tree) {
+    if (tree.dataset.homepage !== 'true') {
+      return tree;
     }
-    return key;
+
+    const lang = tree.dataset.lang || 'zh';
+    const rootNode = Array.from(tree.children).find((node) => {
+      if (node.tagName !== 'LI') {
+        return false;
+      }
+      const link = getBranchLink(node);
+      const href = link ? link.getAttribute('href') || '' : '';
+      return href === '#'
+        || href === `${lang}/index.html`
+        || href.endsWith(`/${lang}/index.html`)
+        || href.endsWith(`../${lang}/index.html`);
+    }) || null;
+
+    if (!rootNode) {
+      return tree;
+    }
+
+    const rootList = Array.from(rootNode.children).find((child) => child.tagName === 'UL') || null;
+    return rootList || tree;
   }
 
   function collectBranchState(tree) {
     const state = {};
-    tree.querySelectorAll('.axcl-nav-node.is-branch[data-node-key]').forEach((node) => {
-      state[node.dataset.nodeKey] = node.classList.contains('is-open');
+    getBranchItems(tree).forEach((node) => {
+      const link = getBranchLink(node);
+      const href = link ? link.getAttribute('href') : '';
+      const normalizedHref = normalizeHref(href);
+      if (normalizedHref) {
+        state[normalizedHref] = node.classList.contains('current');
+      }
     });
     return state;
   }
 
   function persistTranslatedState(tree, targetLang) {
-    const sourceLang = tree.dataset.lang || 'zh';
-    if (sourceLang === targetLang) {
-      return;
-    }
     const sourceState = collectBranchState(tree);
-    const translatedState = {};
-    Object.entries(sourceState).forEach(([key, value]) => {
-      translatedState[translateKey(key, sourceLang, targetLang)] = value;
-    });
-    writeState(getStateKey(targetLang), translatedState);
+    writeState(getStateKey(targetLang), sourceState);
   }
 
   function applyState(tree, state) {
-    tree.querySelectorAll(".axcl-nav-node.is-branch").forEach((node) => {
-      const key = node.dataset.nodeKey;
-      const toggle = node.querySelector(":scope > .axcl-nav-row > .axcl-nav-toggle");
-      const shouldOpen = Object.prototype.hasOwnProperty.call(state, key)
-        ? Boolean(state[key])
-        : node.classList.contains("is-default-open") || node.classList.contains("is-current-path") || node.classList.contains("is-current");
-      node.classList.toggle("is-open", shouldOpen);
-      if (toggle) {
-        toggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
-      }
+    getBranchItems(tree).forEach((node) => {
+      const link = getBranchLink(node);
+      const href = normalizeHref(link ? link.getAttribute('href') : '');
+      const shouldOpen = href && Object.prototype.hasOwnProperty.call(state, href)
+        ? Boolean(state[href])
+        : node.classList.contains('current') || node.classList.contains('toctree-l2');
+      node.classList.toggle('current', shouldOpen);
+      node.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
     });
   }
 
   function bindTree(tree) {
+    if (tree.dataset.axclBound === 'true') {
+      return;
+    }
+    tree.dataset.axclBound = 'true';
+
     const stateKey = getStateKey(tree.dataset.lang || 'zh');
+    const isHomepage = tree.dataset.homepage === 'true';
+    const scope = getLanguageRoot(tree);
     const state = readState(stateKey);
-    applyState(tree, state);
-    let activeHoverNode = null;
+    applyState(scope, state);
 
     function resetSidebarScroll() {
       const sideScroll = document.querySelector(".wy-side-scroll");
@@ -79,101 +118,90 @@
       }
     }
 
-    function clearHover() {
-      if (!activeHoverNode) {
-        return;
-      }
-      const row = activeHoverNode.querySelector(":scope > .axcl-nav-row");
-      const link = activeHoverNode.querySelector(":scope > .axcl-nav-row > .axcl-nav-link");
-      activeHoverNode.classList.remove("is-hovered");
-      if (row) {
-        row.style.removeProperty("background-color");
-      }
-      if (link) {
-        link.style.removeProperty("color");
-        link.style.removeProperty("-webkit-text-fill-color");
-        link.style.removeProperty("background-color");
-      }
-      activeHoverNode = null;
+    function syncState() {
+      writeState(stateKey, collectBranchState(scope));
     }
 
-    function setHover(node) {
-      if (!node || node === activeHoverNode) {
-        return;
-      }
-      clearHover();
-      activeHoverNode = node;
-      const row = node.querySelector(":scope > .axcl-nav-row");
-      const link = node.querySelector(":scope > .axcl-nav-row > .axcl-nav-link");
-      node.classList.add("is-hovered");
-      if (row) {
-        row.style.setProperty("background-color", "transparent", "important");
-      }
-      if (link) {
-        link.style.setProperty("color", "#ff5a5f", "important");
-        link.style.setProperty("-webkit-text-fill-color", "#ff5a5f", "important");
-        link.style.setProperty("background-color", "transparent", "important");
-      }
+    function toggleBranch(node) {
+      const nextOpen = !node.classList.contains('current');
+      node.classList.toggle('current', nextOpen);
+      node.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+      syncState();
     }
 
-    tree.querySelectorAll(".axcl-nav-node.is-branch").forEach((node) => {
-      const key = node.dataset.nodeKey;
-      const toggle = node.querySelector(":scope > .axcl-nav-row > .axcl-nav-toggle");
-      const label = node.querySelector(":scope > .axcl-nav-row > .axcl-nav-link--branch");
-
-      function toggleNode(event) {
-        event.preventDefault();
-        const nextOpen = !node.classList.contains("is-open");
-        node.classList.toggle("is-open", nextOpen);
-        if (toggle) {
-          toggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+    if (isHomepage) {
+      getBranchItems(scope).forEach((node) => {
+        const link = getBranchLink(node);
+        const href = normalizeHref(link ? link.getAttribute('href') : '');
+        if (href && !Object.prototype.hasOwnProperty.call(state, href)) {
+          node.classList.add('current');
+          node.setAttribute('aria-expanded', 'true');
         }
-        state[key] = nextOpen;
-        writeState(stateKey, state);
+      });
+    }
+
+    getBranchItems(scope).forEach((node) => {
+      const link = getBranchLink(node);
+      if (!link) {
+        return;
+      }
+      link.addEventListener('click', (event) => {
+        const clickedButton = event.target instanceof Element ? event.target.closest('button.toctree-expand') : null;
+        if (clickedButton) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        toggleBranch(node);
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (!target) {
+        return;
       }
 
-      if (toggle) {
-        toggle.addEventListener("click", toggleNode);
+      const toggle = target.closest('button.toctree-expand');
+      if (toggle && scope.contains(toggle)) {
+        event.preventDefault();
+        event.stopPropagation();
+        const node = toggle.closest('li');
+        if (node) {
+          toggleBranch(node);
+        }
+        return;
       }
-      if (label) {
-        label.addEventListener("click", toggleNode);
+
+      const link = target.closest('.wy-menu-vertical a[href]');
+      if (!link || !scope.contains(link)) {
+        return;
       }
-    });
+
+      const node = link.closest('li');
+      if (!node) {
+        return;
+      }
+
+      const isBranch = Array.from(node.children).some((child) => child.tagName === 'UL');
+      const isRootWrapper = link.getAttribute('href') === '#';
+      const isCurrentLeaf = link.classList.contains('current') && !isBranch;
+
+      if (isRootWrapper) {
+        event.preventDefault();
+        return;
+      }
+
+      if (isCurrentLeaf) {
+        event.preventDefault();
+        resetSidebarScroll();
+      }
+    }, true);
 
     document.querySelectorAll(".axcl-language-switch .axcl-language-link[data-lang-target]").forEach((link) => {
       link.addEventListener("click", () => {
         persistTranslatedState(tree, link.dataset.langTarget);
       });
-    });
-
-    tree.querySelectorAll(".axcl-nav-link.is-current").forEach((link) => {
-      link.addEventListener("click", (event) => {
-        event.preventDefault();
-      });
-    });
-
-    tree.addEventListener("mouseover", (event) => {
-      const target = event.target instanceof Element ? event.target : null;
-      const row = target ? target.closest(".axcl-nav-row") : null;
-      if (!row || !tree.contains(row)) {
-        return;
-      }
-      setHover(row.closest(".axcl-nav-node"));
-    });
-
-    tree.addEventListener("mouseout", (event) => {
-      const target = event.target instanceof Element ? event.target : null;
-      const row = target ? target.closest(".axcl-nav-row") : null;
-      if (!row || !tree.contains(row)) {
-        return;
-      }
-      const related = event.relatedTarget instanceof Element ? event.relatedTarget : null;
-      if (related && row.contains(related)) {
-        return;
-      }
-      if (row.closest(".axcl-nav-node") === activeHoverNode) {
-        clearHover();
-      }
     });
 
     function forceSidebarScrollTop() {
@@ -198,10 +226,26 @@
   document.addEventListener("DOMContentLoaded", function () {
     const tree = document.querySelector(".axcl-sidebar");
     if (tree) {
-      bindTree(tree);
+      const run = () => {
+        bindTree(tree);
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            bindTree(tree);
+            window.requestAnimationFrame(() => {
+              document.documentElement.classList.remove("axcl-nav-pending");
+            });
+          });
+        });
+      };
+      if (document.readyState === "complete") {
+        run();
+      } else {
+        run();
+      }
+    } else {
+      window.requestAnimationFrame(() => {
+        document.documentElement.classList.remove("axcl-nav-pending");
+      });
     }
-    window.requestAnimationFrame(() => {
-      document.documentElement.classList.remove("axcl-nav-pending");
-    });
   });
 })();

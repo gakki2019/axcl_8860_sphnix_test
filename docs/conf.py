@@ -39,6 +39,7 @@ myst_enable_extensions = [
 
 suppress_warnings = [
 	"myst.xref_missing",
+	"toc.not_included",
 ]
 
 html_theme = "sphinx_rtd_theme"

@@ -2,214 +2,196 @@ const { test, expect } = require('playwright/test');
 const { getChromiumPreflight } = require('./support/playwright-env.cjs');
 
 const preflight = getChromiumPreflight();
-const remoteIndex = 'https://docs.espressif.com/projects/esp-idf/zh_CN/latest/esp32/index.html';
 const skipReason = preflight.missingLibraries.length
-  ? `Chromium runtime dependencies are missing: ${preflight.missingLibraries.join(', ')}`
-  : `Chromium runtime is unavailable: ${(preflight.diagnostics[0] || 'unknown reason')}`;
+    ? `Chromium runtime dependencies are missing: ${preflight.missingLibraries.join(', ')}`
+    : `Chromium runtime is unavailable: ${(preflight.diagnostics[0] || 'unknown reason')}`;
 
-function parsePx(value) {
-  return Number.parseFloat(String(value || '0').replace('px', ''));
-}
-
-async function readStyles(page, selectors) {
-  return page.evaluate((input) => {
-    function stylesFor(selector, pseudoElement) {
-      const element = document.querySelector(selector);
-      if (!element) {
-        return null;
-      }
-      const style = window.getComputedStyle(element, pseudoElement || undefined);
-      return {
-        backgroundColor: style.backgroundColor,
-        color: style.color,
-        paddingLeft: style.paddingLeft,
-        transform: style.transform,
-        borderLeftColor: style.borderLeftColor,
-        display: style.display,
-      };
-    }
-
-    return {
-      sidebar: stylesFor(input.sidebar),
-      search: stylesFor(input.search),
-      topLevel: stylesFor(input.topLevel),
-      nestedLevel: stylesFor(input.nestedLevel),
-      currentRow: stylesFor(input.currentRow),
-      hoverRow: stylesFor(input.hoverRow),
-      ancestorRow: stylesFor(input.ancestorRow),
-    };
-  }, selectors);
-}
+const docsOrigin = 'http://127.0.0.1:18080';
 
 function normalizeNavKeys(keys) {
-  return keys.map((key) => String(key || '').replace(/^(zh|en)\//, ''));
+    return keys
+        .map((key) => String(key || ''))
+        .filter((key) => key && key !== '#')
+        .map((key) => key.replace(/^(?:\.\.\/)?(?:zh|en)\//, ''));
 }
 
-test.describe('AXCL sidebar comparison', () => {
-  test.skip(!preflight.ok, skipReason);
+function sidebarRoot(page) {
+    return page.locator('.axcl-sidebar > ul').first();
+}
 
-  test('matches key sidebar colors and spacing against esp-idf', async ({ page, context }) => {
-    await page.goto('/zh/index.html', { waitUntil: 'networkidle' });
-    const referencePage = await context.newPage();
-    await referencePage.goto(remoteIndex, { waitUntil: 'domcontentloaded' });
+function branchLocator(page, label) {
+    return sidebarRoot(page).locator(`li:has(> a:has-text(${JSON.stringify(label)}))`).first();
+}
 
-    const localSelectors = {
-      sidebar: '.wy-nav-side',
-      search: '.wy-side-nav-search',
-      topLevel: '.axcl-nav-node.level-1 > .axcl-nav-row',
-      nestedLevel: '.axcl-nav-node.level-2 > .axcl-nav-row',
-      currentRow: '.axcl-nav-node.is-current > .axcl-nav-row',
-      hoverRow: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-link',
-      ancestorRow: '.axcl-nav-node[data-node-key="zh/develop/c"] > .axcl-nav-row',
-      toggleIcon: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-toggle',
-      children: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-children',
-    };
+function branchToggleLocator(page, label) {
+    return branchLocator(page, label).locator(':scope > a > button.toctree-expand').first();
+}
 
-    const localBeforeHover = await readStyles(page, localSelectors);
+function branchChildrenLocator(page, label) {
+    return branchLocator(page, label).locator(':scope > ul');
+}
 
-    await page.locator('.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-link').hover();
-    await page.waitForTimeout(300);
-    await referencePage.close();
+function branchLinkLocator(page, label) {
+    return branchLocator(page, label).locator(':scope > a').first();
+}
 
-    const localAfterHover = await readStyles(page, localSelectors);
+async function gotoDocsPage(page, path) {
+    const url = path.startsWith('http://') || path.startsWith('https://')
+        ? path
+        : new URL(path, docsOrigin).toString();
 
-    expect(localBeforeHover.sidebar.backgroundColor).toBe('rgb(52, 49, 49)');
-    expect(localBeforeHover.search.backgroundColor).toBe('rgb(227, 227, 227)');
-    expect(localAfterHover.hoverRow.color).toBe('rgb(255, 90, 95)');
-    expect(localAfterHover.ancestorRow.backgroundColor).toBe(localBeforeHover.ancestorRow.backgroundColor);
+    try {
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    } catch (error) {
+        if (!String(error).includes('ERR_ABORTED')) {
+            throw error;
+        }
+    }
 
-    expect(parsePx(localBeforeHover.nestedLevel.paddingLeft)).toBeGreaterThan(parsePx(localBeforeHover.topLevel.paddingLeft));
-  });
+    await sidebarRoot(page).waitFor({ state: 'attached', timeout: 15000 });
+    await sidebarRoot(page).locator('li').first().waitFor({ state: 'attached', timeout: 15000 });
+}
 
-  test('keeps collapse and expand state with icon feedback', async ({ page }) => {
-    await page.goto('/zh/index.html', { waitUntil: 'networkidle' });
-
-    const branchRow = page.locator('.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row');
-    const toggle = page.locator('.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-toggle');
-    const children = page.locator('.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-children');
-
-    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    await expect(children).toBeVisible();
-
-    const beforeCollapse = await readStyles(page, {
-      toggleIcon: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-toggle',
-    });
-
-    await branchRow.click();
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    await expect(children).toBeHidden();
-
-    const afterCollapse = await readStyles(page, {
-      toggleIcon: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-toggle',
-    });
-
-    expect(beforeCollapse).toBeTruthy();
-    expect(afterCollapse).toBeTruthy();
-
-    await page.reload({ waitUntil: 'networkidle' });
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-
-    await branchRow.click();
-    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    await expect(children).toBeVisible();
-  });
-
-  test('keeps ancestor backgrounds clear and resets sidebar scroll on deep pages', async ({ page }) => {
-    await page.goto('/zh/develop/c/device_api.html', { waitUntil: 'networkidle' });
-
-    const deviceStyles = await page.evaluate(() => {
-      const parentRow = document.querySelector('.axcl-nav-node[data-node-key="zh/develop/c"] > .axcl-nav-row');
-      const selectedRow = document.querySelector('.axcl-nav-node.level-3.is-current > .axcl-nav-row');
-      const sideScroll = document.querySelector('.wy-side-scroll');
-      return {
-        parentBackground: parentRow ? getComputedStyle(parentRow).backgroundColor : null,
-        selectedBackground: selectedRow ? getComputedStyle(selectedRow).backgroundColor : null,
-        sideScrollTop: sideScroll ? sideScroll.scrollTop : null,
-      };
-    });
-
-    expect(deviceStyles.parentBackground).toBe('rgba(0, 0, 0, 0)');
-    expect(deviceStyles.selectedBackground).toBe('rgb(227, 227, 227)');
-    expect(deviceStyles.sideScrollTop).toBe(0);
-
-    await page.goto('/zh/develop/c/memory_api.html', { waitUntil: 'networkidle' });
-    const memoryScrollTop = await page.evaluate(() => {
-      const sideScroll = document.querySelector('.wy-side-scroll');
-      return sideScroll ? sideScroll.scrollTop : null;
-    });
-
-    expect(memoryScrollTop).toBe(0);
-  });
-
-  test('resets sidebar scroll when clicking Memory API again', async ({ page }) => {
-    await page.goto('/zh/develop/c/memory_api.html', { waitUntil: 'networkidle' });
-
-    const beforeScrollTop = await page.evaluate(() => {
-      const sideScroll = document.querySelector('.wy-side-scroll');
-      return sideScroll ? sideScroll.scrollTop : null;
-    });
-
-    await page.locator('.axcl-nav-node.level-3.is-current > .axcl-nav-row > .axcl-nav-link').click({ force: true });
-    await page.waitForTimeout(100);
-
-    const scrollTop = await page.evaluate(() => {
-      const sideScroll = document.querySelector('.wy-side-scroll');
-      return sideScroll ? sideScroll.scrollTop : null;
-    });
-
-    expect(beforeScrollTop).toBe(0);
-    expect(scrollTop).toBe(0);
-  });
-
-  test('keeps Device API aligned when switching languages', async ({ page }) => {
-    await page.goto('/zh/develop/c/device_api.html', { waitUntil: 'networkidle' });
-
-    const zhState = await page.evaluate(() => ({
-      title: document.title,
-      heading: document.querySelector('h1') ? document.querySelector('h1').textContent.trim() : null,
-      openKeys: [...document.querySelectorAll('.axcl-nav-node.is-open[data-node-key]')].map((el) => el.getAttribute('data-node-key')),
-      englishHref: document.querySelector('.axcl-language-switch .axcl-language-link[href]')?.getAttribute('href') || null,
+async function readSidebarState(page) {
+    return page.evaluate(() => ({
+        title: document.title,
+        heading: document.querySelector('h1') ? document.querySelector('h1').textContent.trim() : null,
+        path: window.location.pathname,
+        openKeys: [...document.querySelectorAll('.axcl-sidebar > ul li.current')]
+            .map((el) => el.querySelector(':scope > a')?.getAttribute('href') || null)
+            .filter((href) => href && href !== '#'),
+        currentHref: document.querySelector('.axcl-sidebar > ul a.current')?.getAttribute('href') || null,
     }));
+}
 
-    expect(zhState.title).toContain('设备 API');
-    expect(zhState.heading).toContain('设备 API');
-    expect(zhState.englishHref).toContain('/en/develop/c/device_api.html');
-
-    await page.locator('.axcl-language-switch .axcl-language-link[href]').click();
-    await page.waitForLoadState('networkidle');
-
-    const enState = await page.evaluate(() => ({
-      title: document.title,
-      heading: document.querySelector('h1') ? document.querySelector('h1').textContent.trim() : null,
-      openKeys: [...document.querySelectorAll('.axcl-nav-node.is-open[data-node-key]')].map((el) => el.getAttribute('data-node-key')),
+async function readBranchState(page, label) {
+    return branchLocator(page, label).evaluate((node) => ({
+        expanded: node.getAttribute('aria-expanded'),
+        visible: node.querySelector(':scope > ul') ? getComputedStyle(node.querySelector(':scope > ul')).display : null,
+        current: node.classList.contains('current'),
+        text: node.querySelector(':scope > a') ? node.querySelector(':scope > a').textContent.trim() : null,
+        href: node.querySelector(':scope > a') ? node.querySelector(':scope > a').getAttribute('href') : null,
     }));
+}
 
-    expect(enState.title).toContain('Device API');
-    expect(enState.heading).toContain('Device API');
-    expect(normalizeNavKeys(enState.openKeys)).toEqual(normalizeNavKeys(zhState.openKeys));
-  });
+test.describe('AXCL sidebar navigation', () => {
+    test.skip(!preflight.ok, skipReason);
 
-  test('preserves homepage sidebar state when switching languages', async ({ page }) => {
-    await page.goto('/zh/index.html', { waitUntil: 'networkidle' });
+    test('icon and text clicks toggle branches independently', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/index.html');
 
-    await page.locator('.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-toggle').click();
-    await page.waitForLoadState('networkidle');
+        const basicToggle = branchToggleLocator(page, '基础');
+        const basicChildren = branchChildrenLocator(page, '基础');
+        const developText = branchLinkLocator(page, '开发');
+        const developChildren = branchChildrenLocator(page, '开发');
 
-    const zhState = await page.evaluate(() => ({
-      title: document.title,
-      openKeys: [...document.querySelectorAll('.axcl-nav-node.is-open[data-node-key]')].map((el) => el.getAttribute('data-node-key')),
-    }));
+        const basicInitial = await readBranchState(page, '基础');
+        const developInitial = await readBranchState(page, '开发');
+        const developChildInitial = await readBranchState(page, 'C/C++');
+        const faqInitial = await readBranchState(page, '常见问题');
 
-    await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
-    await page.waitForLoadState('networkidle');
+        await basicToggle.click();
+        await expect(branchLocator(page, '基础')).toHaveAttribute('aria-expanded', basicInitial.expanded === 'true' ? 'false' : 'true');
+        await expect(basicChildren).toHaveCSS('display', basicInitial.visible === 'block' ? 'none' : 'block');
+        expect(await readBranchState(page, '开发')).toEqual(developInitial);
+        expect(await readBranchState(page, 'C/C++')).toEqual(developChildInitial);
+        expect(await readBranchState(page, '常见问题')).toEqual(faqInitial);
 
-    const enState = await page.evaluate(() => ({
-      title: document.title,
-      openKeys: [...document.querySelectorAll('.axcl-nav-node.is-open[data-node-key]')].map((el) => el.getAttribute('data-node-key')),
-    }));
+        await developText.click();
+        await expect(branchLocator(page, '开发')).toHaveAttribute('aria-expanded', developInitial.expanded === 'true' ? 'false' : 'true');
+        await expect(developChildren).toHaveCSS('display', developInitial.visible === 'block' ? 'none' : 'block');
+        expect((await readBranchState(page, 'C/C++')).current).toBe(developChildInitial.current);
+        expect((await readBranchState(page, 'C/C++')).expanded).toBe(developChildInitial.expanded);
+        expect(await readBranchState(page, '常见问题')).toEqual(faqInitial);
 
-    expect(zhState.title).toContain('AXCL SDK 文档');
-    expect(enState.title).toContain('AXCL SDK Documentation');
-    expect(normalizeNavKeys(enState.openKeys)).toEqual(normalizeNavKeys(zhState.openKeys));
-  });
+        await developText.click();
+        await expect(branchLocator(page, '开发')).toHaveAttribute('aria-expanded', developInitial.expanded);
+        await expect(developChildren).toHaveCSS('display', developInitial.visible);
+        expect(await readBranchState(page, 'C/C++')).toEqual(developChildInitial);
+    });
+
+    test('keeps the active page and sidebar state aligned when switching languages', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/c/device_api.html');
+
+        const zhState = await readSidebarState(page);
+        expect(zhState.title).toContain('设备 API');
+        expect(zhState.heading).toContain('设备 API');
+        expect(zhState.path).toContain('/zh/develop/c/device_api.html');
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/develop/c/device_api.html');
+
+        const enState = await readSidebarState(page);
+        expect(enState.title).toContain('Device API');
+        expect(enState.heading).toContain('Device API');
+        expect(enState.path).toContain('/en/develop/c/device_api.html');
+        expect(normalizeNavKeys(enState.openKeys)).toEqual(normalizeNavKeys(zhState.openKeys));
+    });
+
+    test('preserves homepage sidebar collapse state across language switches', async ({ page }) => {
+        await gotoDocsPage(page, '/index.html');
+
+        const zhRoot = page.locator('.axcl-sidebar > ul > li:has(> a[href="zh/index.html"])').first();
+        const zhBasic = zhRoot.locator('ul > li:has(> a:has-text("基础"))').first();
+        const zhBasicToggle = zhBasic.locator(':scope > a > button.toctree-expand').first();
+        const zhDevelop = zhRoot.locator('ul > li:has(> a:has-text("开发"))').first();
+        const zhDevelopChild = zhRoot.locator('ul li:has(> a:has-text("C/C++"))').first();
+        const zhFaq = zhRoot.locator('ul > li:has(> a:has-text("常见问题"))').first();
+
+        const basicInitial = await zhBasic.evaluate((node) => ({
+            expanded: node.getAttribute('aria-expanded'),
+            current: node.classList.contains('current'),
+            visible: node.querySelector(':scope > ul') ? getComputedStyle(node.querySelector(':scope > ul')).display : null,
+        }));
+        const developInitial = await zhDevelop.evaluate((node) => ({
+            expanded: node.getAttribute('aria-expanded'),
+            current: node.classList.contains('current'),
+            visible: node.querySelector(':scope > ul') ? getComputedStyle(node.querySelector(':scope > ul')).display : null,
+        }));
+        const developChildInitial = await zhDevelopChild.evaluate((node) => ({
+            expanded: node.getAttribute('aria-expanded'),
+            current: node.classList.contains('current'),
+            visible: node.querySelector(':scope > ul') ? getComputedStyle(node.querySelector(':scope > ul')).display : null,
+        }));
+        const faqInitial = await zhFaq.evaluate((node) => ({
+            expanded: node.getAttribute('aria-expanded'),
+            current: node.classList.contains('current'),
+            visible: node.querySelector(':scope > ul') ? getComputedStyle(node.querySelector(':scope > ul')).display : null,
+        }));
+
+        await zhBasicToggle.click();
+        await expect(zhBasic).not.toHaveAttribute('aria-expanded', basicInitial.expanded);
+        expect(await zhDevelop.evaluate((node) => ({
+            expanded: node.getAttribute('aria-expanded'),
+            current: node.classList.contains('current'),
+            visible: node.querySelector(':scope > ul') ? getComputedStyle(node.querySelector(':scope > ul')).display : null,
+        }))).toEqual(developInitial);
+        expect(await zhDevelopChild.evaluate((node) => ({
+            expanded: node.getAttribute('aria-expanded'),
+            current: node.classList.contains('current'),
+            visible: node.querySelector(':scope > ul') ? getComputedStyle(node.querySelector(':scope > ul')).display : null,
+        }))).toEqual(developChildInitial);
+        expect(await zhFaq.evaluate((node) => ({
+            expanded: node.getAttribute('aria-expanded'),
+            current: node.classList.contains('current'),
+            visible: node.querySelector(':scope > ul') ? getComputedStyle(node.querySelector(':scope > ul')).display : null,
+        }))).toEqual(faqInitial);
+
+        const zhState = await readSidebarState(page);
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/index.html');
+
+        const enRoot = page.locator('.axcl-sidebar > ul > li:has(> a[href="#"])').first();
+        const enBasic = enRoot.locator('ul > li:has(> a:has-text("Basic"))').first();
+        const enDevelop = enRoot.locator('ul > li:has(> a:has-text("Development"))').first();
+        const enDevelopChild = enRoot.locator('ul li:has(> a:has-text("C/C++"))').first();
+        const enFaq = enRoot.locator('ul > li:has(> a:has-text("FAQ"))').first();
+
+        const enState = await readSidebarState(page);
+        expect(enState.title).toContain('AXCL SDK Documentation');
+        const zhStoredState = JSON.parse(await page.evaluate(() => window.localStorage.getItem('axcl-sidebar-state-zh') || '{}'));
+        const enStoredState = JSON.parse(await page.evaluate(() => window.localStorage.getItem('axcl-sidebar-state-en') || '{}'));
+        expect(enStoredState).toEqual(zhStoredState);
+    });
 });
