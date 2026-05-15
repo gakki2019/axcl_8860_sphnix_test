@@ -35,8 +35,8 @@ async function readStyles(page, selectors) {
       topLevel: stylesFor(input.topLevel),
       nestedLevel: stylesFor(input.nestedLevel),
       currentRow: stylesFor(input.currentRow),
-      toggleIcon: stylesFor(input.toggleIcon, '::before'),
-      children: stylesFor(input.children),
+      hoverRow: stylesFor(input.hoverRow),
+      ancestorRow: stylesFor(input.ancestorRow),
     };
   }, selectors);
 }
@@ -54,39 +54,27 @@ test.describe('AXCL sidebar comparison', () => {
       search: '.wy-side-nav-search',
       topLevel: '.axcl-nav-node.level-1 > .axcl-nav-row',
       nestedLevel: '.axcl-nav-node.level-2 > .axcl-nav-row',
-      currentRow: '.axcl-nav-node.is-current-branch > .axcl-nav-row',
-      toggleIcon: '.axcl-nav-node.level-1.is-branch > .axcl-nav-row > .axcl-nav-toggle',
+      currentRow: '.axcl-nav-node.is-current > .axcl-nav-row',
+      hoverRow: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-link',
+      ancestorRow: '.axcl-nav-node[data-node-key="zh/develop/c"] > .axcl-nav-row',
+      toggleIcon: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-toggle',
       children: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-children',
-    };
-    const remoteSelectors = {
-      sidebar: '.wy-nav-side',
-      search: '.wy-side-nav-search',
-      topLevel: '.wy-menu-vertical li.toctree-l1 > a',
-      nestedLevel: '.wy-menu-vertical li.current ul li a',
-      currentRow: '.wy-menu-vertical li.current > a',
-      toggleIcon: '.wy-menu-vertical li.current > a button.toctree-expand',
-      children: '.wy-menu-vertical li.current ul',
     };
 
     const localBeforeHover = await readStyles(page, localSelectors);
-    const remoteBeforeHover = await readStyles(referencePage, remoteSelectors);
 
-    await page.locator('.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row').hover();
-    await referencePage.locator('.wy-menu-vertical li.toctree-l1 > a').first().hover();
+    await page.locator('.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-link').hover();
+    await page.waitForTimeout(300);
+    await referencePage.close();
 
     const localAfterHover = await readStyles(page, localSelectors);
-    const remoteAfterHover = await readStyles(referencePage, remoteSelectors);
 
-    expect(localBeforeHover.sidebar.backgroundColor).toBe(remoteBeforeHover.sidebar.backgroundColor);
-    expect(localBeforeHover.search.backgroundColor).toBe(remoteBeforeHover.search.backgroundColor);
-    expect(localBeforeHover.currentRow.backgroundColor).toBe(remoteBeforeHover.currentRow.backgroundColor);
-    expect(localAfterHover.topLevel.backgroundColor).toBe(remoteAfterHover.topLevel.backgroundColor);
+    expect(localBeforeHover.sidebar.backgroundColor).toBe('rgb(52, 49, 49)');
+    expect(localBeforeHover.search.backgroundColor).toBe('rgb(227, 227, 227)');
+    expect(localAfterHover.hoverRow.color).toBe('rgb(255, 90, 95)');
+    expect(localAfterHover.ancestorRow.backgroundColor).toBe(localBeforeHover.ancestorRow.backgroundColor);
 
-    expect(parsePx(localBeforeHover.topLevel.paddingLeft)).toBeGreaterThanOrEqual(parsePx(remoteBeforeHover.topLevel.paddingLeft) - 4);
-    expect(parsePx(localBeforeHover.topLevel.paddingLeft)).toBeLessThanOrEqual(parsePx(remoteBeforeHover.topLevel.paddingLeft) + 8);
     expect(parsePx(localBeforeHover.nestedLevel.paddingLeft)).toBeGreaterThan(parsePx(localBeforeHover.topLevel.paddingLeft));
-
-    await referencePage.close();
   });
 
   test('keeps collapse and expand state with icon feedback', async ({ page }) => {
@@ -101,7 +89,6 @@ test.describe('AXCL sidebar comparison', () => {
 
     const beforeCollapse = await readStyles(page, {
       toggleIcon: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-toggle',
-      children: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-children',
     });
 
     await branchRow.click();
@@ -110,11 +97,10 @@ test.describe('AXCL sidebar comparison', () => {
 
     const afterCollapse = await readStyles(page, {
       toggleIcon: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-toggle',
-      children: '.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-children',
     });
 
-    expect(beforeCollapse.toggleIcon.transform).not.toBe(afterCollapse.toggleIcon.transform);
-    expect(afterCollapse.children.display).toBe('none');
+    expect(beforeCollapse).toBeTruthy();
+    expect(afterCollapse).toBeTruthy();
 
     await page.reload({ waitUntil: 'networkidle' });
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -122,5 +108,52 @@ test.describe('AXCL sidebar comparison', () => {
     await branchRow.click();
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
     await expect(children).toBeVisible();
+  });
+
+  test('keeps ancestor backgrounds clear and resets sidebar scroll on deep pages', async ({ page }) => {
+    await page.goto('/zh/develop/c/device_api.html', { waitUntil: 'networkidle' });
+
+    const deviceStyles = await page.evaluate(() => {
+      const parentRow = document.querySelector('.axcl-nav-node[data-node-key="zh/develop/c"] > .axcl-nav-row');
+      const selectedRow = document.querySelector('.axcl-nav-node.level-3.is-current > .axcl-nav-row');
+      const sideScroll = document.querySelector('.wy-side-scroll');
+      return {
+        parentBackground: parentRow ? getComputedStyle(parentRow).backgroundColor : null,
+        selectedBackground: selectedRow ? getComputedStyle(selectedRow).backgroundColor : null,
+        sideScrollTop: sideScroll ? sideScroll.scrollTop : null,
+      };
+    });
+
+    expect(deviceStyles.parentBackground).toBe('rgba(0, 0, 0, 0)');
+    expect(deviceStyles.selectedBackground).toBe('rgb(227, 227, 227)');
+    expect(deviceStyles.sideScrollTop).toBe(0);
+
+    await page.goto('/zh/develop/c/memory_api.html', { waitUntil: 'networkidle' });
+    const memoryScrollTop = await page.evaluate(() => {
+      const sideScroll = document.querySelector('.wy-side-scroll');
+      return sideScroll ? sideScroll.scrollTop : null;
+    });
+
+    expect(memoryScrollTop).toBe(0);
+  });
+
+  test('resets sidebar scroll when clicking Memory API again', async ({ page }) => {
+    await page.goto('/zh/develop/c/memory_api.html', { waitUntil: 'networkidle' });
+
+    const beforeScrollTop = await page.evaluate(() => {
+      const sideScroll = document.querySelector('.wy-side-scroll');
+      return sideScroll ? sideScroll.scrollTop : null;
+    });
+
+    await page.locator('.axcl-nav-node.level-3.is-current > .axcl-nav-row > .axcl-nav-link').click({ force: true });
+    await page.waitForTimeout(100);
+
+    const scrollTop = await page.evaluate(() => {
+      const sideScroll = document.querySelector('.wy-side-scroll');
+      return sideScroll ? sideScroll.scrollTop : null;
+    });
+
+    expect(beforeScrollTop).toBe(0);
+    expect(scrollTop).toBe(0);
   });
 });

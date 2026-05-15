@@ -51,6 +51,55 @@
   color: var(--axcl-sidebar-text-invert);
 }
 
+.axcl-breadcrumbs-aside {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.axcl-language-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.axcl-language-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 3.2px 12px !important;
+  border: 0;
+  background: transparent;
+  color: #41566f;
+  font-size: 13.12px;
+  font-weight: 700;
+  line-height: normal;
+  text-decoration: none !important;
+  white-space: nowrap;
+  transition: color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.axcl-language-link:hover,
+.axcl-language-link:focus {
+  background: transparent;
+  border-color: transparent;
+  color: var(--axcl-sky-deep);
+  text-decoration: none !important;
+}
+
+.axcl-language-link.current {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--axcl-sky-deep), var(--axcl-sky));
+  border-color: transparent;
+  color: #ffffff !important;
+  box-shadow: none;
+}
+
 .wy-menu-vertical {
   background: var(--axcl-sidebar-bg);
 }
@@ -80,18 +129,18 @@
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   min-height: 30px;
-  padding: 0 16px;
+  padding: 0 12px;
   transition: background-color 0.16s ease, color 0.16s ease;
 }
 
-.axcl-nav-node.level-2 > .axcl-nav-row {
-  padding-left: 28px;
+.axcl-nav-node.level-2>.axcl-nav-row {
+  padding-left: 24px;
 }
 
-.axcl-nav-node.level-3 > .axcl-nav-row {
-  padding-left: 44px;
+.axcl-nav-node.level-3>.axcl-nav-row {
+  padding-left: 36px;
 }
 
 .axcl-nav-link {
@@ -101,43 +150,26 @@
   line-height: 18px;
   padding: 6px 0;
   text-decoration: none;
-  transition: color 0.16s ease;
 }
 
-.axcl-nav-link:hover,
-.axcl-nav-link:focus {
-  color: inherit;
+.axcl-nav-node.is-hovered>.axcl-nav-row .axcl-nav-link,
+.axcl-nav-node.is-hovered>.axcl-nav-row .axcl-nav-link:hover,
+.axcl-nav-node.is-hovered>.axcl-nav-row .axcl-nav-link:focus {
+  color: #ff5a5f !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
-.axcl-nav-node:hover > .axcl-nav-row {
-  background: var(--axcl-sidebar-hover);
+.axcl-nav-node.is-hovered>.axcl-nav-row {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
-.axcl-nav-node:hover > .axcl-nav-row .axcl-nav-link,
-.axcl-nav-node:hover > .axcl-nav-row .axcl-nav-toggle::before {
-  color: var(--axcl-sidebar-text-invert);
-  border-left-color: var(--axcl-sidebar-text-invert);
-}
-
-.axcl-nav-node.is-current > .axcl-nav-row,
-.axcl-nav-node.is-current-branch > .axcl-nav-row {
+.axcl-nav-node.is-current:not(.is-branch)>.axcl-nav-row {
   background: var(--axcl-sidebar-current);
 }
 
-.axcl-nav-node.level-2.is-current > .axcl-nav-row,
-.axcl-nav-node.level-2.is-current-branch > .axcl-nav-row,
-.axcl-nav-node.level-3.is-current > .axcl-nav-row,
-.axcl-nav-node.level-3.is-current-branch > .axcl-nav-row {
-  background: var(--axcl-sidebar-current-strong);
-}
-
-.axcl-nav-node.is-current-branch {
-  border-top-color: var(--axcl-sidebar-border);
-  border-bottom-color: var(--axcl-sidebar-border);
-}
-
-.axcl-nav-node.is-current > .axcl-nav-row .axcl-nav-link,
-.axcl-nav-node.is-current-branch > .axcl-nav-row .axcl-nav-link {
+.axcl-nav-node.is-current:not(.is-branch)>.axcl-nav-row .axcl-nav-link {
   color: var(--axcl-sidebar-text-strong);
 }
 
@@ -177,12 +209,11 @@
   transition: transform 0.18s ease;
 }
 
-.axcl-nav-node.is-current > .axcl-nav-row > .axcl-nav-toggle::before,
-.axcl-nav-node.is-current-branch > .axcl-nav-row > .axcl-nav-toggle::before {
+.axcl-nav-node.is-current:not(.is-branch)>.axcl-nav-row>.axcl-nav-toggle::before {
   border-left-color: var(--axcl-sidebar-icon-strong);
 }
 
-.axcl-nav-node.is-open > .axcl-nav-row > .axcl-nav-toggle::before {
+.axcl-nav-node.is-open>.axcl-nav-row>.axcl-nav-toggle::before {
   transform: rotate(90deg);
 }
 
@@ -190,7 +221,7 @@
   display: none;
 }
 
-.axcl-nav-node.is-open > .axcl-nav-children {
+.axcl-nav-node.is-open>.axcl-nav-children {
   display: block;
 }
 
