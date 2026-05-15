@@ -188,4 +188,28 @@ test.describe('AXCL sidebar comparison', () => {
     expect(enState.heading).toContain('Device API');
     expect(normalizeNavKeys(enState.openKeys)).toEqual(normalizeNavKeys(zhState.openKeys));
   });
+
+  test('preserves homepage sidebar state when switching languages', async ({ page }) => {
+    await page.goto('/zh/index.html', { waitUntil: 'networkidle' });
+
+    await page.locator('.axcl-nav-node[data-node-key="zh/develop"] > .axcl-nav-row > .axcl-nav-toggle').click();
+    await page.waitForLoadState('networkidle');
+
+    const zhState = await page.evaluate(() => ({
+      title: document.title,
+      openKeys: [...document.querySelectorAll('.axcl-nav-node.is-open[data-node-key]')].map((el) => el.getAttribute('data-node-key')),
+    }));
+
+    await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+    await page.waitForLoadState('networkidle');
+
+    const enState = await page.evaluate(() => ({
+      title: document.title,
+      openKeys: [...document.querySelectorAll('.axcl-nav-node.is-open[data-node-key]')].map((el) => el.getAttribute('data-node-key')),
+    }));
+
+    expect(zhState.title).toContain('AXCL SDK 文档');
+    expect(enState.title).toContain('AXCL SDK Documentation');
+    expect(normalizeNavKeys(enState.openKeys)).toEqual(normalizeNavKeys(zhState.openKeys));
+  });
 });

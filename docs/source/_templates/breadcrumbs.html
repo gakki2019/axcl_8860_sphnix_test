@@ -54,9 +54,11 @@
             <nav class="axcl-language-switch" aria-label="Language switch">
                 {%- if current_lang == 'en' %}
                 <span class="axcl-language-link current" style="padding: 3.2px 12px;">English</span>
-                <a class="axcl-language-link" style="padding: 3.2px 12px;" href="{{ pathto(zh_target) }}">中文</a>
+                <a class="axcl-language-link" style="padding: 3.2px 12px;" href="{{ pathto(zh_target) }}"
+                    data-lang-target="zh">中文</a>
                 {%- else %}
-                <a class="axcl-language-link" style="padding: 3.2px 12px;" href="{{ pathto(en_target) }}">English</a>
+                <a class="axcl-language-link" style="padding: 3.2px 12px;" href="{{ pathto(en_target) }}"
+                    data-lang-target="en">English</a>
                 <span class="axcl-language-link current" style="padding: 3.2px 12px;">中文</span>
                 {%- endif %}
             </nav>

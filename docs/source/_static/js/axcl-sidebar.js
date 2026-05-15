@@ -1,7 +1,9 @@
 (function () {
-  const stateKey = "axcl-sidebar-state";
+  function getStateKey(lang) {
+    return `axcl-sidebar-state-${lang}`;
+  }
 
-  function readState() {
+  function readState(stateKey) {
     try {
       return JSON.parse(window.localStorage.getItem(stateKey) || "{}");
     } catch (error) {
@@ -9,12 +11,45 @@
     }
   }
 
-  function writeState(state) {
+  function writeState(stateKey, state) {
     try {
       window.localStorage.setItem(stateKey, JSON.stringify(state));
     } catch (error) {
       // Ignore storage failures and keep navigation usable.
     }
+  }
+
+  function translateKey(key, fromLang, toLang) {
+    const fromPrefix = `${fromLang}/`;
+    const toPrefix = `${toLang}/`;
+    if (key === fromLang) {
+      return toLang;
+    }
+    if (key.startsWith(fromPrefix)) {
+      return toPrefix + key.slice(fromPrefix.length);
+    }
+    return key;
+  }
+
+  function collectBranchState(tree) {
+    const state = {};
+    tree.querySelectorAll('.axcl-nav-node.is-branch[data-node-key]').forEach((node) => {
+      state[node.dataset.nodeKey] = node.classList.contains('is-open');
+    });
+    return state;
+  }
+
+  function persistTranslatedState(tree, targetLang) {
+    const sourceLang = tree.dataset.lang || 'zh';
+    if (sourceLang === targetLang) {
+      return;
+    }
+    const sourceState = collectBranchState(tree);
+    const translatedState = {};
+    Object.entries(sourceState).forEach(([key, value]) => {
+      translatedState[translateKey(key, sourceLang, targetLang)] = value;
+    });
+    writeState(getStateKey(targetLang), translatedState);
   }
 
   function applyState(tree, state) {
@@ -32,7 +67,8 @@
   }
 
   function bindTree(tree) {
-    const state = readState();
+    const stateKey = getStateKey(tree.dataset.lang || 'zh');
+    const state = readState(stateKey);
     applyState(tree, state);
     let activeHoverNode = null;
 
@@ -93,7 +129,7 @@
           toggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
         }
         state[key] = nextOpen;
-        writeState(state);
+        writeState(stateKey, state);
       }
 
       if (toggle) {
@@ -102,6 +138,12 @@
       if (label) {
         label.addEventListener("click", toggleNode);
       }
+    });
+
+    document.querySelectorAll(".axcl-language-switch .axcl-language-link[data-lang-target]").forEach((link) => {
+      link.addEventListener("click", () => {
+        persistTranslatedState(tree, link.dataset.langTarget);
+      });
     });
 
     tree.querySelectorAll(".axcl-nav-link.is-current").forEach((link) => {

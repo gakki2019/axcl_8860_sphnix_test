@@ -1,4 +1,4 @@
-Development Documentation
+Development
 =========================
 
 This section collects architecture notes and language-specific development interfaces.
