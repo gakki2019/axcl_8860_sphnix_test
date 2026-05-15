@@ -1,10 +1,10 @@
-# Macro Reference
+# 宏参考
 
 <a id="AXCLRT_ENGINE_MAX_DIM_CNT"></a>
 
 ## AXCLRT_ENGINE_MAX_DIM_CNT
 
-Maximum number of dimensions supported by an engine tensor.
+引擎张量支持的最大维度数。
 
 ```c
 #define AXCLRT_ENGINE_MAX_DIM_CNT 32
@@ -46,7 +46,7 @@ Maximum number of dimensions supported by an engine tensor.
 
 ## AXCL_DEF_COMM_ERR
 
-Compose a common-module error code.
+组合通用模块错误码。
 
 ```c
 #define AXCL_DEF_COMM_ERR AXCL_DEF_ERR(AXCL_COMM, (errid))
@@ -68,7 +68,7 @@ Compose a common-module error code.
 
 ## AXCL_DEF_DAEMON_ERR
 
-Compose a daemon-module error code.
+组合 daemon 模块错误码。
 
 ```c
 #define AXCL_DEF_DAEMON_ERR AXCL_DEF_ERR(AXCL_DAEMON, (errid))
@@ -80,7 +80,7 @@ Compose a daemon-module error code.
 
 ## AXCL_DEF_ENGINE_ERR
 
-Compose an engine-module error code.
+组合引擎模块错误码。
 
 ```c
 #define AXCL_DEF_ENGINE_ERR AXCL_DEF_ERR(AXCL_ENGINE, (errid))
@@ -92,7 +92,7 @@ Compose an engine-module error code.
 
 ## AXCL_DEF_ERR
 
-Compose a module-specific AXCL error code.
+组合特定模块的 AXCL 错误码。
 
 ```c
 #define AXCL_DEF_ERR ((axclError)((0x80000000L) | ((AX_ID_AXCL) << 16 ) | ((sub) << 8) | (errid)))
@@ -104,7 +104,7 @@ Compose a module-specific AXCL error code.
 
 ## AXCL_DEF_IVE_ERR
 
-Compose an IVE-module error code.
+组合 IVE 模块错误码。
 
 ```c
 #define AXCL_DEF_IVE_ERR AXCL_DEF_ERR(AXCL_IVE, (errid))
@@ -116,7 +116,7 @@ Compose an IVE-module error code.
 
 ## AXCL_DEF_IVPS_ERR
 
-Compose an IVPS-module error code.
+组合 IVPS 模块错误码。
 
 ```c
 #define AXCL_DEF_IVPS_ERR AXCL_DEF_ERR(AXCL_IVPS, (errid))
@@ -128,7 +128,7 @@ Compose an IVPS-module error code.
 
 ## AXCL_DEF_NATIVE_ERR
 
-Compose a native-module error code.
+组合 native 模块错误码。
 
 ```c
 #define AXCL_DEF_NATIVE_ERR AXCL_DEF_ERR(AXCL_NATIVE, (errid))
@@ -140,7 +140,7 @@ Compose a native-module error code.
 
 ## AXCL_DEF_PROTOCOL_ERR
 
-Compose a protocol-module error code.
+组合协议模块错误码。
 
 ```c
 #define AXCL_DEF_PROTOCOL_ERR AXCL_DEF_ERR(AXCL_PROTOCOL, (errid))
@@ -152,7 +152,7 @@ Compose a protocol-module error code.
 
 ## AXCL_DEF_RT_ERR
 
-Compose a runtime-module error code.
+组合运行时模块错误码。
 
 ```c
 #define AXCL_DEF_RT_ERR AXCL_DEF_ERR(AXCL_RUNTIME, (errid))
@@ -164,7 +164,7 @@ Compose a runtime-module error code.
 
 ## AXCL_DEF_SYS_ERR
 
-Compose a system-module error code.
+组合系统模块错误码。
 
 ```c
 #define AXCL_DEF_SYS_ERR AXCL_DEF_ERR(AXCL_SYS, (errid))
@@ -176,7 +176,7 @@ Compose a system-module error code.
 
 ## AXCL_DEF_VDEC_ERR
 
-Compose a video-decode-module error code.
+组合视频解码模块错误码。
 
 ```c
 #define AXCL_DEF_VDEC_ERR AXCL_DEF_ERR(AXCL_VDEC, (errid))
@@ -188,7 +188,7 @@ Compose a video-decode-module error code.
 
 ## AXCL_DEF_VENC_ERR
 
-Compose a video-encode-module error code.
+组合视频编码模块错误码。
 
 ```c
 #define AXCL_DEF_VENC_ERR AXCL_DEF_ERR(AXCL_VENC, (errid))
@@ -376,7 +376,7 @@ Invalid runtime stream handle.
 
 ## NO_TIMEOUT
 
-Timeout value used to wait indefinitely.
+用于无限等待的超时值。
 
 ```c
 #define NO_TIMEOUT (-1)

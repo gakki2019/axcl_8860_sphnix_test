@@ -1,6 +1,6 @@
-# Stream API
+# 流 API
 
-## Index
+## 目录
 
 - [axclrtCreateStream](#axclrtCreateStream)
 - [axclrtDestroyStream](#axclrtDestroyStream)
@@ -16,24 +16,24 @@
 
 ### axclrtCreateStream
 
-Create a stream.
+创建流。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| stream | out | pointer to created stream |
+| 名称   | 方向 | 说明               |
+| ------ | ---- | ------------------ |
+| stream | out  | 指向已创建流的指针 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -41,24 +41,24 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 ### axclrtDestroyStream
 
-Destroy a stream.
+销毁流。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtDestroyStream(axclrtStream stream);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to destroy. |
+| 名称   | 方向 | 说明                                                            |
+| ------ | ---- | --------------------------------------------------------------- |
+| stream | in   | 由 [axclrtCreateStream](#axclrtCreateStream) 创建并要销毁的流。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -66,24 +66,24 @@ AXCL_EXPORT axclError axclrtDestroyStream(axclrtStream stream);
 
 ### axclrtDestroyStreamForce
 
-Destroy a stream forcefully.
+强制销毁流。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtDestroyStreamForce(axclrtStream stream);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to destroy. |
+| 名称   | 方向 | 说明                                                            |
+| ------ | ---- | --------------------------------------------------------------- |
+| stream | in   | 由 [axclrtCreateStream](#axclrtCreateStream) 创建并要销毁的流。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -91,24 +91,24 @@ AXCL_EXPORT axclError axclrtDestroyStreamForce(axclrtStream stream);
 
 ### axclrtSynchronizeStream
 
-Synchronize a stream.
+同步流。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtSynchronizeStream(axclrtStream stream);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to synchronize. |
+| 名称   | 方向 | 说明                                                              |
+| ------ | ---- | ----------------------------------------------------------------- |
+| stream | in   | 由 [axclrtCreateStream](#axclrtCreateStream) 创建并用于同步的流。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -116,22 +116,22 @@ AXCL_EXPORT axclError axclrtSynchronizeStream(axclrtStream stream);
 
 ### axclrtSynchronizeStreamWithTimeout
 
-Synchronize a stream with timeout.
+带超时同步流。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, int32_t timeout);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to synchronize. |
-| timeout | in | timeout in milliseconds, -1 for no timeout. |
+| 名称    | 方向 | 说明                                                              |
+| ------- | ---- | ----------------------------------------------------------------- |
+| stream  | in   | 由 [axclrtCreateStream](#axclrtCreateStream) 创建并用于同步的流。 |
+| timeout | in   | 超时时间，单位为毫秒；-1 表示无超时。                             |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。

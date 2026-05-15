@@ -1,0 +1,199 @@
+:root {
+  --axcl-sidebar-bg: #343131;
+  --axcl-sidebar-surface: #3f3b3b;
+  --axcl-sidebar-search: #e3e3e3;
+  --axcl-sidebar-current: #e3e3e3;
+  --axcl-sidebar-current-strong: #c9c9c9;
+  --axcl-sidebar-hover: #2980b9;
+  --axcl-sidebar-hover-strong: #2472a4;
+  --axcl-sidebar-text: #d9d9d9;
+  --axcl-sidebar-text-muted: #b3b3b3;
+  --axcl-sidebar-text-strong: #404040;
+  --axcl-sidebar-text-invert: #ffffff;
+  --axcl-sidebar-border: #c9c9c9;
+  --axcl-sidebar-icon: #a3a3a3;
+  --axcl-sidebar-icon-strong: #333333;
+}
+
+.wy-nav-side {
+  background: var(--axcl-sidebar-bg);
+}
+
+.wy-side-nav-search {
+  background: var(--axcl-sidebar-search);
+  color: var(--axcl-sidebar-text-strong);
+}
+
+.wy-nav-top {
+  background: var(--axcl-sidebar-hover);
+}
+
+.wy-side-nav-search a,
+.wy-side-nav-search .icon,
+.wy-side-nav-search .version {
+  color: var(--axcl-sidebar-text-strong);
+}
+
+.wy-side-nav-search a:hover,
+.wy-side-nav-search a:focus {
+  background: #d6d6d6;
+  color: var(--axcl-sidebar-text-strong);
+}
+
+.wy-side-nav-search input[type="text"] {
+  border-color: #333333;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.wy-nav-top a,
+.wy-nav-top i {
+  color: var(--axcl-sidebar-text-invert);
+}
+
+.wy-menu-vertical {
+  background: var(--axcl-sidebar-bg);
+}
+
+.axcl-sidebar {
+  padding: 4px 0 18px;
+}
+
+.axcl-nav-tree,
+.axcl-nav-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.axcl-nav-node {
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.16s ease;
+}
+
+.axcl-nav-node.level-1 {
+  margin-bottom: 0;
+}
+
+.axcl-nav-row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+  padding: 0 16px;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.axcl-nav-node.level-2 > .axcl-nav-row {
+  padding-left: 28px;
+}
+
+.axcl-nav-node.level-3 > .axcl-nav-row {
+  padding-left: 44px;
+}
+
+.axcl-nav-link {
+  display: block;
+  color: var(--axcl-sidebar-text);
+  font-size: 14px;
+  line-height: 18px;
+  padding: 6px 0;
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.axcl-nav-link:hover,
+.axcl-nav-link:focus {
+  color: inherit;
+}
+
+.axcl-nav-node:hover > .axcl-nav-row {
+  background: var(--axcl-sidebar-hover);
+}
+
+.axcl-nav-node:hover > .axcl-nav-row .axcl-nav-link,
+.axcl-nav-node:hover > .axcl-nav-row .axcl-nav-toggle::before {
+  color: var(--axcl-sidebar-text-invert);
+  border-left-color: var(--axcl-sidebar-text-invert);
+}
+
+.axcl-nav-node.is-current > .axcl-nav-row,
+.axcl-nav-node.is-current-branch > .axcl-nav-row {
+  background: var(--axcl-sidebar-current);
+}
+
+.axcl-nav-node.level-2.is-current > .axcl-nav-row,
+.axcl-nav-node.level-2.is-current-branch > .axcl-nav-row,
+.axcl-nav-node.level-3.is-current > .axcl-nav-row,
+.axcl-nav-node.level-3.is-current-branch > .axcl-nav-row {
+  background: var(--axcl-sidebar-current-strong);
+}
+
+.axcl-nav-node.is-current-branch {
+  border-top-color: var(--axcl-sidebar-border);
+  border-bottom-color: var(--axcl-sidebar-border);
+}
+
+.axcl-nav-node.is-current > .axcl-nav-row .axcl-nav-link,
+.axcl-nav-node.is-current-branch > .axcl-nav-row .axcl-nav-link {
+  color: var(--axcl-sidebar-text-strong);
+}
+
+.axcl-nav-link.is-current {
+  font-weight: 700;
+}
+
+.axcl-nav-toggle,
+.axcl-nav-spacer {
+  width: 16px;
+  height: 16px;
+}
+
+.axcl-nav-spacer {
+  display: inline-block;
+}
+
+.axcl-nav-toggle {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+}
+
+.axcl-nav-toggle::before {
+  border-style: solid;
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent var(--axcl-sidebar-icon);
+  content: "";
+  display: block;
+  left: 5px;
+  position: absolute;
+  top: 4px;
+  transform: rotate(0deg);
+  transform-origin: 2px 4px;
+  transition: transform 0.18s ease;
+}
+
+.axcl-nav-node.is-current > .axcl-nav-row > .axcl-nav-toggle::before,
+.axcl-nav-node.is-current-branch > .axcl-nav-row > .axcl-nav-toggle::before {
+  border-left-color: var(--axcl-sidebar-icon-strong);
+}
+
+.axcl-nav-node.is-open > .axcl-nav-row > .axcl-nav-toggle::before {
+  transform: rotate(90deg);
+}
+
+.axcl-nav-children {
+  display: none;
+}
+
+.axcl-nav-node.is-open > .axcl-nav-children {
+  display: block;
+}
+
+.wy-menu-vertical a {
+  color: inherit;
+}

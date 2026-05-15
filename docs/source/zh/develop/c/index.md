@@ -1,21 +1,21 @@
-# AXCL API Index
+# AXCL API 索引
 
-## API Pages
+## API 页面
 
-- [Context API](context_api.md)
-- [Control API](control_api.md)
-- [Device API](device_api.md)
-- [Engine API](engine_api.md)
-- [Event API](event_api.md)
-- [Memory API](memory_api.md)
-- [Stream API](stream_api.md)
-- [System API](system_api.md)
+- [上下文 API](context_api.md)
+- [控制 API](control_api.md)
+- [设备 API](device_api.md)
+- [引擎 API](engine_api.md)
+- [事件 API](event_api.md)
+- [内存 API](memory_api.md)
+- [流 API](stream_api.md)
+- [系统 API](system_api.md)
 
 <br>
 
-## Reference Pages
+## 参考页面
 
-- [Enums](reference/enum.md)
-- [Structures and Type Definitions](reference/struct.md)
-- [Macros](reference/macro.md)
-- [Error Codes](reference/error.md)
+- [枚举](reference/enum.md)
+- [结构体与类型定义](reference/struct.md)
+- [宏定义](reference/macro.md)
+- [错误码](reference/error.md)

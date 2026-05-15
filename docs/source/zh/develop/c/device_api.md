@@ -1,6 +1,6 @@
-# Device API
+# 设备 API
 
-## Index
+## 目录
 
 - [axclrtDeviceGetUid](#axclrtDeviceGetUid)
 - [axclrtGetDevice](#axclrtGetDevice)
@@ -18,25 +18,25 @@
 
 ### axclrtDeviceGetUid
 
-Get the UID of a device.
+获取设备的 UID。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtDeviceGetUid(int32_t deviceId, uint64_t *uid);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| deviceId | in | device id |
-| uid | out | UID of the device |
+| 名称     | 方向 | 说明     |
+| -------- | ---- | -------- |
+| deviceId | in   | 设备 ID  |
+| uid      | out  | 设备 UID |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -44,24 +44,24 @@ AXCL_EXPORT axclError axclrtDeviceGetUid(int32_t deviceId, uint64_t *uid);
 
 ### axclrtGetDevice
 
-Get device id of current calling thread.
+获取当前调用线程的设备 ID。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtGetDevice(int32_t *deviceId);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| deviceId | out | device id |
+| 名称     | 方向 | 说明    |
+| -------- | ---- | ------- |
+| deviceId | out  | 设备 ID |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -69,24 +69,24 @@ AXCL_EXPORT axclError axclrtGetDevice(int32_t *deviceId);
 
 ### axclrtGetDeviceCount
 
-Get the number of devices.
+获取设备数量。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtGetDeviceCount(uint32_t *count);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| count | out | number of devices |
+| 名称  | 方向 | 说明     |
+| ----- | ---- | -------- |
+| count | out  | 设备数量 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -94,29 +94,29 @@ AXCL_EXPORT axclError axclrtGetDeviceCount(uint32_t *count);
 
 ### axclrtResetDevice
 
-Deactivate device.
+停用设备。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtResetDevice(int32_t deviceId);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| deviceId | in | device id |
+| 名称     | 方向 | 说明    |
+| -------- | ---- | ------- |
+| deviceId | in   | 设备 ID |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
-#### Note
+#### 说明
 
-Before deactive, all contexts and streams will wait for finished synchronization.
-All explicit created contexts and streams should be destroyed before deactive, that means: [axclrtDestroyStream](stream_api.md#axclrtDestroyStream) -> [axclrtDestroyContext](context_api.md#axclrtDestroyContext) -> [axclrtResetDevice](#axclrtResetDevice)
+在停用设备之前，所有上下文和流都会等待同步完成。
+所有显式创建的上下文和流都应在停用前销毁，也就是说：[axclrtDestroyStream](stream_api.md#axclrtDestroyStream) -> [axclrtDestroyContext](context_api.md#axclrtDestroyContext) -> [axclrtResetDevice](#axclrtResetDevice)
 
 <br>
 
@@ -124,32 +124,32 @@ All explicit created contexts and streams should be destroyed before deactive, t
 
 ### axclrtSetDevice
 
-Activate device.
+激活设备。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtSetDevice(int32_t deviceId);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| deviceId | in | device id, [0 - (device count - 1)] |
+| 名称     | 方向 | 说明                          |
+| -------- | ---- | ----------------------------- |
+| deviceId | in   | 设备 ID，[0 - (设备数量 - 1)] |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
-#### Note
+#### 说明
 
-[axclrtSetDevice](#axclrtSetDevice) can be called multiple times, correspondingly call [axclrtResetDevice](#axclrtResetDevice) to deactivate.
-When the 1st time to activate the device, the system will create a default context and a default stream.
-Invoke [axclrtSetDevice](#axclrtSetDevice) to activate the same device in different threads, those threads use the same default context and default stream.
+[axclrtSetDevice](#axclrtSetDevice) 可以被多次调用，对应地调用 [axclrtResetDevice](#axclrtResetDevice) 来停用。
+首次激活设备时，系统会创建一个默认上下文和一个默认流。
+在不同线程中调用 [axclrtSetDevice](#axclrtSetDevice) 激活同一设备时，这些线程将使用相同的默认上下文和默认流。
 
-#### Remark
+#### 参考
 
 [axclrtResetDevice](#axclrtResetDevice) | [axclrtCreateContext](context_api.md#axclrtCreateContext)
 
@@ -159,22 +159,22 @@ Invoke [axclrtSetDevice](#axclrtSetDevice) to activate the same device in differ
 
 ### axclrtSynchronizeDevice
 
-Block the current thread until the device bound to the current context has completed.
+阻塞当前线程，直到与当前上下文绑定的设备完成。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtSynchronizeDevice();
 ```
 
-#### Parameters
+#### 参数
 
-N/A
+不适用
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -182,21 +182,21 @@ N/A
 
 ### axclrtSynchronizeDeviceWithTimeout
 
-Block the current thread until the device which is bound to the current context has completed in timeout.
+阻塞当前线程，直到与当前上下文绑定的设备在超时时间内完成。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtSynchronizeDeviceWithTimeout(int32_t timeout);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| timeout | in | timeout in milliseconds, -1 for no timeout. |
+| 名称    | 方向 | 说明                                  |
+| ------- | ---- | ------------------------------------- |
+| timeout | in   | 超时时间，单位为毫秒；-1 表示无超时。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。

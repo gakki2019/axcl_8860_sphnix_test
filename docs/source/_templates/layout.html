@@ -1,0 +1,108 @@
+{% extends "!layout.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  <script>
+    document.documentElement.classList.add("axcl-nav-pending");
+  </script>
+{% endblock %}
+
+{% block menu %}
+  {% set is_en = pagename.startswith('en/') %}
+  {% set current_lang = 'en' if is_en else 'zh' %}
+  {% set current_page = pagename %}
+
+  {% macro leaf(label, target, level, current=False) -%}
+    <li class="axcl-nav-node level-{{ level }}{% if current %} is-current{% endif %}">
+      <div class="axcl-nav-row">
+        <span class="axcl-nav-spacer" aria-hidden="true"></span>
+        <a class="axcl-nav-link{% if current %} is-current{% endif %}" href="{{ pathto(target) }}">{{ label }}</a>
+      </div>
+    </li>
+  {%- endmacro %}
+
+  {% macro branch(label, target, key, level, open_by_default=False, current_branch=False) -%}
+    {% set initially_open = open_by_default or current_branch %}
+    <li class="axcl-nav-node level-{{ level }} is-branch{% if open_by_default %} is-default-open{% endif %}{% if current_branch %} is-current-branch{% endif %}{% if initially_open %} is-open{% endif %}" data-node-key="{{ key }}">
+      <div class="axcl-nav-row">
+        <button class="axcl-nav-toggle" type="button" aria-expanded="{{ 'true' if initially_open else 'false' }}" aria-label="toggle {{ label }}"></button>
+        <a class="axcl-nav-link axcl-nav-link--branch" href="{{ pathto(target) }}" data-toggle-node="true">{{ label }}</a>
+      </div>
+      <ul class="axcl-nav-children">
+        {{ caller() }}
+      </ul>
+    </li>
+  {%- endmacro %}
+
+  <div class="axcl-sidebar" data-lang="{{ current_lang }}">
+    <ul class="axcl-nav-tree">
+      {% if is_en %}
+        {% set en_basic = current_page.startswith('en/basic') %}
+        {% set en_develop = current_page.startswith('en/develop') %}
+        {% set en_arch = current_page.startswith('en/develop/arch') %}
+        {% set en_c = current_page.startswith('en/develop/c') %}
+        {% set en_python = current_page.startswith('en/develop/python') %}
+        {% set en_faq = current_page.startswith('en/faq') %}
+        {% call branch('Basic Documentation', 'en/basic/index', 'en/basic', 1, True, en_basic) %}
+          {{ leaf('Overview', 'en/basic/overview', 2, current_page == 'en/basic/overview') }}
+          {{ leaf('Installation Guide', 'en/basic/install', 2, current_page == 'en/basic/install') }}
+          {{ leaf('Quick Start', 'en/basic/quick_start', 2, current_page == 'en/basic/quick_start') }}
+        {% endcall %}
+        {% call branch('Development Documentation', 'en/develop/index', 'en/develop', 1, True, en_develop) %}
+          {% call branch('Architecture', 'en/develop/arch/index', 'en/develop/arch', 2, en_arch, en_arch) %}
+            {{ leaf('System Architecture', 'en/develop/arch/system', 3, current_page == 'en/develop/arch/system') }}
+          {% endcall %}
+          {% call branch('C/C++', 'en/develop/c/index', 'en/develop/c', 2, en_c, en_c) %}
+            {{ leaf('Context API', 'en/develop/c/context_api', 3, current_page == 'en/develop/c/context_api') }}
+            {{ leaf('Control API', 'en/develop/c/control_api', 3, current_page == 'en/develop/c/control_api') }}
+            {{ leaf('Device API', 'en/develop/c/device_api', 3, current_page == 'en/develop/c/device_api') }}
+            {{ leaf('Engine API', 'en/develop/c/engine_api', 3, current_page == 'en/develop/c/engine_api') }}
+            {{ leaf('Event API', 'en/develop/c/event_api', 3, current_page == 'en/develop/c/event_api') }}
+            {{ leaf('Memory API', 'en/develop/c/memory_api', 3, current_page == 'en/develop/c/memory_api') }}
+            {{ leaf('Stream API', 'en/develop/c/stream_api', 3, current_page == 'en/develop/c/stream_api') }}
+            {{ leaf('System API', 'en/develop/c/system_api', 3, current_page == 'en/develop/c/system_api') }}
+            {{ leaf('Enums', 'en/develop/c/reference/enum', 3, current_page == 'en/develop/c/reference/enum') }}
+            {{ leaf('Structures', 'en/develop/c/reference/struct', 3, current_page == 'en/develop/c/reference/struct') }}
+            {{ leaf('Macros', 'en/develop/c/reference/macro', 3, current_page == 'en/develop/c/reference/macro') }}
+            {{ leaf('Error Codes', 'en/develop/c/reference/error', 3, current_page == 'en/develop/c/reference/error') }}
+          {% endcall %}
+          {{ leaf('Python', 'en/develop/python/index', 2, en_python) }}
+        {% endcall %}
+        {{ leaf('FAQ', 'en/faq/index', 1, en_faq) }}
+      {% else %}
+        {% set zh_basic = current_page == 'index' or current_page.startswith('zh/basic') %}
+        {% set zh_develop = current_page.startswith('zh/develop') %}
+        {% set zh_arch = current_page.startswith('zh/develop/arch') %}
+        {% set zh_c = current_page.startswith('zh/develop/c') %}
+        {% set zh_python = current_page.startswith('zh/develop/python') %}
+        {% set zh_faq = current_page.startswith('zh/faq') %}
+        {% call branch('基础文档', 'zh/basic/index', 'zh/basic', 1, True, zh_basic) %}
+          {{ leaf('概览', 'zh/basic/overview', 2, current_page == 'zh/basic/overview') }}
+          {{ leaf('安装指南', 'zh/basic/install', 2, current_page == 'zh/basic/install') }}
+          {{ leaf('快速开始', 'zh/basic/quick_start', 2, current_page == 'zh/basic/quick_start') }}
+        {% endcall %}
+        {% call branch('开发文档', 'zh/develop/index', 'zh/develop', 1, True, zh_develop) %}
+          {% call branch('架构', 'zh/develop/arch/index', 'zh/develop/arch', 2, zh_arch, zh_arch) %}
+            {{ leaf('系统架构', 'zh/develop/arch/system', 3, current_page == 'zh/develop/arch/system') }}
+          {% endcall %}
+          {% call branch('C/C++', 'zh/develop/c/index', 'zh/develop/c', 2, zh_c, zh_c) %}
+            {{ leaf('Context API', 'zh/develop/c/context_api', 3, current_page == 'zh/develop/c/context_api') }}
+            {{ leaf('Control API', 'zh/develop/c/control_api', 3, current_page == 'zh/develop/c/control_api') }}
+            {{ leaf('Device API', 'zh/develop/c/device_api', 3, current_page == 'zh/develop/c/device_api') }}
+            {{ leaf('Engine API', 'zh/develop/c/engine_api', 3, current_page == 'zh/develop/c/engine_api') }}
+            {{ leaf('Event API', 'zh/develop/c/event_api', 3, current_page == 'zh/develop/c/event_api') }}
+            {{ leaf('Memory API', 'zh/develop/c/memory_api', 3, current_page == 'zh/develop/c/memory_api') }}
+            {{ leaf('Stream API', 'zh/develop/c/stream_api', 3, current_page == 'zh/develop/c/stream_api') }}
+            {{ leaf('System API', 'zh/develop/c/system_api', 3, current_page == 'zh/develop/c/system_api') }}
+            {{ leaf('枚举', 'zh/develop/c/reference/enum', 3, current_page == 'zh/develop/c/reference/enum') }}
+            {{ leaf('结构体', 'zh/develop/c/reference/struct', 3, current_page == 'zh/develop/c/reference/struct') }}
+            {{ leaf('宏定义', 'zh/develop/c/reference/macro', 3, current_page == 'zh/develop/c/reference/macro') }}
+            {{ leaf('错误码', 'zh/develop/c/reference/error', 3, current_page == 'zh/develop/c/reference/error') }}
+          {% endcall %}
+          {{ leaf('Python', 'zh/develop/python/index', 2, zh_python) }}
+        {% endcall %}
+        {{ leaf('常见问题', 'zh/faq/index', 1, zh_faq) }}
+      {% endif %}
+    </ul>
+  </div>
+{% endblock %}

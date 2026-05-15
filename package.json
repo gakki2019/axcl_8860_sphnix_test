@@ -1,0 +1,13 @@
+{
+  "name": "axcl_8860_sphnix_test",
+  "private": true,
+  "scripts": {
+    "docs:clean": "make -C docs clean",
+    "docs:html": "make -C docs html",
+    "docs:report": "python3 docs/scripts/sphnix/generate_test_report.py",
+    "test:nav": "playwright test --config=playwright.config.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  }
+}

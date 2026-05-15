@@ -1,6 +1,6 @@
-# Event API
+# 事件 API
 
-## Index
+## 目录
 
 - [axclrtCreateEvent](#axclrtCreateEvent)
 - [axclrtDestroyEvent](#axclrtDestroyEvent)
@@ -18,24 +18,24 @@
 
 ### axclrtCreateEvent
 
-Create an event.
+创建事件。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtCreateEvent(axclrtEvent *event);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| event | out | pointer to created event |
+| 名称  | 方向 | 说明                 |
+| ----- | ---- | -------------------- |
+| event | out  | 指向已创建事件的指针 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -43,24 +43,24 @@ AXCL_EXPORT axclError axclrtCreateEvent(axclrtEvent *event);
 
 ### axclrtDestroyEvent
 
-Destroy an event.
+销毁事件。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtDestroyEvent(axclrtEvent event);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| event | in | event created by [axclrtCreateEvent](#axclrtCreateEvent) to destroy. |
+| 名称  | 方向 | 说明                                                            |
+| ----- | ---- | --------------------------------------------------------------- |
+| event | in   | 由 [axclrtCreateEvent](#axclrtCreateEvent) 创建并要销毁的事件。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -68,24 +68,24 @@ AXCL_EXPORT axclError axclrtDestroyEvent(axclrtEvent event);
 
 ### axclrtRecordEvent
 
-Record an event on a stream.
+在流上记录事件。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtRecordEvent(axclrtEvent event, axclrtStream stream);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| event | in | event created by [axclrtCreateEvent](#axclrtCreateEvent) to record. |
-| stream | in | stream created by [axclrtCreateStream](stream_api.md#axclrtCreateStream) to record the event. |
+| 名称   | 方向 | 说明                                                                             |
+| ------ | ---- | -------------------------------------------------------------------------------- |
+| event  | in   | 由 [axclrtCreateEvent](#axclrtCreateEvent) 创建并要记录的事件。                  |
+| stream | in   | 由 [axclrtCreateStream](stream_api.md#axclrtCreateStream) 创建并要记录事件的流。 |
 
-#### Returns
+#### 返回值
 
-N/A
+不适用
 
 <br>
 
@@ -93,24 +93,24 @@ N/A
 
 ### axclrtStreamWaitEvent
 
-Wait for an event on a stream.
+在流上等待事件。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtStreamWaitEvent(axclrtStream stream, axclrtEvent event);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| stream | in | stream created by [axclrtCreateStream](stream_api.md#axclrtCreateStream) to wait for the event. |
-| event | in | event created by [axclrtCreateEvent](#axclrtCreateEvent) to wait for. |
+| 名称   | 方向 | 说明                                                                           |
+| ------ | ---- | ------------------------------------------------------------------------------ |
+| stream | in   | 由 [axclrtCreateStream](stream_api.md#axclrtCreateStream) 创建并等待事件的流。 |
+| event  | in   | 由 [axclrtCreateEvent](#axclrtCreateEvent) 创建并等待的事件。                  |
 
-#### Returns
+#### 返回值
 
-N/A
+不适用
 
 <br>
 
@@ -118,25 +118,25 @@ N/A
 
 ### axclrtStreamWaitEventWithTimeout
 
-Wait for an event on a stream with timeout.
+在流上等待事件并设置超时。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtStreamWaitEventWithTimeout(axclrtStream stream, axclrtEvent event, int32_t timeout);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| stream | in | stream created by [axclrtCreateStream](stream_api.md#axclrtCreateStream) to wait for the event. |
-| event | in | event created by [axclrtCreateEvent](#axclrtCreateEvent) to wait for. |
-| timeout | in | timeout in milliseconds, -1 for no timeout. |
+| 名称    | 方向 | 说明                                                                           |
+| ------- | ---- | ------------------------------------------------------------------------------ |
+| stream  | in   | 由 [axclrtCreateStream](stream_api.md#axclrtCreateStream) 创建并等待事件的流。 |
+| event   | in   | 由 [axclrtCreateEvent](#axclrtCreateEvent) 创建并等待的事件。                  |
+| timeout | in   | 超时时间，单位为毫秒；-1 表示无超时。                                          |
 
-#### Returns
+#### 返回值
 
-N/A
+不适用
 
 <br>
 
@@ -144,24 +144,24 @@ N/A
 
 ### axclrtSynchronizeEvent
 
-Block host until the event is signaled (recorded).
+阻塞主机，直到事件被触发（记录）。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtSynchronizeEvent(axclrtEvent event);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| event | in | event created by [axclrtCreateEvent](#axclrtCreateEvent) to wait for. |
+| 名称  | 方向 | 说明                                                          |
+| ----- | ---- | ------------------------------------------------------------- |
+| event | in   | 由 [axclrtCreateEvent](#axclrtCreateEvent) 创建并等待的事件。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -169,22 +169,22 @@ AXCL_EXPORT axclError axclrtSynchronizeEvent(axclrtEvent event);
 
 ### axclrtSynchronizeEventWithTimeout
 
-Block host until the event is signaled (recorded) with timeout.
+阻塞主机，直到事件被触发（记录）并达到超时时间。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtSynchronizeEventWithTimeout(axclrtEvent event, int32_t timeout);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| event | in | event created by [axclrtCreateEvent](#axclrtCreateEvent) to wait for. |
-| timeout | in | timeout in milliseconds, -1 for no timeout. |
+| 名称    | 方向 | 说明                                                          |
+| ------- | ---- | ------------------------------------------------------------- |
+| event   | in   | 由 [axclrtCreateEvent](#axclrtCreateEvent) 创建并等待的事件。 |
+| timeout | in   | 超时时间，单位为毫秒；-1 表示无超时。                         |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。

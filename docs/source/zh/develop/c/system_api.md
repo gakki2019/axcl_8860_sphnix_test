@@ -1,15 +1,15 @@
-# System API
+# 系统 API
 
-## Index
+## 目录
 
-- [axclAppLog](#axclAppLog)
-- [axclFinalize](#axclFinalize)
-- [axclGetLogLevel](#axclGetLogLevel)
-- [axclInit](#axclInit)
-- [axclSetLogLevel](#axclSetLogLevel)
-- [axclrtGetSocName](#axclrtGetSocName)
-- [axclrtGetVersion](#axclrtGetVersion)
-- [axclrtGetVersionStr](#axclrtGetVersionStr)
+- [axclAppLog](#axclapplog)
+- [axclFinalize](#axclfinalize)
+- [axclGetLogLevel](#axclgetloglevel)
+- [axclInit](#axclinit)
+- [axclSetLogLevel](#axclsetloglevel)
+- [axclrtGetSocName](#axclrtgetsocname)
+- [axclrtGetVersion](#axclrtgetversion)
+- [axclrtGetVersionStr](#axclrtgetversionstr)
 
 <br>
 
@@ -19,29 +19,29 @@
 
 ### axclAppLog
 
-Record an application log in the following format. [date time][tid][level][APP][function][file][line]: formatted message Example: axclAppLog(5, func, NULL, LINE, "json: %s, device: %d", json, device); log: [2024-11-12 14:24:22.380][1330][C][APP][main][53]: json: ./axcl.json, device: 129.
+按以下格式记录应用日志：[date time][tid][level][APP][function][file][line]: formatted message。示例：axclAppLog(5, func, NULL, LINE, "json: %s, device: %d", json, device); 日志： [2024-11-12 14:24:22.380][1330][C][APP][main][53]: json: ./axcl.json, device: 129.
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint32_t line, const char *fmt,...);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| lv | in | log level, refer to [axclSetLogLevel](#axclSetLogLevel). |
-| func | in | function name; if set to NULL, the function name will not be printed. |
-| file | in | file name; if set to NULL, the file name will not be printed. |
-| line | in | line number |
-| fmt | in | format string for the log message, max. length is 1024. |
+| 名称 | 方向 | 说明                                                 |
+| ---- | ---- | ---------------------------------------------------- |
+| lv   | in   | 日志级别，参见 [axclSetLogLevel](#axclSetLogLevel)。 |
+| func | in   | 函数名；如果设为 NULL，则不会打印函数名。            |
+| file | in   | 文件名；如果设为 NULL，则不会打印文件名。            |
+| line | in   | 行号                                                 |
+| fmt  | in   | 日志消息的格式字符串，最大长度为 1024。              |
 
-#### Returns
+#### 返回值
 
-N/A
+不适用
 
-#### Remark
+#### 参考
 
 [axclSetLogLevel](#axclSetLogLevel)
 
@@ -51,29 +51,29 @@ N/A
 
 ### axclFinalize
 
-Finalize axcl runtime.
+结束 axcl 运行时。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclFinalize();
 ```
 
-#### Parameters
+#### 参数
 
-N/A
+不适用
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
-#### Note
+#### 说明
 
-[axclFinalize](#axclFinalize) must be called explicitly before quit, otherwise causes terminated abort.
-Do not call [axclFinalize](#axclFinalize) in destructor.
+[axclFinalize](#axclFinalize) 必须在退出前显式调用，否则会导致终止性 abort。
+不要在析构函数中调用 [axclFinalize](#axclFinalize)。
 
-#### Remark
+#### 参考
 
 [axclInit](#axclInit)
 
@@ -83,24 +83,24 @@ Do not call [axclFinalize](#axclFinalize) in destructor.
 
 ### axclGetLogLevel
 
-Get axcl log level.
+获取 axcl 日志级别。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclGetLogLevel(int32_t *lv);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| lv | out | log level |
+| 名称 | 方向 | 说明     |
+| ---- | ---- | -------- |
+| lv   | out  | 日志级别 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -108,33 +108,33 @@ AXCL_EXPORT axclError axclGetLogLevel(int32_t *lv);
 
 ### axclInit
 
-Initialize axcl runtime.
+初始化 axcl 运行时。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclInit(const char *json);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| json | in | json config of the following:<br>json config file path.<br>json config content string.<br>NULL, use default config. |
+| 名称 | 方向 | 说明                                                                                             |
+| ---- | ---- | ------------------------------------------------------------------------------------------------ |
+| json | in   | 以下任意一种 JSON 配置：<br>JSON 配置文件路径。<br>JSON 配置内容字符串。<br>NULL，使用默认配置。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
-#### Note
+#### 说明
 
-[axclInit](#axclInit) should be callled before any other APIs.
-[axclInit](#axclInit) can be called multiple times, but only the first call of config parameter will be used.
-[axclFinalize](#axclFinalize) should be called in pair with [axclInit](#axclInit), for example: axclInit(NULL); axclInit(NULL); [axclFinalize](#axclFinalize)(); [axclFinalize](#axclFinalize)();
-Usually [axclInit](#axclInit) and [axclFinalize](#axclFinalize) are called in the main function of the application.
+[axclInit](#axclInit) 应在任何其他 API 之前调用。
+[axclInit](#axclInit) 可以被多次调用，但只会使用第一次传入的配置参数。
+[axclFinalize](#axclFinalize) 应与 [axclInit](#axclInit) 成对调用，例如：axclInit(NULL); axclInit(NULL); [axclFinalize](#axclFinalize)(); [axclFinalize](#axclFinalize)();
+通常 [axclInit](#axclInit) 和 [axclFinalize](#axclFinalize) 会在应用的 main 函数中调用。
 
-#### Example
+#### 示例
 
 ```c
 int main(int argc, char *argv[]) {
@@ -153,24 +153,24 @@ int main(int argc, char *argv[]) {
 
 ### axclSetLogLevel
 
-Set axcl log level.
+设置 axcl 日志级别。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclSetLogLevel(int32_t lv);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| lv | in | log level 0: trace 1: debug 2: info 3: warning 4: error 5: critical 6: off |
+| 名称 | 方向 | 说明                                                                      |
+| ---- | ---- | ------------------------------------------------------------------------- |
+| lv   | in   | 日志级别：0 trace，1 debug，2 info，3 warning，4 error，5 critical，6 off |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -178,21 +178,21 @@ AXCL_EXPORT axclError axclSetLogLevel(int32_t lv);
 
 ### axclrtGetSocName
 
-Get chip name.
+获取芯片名称。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT const char* axclrtGetSocName();
 ```
 
-#### Parameters
+#### 参数
 
-N/A
+不适用
 
-#### Returns
+#### 返回值
 
-- Chip name string.
+- 芯片名称字符串。
 
 <br>
 
@@ -200,26 +200,26 @@ N/A
 
 ### axclrtGetVersion
 
-Get axcl version.
+获取 axcl 版本。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtGetVersion(int32_t *major, int32_t *minor, int32_t *patch);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| major | out | major version. |
-| minor | out | minor version. |
-| patch | out | patch version. |
+| 名称  | 方向 | 说明         |
+| ----- | ---- | ------------ |
+| major | out  | 主版本号。   |
+| minor | out  | 次版本号。   |
+| patch | out  | 补丁版本号。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -227,18 +227,18 @@ AXCL_EXPORT axclError axclrtGetVersion(int32_t *major, int32_t *minor, int32_t *
 
 ### axclrtGetVersionStr
 
-Get axcl version string.
+获取 axcl 版本字符串。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT const char* axclrtGetVersionStr();
 ```
 
-#### Parameters
+#### 参数
 
-N/A
+不适用
 
-#### Returns
+#### 返回值
 
-- Version string.
+- 版本字符串。

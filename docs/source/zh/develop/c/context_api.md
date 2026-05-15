@@ -1,6 +1,6 @@
-# Context API
+# 上下文 API
 
-## Index
+## 目录
 
 - [axclrtCreateContext](#axclrtCreateContext)
 - [axclrtDestroyContext](#axclrtDestroyContext)
@@ -15,37 +15,37 @@
 
 ### axclrtCreateContext
 
-Create a context on specified device and bind to calling thread.
+在指定设备上创建上下文，并绑定到调用线程。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtCreateContext(axclrtContext *context, int32_t deviceId);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| context | out | pointer to created context |
-| deviceId | in | device id |
+| 名称     | 方向 | 说明                   |
+| -------- | ---- | ---------------------- |
+| context  | out  | 指向已创建上下文的指针 |
+| deviceId | in   | 设备 ID                |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
-#### Note
+#### 说明
 
-If don't call the [axclrtCreateContext](#axclrtCreateContext) API to explicitly create the context, the system will use the default context, which is implicitly created when the [axclrtSetDevice](device_api.md#axclrtSetDevice) API is called.
-If multiple contexts are created in calling thread, only the latest created context will be used.
-[axclrtDestroyContext](#axclrtDestroyContext) must be called explicitly to destroy the created context.
+如果没有显式调用 [axclrtCreateContext](#axclrtCreateContext) API 创建上下文，系统将使用默认上下文，而默认上下文会在调用 [axclrtSetDevice](device_api.md#axclrtSetDevice) API 时隐式创建。
+如果在同一调用线程中创建了多个上下文，则只会使用最近创建的上下文。
+[axclrtDestroyContext](#axclrtDestroyContext) 必须显式调用，才能销毁已创建的上下文。
 
-#### Remark
+#### 参考
 
 [axclrtDestroyContext](#axclrtDestroyContext) | [axclrtSetDevice](device_api.md#axclrtSetDevice)
 
-#### Example
+#### 示例
 
 ```c
 // create a context and bind to device_id
@@ -69,7 +69,7 @@ void working_thread(int device_id) {
 
 Destroy the context explicitly created by [axclrtCreateContext](#axclrtCreateContext).
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
@@ -77,20 +77,20 @@ AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
 
 #### Parameters
 
-| Name | Direction | Description |
-|---|---|---|
-| context | in | context created by [axclrtCreateContext](#axclrtCreateContext). |
+| 名称    | 方向 | 说明                                                          |
+| ------- | ---- | ------------------------------------------------------------- |
+| context | in   | 由 [axclrtCreateContext](#axclrtCreateContext) 创建的上下文。 |
 
 #### Returns
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
-#### Note
+#### 说明
 
-[axclrtDestroyContext](#axclrtDestroyContext) cannot destroy the default context which is created by [axclrtSetDevice](device_api.md#axclrtSetDevice).
+[axclrtDestroyContext](#axclrtDestroyContext) 不能销毁由 [axclrtSetDevice](device_api.md#axclrtSetDevice) 创建的默认上下文。
 
-#### Remark
+#### 参考
 
 [axclrtCreateContext](#axclrtCreateContext) | [axclrtSetDevice](device_api.md#axclrtSetDevice)
 
@@ -100,24 +100,24 @@ AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
 
 ### axclrtGetCurrentContext
 
-Get context of current calling thread.
+获取当前调用线程的上下文。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtGetCurrentContext(axclrtContext *context);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| context | out | pointer to context. |
+| 名称    | 方向 | 说明         |
+| ------- | ---- | ------------ |
+| context | out  | 上下文指针。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -125,21 +125,21 @@ AXCL_EXPORT axclError axclrtGetCurrentContext(axclrtContext *context);
 
 ### axclrtSetCurrentContext
 
-Bind the specified context to current calling thread.
+将指定上下文绑定到当前调用线程。
 
-#### Function
+#### 函数
 
 ```c
 AXCL_EXPORT axclError axclrtSetCurrentContext(axclrtContext context);
 ```
 
-#### Parameters
+#### 参数
 
-| Name | Direction | Description |
-|---|---|---|
-| context | in | context. |
+| 名称    | 方向 | 说明     |
+| ------- | ---- | -------- |
+| context | in   | 上下文。 |
 
-#### Returns
+#### 返回值
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`：成功。
+- `others`：失败。

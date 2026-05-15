@@ -1,10 +1,10 @@
-# Structure Reference
+# 结构体参考
 
 <a id="axclCrashDumpConfig"></a>
 
 ## axclCrashDumpConfig
 
-Crash dump configuration structure.
+崩溃转储配置结构体。
 
 ```c
 typedef struct {
@@ -15,10 +15,10 @@ typedef struct {
 
 ### Fields
 
-| Name | Type | Description |
-|---|---|---|
-| dump_dir | const char * | Dump file output directory. |
-| dump_type | const char * | Dump type or level such as "Normal" or "FullMemory". |
+| 名称      | 类型         | 说明                                            |
+| --------- | ------------ | ----------------------------------------------- |
+| dump_dir  | const char * | 转储文件输出目录。                              |
+| dump_type | const char * | 转储类型或级别，例如 "Normal" 或 "FullMemory"。 |
 
 <br>
 
@@ -26,7 +26,7 @@ typedef struct {
 
 ## axclrtEngineIODims
 
-Tensor dimensions returned by engine shape query APIs.
+由引擎形状查询 API 返回的张量维度。
 
 ```c
 typedef struct axclrtEngineIODims {
@@ -37,10 +37,10 @@ typedef struct axclrtEngineIODims {
 
 ### Fields
 
-| Name | Type | Description |
-|---|---|---|
-| dimCount | int32_t | Number of valid dimensions in the shape. |
-| dims | int32_t[AXCLRT_ENGINE_MAX_DIM_CNT] | Dimension values in logical tensor order. |
+| 名称     | 类型                               | 说明                         |
+| -------- | ---------------------------------- | ---------------------------- |
+| dimCount | int32_t                            | 形状中有效维度的数量。       |
+| dims     | int32_t[AXCLRT_ENGINE_MAX_DIM_CNT] | 按逻辑张量顺序排列的维度值。 |
 
 <br>
 
@@ -48,7 +48,7 @@ typedef struct axclrtEngineIODims {
 
 ## mockAttr
 
-Mock pipeline attributes.
+Mock 管道属性。
 
 ```c
 typedef struct {
@@ -60,11 +60,11 @@ typedef struct {
 
 ### Fields
 
-| Name | Type | Description |
-|---|---|---|
-| mode | uint32_t | Mock running mode. |
-| param_a | uint32_t | Auxiliary parameter A. |
-| param_b | uint32_t | Auxiliary parameter B. |
+| 名称    | 类型     | 说明            |
+| ------- | -------- | --------------- |
+| mode    | uint32_t | Mock 运行模式。 |
+| param_a | uint32_t | 辅助参数 A。    |
+| param_b | uint32_t | 辅助参数 B。    |
 
 <br>
 
@@ -72,7 +72,7 @@ typedef struct {
 
 ## axclError
 
-Public AXCL error code type.
+公开的 AXCL 错误码类型。
 
 ```c
 typedef int32_t axclError
@@ -84,7 +84,7 @@ typedef int32_t axclError
 
 ## axclrtContext
 
-Runtime context handle.
+运行时上下文句柄。
 
 ```c
 typedef void* axclrtContext
@@ -96,7 +96,7 @@ typedef void* axclrtContext
 
 ## axclrtEngineIO
 
-Opaque handle used to bind engine input and output buffers.
+用于绑定引擎输入和输出缓冲区的不透明句柄。
 
 ```c
 typedef void* axclrtEngineIO
@@ -108,7 +108,7 @@ typedef void* axclrtEngineIO
 
 ## axclrtEngineIOInfo
 
-Opaque handle used to query engine input and output metadata.
+用于查询引擎输入和输出元数据的不透明句柄。
 
 ```c
 typedef void* axclrtEngineIOInfo
@@ -120,7 +120,7 @@ typedef void* axclrtEngineIOInfo
 
 ## axclrtEngineSet
 
-Bitmask describing the engine core affinity set.
+描述引擎核亲和性集合的位掩码。
 
 ```c
 typedef uint32_t axclrtEngineSet
@@ -132,7 +132,7 @@ typedef uint32_t axclrtEngineSet
 
 ## axclrtEvent
 
-Runtime event handle.
+运行时事件句柄。
 
 ```c
 typedef void* axclrtEvent
@@ -144,7 +144,7 @@ typedef void* axclrtEvent
 
 ## axclrtStream
 
-Runtime stream handle.
+运行时流句柄。
 
 ```c
 typedef void* axclrtStream
@@ -156,7 +156,7 @@ typedef void* axclrtStream
 
 ## mockCallbackAEx_t
 
-Callback invoked with a status code.
+带状态码回调的函数指针类型。
 
 ```c
 typedef int32_t(* mockCallbackAEx_t) (int32_t statusCode)
@@ -168,7 +168,7 @@ typedef int32_t(* mockCallbackAEx_t) (int32_t statusCode)
 
 ## mockCallbackA_t
 
-Callback invoked with a status code and user context.
+带状态码和用户上下文回调的函数指针类型。
 
 ```c
 typedef int32_t(* mockCallbackA_t) (int32_t statusCode, void *userData)
@@ -180,7 +180,7 @@ typedef int32_t(* mockCallbackA_t) (int32_t statusCode, void *userData)
 
 ## mockCallbackBEx_t
 
-Callback invoked for group and frame notifications without user data.
+不带用户数据的组和帧通知回调函数指针类型。
 
 ```c
 typedef int32_t(* mockCallbackBEx_t) (uint32_t grp, uint32_t frameIndex)
@@ -192,7 +192,7 @@ typedef int32_t(* mockCallbackBEx_t) (uint32_t grp, uint32_t frameIndex)
 
 ## mockCallbackB_t
 
-Callback invoked for group and frame notifications.
+组和帧通知回调函数指针类型。
 
 ```c
 typedef int32_t(* mockCallbackB_t) (uint32_t grp, uint32_t frameIndex, void *userData)
