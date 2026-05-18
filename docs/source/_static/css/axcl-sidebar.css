@@ -132,23 +132,25 @@
     display: none;
 }
 
-.axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>a.reference.internal {
-    color: transparent;
-    font-size: 0;
-}
-
 .axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>a.reference.internal>button.toctree-expand {
     color: var(--axcl-sidebar-icon-strong);
     font-size: 1rem;
 }
 
 .axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>ul {
-    display: block !important;
-}
-
-.axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>ul {
     margin-left: 0;
     padding-left: 0;
+}
+
+.axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>a.reference.internal {
+    background: #fcfcfc;
+    color: #404040;
+}
+
+.axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>a.reference.internal:hover,
+.axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>a.reference.internal:focus {
+    background: #fcfcfc;
+    color: #404040;
 }
 
 .axcl-sidebar {

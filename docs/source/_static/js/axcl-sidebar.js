@@ -69,7 +69,13 @@
   }
 
   function getBranchItems(tree) {
-    return Array.from(tree.querySelectorAll('li')).filter((node) => {
+    const candidates = [];
+    if (tree.tagName === 'LI') {
+      candidates.push(tree);
+    }
+    candidates.push(...Array.from(tree.querySelectorAll('li')));
+
+    return candidates.filter((node) => {
       const hasDirectList = Array.from(node.children).some((child) => child.tagName === 'UL');
       const link = Array.from(node.children).find((child) => child.tagName === 'A') || null;
       return hasDirectList && Boolean(link);
@@ -163,8 +169,7 @@
       return tree;
     }
 
-    const rootList = Array.from(rootNode.children).find((child) => child.tagName === 'UL') || null;
-    return rootList || tree;
+    return rootNode;
   }
 
   function getHomepageRootNode(tree) {
@@ -289,7 +294,9 @@
         homepageDefaultsApplied = true;
 
         getBranchItems(scope).forEach((node) => {
-          const shouldOpen = node.classList.contains('toctree-l2');
+          const shouldOpen =
+            node.classList.contains('toctree-l2') ||
+            node.classList.contains('toctree-l1');
           setExpanded(node, shouldOpen);
         });
 
@@ -319,6 +326,15 @@
       window.setTimeout(() => {
         applyingSidebarState = false;
       }, 0);
+    }
+
+    function resetHomepageToDefaultState() {
+      if (!isHomepage) {
+        return;
+      }
+      homepageDefaultsApplied = false;
+      applySidebarState();
+      restoreSidebarScroll();
     }
 
     function scheduleSidebarStateRestore() {
@@ -356,6 +372,14 @@
         return;
       }
 
+      const homepageLogo = target.closest('.wy-side-nav-search a.icon-home, .wy-nav-top a, .wy-breadcrumbs a.icon-home');
+      if (isHomepage && homepageLogo) {
+        event.preventDefault();
+        event.stopPropagation();
+        resetHomepageToDefaultState();
+        return;
+      }
+
       const toggle = target.closest('button.toctree-expand');
       if (toggle && scope.contains(toggle)) {
         event.preventDefault();
@@ -385,6 +409,13 @@
 
       if (isRootWrapper) {
         event.preventDefault();
+        return;
+      }
+
+      if (isBranch) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleBranch(node);
         return;
       }
 
