@@ -108,6 +108,11 @@
     display: none;
 }
 
+.axcl-sidebar[data-homepage="true"][data-lang="zh"]>ul>li.toctree-l1:has(> a[href="en/index.html"]),
+.axcl-sidebar[data-homepage="true"][data-lang="zh"]>ul>li.toctree-l1:has(> a[href="../en/index.html"]) {
+    display: none;
+}
+
 .axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>a.reference.internal {
     color: transparent;
     font-size: 0;
@@ -116,6 +121,10 @@
 .axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>a.reference.internal>button.toctree-expand {
     color: var(--axcl-sidebar-icon-strong);
     font-size: 1rem;
+}
+
+.axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>ul {
+    display: block !important;
 }
 
 .axcl-sidebar[data-homepage="true"]>ul>li.toctree-l1>ul {

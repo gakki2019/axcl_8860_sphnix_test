@@ -27,7 +27,9 @@
     if (!href || href.startsWith('#') || isExternalHref(href)) {
       return href;
     }
-    return href.replace(/^(?:\.\.\/)?(?:zh|en)\//, '');
+    return href
+      .replace(/^(?:\.\.\/)+/, '')
+      .replace(/^(?:zh|en)\//, '');
   }
 
   function getBranchItems(tree) {
@@ -67,6 +69,30 @@
 
     const rootList = Array.from(rootNode.children).find((child) => child.tagName === 'UL') || null;
     return rootList || tree;
+  }
+
+  function getHomepageRootNode(tree) {
+    if (tree.dataset.homepage !== 'true') {
+      return null;
+    }
+
+    const lang = tree.dataset.lang || 'zh';
+    const topList = Array.from(tree.children).find((node) => node.tagName === 'UL') || null;
+    if (!topList) {
+      return null;
+    }
+
+    return Array.from(topList.children).find((node) => {
+      if (node.tagName !== 'LI') {
+        return false;
+      }
+      const link = getBranchLink(node);
+      const href = link ? link.getAttribute('href') || '' : '';
+      return href === '#'
+        || href === `${lang}/index.html`
+        || href.endsWith(`/${lang}/index.html`)
+        || href.endsWith(`../${lang}/index.html`);
+    }) || null;
   }
 
   function collectBranchState(tree) {
@@ -129,16 +155,28 @@
       syncState();
     }
 
-    if (isHomepage) {
+    function applyHomepageDefaults() {
+      if (!isHomepage) {
+        return;
+      }
+
       getBranchItems(scope).forEach((node) => {
-        const link = getBranchLink(node);
-        const href = normalizeHref(link ? link.getAttribute('href') : '');
-        if (href && !Object.prototype.hasOwnProperty.call(state, href)) {
-          node.classList.add('current');
-          node.setAttribute('aria-expanded', 'true');
-        }
+        const shouldOpen = node.classList.contains('toctree-l2');
+        node.classList.toggle('current', shouldOpen);
+        node.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
       });
     }
+
+    function applySidebarState() {
+      if (isHomepage) {
+        applyHomepageDefaults();
+        return;
+      }
+
+      applyState(scope, state);
+    }
+
+    applySidebarState();
 
     getBranchItems(scope).forEach((node) => {
       const link = getBranchLink(node);
@@ -192,6 +230,10 @@
         return;
       }
 
+      if (!isBranch) {
+        syncState();
+      }
+
       if (isCurrentLeaf) {
         event.preventDefault();
         resetSidebarScroll();
@@ -219,8 +261,11 @@
     window.history.scrollRestoration = "manual";
     forceSidebarScrollTop();
     window.requestAnimationFrame(forceSidebarScrollTop);
+    window.requestAnimationFrame(applySidebarState);
     window.setTimeout(forceSidebarScrollTop, 0);
+    window.setTimeout(applySidebarState, 0);
     window.addEventListener("load", forceSidebarScrollTop, { once: true });
+    window.addEventListener("load", applySidebarState, { once: true });
   }
 
   document.addEventListener("DOMContentLoaded", function () {

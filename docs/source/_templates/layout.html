@@ -16,7 +16,7 @@
 
 {% block menu %}
 {% set current_lang = 'en' if pagename.startswith('en/') else 'zh' %}
-{% set is_homepage = pagename == 'index' %}
+{% set is_homepage = pagename in ['index', 'zh/index', 'en/index'] %}
 {% set sidebar_toc = toctree(maxdepth=4, collapse=False, includehidden=True, titles_only=False) %}
 <div class="axcl-sidebar" data-lang="{{ current_lang }}" data-homepage="{{ 'true' if is_homepage else 'false' }}">
   {{ sidebar_toc }}
