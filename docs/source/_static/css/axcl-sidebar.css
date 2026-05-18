@@ -2,9 +2,11 @@
     --axcl-sidebar-bg: #343131;
     --axcl-sidebar-search: #e3e3e3;
     --axcl-sidebar-current: #e3e3e3;
-    --axcl-sidebar-hover: #ff5a5f;
-    --axcl-sidebar-text: #d9d9d9;
+    --axcl-sidebar-hover: #40ded6;
+    --axcl-sidebar-text: #1d1d1d;
     --axcl-sidebar-text-strong: #404040;
+    --axcl-sidebar-current-text: #1488e6;
+    --axcl-sidebar-current-border: #2980b9;
     --axcl-sidebar-text-invert: #ffffff;
     --axcl-sidebar-icon: #a3a3a3;
     --axcl-sidebar-icon-strong: #333333;
@@ -149,11 +151,11 @@
     padding-left: 0;
 }
 
-.axcl-sidebar .wy-menu-vertical {
+.axcl-sidebar {
     background: transparent;
 }
 
-.axcl-sidebar .wy-menu-vertical a {
+.axcl-sidebar a {
     color: var(--axcl-sidebar-text);
     line-height: 18px;
     padding: 0.4045em 1.618em;
@@ -163,75 +165,73 @@
     transition: background-color 0.16s ease, color 0.16s ease;
 }
 
-.axcl-sidebar .wy-menu-vertical a:hover,
-.axcl-sidebar .wy-menu-vertical a:focus {
+.axcl-sidebar a:hover,
+.axcl-sidebar a:focus {
     background-color: transparent;
     color: var(--axcl-sidebar-hover);
 }
 
-.axcl-sidebar .wy-menu-vertical li.toctree-l2>a:hover,
-.axcl-sidebar .wy-menu-vertical li.toctree-l3>a:hover,
-.axcl-sidebar .wy-menu-vertical li.toctree-l4>a:hover {
+.axcl-sidebar li.toctree-l2>a:hover,
+.axcl-sidebar li.toctree-l3>a:hover,
+.axcl-sidebar li.toctree-l4>a:hover {
     color: var(--axcl-sidebar-hover) !important;
 }
 
-.axcl-sidebar .wy-menu-vertical a.current {
+.axcl-sidebar li.current>a.current,
+.axcl-sidebar a.current {
     background: var(--axcl-sidebar-current);
-    color: var(--axcl-sidebar-text-strong);
+    color: var(--axcl-sidebar-current-text);
     font-weight: 700;
+    border-left: 3px solid var(--axcl-sidebar-current-border);
+    padding-left: calc(1.618em - 3px);
 }
 
-.axcl-sidebar .wy-menu-vertical li.current>a {
+.axcl-sidebar li.current>a {
     background: transparent;
     color: var(--axcl-sidebar-text);
 }
 
-.axcl-sidebar .wy-menu-vertical li.current>a.current {
-    background: var(--axcl-sidebar-current);
-    color: var(--axcl-sidebar-text-strong);
-}
-
-.axcl-sidebar .wy-menu-vertical li.current>a:hover,
-.axcl-sidebar .wy-menu-vertical li.current>a:focus {
+.axcl-sidebar li.current>a:hover,
+.axcl-sidebar li.current>a:focus {
     background: transparent;
 }
 
-.axcl-sidebar .wy-menu-vertical li.current>a button.toctree-expand,
-.axcl-sidebar .wy-menu-vertical li.on a button.toctree-expand,
-.axcl-sidebar .wy-menu-vertical li button.toctree-expand {
+.axcl-sidebar li.current>a button.toctree-expand,
+.axcl-sidebar li.on a button.toctree-expand,
+.axcl-sidebar li button.toctree-expand {
     margin-left: 0;
     margin-right: 0.35rem;
     width: 1rem;
     color: var(--axcl-sidebar-icon);
 }
 
-.axcl-sidebar .wy-menu-vertical li.current>a button.toctree-expand,
-.axcl-sidebar .wy-menu-vertical li.on a button.toctree-expand {
+.axcl-sidebar li.current>a button.toctree-expand,
+.axcl-sidebar li.on a button.toctree-expand {
     color: var(--axcl-sidebar-icon-strong);
 }
 
-.axcl-sidebar .wy-menu-vertical li.toctree-l2>a,
-.axcl-sidebar .wy-menu-vertical li.toctree-l3>a,
-.axcl-sidebar .wy-menu-vertical li.toctree-l4>a,
-.axcl-sidebar .wy-menu-vertical li.toctree-l5>a,
-.axcl-sidebar .wy-menu-vertical li.toctree-l6>a,
-.axcl-sidebar .wy-menu-vertical li.toctree-l7>a,
-.axcl-sidebar .wy-menu-vertical li.toctree-l8>a,
-.axcl-sidebar .wy-menu-vertical li.toctree-l9>a,
-.axcl-sidebar .wy-menu-vertical li.toctree-l10>a {
+.axcl-sidebar li.toctree-l2>a,
+.axcl-sidebar li.toctree-l3>a,
+.axcl-sidebar li.toctree-l4>a,
+.axcl-sidebar li.toctree-l5>a,
+.axcl-sidebar li.toctree-l6>a,
+.axcl-sidebar li.toctree-l7>a,
+.axcl-sidebar li.toctree-l8>a,
+.axcl-sidebar li.toctree-l9>a,
+.axcl-sidebar li.toctree-l10>a {
     color: var(--axcl-sidebar-text);
 }
 
-.axcl-sidebar .wy-menu-vertical li.toctree-l3,
-.axcl-sidebar .wy-menu-vertical li.toctree-l4 {
+.axcl-sidebar li.toctree-l3,
+.axcl-sidebar li.toctree-l4 {
     font-size: 0.9em;
 }
 
-.axcl-sidebar .wy-menu-vertical li ul {
+.axcl-sidebar li ul {
     margin-bottom: 0;
 }
 
-.axcl-sidebar .wy-menu-vertical li ul li a {
+.axcl-sidebar li ul li a {
     margin-bottom: 0;
 }
 
