@@ -195,6 +195,39 @@ test.describe('AXCL sidebar navigation', () => {
         expect(await readBranchState(page, '开发')).toEqual(developInitial);
     });
 
+    test('keeps manually opened page groups open when navigating between page group leaves', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/basic/install.html');
+
+        const overview = branchLocator(page, '概览');
+        const install = branchLocator(page, '安装指南');
+        const quickStart = branchLocator(page, '快速开始');
+
+        await expect(install).toHaveAttribute('aria-expanded', 'true');
+        await expect(overview).toHaveAttribute('aria-expanded', 'false');
+        await expect(quickStart).toHaveAttribute('aria-expanded', 'false');
+
+        await branchLinkLocator(page, '概览').click();
+        await branchLinkLocator(page, '快速开始').click();
+        await expect(overview).toHaveAttribute('aria-expanded', 'true');
+        await expect(install).toHaveAttribute('aria-expanded', 'true');
+        await expect(quickStart).toHaveAttribute('aria-expanded', 'true');
+
+        await install.locator(':scope > ul > li:has(> a:has-text("推荐准备项")) > a').click();
+        await page.waitForURL('**/zh/basic/install.html*');
+        await install.locator(':scope > ul > li:has(> a:has-text("文档构建准备")) > a').click();
+        await page.waitForURL('**/zh/basic/install.html*');
+        await expect(overview).toHaveAttribute('aria-expanded', 'true');
+        await expect(install).toHaveAttribute('aria-expanded', 'true');
+        await expect(quickStart).toHaveAttribute('aria-expanded', 'true');
+
+        await overview.locator(':scope > ul > li:has(> a:has-text("页面目的")) > a').click();
+        await page.waitForURL('**/zh/basic/overview.html*');
+
+        await expect(branchLocator(page, '概览')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, '安装指南')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, '快速开始')).toHaveAttribute('aria-expanded', 'true');
+    });
+
     test('icon and text clicks toggle branches independently', async ({ page }) => {
         await gotoDocsPage(page, '/zh/index.html');
 

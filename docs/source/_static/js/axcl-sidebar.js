@@ -7,6 +7,10 @@
     return `axcl-sidebar-state-${lang}`;
   }
 
+  function getScrollKey(lang) {
+    return `axcl-sidebar-scroll-${lang}`;
+  }
+
   function readState(stateKey) {
     try {
       return JSON.parse(window.localStorage.getItem(stateKey) || "{}");
@@ -23,21 +27,52 @@
     }
   }
 
+  function readScrollTop(scrollKey) {
+    try {
+      const raw = window.sessionStorage.getItem(scrollKey);
+      if (raw === null) {
+        return null;
+      }
+      const value = Number(raw);
+      return Number.isFinite(value) ? value : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function writeScrollTop(scrollKey, scrollTop) {
+    try {
+      window.sessionStorage.setItem(scrollKey, String(scrollTop));
+    } catch (error) {
+      // Ignore storage failures and keep navigation usable.
+    }
+  }
+
   function normalizeHref(href) {
-    if (!href || href.startsWith('#') || isExternalHref(href)) {
+    if (!href || href === '#') {
       return href;
     }
-    return href
-      .replace(/^(?:\.\.\/)+/, '')
-      .replace(/^(?:zh|en)\//, '');
+
+    try {
+      const url = new URL(href, window.location.href);
+      const isExternalOtherOrigin = isExternalHref(href) && !href.startsWith(window.location.origin);
+      if (url.origin !== window.location.origin || isExternalOtherOrigin) {
+        return href;
+      }
+
+      return `${url.pathname.replace(/^\/(?:zh|en)\//, '').replace(/^\//, '')}${url.hash}`;
+    } catch (error) {
+      return href
+        .replace(/^(?:\.\.\/)+/, '')
+        .replace(/^(?:zh|en)\//, '');
+    }
   }
 
   function getBranchItems(tree) {
     return Array.from(tree.querySelectorAll('li')).filter((node) => {
       const hasDirectList = Array.from(node.children).some((child) => child.tagName === 'UL');
       const link = Array.from(node.children).find((child) => child.tagName === 'A') || null;
-      const href = link ? link.getAttribute('href') || '' : '';
-      return hasDirectList && Boolean(link) && href !== '#';
+      return hasDirectList && Boolean(link);
     });
   }
 
@@ -45,7 +80,66 @@
     return Array.from(node.children).find((child) => child.tagName === 'A') || null;
   }
 
+  function toStateKey(href) {
+    const normalized = normalizeHref(href);
+    if (!normalized || normalized === '#') {
+      return '';
+    }
+    return normalized.split('#')[0];
+  }
+
+  function isExpanded(node) {
+    if (node.dataset.axclExpanded === 'true') {
+      return true;
+    }
+    if (node.dataset.axclExpanded === 'false') {
+      return false;
+    }
+    return node.classList.contains('current');
+  }
+
+  function setExpanded(node, expanded) {
+    node.dataset.axclExpanded = expanded ? 'true' : 'false';
+    node.classList.toggle('current', expanded);
+    node.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  }
+
+  function getBranchStateKey(node) {
+    const link = getBranchLink(node);
+    const linkStateKey = toStateKey(link ? link.getAttribute('href') : '');
+    if (linkStateKey) {
+      return linkStateKey;
+    }
+
+    const descendant = Array.from(node.querySelectorAll('ul a[href]')).find((anchor) => {
+      const candidate = toStateKey(anchor.getAttribute('href') || '');
+      return Boolean(candidate);
+    }) || null;
+    if (descendant) {
+      return toStateKey(descendant.getAttribute('href') || '');
+    }
+
+    return '';
+  }
+
   function getLanguageRoot(tree) {
+    const topList = Array.from(tree.children).find((node) => node.tagName === 'UL') || null;
+    if (topList) {
+      const activeRootNode = Array.from(topList.children).find((node) => {
+        if (node.tagName !== 'LI') {
+          return false;
+        }
+        return node.querySelector('a.current') !== null;
+      }) || null;
+
+      if (activeRootNode) {
+        const activeRootList = Array.from(activeRootNode.children).find((child) => child.tagName === 'UL') || null;
+        if (activeRootList) {
+          return activeRootList;
+        }
+      }
+    }
+
     if (tree.dataset.homepage !== 'true') {
       return tree;
     }
@@ -98,11 +192,9 @@
   function collectBranchState(tree) {
     const state = {};
     getBranchItems(tree).forEach((node) => {
-      const link = getBranchLink(node);
-      const href = link ? link.getAttribute('href') : '';
-      const normalizedHref = normalizeHref(href);
-      if (normalizedHref) {
-        state[normalizedHref] = node.classList.contains('current');
+      const stateKey = getBranchStateKey(node);
+      if (stateKey) {
+        state[stateKey] = isExpanded(node);
       }
     });
     return state;
@@ -115,13 +207,28 @@
 
   function applyState(tree, state) {
     getBranchItems(tree).forEach((node) => {
-      const link = getBranchLink(node);
-      const href = normalizeHref(link ? link.getAttribute('href') : '');
-      const shouldOpen = href && Object.prototype.hasOwnProperty.call(state, href)
-        ? Boolean(state[href])
-        : node.classList.contains('current') || node.classList.contains('toctree-l2');
-      node.classList.toggle('current', shouldOpen);
-      node.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+      const stateKey = getBranchStateKey(node);
+
+      // Branches that contain the current page MUST stay expanded.
+      // Sphinx sets class="current" on the active <a> element, and our JS
+      // never modifies <a> class attributes, so querySelector('a.current')
+      // reliably detects whether the current page lives inside this branch.
+      const containsCurrent = node.querySelector('a.current') !== null;
+
+      var shouldOpen;
+      if (stateKey && Object.prototype.hasOwnProperty.call(state, stateKey)) {
+        // Respect the user's manual expand / collapse choices first.
+        shouldOpen = Boolean(state[stateKey]);
+      } else if (containsCurrent) {
+        // Without saved user preference, expand branches containing active page.
+        shouldOpen = true;
+      } else {
+        // No saved preference: do not override the current rendered state.
+        // This avoids route-change-driven auto-collapse.
+        shouldOpen = isExpanded(node);
+      }
+
+      setExpanded(node, shouldOpen);
     });
   }
 
@@ -132,16 +239,33 @@
     tree.dataset.axclBound = 'true';
 
     const stateKey = getStateKey(tree.dataset.lang || 'zh');
+    const scrollKey = getScrollKey(tree.dataset.lang || 'zh');
     const isHomepage = tree.dataset.homepage === 'true';
     const scope = getLanguageRoot(tree);
-    const state = readState(stateKey);
-    applyState(scope, state);
+    applyState(scope, readState(stateKey));
 
-    function resetSidebarScroll() {
-      const sideScroll = document.querySelector(".wy-side-scroll");
-      if (sideScroll) {
-        sideScroll.scrollTop = 0;
+    function getSidebarScrollContainer() {
+      return document.querySelector('.wy-side-scroll');
+    }
+
+    function persistSidebarScroll() {
+      const sideScroll = getSidebarScrollContainer();
+      if (!sideScroll) {
+        return;
       }
+      writeScrollTop(scrollKey, sideScroll.scrollTop);
+    }
+
+    function restoreSidebarScroll() {
+      const sideScroll = getSidebarScrollContainer();
+      if (!sideScroll) {
+        return;
+      }
+      const saved = readScrollTop(scrollKey);
+      if (saved === null) {
+        return;
+      }
+      sideScroll.scrollTop = saved;
     }
 
     function syncState() {
@@ -149,9 +273,8 @@
     }
 
     function toggleBranch(node) {
-      const nextOpen = !node.classList.contains('current');
-      node.classList.toggle('current', nextOpen);
-      node.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+      const nextOpen = !isExpanded(node);
+      setExpanded(node, nextOpen);
       syncState();
     }
 
@@ -162,18 +285,35 @@
 
       getBranchItems(scope).forEach((node) => {
         const shouldOpen = node.classList.contains('toctree-l2');
-        node.classList.toggle('current', shouldOpen);
-        node.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+        setExpanded(node, shouldOpen);
       });
     }
 
+    var applyingSidebarState = false;
+    var restoreScheduled = false;
+
     function applySidebarState() {
+      applyingSidebarState = true;
       if (isHomepage) {
         applyHomepageDefaults();
-        return;
+      } else {
+        applyState(scope, readState(stateKey));
       }
 
-      applyState(scope, state);
+      window.setTimeout(() => {
+        applyingSidebarState = false;
+      }, 0);
+    }
+
+    function scheduleSidebarStateRestore() {
+      if (restoreScheduled) {
+        return;
+      }
+      restoreScheduled = true;
+      window.requestAnimationFrame(() => {
+        restoreScheduled = false;
+        applySidebarState();
+      });
     }
 
     applySidebarState();
@@ -224,6 +364,8 @@
       const isBranch = Array.from(node.children).some((child) => child.tagName === 'UL');
       const isRootWrapper = link.getAttribute('href') === '#';
       const isCurrentLeaf = link.classList.contains('current') && !isBranch;
+      const href = link.getAttribute('href') || '';
+      const isInPageAnchor = href.startsWith('#') && href !== '#';
 
       if (isRootWrapper) {
         event.preventDefault();
@@ -231,12 +373,18 @@
       }
 
       if (!isBranch) {
+        event.stopPropagation();
+      }
+
+      if (!isBranch && !isInPageAnchor) {
+        // Persist sidebar state before full-page navigation.
+        // For in-page anchors, hashchange recovery will re-apply state.
         syncState();
+        persistSidebarScroll();
       }
 
       if (isCurrentLeaf) {
         event.preventDefault();
-        resetSidebarScroll();
       }
     }, true);
 
@@ -246,26 +394,90 @@
       });
     });
 
-    function forceSidebarScrollTop() {
-      let attempts = 0;
-      function tick() {
-        resetSidebarScroll();
-        attempts += 1;
-        if (attempts < 12) {
-          window.requestAnimationFrame(tick);
-        }
+    const observer = new MutationObserver(() => {
+      if (!applyingSidebarState) {
+        scheduleSidebarStateRestore();
       }
-      tick();
+    });
+    getBranchItems(scope).forEach((node) => {
+      observer.observe(node, {
+        attributes: true,
+        attributeFilter: ['class', 'aria-expanded'],
+      });
+    });
+
+    function patchThemeNavigation() {
+      const navigation = window.SphinxRtdTheme && window.SphinxRtdTheme.Navigation;
+      if (!navigation || navigation.axclSidebarPatched === true) {
+        return Boolean(navigation);
+      }
+
+      function getSidebarScrollTop() {
+        const sideScroll = document.querySelector('.wy-side-scroll');
+        return sideScroll ? sideScroll.scrollTop : null;
+      }
+
+      function restoreSidebarScrollTop(scrollTop) {
+        if (scrollTop === null || typeof scrollTop === 'undefined') {
+          return;
+        }
+        const sideScroll = document.querySelector('.wy-side-scroll');
+        if (!sideScroll) {
+          return;
+        }
+        sideScroll.scrollTop = scrollTop;
+      }
+
+      ['reset', 'toggleCurrent'].forEach((methodName) => {
+        const original = navigation[methodName];
+        if (typeof original !== 'function') {
+          return;
+        }
+
+        navigation[methodName] = function () {
+          const scrollTopBefore = getSidebarScrollTop();
+          const result = original.apply(this, arguments);
+          restoreSidebarScrollTop(scrollTopBefore);
+          window.requestAnimationFrame(() => restoreSidebarScrollTop(scrollTopBefore));
+          window.setTimeout(() => restoreSidebarScrollTop(scrollTopBefore), 0);
+          scheduleSidebarStateRestore();
+          window.setTimeout(applySidebarState, 0);
+          return result;
+        };
+      });
+      navigation.axclSidebarPatched = true;
+      return true;
     }
 
     window.history.scrollRestoration = "manual";
-    forceSidebarScrollTop();
-    window.requestAnimationFrame(forceSidebarScrollTop);
+    patchThemeNavigation();
+    restoreSidebarScroll();
     window.requestAnimationFrame(applySidebarState);
-    window.setTimeout(forceSidebarScrollTop, 0);
+    window.requestAnimationFrame(restoreSidebarScroll);
+    window.requestAnimationFrame(patchThemeNavigation);
     window.setTimeout(applySidebarState, 0);
-    window.addEventListener("load", forceSidebarScrollTop, { once: true });
+    window.setTimeout(restoreSidebarScroll, 0);
+    window.setTimeout(patchThemeNavigation, 0);
+    window.setTimeout(patchThemeNavigation, 50);
+    window.setTimeout(applySidebarState, 50);
+    window.setTimeout(restoreSidebarScroll, 50);
     window.addEventListener("load", applySidebarState, { once: true });
+    window.addEventListener("load", restoreSidebarScroll, { once: true });
+    window.addEventListener("load", patchThemeNavigation, { once: true });
+    window.addEventListener("beforeunload", () => {
+      syncState();
+      persistSidebarScroll();
+    });
+
+    // sphinx_rtd_theme binds hashchange -> Navigation.reset(), which rewrites
+    // `.wy-menu-vertical .current` and can wipe manual branch expand state.
+    // Re-apply our persisted sidebar state after hash changes.
+    window.addEventListener("hashchange", () => {
+      window.requestAnimationFrame(applySidebarState);
+      window.requestAnimationFrame(restoreSidebarScroll);
+      window.setTimeout(applySidebarState, 0);
+      window.setTimeout(restoreSidebarScroll, 0);
+    });
   }
 
   document.addEventListener("DOMContentLoaded", function () {
