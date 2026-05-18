@@ -145,17 +145,19 @@
     }
 
     const lang = tree.dataset.lang || 'zh';
-    const rootNode = Array.from(tree.children).find((node) => {
-      if (node.tagName !== 'LI') {
-        return false;
-      }
-      const link = getBranchLink(node);
-      const href = link ? link.getAttribute('href') || '' : '';
-      return href === '#'
-        || href === `${lang}/index.html`
-        || href.endsWith(`/${lang}/index.html`)
-        || href.endsWith(`../${lang}/index.html`);
-    }) || null;
+    const rootNode = topList
+      ? Array.from(topList.children).find((node) => {
+          if (node.tagName !== 'LI') {
+            return false;
+          }
+          const link = getBranchLink(node);
+          const href = link ? link.getAttribute('href') || '' : '';
+          return href === '#'
+            || href === `${lang}/index.html`
+            || href.endsWith(`/${lang}/index.html`)
+            || href.endsWith(`../${lang}/index.html`);
+        }) || null
+      : null;
 
     if (!rootNode) {
       return tree;
@@ -283,10 +285,17 @@
         return;
       }
 
-      getBranchItems(scope).forEach((node) => {
-        const shouldOpen = node.classList.contains('toctree-l2');
-        setExpanded(node, shouldOpen);
-      });
+      const state = readState(stateKey);
+      const hasSavedState = Object.keys(state).length > 0;
+
+      if (hasSavedState) {
+        applyState(scope, state);
+      } else {
+        getBranchItems(scope).forEach((node) => {
+          const shouldOpen = node.classList.contains('toctree-l2');
+          setExpanded(node, shouldOpen);
+        });
+      }
     }
 
     var applyingSidebarState = false;
