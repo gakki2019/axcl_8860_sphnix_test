@@ -285,21 +285,28 @@
         return;
       }
 
-      const state = readState(stateKey);
-      const hasSavedState = Object.keys(state).length > 0;
+      if (!homepageDefaultsApplied) {
+        homepageDefaultsApplied = true;
 
-      if (hasSavedState) {
-        applyState(scope, state);
-      } else {
         getBranchItems(scope).forEach((node) => {
           const shouldOpen = node.classList.contains('toctree-l2');
           setExpanded(node, shouldOpen);
         });
+
+        syncState();
+      } else {
+        const state = readState(stateKey);
+        const hasSavedState = Object.keys(state).length > 0;
+
+        if (hasSavedState) {
+          applyState(scope, state);
+        }
       }
     }
 
     var applyingSidebarState = false;
     var restoreScheduled = false;
+    var homepageDefaultsApplied = false;
 
     function applySidebarState() {
       applyingSidebarState = true;
