@@ -354,6 +354,59 @@ test.describe('AXCL sidebar navigation', () => {
         expect(normalizeNavKeys(enState.openKeys)).toEqual(normalizeNavKeys(zhState.openKeys));
     });
 
+    test('switching architecture pages keeps every ancestor branch open in the target language', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/arch/system.html');
+
+        await expect(branchLocator(page, '开发')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, '架构')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, '系统架构')).toHaveClass(/current/);
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/develop/arch/system.html');
+
+        await expect(branchLocator(page, 'Development')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'Architecture')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'System Architecture')).toHaveClass(/current/);
+    });
+
+    test('switching overview section anchors keeps the matching subsection selected', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/basic/overview.html#id2');
+
+        await expect(branchLocator(page, '页面目的')).toHaveClass(/current/);
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/basic/overview.html#purpose');
+
+        await expect(branchLocator(page, 'Basic')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'Overview')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'Purpose')).toHaveClass(/current/);
+    });
+
+    test('switching faq anchors keeps the matching question selected', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/faq/index.html#id2');
+
+        await expect(branchLocator(page, '如何在本地构建文档？')).toHaveClass(/current/);
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/faq/index.html#how-do-i-build-the-documentation-locally');
+
+        await expect(branchLocator(page, 'FAQ')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'How do I build the documentation locally?')).toHaveClass(/current/);
+    });
+
+    test('switching anchored sections keeps the matched node selected without scrolling the content pane down', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/basic/install.html#sdk');
+
+        await expect(branchLocator(page, 'SDK 环境准备')).toHaveClass(/current/);
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/basic/install.html#sdk-environment-preparation');
+
+        await expect(branchLocator(page, 'Installation Guide')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'SDK Environment Preparation')).toHaveClass(/current/);
+        await expect(page.evaluate(() => window.scrollY)).resolves.toBe(0);
+    });
+
     test('preserves homepage sidebar collapse state across language switches', async ({ page }) => {
         await gotoDocsPage(page, '/index.html');
 

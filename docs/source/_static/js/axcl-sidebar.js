@@ -11,6 +11,10 @@
     return `axcl-sidebar-scroll-${lang}`;
   }
 
+  function getContentScrollResetKey() {
+    return 'axcl-language-switch-scroll-reset';
+  }
+
   function readState(stateKey) {
     try {
       return JSON.parse(window.localStorage.getItem(stateKey) || "{}");
@@ -43,6 +47,30 @@
   function writeScrollTop(scrollKey, scrollTop) {
     try {
       window.sessionStorage.setItem(scrollKey, String(scrollTop));
+    } catch (error) {
+      // Ignore storage failures and keep navigation usable.
+    }
+  }
+
+  function readContentScrollResetFlag() {
+    try {
+      return window.sessionStorage.getItem(getContentScrollResetKey()) === 'true';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function writeContentScrollResetFlag() {
+    try {
+      window.sessionStorage.setItem(getContentScrollResetKey(), 'true');
+    } catch (error) {
+      // Ignore storage failures and keep navigation usable.
+    }
+  }
+
+  function clearContentScrollResetFlag() {
+    try {
+      window.sessionStorage.removeItem(getContentScrollResetKey());
     } catch (error) {
       // Ignore storage failures and keep navigation usable.
     }
@@ -182,6 +210,111 @@
     }) || null;
   }
 
+  function getTopLevelRootNodes(tree) {
+    const topList = Array.from(tree.children).find((node) => node.tagName === 'UL') || null;
+    if (!topList) {
+      return [];
+    }
+
+    return Array.from(topList.children).filter((node) => node.tagName === 'LI');
+  }
+
+  function getActiveLanguageRootNode(tree) {
+    const roots = getTopLevelRootNodes(tree);
+    return roots.find((node) => node.querySelector('a.current') !== null) || roots[0] || null;
+  }
+
+  function getTranslatedLanguageRootNode(tree, sourceRootNode) {
+    return getTopLevelRootNodes(tree).find((node) => node !== sourceRootNode) || null;
+  }
+
+  function getDirectCurrentNode(rootNode) {
+    const candidates = [rootNode, ...Array.from(rootNode.querySelectorAll('li'))];
+    const currentNodes = candidates.filter((node) => {
+      if (node.tagName !== 'LI') {
+        return false;
+      }
+      const link = getBranchLink(node);
+      return Boolean(link) && link.classList.contains('current');
+    });
+
+    return currentNodes[currentNodes.length - 1] || null;
+  }
+
+  function getNodeIndexPath(rootNode, targetNode) {
+    const path = [];
+    let currentNode = targetNode;
+
+    while (currentNode && currentNode !== rootNode) {
+      const parentList = currentNode.parentElement;
+      if (!parentList) {
+        return null;
+      }
+
+      const siblings = Array.from(parentList.children).filter((node) => node.tagName === 'LI');
+      const index = siblings.indexOf(currentNode);
+      if (index < 0) {
+        return null;
+      }
+
+      path.unshift(index);
+      currentNode = parentList.closest('li');
+    }
+
+    return currentNode === rootNode ? path : null;
+  }
+
+  function followNodeIndexPath(rootNode, indexPath) {
+    let currentNode = rootNode;
+
+    for (const index of indexPath) {
+      const childList = Array.from(currentNode.children).find((node) => node.tagName === 'UL') || null;
+      if (!childList) {
+        return null;
+      }
+
+      const children = Array.from(childList.children).filter((node) => node.tagName === 'LI');
+      currentNode = children[index] || null;
+      if (!currentNode) {
+        return null;
+      }
+    }
+
+    return currentNode;
+  }
+
+  function resolveTranslatedCurrentHref(tree, fallbackHref) {
+    const sourceRootNode = getActiveLanguageRootNode(tree);
+    const targetRootNode = sourceRootNode ? getTranslatedLanguageRootNode(tree, sourceRootNode) : null;
+    const currentNode = sourceRootNode ? getDirectCurrentNode(sourceRootNode) : null;
+
+    if (!sourceRootNode || !targetRootNode || !currentNode) {
+      return fallbackHref;
+    }
+
+    const indexPath = getNodeIndexPath(sourceRootNode, currentNode);
+    if (!indexPath) {
+      return fallbackHref;
+    }
+
+    const targetNode = followNodeIndexPath(targetRootNode, indexPath);
+    const targetLink = targetNode ? getBranchLink(targetNode) : null;
+    return targetLink ? targetLink.getAttribute('href') || fallbackHref : fallbackHref;
+  }
+
+  function updateLanguageSwitchTargets(tree) {
+    document.querySelectorAll(".axcl-language-switch .axcl-language-link[data-lang-target]").forEach((link) => {
+      if (!link.dataset.axclBaseHref) {
+        link.dataset.axclBaseHref = link.getAttribute('href') || '';
+      }
+
+      const resolvedHref = resolveTranslatedCurrentHref(tree, link.dataset.axclBaseHref);
+      if (resolvedHref) {
+        link.setAttribute('href', resolvedHref);
+      }
+    });
+  }
+
   function collectBranchState(tree) {
     const state = {};
     getBranchItems(tree).forEach((node) => {
@@ -194,7 +327,7 @@
   }
 
   function persistTranslatedState(tree, targetLang) {
-    const sourceState = collectBranchState(tree);
+    const sourceState = collectBranchState(getLanguageRoot(tree));
     writeState(getStateKey(targetLang), sourceState);
   }
 
@@ -259,6 +392,18 @@
         return;
       }
       sideScroll.scrollTop = saved;
+    }
+
+    function resetContentScrollIfNeeded() {
+      if (!readContentScrollResetFlag()) {
+        return;
+      }
+
+      clearContentScrollResetFlag();
+      window.scrollTo(0, 0);
+      window.requestAnimationFrame(() => window.scrollTo(0, 0));
+      window.setTimeout(() => window.scrollTo(0, 0), 0);
+      window.setTimeout(() => window.scrollTo(0, 0), 50);
     }
 
     function syncState() {
@@ -335,6 +480,7 @@
     }
 
     applySidebarState();
+    updateLanguageSwitchTargets(tree);
 
     getBranchItems(scope).forEach((node) => {
       const link = getBranchLink(node);
@@ -424,6 +570,8 @@
     document.querySelectorAll(".axcl-language-switch .axcl-language-link[data-lang-target]").forEach((link) => {
       link.addEventListener("click", () => {
         persistTranslatedState(tree, link.dataset.langTarget);
+        updateLanguageSwitchTargets(tree);
+        writeContentScrollResetFlag();
       });
     });
 
@@ -494,9 +642,13 @@
     window.setTimeout(patchThemeNavigation, 50);
     window.setTimeout(applySidebarState, 50);
     window.setTimeout(restoreSidebarScroll, 50);
+    window.setTimeout(resetContentScrollIfNeeded, 50);
+    window.setTimeout(() => updateLanguageSwitchTargets(tree), 50);
     window.addEventListener("load", applySidebarState, { once: true });
     window.addEventListener("load", restoreSidebarScroll, { once: true });
     window.addEventListener("load", patchThemeNavigation, { once: true });
+    window.addEventListener("load", resetContentScrollIfNeeded, { once: true });
+    window.addEventListener("load", () => updateLanguageSwitchTargets(tree), { once: true });
     window.addEventListener("beforeunload", () => {
       syncState();
       persistSidebarScroll();
@@ -508,8 +660,10 @@
     window.addEventListener("hashchange", () => {
       window.requestAnimationFrame(applySidebarState);
       window.requestAnimationFrame(restoreSidebarScroll);
+      window.requestAnimationFrame(() => updateLanguageSwitchTargets(tree));
       window.setTimeout(applySidebarState, 0);
       window.setTimeout(restoreSidebarScroll, 0);
+      window.setTimeout(() => updateLanguageSwitchTargets(tree), 0);
     });
   }
 
