@@ -15,6 +15,14 @@
     return 'axcl-language-switch-scroll-reset';
   }
 
+  function getSidebarFocusRevealKey() {
+    return 'axcl-language-switch-sidebar-focus-reveal';
+  }
+
+  function getHomepageResetKey() {
+    return 'axcl-homepage-reset-pending';
+  }
+
   function readState(stateKey) {
     try {
       return JSON.parse(window.localStorage.getItem(stateKey) || "{}");
@@ -74,6 +82,82 @@
     } catch (error) {
       // Ignore storage failures and keep navigation usable.
     }
+  }
+
+  function readSidebarFocusRevealTarget() {
+    try {
+      const raw = window.sessionStorage.getItem(getSidebarFocusRevealKey());
+      if (!raw) {
+        return null;
+      }
+
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          return {
+            lang: typeof parsed.lang === 'string' ? parsed.lang : '',
+            offsetTop: Number.isFinite(parsed.offsetTop) ? parsed.offsetTop : null,
+          };
+        }
+      } catch (parseError) {
+        return { lang: raw, offsetTop: null };
+      }
+
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function writeSidebarFocusRevealTarget(lang, offsetTop) {
+    try {
+      window.sessionStorage.setItem(getSidebarFocusRevealKey(), JSON.stringify({
+        lang: String(lang || ''),
+        offsetTop: Number.isFinite(offsetTop) ? offsetTop : null,
+      }));
+    } catch (error) {
+      // Ignore storage failures and keep navigation usable.
+    }
+  }
+
+  function clearSidebarFocusRevealTarget() {
+    try {
+      window.sessionStorage.removeItem(getSidebarFocusRevealKey());
+    } catch (error) {
+      // Ignore storage failures and keep navigation usable.
+    }
+  }
+
+  function readHomepageResetPending() {
+    try {
+      return window.sessionStorage.getItem(getHomepageResetKey()) === 'true';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function writeHomepageResetPending() {
+    try {
+      window.sessionStorage.setItem(getHomepageResetKey(), 'true');
+    } catch (error) {
+      // Ignore storage failures and keep navigation usable.
+    }
+  }
+
+  function clearHomepageResetPending() {
+    try {
+      window.sessionStorage.removeItem(getHomepageResetKey());
+    } catch (error) {
+      // Ignore storage failures and keep navigation usable.
+    }
+  }
+
+  function isDesktopSidebarScrollIsolationEnabled() {
+    if (typeof window.matchMedia !== 'function') {
+      return false;
+    }
+
+    return window.matchMedia('(min-width: 769px) and (hover: hover) and (pointer: fine)').matches;
   }
 
   function normalizeHref(href) {
@@ -374,6 +458,31 @@
       return document.querySelector('.wy-side-scroll');
     }
 
+    function isolateSidebarWheelScrolling() {
+      const sideScroll = getSidebarScrollContainer();
+      if (!sideScroll || sideScroll.dataset.axclWheelIsolated === 'true') {
+        return;
+      }
+
+      sideScroll.dataset.axclWheelIsolated = 'true';
+      sideScroll.addEventListener('wheel', (event) => {
+        if (!isDesktopSidebarScrollIsolationEnabled() || event.ctrlKey) {
+          return;
+        }
+
+        const nextScrollTop = sideScroll.scrollTop + event.deltaY;
+        const nextScrollLeft = sideScroll.scrollLeft + event.deltaX;
+        const maxScrollTop = Math.max(0, sideScroll.scrollHeight - sideScroll.clientHeight);
+        const maxScrollLeft = Math.max(0, sideScroll.scrollWidth - sideScroll.clientWidth);
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        sideScroll.scrollTop = Math.max(0, Math.min(maxScrollTop, nextScrollTop));
+        sideScroll.scrollLeft = Math.max(0, Math.min(maxScrollLeft, nextScrollLeft));
+      }, { passive: false });
+    }
+
     function persistSidebarScroll() {
       const sideScroll = getSidebarScrollContainer();
       if (!sideScroll) {
@@ -382,7 +491,31 @@
       writeScrollTop(scrollKey, sideScroll.scrollTop);
     }
 
+    function getSidebarFocusRevealSnapshot() {
+      const sideScroll = getSidebarScrollContainer();
+      const rootNode = getLanguageRoot(tree);
+      const currentNode = rootNode && rootNode.tagName === 'LI'
+        ? getDirectCurrentNode(rootNode)
+        : null;
+      const currentLink = currentNode ? getBranchLink(currentNode) : null;
+
+      if (!sideScroll || !currentLink) {
+        return null;
+      }
+
+      const containerRect = sideScroll.getBoundingClientRect();
+      const linkRect = currentLink.getBoundingClientRect();
+      return {
+        offsetTop: linkRect.top - containerRect.top,
+      };
+    }
+
     function restoreSidebarScroll() {
+      const focusRevealTarget = readSidebarFocusRevealTarget();
+      if (focusRevealTarget && focusRevealTarget.lang === (tree.dataset.lang || 'zh')) {
+        return;
+      }
+
       const sideScroll = getSidebarScrollContainer();
       if (!sideScroll) {
         return;
@@ -409,6 +542,44 @@
       });
     }
 
+    function revealSidebarCurrentNodeIfNeeded() {
+      const focusRevealTarget = readSidebarFocusRevealTarget();
+      if (!focusRevealTarget || focusRevealTarget.lang !== (tree.dataset.lang || 'zh')) {
+        return;
+      }
+
+      const sideScroll = getSidebarScrollContainer();
+      const rootNode = getLanguageRoot(tree);
+      const currentNode = rootNode && rootNode.tagName === 'LI'
+        ? getDirectCurrentNode(rootNode)
+        : null;
+      const currentLink = currentNode ? getBranchLink(currentNode) : null;
+
+      if (!sideScroll || !currentLink) {
+        return;
+      }
+
+      const containerRect = sideScroll.getBoundingClientRect();
+      const linkRect = currentLink.getBoundingClientRect();
+      const maxScrollTop = sideScroll.scrollHeight - sideScroll.clientHeight;
+      const desiredOffsetTop = Number.isFinite(focusRevealTarget.offsetTop)
+        ? focusRevealTarget.offsetTop
+        : (linkRect.top - containerRect.top);
+      const targetScrollTop = sideScroll.scrollTop
+        + (linkRect.top - containerRect.top)
+        - desiredOffsetTop;
+      const clampedScrollTop = Math.max(0, Math.min(maxScrollTop, targetScrollTop));
+      const applyScrollTop = () => {
+        sideScroll.scrollTop = clampedScrollTop;
+      };
+
+      clearSidebarFocusRevealTarget();
+      applyScrollTop();
+      window.requestAnimationFrame(applyScrollTop);
+      window.setTimeout(applyScrollTop, 0);
+      window.setTimeout(applyScrollTop, 50);
+    }
+
     function syncState() {
       writeState(stateKey, collectBranchState(scope));
     }
@@ -424,6 +595,21 @@
         return;
       }
 
+      if (readHomepageResetPending()) {
+        clearHomepageResetPending();
+        writeState(stateKey, {});
+        homepageDefaultsApplied = false;
+      }
+
+      const state = readState(stateKey);
+      const hasSavedState = Object.keys(state).length > 0;
+
+      if (hasSavedState) {
+        homepageDefaultsApplied = true;
+        applyState(scope, state);
+        return;
+      }
+
       if (!homepageDefaultsApplied) {
         homepageDefaultsApplied = true;
 
@@ -435,13 +621,6 @@
         });
 
         syncState();
-      } else {
-        const state = readState(stateKey);
-        const hasSavedState = Object.keys(state).length > 0;
-
-        if (hasSavedState) {
-          applyState(scope, state);
-        }
       }
     }
 
@@ -466,6 +645,7 @@
       if (!isHomepage) {
         return;
       }
+      writeState(stateKey, {});
       homepageDefaultsApplied = false;
       applySidebarState();
       restoreSidebarScroll();
@@ -508,10 +688,14 @@
       }
 
       const homepageLogo = target.closest('.wy-side-nav-search a.icon-home, .wy-nav-top a, .wy-breadcrumbs a.icon-home');
-      if (isHomepage && homepageLogo) {
-        event.preventDefault();
-        event.stopPropagation();
-        resetHomepageToDefaultState();
+      if (homepageLogo) {
+        if (isHomepage) {
+          event.preventDefault();
+          event.stopPropagation();
+          resetHomepageToDefaultState();
+        } else {
+          writeHomepageResetPending();
+        }
         return;
       }
 
@@ -577,9 +761,14 @@
 
     document.querySelectorAll(".axcl-language-switch .axcl-language-link[data-lang-target]").forEach((link) => {
       link.addEventListener("click", () => {
+        const focusRevealSnapshot = getSidebarFocusRevealSnapshot();
         persistTranslatedState(tree, link.dataset.langTarget);
         updateLanguageSwitchTargets(tree);
         writeContentScrollResetFlag();
+        writeSidebarFocusRevealTarget(
+          link.dataset.langTarget,
+          focusRevealSnapshot ? focusRevealSnapshot.offsetTop : null
+        );
       });
     });
 
@@ -634,28 +823,46 @@
           return result;
         };
       });
+
+      if (typeof navigation.onScroll === 'function') {
+        navigation.onScroll = function () {
+          this.winScroll = false;
+          this.winPosition = this.win ? this.win.scrollTop() : 0;
+        };
+      }
+
       navigation.axclSidebarPatched = true;
       return true;
     }
 
     window.history.scrollRestoration = "manual";
     patchThemeNavigation();
+    isolateSidebarWheelScrolling();
     restoreSidebarScroll();
     window.requestAnimationFrame(applySidebarState);
     window.requestAnimationFrame(restoreSidebarScroll);
+    window.requestAnimationFrame(revealSidebarCurrentNodeIfNeeded);
+    window.requestAnimationFrame(isolateSidebarWheelScrolling);
     window.requestAnimationFrame(patchThemeNavigation);
     window.setTimeout(applySidebarState, 0);
     window.setTimeout(restoreSidebarScroll, 0);
+    window.setTimeout(revealSidebarCurrentNodeIfNeeded, 0);
+    window.setTimeout(isolateSidebarWheelScrolling, 0);
     window.setTimeout(patchThemeNavigation, 0);
     window.setTimeout(patchThemeNavigation, 50);
     window.setTimeout(applySidebarState, 50);
     window.setTimeout(restoreSidebarScroll, 50);
+    window.setTimeout(revealSidebarCurrentNodeIfNeeded, 50);
+    window.setTimeout(isolateSidebarWheelScrolling, 50);
     window.setTimeout(resetContentScrollIfNeeded, 50);
     window.setTimeout(() => updateLanguageSwitchTargets(tree), 50);
     window.addEventListener("load", applySidebarState, { once: true });
     window.addEventListener("load", restoreSidebarScroll, { once: true });
+    window.addEventListener("load", revealSidebarCurrentNodeIfNeeded, { once: true });
+    window.addEventListener("load", isolateSidebarWheelScrolling, { once: true });
     window.addEventListener("load", patchThemeNavigation, { once: true });
     window.addEventListener("load", resetContentScrollIfNeeded, { once: true });
+    window.addEventListener("pageshow", revealSidebarCurrentNodeIfNeeded, { once: true });
     window.addEventListener("pageshow", resetContentScrollIfNeeded, { once: true });
     window.addEventListener("load", () => updateLanguageSwitchTargets(tree), { once: true });
     window.addEventListener("beforeunload", () => {
@@ -669,10 +876,13 @@
     window.addEventListener("hashchange", () => {
       window.requestAnimationFrame(applySidebarState);
       window.requestAnimationFrame(restoreSidebarScroll);
+      window.requestAnimationFrame(revealSidebarCurrentNodeIfNeeded);
       window.requestAnimationFrame(resetContentScrollIfNeeded);
       window.requestAnimationFrame(() => updateLanguageSwitchTargets(tree));
       window.setTimeout(applySidebarState, 0);
       window.setTimeout(restoreSidebarScroll, 0);
+      window.setTimeout(revealSidebarCurrentNodeIfNeeded, 0);
+      window.setTimeout(revealSidebarCurrentNodeIfNeeded, 50);
       window.setTimeout(resetContentScrollIfNeeded, 0);
       window.setTimeout(resetContentScrollIfNeeded, 50);
       window.setTimeout(() => updateLanguageSwitchTargets(tree), 0);

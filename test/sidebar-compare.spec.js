@@ -175,6 +175,30 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(zhFaq.locator(':scope > ul')).toHaveCSS('display', 'block');
     });
 
+    test('logo resets the Chinese homepage tree on the first return even after homepage branch toggles were saved', async ({ page }) => {
+        await gotoDocsPage(page, '/index.html');
+
+        const zhRoot = page.locator('.axcl-sidebar > ul > li:has(> a[href="zh/index.html"])').first();
+        const zhBasic = zhRoot.locator('ul > li:has(> a:has-text("基础"))').first();
+        const zhDevelop = zhRoot.locator('ul > li:has(> a:has-text("开发"))').first();
+        const zhFaq = zhRoot.locator('ul > li:has(> a:has-text("常见问题"))').first();
+
+        await zhBasic.locator(':scope > a').click();
+        await zhDevelop.locator(':scope > a').click();
+        await expect(zhBasic).toHaveAttribute('aria-expanded', 'false');
+        await expect(zhDevelop).toHaveAttribute('aria-expanded', 'false');
+
+        await zhFaq.locator('ul > li:has(> a:has-text("如何在本地构建文档？")) > a').first().click();
+        await page.waitForURL('**/zh/faq/index.html*');
+
+        await page.locator('.wy-side-nav-search a.icon-home').click();
+        await page.waitForURL('**/index.html');
+
+        await expect(zhBasic).toHaveAttribute('aria-expanded', 'true');
+        await expect(zhDevelop).toHaveAttribute('aria-expanded', 'true');
+        await expect(zhFaq).toHaveAttribute('aria-expanded', 'true');
+    });
+
     test('logo return keeps the homepage root title aligned with the sidebar header tone', async ({ page }) => {
         await gotoDocsPage(page, '/zh/develop/c/device_api.html');
 
@@ -407,6 +431,98 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(page.evaluate(() => window.scrollY)).resolves.toBe(0);
     });
 
+    test('language switching keeps the current sidebar item at the same visible position', async ({ page }) => {
+        await page.setViewportSize({ width: 1440, height: 500 });
+        await gotoDocsPage(page, '/zh/develop/c/reference/enum.html');
+
+        await page.evaluate(() => {
+            document.querySelector('.wy-side-scroll').scrollTop = 120;
+        });
+
+        const beforeSwitch = await branchLocator(page, '枚举参考').evaluate((node) => {
+            const link = node.querySelector(':scope > a');
+            const container = document.querySelector('.wy-side-scroll');
+            const linkRect = link.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            return {
+                fullyVisible: linkRect.top >= containerRect.top && linkRect.bottom <= containerRect.bottom,
+                offsetTop: linkRect.top - containerRect.top,
+            };
+        });
+        expect(beforeSwitch.fullyVisible).toBe(true);
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/develop/c/reference/enum.html');
+
+        const afterSwitch = await branchLocator(page, 'Enum Reference').evaluate((node) => {
+            const link = node.querySelector(':scope > a');
+            const container = document.querySelector('.wy-side-scroll');
+            const linkRect = link.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            return {
+                fullyVisible: linkRect.top >= containerRect.top && linkRect.bottom <= containerRect.bottom,
+                offsetTop: linkRect.top - containerRect.top,
+            };
+        });
+
+        expect(afterSwitch.fullyVisible).toBe(true);
+        expect(Math.abs(afterSwitch.offsetTop - beforeSwitch.offsetTop)).toBeLessThanOrEqual(2);
+    });
+
+    test('desktop content scrolling does not drag the sidebar scroll position with it', async ({ page }) => {
+        await page.setViewportSize({ width: 1440, height: 500 });
+        await gotoDocsPage(page, '/zh/develop/c/reference/enum.html');
+
+        const contentBox = await page.locator('.wy-nav-content').boundingBox();
+        expect(contentBox).not.toBeNull();
+
+        await page.evaluate(() => {
+            document.querySelector('.wy-side-scroll').scrollTop = 120;
+            window.scrollTo(0, 0);
+        });
+
+        await page.mouse.move(contentBox.x + 120, contentBox.y + 120);
+        await page.mouse.wheel(0, 700);
+
+        const result = await page.evaluate(() => ({
+            side: document.querySelector('.wy-side-scroll').scrollTop,
+            page: window.scrollY,
+        }));
+
+        expect(result.page).toBeGreaterThan(0);
+        expect(result.side).toBe(120);
+    });
+
+    test('desktop sidebar wheel scrolling does not leak into the page at the sidebar boundary', async ({ page }) => {
+        await page.setViewportSize({ width: 1440, height: 500 });
+        await gotoDocsPage(page, '/zh/develop/c/reference/enum.html');
+
+        const sideBox = await page.locator('.wy-side-scroll').boundingBox();
+        expect(sideBox).not.toBeNull();
+
+        const boundaryState = await page.evaluate(() => {
+            const sideScroll = document.querySelector('.wy-side-scroll');
+            const maxScrollTop = sideScroll.scrollHeight - sideScroll.clientHeight;
+            sideScroll.scrollTop = maxScrollTop;
+            window.scrollTo(0, 400);
+            return {
+                maxScrollTop,
+                page: window.scrollY,
+            };
+        });
+
+        await page.mouse.move(sideBox.x + 40, sideBox.y + 120);
+        await page.mouse.wheel(0, 500);
+
+        const result = await page.evaluate(() => ({
+            side: document.querySelector('.wy-side-scroll').scrollTop,
+            page: window.scrollY,
+        }));
+
+        expect(result.side).toBe(boundaryState.maxScrollTop);
+        expect(result.page).toBe(boundaryState.page);
+    });
+
     test('manual basic anchor clicks keep the content pane pinned to the top', async ({ page }) => {
         await gotoDocsPage(page, '/zh/basic/install.html');
 
@@ -486,5 +602,53 @@ test.describe('AXCL sidebar navigation', () => {
         const zhStoredState = JSON.parse(await page.evaluate(() => window.localStorage.getItem('axcl-sidebar-state-zh') || '{}'));
         const enStoredState = JSON.parse(await page.evaluate(() => window.localStorage.getItem('axcl-sidebar-state-en') || '{}'));
         expect(enStoredState).toEqual(zhStoredState);
+    });
+
+    test('homepage branch-only expand and collapse choices survive language switching without selecting a leaf page', async ({ page }) => {
+        await gotoDocsPage(page, '/index.html');
+
+        const zhRoot = page.locator('.axcl-sidebar > ul > li:has(> a[href="zh/index.html"])').first();
+        const zhBasic = zhRoot.locator('ul > li:has(> a:has-text("基础"))').first();
+        const zhDevelop = zhRoot.locator('ul > li:has(> a:has-text("开发"))').first();
+        const zhFaq = zhRoot.locator('ul > li:has(> a:has-text("常见问题"))').first();
+
+        await zhBasic.locator(':scope > a').click();
+        await zhDevelop.locator(':scope > a').click();
+
+        await expect(zhBasic).toHaveAttribute('aria-expanded', 'false');
+        await expect(zhDevelop).toHaveAttribute('aria-expanded', 'false');
+        await expect(zhFaq).toHaveAttribute('aria-expanded', 'true');
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/index.html');
+
+        const enRoot = page.locator('.axcl-sidebar > ul > li:has(> a[href="en/index.html"])').first();
+        const enBasic = enRoot.locator('ul > li:has(> a:has-text("Basic"))').first();
+        const enDevelop = enRoot.locator('ul > li:has(> a:has-text("Development"))').first();
+        const enFaq = enRoot.locator('ul > li:has(> a:has-text("FAQ"))').first();
+
+        await expect(enBasic).toHaveAttribute('aria-expanded', 'false');
+        await expect(enDevelop).toHaveAttribute('aria-expanded', 'false');
+        await expect(enFaq).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    test('homepage logo still resets the tree to the default expanded state after manual branch toggles', async ({ page }) => {
+        await gotoDocsPage(page, '/index.html');
+
+        const zhRoot = page.locator('.axcl-sidebar > ul > li:has(> a[href="zh/index.html"])').first();
+        const zhBasic = zhRoot.locator('ul > li:has(> a:has-text("基础"))').first();
+        const zhDevelop = zhRoot.locator('ul > li:has(> a:has-text("开发"))').first();
+        const zhFaq = zhRoot.locator('ul > li:has(> a:has-text("常见问题"))').first();
+
+        await zhBasic.locator(':scope > a').click();
+        await zhDevelop.locator(':scope > a').click();
+        await expect(zhBasic).toHaveAttribute('aria-expanded', 'false');
+        await expect(zhDevelop).toHaveAttribute('aria-expanded', 'false');
+
+        await page.locator('.wy-side-nav-search a.icon-home').click();
+
+        await expect(zhBasic).toHaveAttribute('aria-expanded', 'true');
+        await expect(zhDevelop).toHaveAttribute('aria-expanded', 'true');
+        await expect(zhFaq).toHaveAttribute('aria-expanded', 'true');
     });
 });
