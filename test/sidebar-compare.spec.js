@@ -407,6 +407,26 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(page.evaluate(() => window.scrollY)).resolves.toBe(0);
     });
 
+    test('manual basic anchor clicks keep the content pane pinned to the top', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/basic/install.html');
+
+        await branchLocator(page, 'SDK 环境准备').locator(':scope > a').evaluate((node) => node.click());
+        await page.waitForURL('**/zh/basic/install.html#sdk');
+
+        await expect(branchLocator(page, 'SDK 环境准备')).toHaveClass(/current/);
+        await expect(page.evaluate(() => window.scrollY)).resolves.toBe(0);
+    });
+
+    test('manual faq anchor clicks keep the content pane pinned to the top', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/faq/index.html');
+
+        await branchLocator(page, '如何在本地构建文档？').locator(':scope > a').evaluate((node) => node.click());
+        await page.waitForURL('**/zh/faq/index.html#id2');
+
+        await expect(branchLocator(page, '如何在本地构建文档？')).toHaveClass(/current/);
+        await expect(page.evaluate(() => window.scrollY)).resolves.toBe(0);
+    });
+
     test('preserves homepage sidebar collapse state across language switches', async ({ page }) => {
         await gotoDocsPage(page, '/index.html');
 

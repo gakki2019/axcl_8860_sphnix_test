@@ -400,10 +400,13 @@
       }
 
       clearContentScrollResetFlag();
-      window.scrollTo(0, 0);
-      window.requestAnimationFrame(() => window.scrollTo(0, 0));
-      window.setTimeout(() => window.scrollTo(0, 0), 0);
-      window.setTimeout(() => window.scrollTo(0, 0), 50);
+      const scrollContentToTop = () => window.scrollTo(0, 0);
+
+      scrollContentToTop();
+      window.requestAnimationFrame(scrollContentToTop);
+      [0, 50, 150, 300, 600, 1000].forEach((delay) => {
+        window.setTimeout(scrollContentToTop, delay);
+      });
     }
 
     function syncState() {
@@ -537,7 +540,8 @@
       const isRootWrapper = link.getAttribute('href') === '#';
       const isCurrentLeaf = link.classList.contains('current') && !isBranch;
       const href = link.getAttribute('href') || '';
-      const isInPageAnchor = href.startsWith('#') && href !== '#';
+      const isSamePageAnchor = href.startsWith('#') && href !== '#';
+      const hasHashTarget = href.includes('#') && !href.endsWith('#');
 
       if (isRootWrapper) {
         event.preventDefault();
@@ -555,7 +559,11 @@
         event.stopPropagation();
       }
 
-      if (!isBranch && !isInPageAnchor) {
+      if (!isBranch && hasHashTarget) {
+        writeContentScrollResetFlag();
+      }
+
+      if (!isBranch && !isSamePageAnchor) {
         // Persist sidebar state before full-page navigation.
         // For in-page anchors, hashchange recovery will re-apply state.
         syncState();
@@ -648,6 +656,7 @@
     window.addEventListener("load", restoreSidebarScroll, { once: true });
     window.addEventListener("load", patchThemeNavigation, { once: true });
     window.addEventListener("load", resetContentScrollIfNeeded, { once: true });
+    window.addEventListener("pageshow", resetContentScrollIfNeeded, { once: true });
     window.addEventListener("load", () => updateLanguageSwitchTargets(tree), { once: true });
     window.addEventListener("beforeunload", () => {
       syncState();
@@ -660,9 +669,12 @@
     window.addEventListener("hashchange", () => {
       window.requestAnimationFrame(applySidebarState);
       window.requestAnimationFrame(restoreSidebarScroll);
+      window.requestAnimationFrame(resetContentScrollIfNeeded);
       window.requestAnimationFrame(() => updateLanguageSwitchTargets(tree));
       window.setTimeout(applySidebarState, 0);
       window.setTimeout(restoreSidebarScroll, 0);
+      window.setTimeout(resetContentScrollIfNeeded, 0);
+      window.setTimeout(resetContentScrollIfNeeded, 50);
       window.setTimeout(() => updateLanguageSwitchTargets(tree), 0);
     });
   }
