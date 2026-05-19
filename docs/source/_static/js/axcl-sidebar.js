@@ -721,16 +721,10 @@
       }
 
       const isBranch = Array.from(node.children).some((child) => child.tagName === 'UL');
-      const isRootWrapper = link.getAttribute('href') === '#';
       const isCurrentLeaf = link.classList.contains('current') && !isBranch;
       const href = link.getAttribute('href') || '';
       const isSamePageAnchor = href.startsWith('#') && href !== '#';
       const hasHashTarget = href.includes('#') && !href.endsWith('#');
-
-      if (isRootWrapper) {
-        event.preventDefault();
-        return;
-      }
 
       if (isBranch) {
         event.preventDefault();
