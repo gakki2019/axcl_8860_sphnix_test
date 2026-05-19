@@ -175,6 +175,63 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(zhFaq.locator(':scope > ul')).toHaveCSS('display', 'block');
     });
 
+    test('logo return keeps the homepage root title aligned with the sidebar header tone', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/c/device_api.html');
+
+        await page.locator('.wy-side-nav-search a.icon-home').click();
+        await page.waitForURL('**/index.html');
+
+        const zhRootLink = page.locator('.axcl-sidebar > ul > li:has(> a[href="zh/index.html"]) > a').first();
+        const header = page.locator('.wy-side-nav-search').first();
+
+        await expect(zhRootLink).toBeVisible();
+        await expect(zhRootLink).toHaveCSS('background-color', await header.evaluate((node) => getComputedStyle(node).backgroundColor));
+    });
+
+    test('localized homepage keeps the root title visible and lets it collapse the whole tree', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/index.html');
+
+        const zhRoot = page.locator('.axcl-sidebar > ul > li.current').first();
+        const zhRootLink = zhRoot.locator(':scope > a').first();
+        const zhRootChildren = zhRoot.locator(':scope > ul').first();
+
+        await expect(zhRootLink).toBeVisible();
+        await expect(zhRoot).toHaveAttribute('aria-expanded', 'true');
+        await expect(zhRootChildren).toHaveCSS('display', 'block');
+
+        await zhRootLink.click();
+        await expect(zhRoot).toHaveAttribute('aria-expanded', 'false');
+        await expect(zhRootChildren).toHaveCSS('display', 'none');
+
+        await zhRootLink.click();
+        await expect(zhRoot).toHaveAttribute('aria-expanded', 'true');
+        await expect(zhRootChildren).toHaveCSS('display', 'block');
+    });
+
+    test('root title on a content page collapses the current tree instead of navigating home first', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/c/device_api.html');
+
+        await page.locator('.wy-side-nav-search a.icon-home').click();
+        await page.waitForURL('**/index.html');
+
+        await branchLinkLocator(page, 'C/C++').click();
+        await branchLocator(page, 'C/C++').locator(':scope > ul').waitFor({ state: 'visible' });
+        await branchLocator(page, '流 API').locator(':scope > a').click();
+        await page.waitForURL('**/zh/develop/c/stream_api.html');
+
+        const zhRoot = page.locator('.axcl-sidebar > ul > li.current').first();
+        const zhRootLink = zhRoot.locator(':scope > a').first();
+        const zhRootChildren = zhRoot.locator(':scope > ul').first();
+        const headerBackground = await page.locator('.wy-side-nav-search').first().evaluate((node) => getComputedStyle(node).backgroundColor);
+
+        await expect(zhRootLink).toHaveCSS('background-color', headerBackground);
+        await zhRootLink.click();
+        await expect(page).toHaveURL(/\/zh\/develop\/c\/stream_api\.html$/);
+        await expect(zhRoot).toHaveAttribute('aria-expanded', 'false');
+        await expect(zhRootChildren).toHaveCSS('display', 'none');
+        await expect(zhRootLink).toHaveCSS('background-color', headerBackground);
+    });
+
     test('homepage faq leaf keeps unrelated branches open', async ({ page }) => {
         await gotoDocsPage(page, '/index.html');
 

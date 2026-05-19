@@ -117,6 +117,15 @@
       return linkStateKey;
     }
 
+    const sidebar = node.closest('.axcl-sidebar');
+    if (
+      sidebar
+      && sidebar.dataset.homepage === 'true'
+      && node.classList.contains('toctree-l1')
+    ) {
+      return `${sidebar.dataset.lang || 'zh'}/index.html`;
+    }
+
     const descendant = Array.from(node.querySelectorAll('ul a[href]')).find((anchor) => {
       const candidate = toStateKey(anchor.getAttribute('href') || '');
       return Boolean(candidate);
@@ -129,6 +138,10 @@
   }
 
   function getLanguageRoot(tree) {
+    if (tree.dataset.homepage === 'true') {
+      return getHomepageRootNode(tree) || tree;
+    }
+
     const topList = Array.from(tree.children).find((node) => node.tagName === 'UL') || null;
     if (topList) {
       const activeRootNode = Array.from(topList.children).find((node) => {
@@ -139,37 +152,10 @@
       }) || null;
 
       if (activeRootNode) {
-        const activeRootList = Array.from(activeRootNode.children).find((child) => child.tagName === 'UL') || null;
-        if (activeRootList) {
-          return activeRootList;
-        }
+        return activeRootNode;
       }
     }
-
-    if (tree.dataset.homepage !== 'true') {
-      return tree;
-    }
-
-    const lang = tree.dataset.lang || 'zh';
-    const rootNode = topList
-      ? Array.from(topList.children).find((node) => {
-          if (node.tagName !== 'LI') {
-            return false;
-          }
-          const link = getBranchLink(node);
-          const href = link ? link.getAttribute('href') || '' : '';
-          return href === '#'
-            || href === `${lang}/index.html`
-            || href.endsWith(`/${lang}/index.html`)
-            || href.endsWith(`../${lang}/index.html`);
-        }) || null
-      : null;
-
-    if (!rootNode) {
-      return tree;
-    }
-
-    return rootNode;
+    return tree;
   }
 
   function getHomepageRootNode(tree) {
