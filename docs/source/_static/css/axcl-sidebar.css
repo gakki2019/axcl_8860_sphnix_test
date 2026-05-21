@@ -179,6 +179,18 @@ a:hover {
     border-color: var(--axcl-sidebar-current-border) !important;
     box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
 }
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"]:not(:placeholder-shown) {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"]:not(:placeholder-shown):focus {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: var(--axcl-sidebar-current-border) !important;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+}
 
 .wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search a,
 .wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search .icon,

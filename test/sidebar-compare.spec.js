@@ -623,4 +623,39 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(zhDevelop).toHaveAttribute('aria-expanded', 'true');
         await expect(zhFaq).toHaveAttribute('aria-expanded', 'true');
     });
+
+    test('search page allows sidebar branches to fold and expand', async ({ page }) => {
+        // Let's capture console error and log output
+        page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+        page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
+
+        await gotoDocsPage(page, '/search.html?q=install');
+
+        const zhRoot = page.locator('.axcl-sidebar > ul > li:has(> a[href="zh/index.html"])').first();
+        
+        // Expand Chinese root node first
+        const isRootExpanded = await zhRoot.evaluate((node) => node.getAttribute('aria-expanded') === 'true');
+        console.log('Root initially expanded:', isRootExpanded);
+        if (!isRootExpanded) {
+            await zhRoot.locator(':scope > a').click();
+            await expect(zhRoot).toHaveAttribute('aria-expanded', 'true');
+            console.log('Root expanded after click');
+        }
+
+        const zhBasic = zhRoot.locator('ul > li:has(> a:has-text("基础"))').first();
+
+        // Check if it starts expanded
+        const isExpanded = await zhBasic.evaluate((node) => node.getAttribute('aria-expanded') === 'true');
+        console.log('Initially expanded:', isExpanded);
+
+        await zhBasic.locator(':scope > a').click();
+        const afterClick = await zhBasic.evaluate((node) => node.getAttribute('aria-expanded') === 'true');
+        console.log('After first click, expanded:', afterClick);
+        expect(afterClick).not.toBe(isExpanded);
+
+        await zhBasic.locator(':scope > a').click();
+        const afterSecondClick = await zhBasic.evaluate((node) => node.getAttribute('aria-expanded') === 'true');
+        console.log('After second click, expanded:', afterSecondClick);
+        expect(afterSecondClick).toBe(isExpanded);
+    });
 });

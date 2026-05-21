@@ -249,6 +249,25 @@
     return '';
   }
 
+  function getLanguageRootNodeByLang(tree, lang) {
+    const topList = Array.from(tree.children).find((node) => node.tagName === 'UL') || null;
+    if (!topList) {
+      return null;
+    }
+
+    return Array.from(topList.children).find((node) => {
+      if (node.tagName !== 'LI') {
+        return false;
+      }
+      const link = getBranchLink(node);
+      const href = link ? link.getAttribute('href') || '' : '';
+      return href === '#'
+        || href === `${lang}/index.html`
+        || href.endsWith(`/${lang}/index.html`)
+        || href.endsWith(`../${lang}/index.html`);
+    }) || null;
+  }
+
   function getLanguageRoot(tree) {
     if (tree.dataset.homepage === 'true') {
       return getHomepageRootNode(tree) || tree;
@@ -266,6 +285,12 @@
       if (activeRootNode) {
         return activeRootNode;
       }
+
+      // Fallback for search.html or other pages not in toctree
+      const fallbackRoot = getLanguageRootNodeByLang(tree, tree.dataset.lang || 'zh');
+      if (fallbackRoot) {
+        return fallbackRoot;
+      }
     }
     return tree;
   }
@@ -274,24 +299,7 @@
     if (tree.dataset.homepage !== 'true') {
       return null;
     }
-
-    const lang = tree.dataset.lang || 'zh';
-    const topList = Array.from(tree.children).find((node) => node.tagName === 'UL') || null;
-    if (!topList) {
-      return null;
-    }
-
-    return Array.from(topList.children).find((node) => {
-      if (node.tagName !== 'LI') {
-        return false;
-      }
-      const link = getBranchLink(node);
-      const href = link ? link.getAttribute('href') || '' : '';
-      return href === '#'
-        || href === `${lang}/index.html`
-        || href.endsWith(`/${lang}/index.html`)
-        || href.endsWith(`../${lang}/index.html`);
-    }) || null;
+    return getLanguageRootNodeByLang(tree, tree.dataset.lang || 'zh');
   }
 
   function getTopLevelRootNodes(tree) {
@@ -429,8 +437,8 @@
       if (stateKey && Object.prototype.hasOwnProperty.call(state, stateKey)) {
         // Respect the user's manual expand / collapse choices first.
         shouldOpen = Boolean(state[stateKey]);
-      } else if (containsCurrent) {
-        // Without saved user preference, expand branches containing active page.
+      } else if (containsCurrent || node === tree) {
+        // Without saved user preference, expand branches containing active page or the root node itself.
         shouldOpen = true;
       } else {
         // No saved preference: do not override the current rendered state.

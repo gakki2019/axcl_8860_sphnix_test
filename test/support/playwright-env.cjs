@@ -26,6 +26,15 @@ function getCandidateExecutables() {
 }
 
 function inspectExecutable(executablePath) {
+  if (process.platform === 'darwin') {
+    return {
+      executablePath,
+      ok: true,
+      missingLibraries: [],
+      diagnostics: ['Skipping ldd check on macOS'],
+      nonElf: false,
+    };
+  }
   const result = spawnSync('ldd', [executablePath], { encoding: 'utf8' });
   const output = `${result.stdout || ''}\n${result.stderr || ''}`;
   const diagnostics = output
