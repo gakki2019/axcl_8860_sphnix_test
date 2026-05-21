@@ -1,235 +1,324 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-    --axcl-sidebar-bg: #343131;
-    --axcl-sidebar-search: #e3e3e3;
-    --axcl-sidebar-current: #e3e3e3;
-    --axcl-sidebar-hover: #ff2a2a;
-    --axcl-sidebar-text: #1d1d1d;
-    --axcl-sidebar-text-strong: #404040;
-    --axcl-sidebar-current-text: #000000;
-    --axcl-sidebar-current-border: #2980b9;
-    --axcl-sidebar-text-invert: #ffffff;
-    --axcl-sidebar-icon: #a3a3a3;
-    --axcl-sidebar-icon-strong: #333333;
+    /* Base Typography */
+    --axcl-font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --axcl-font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --axcl-font-code: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+    /* Modern Unified Premium Dark Sidebar Theme (VitePress/Tailwind Slate-900 style) */
+    --axcl-sidebar-bg-start: #0f172a;       /* Deep slate-900 */
+    --axcl-sidebar-bg-end: #090d16;         /* Deeper slate-950 for beautiful gradient */
+    --axcl-sidebar-border: rgba(255, 255, 255, 0.05); /* Soft premium dark border */
+    
+    --axcl-sidebar-text: #94a3b8;           /* High contrast slate-400 for menu links */
+    --axcl-sidebar-text-hover: #f8fafc;     /* Clean slate-50 on hover */
+    --axcl-sidebar-hover-bg: rgba(255, 255, 255, 0.06); /* Gentle translucent hover tint */
+    
+    --axcl-sidebar-current-bg: rgba(56, 189, 248, 0.08); /* Subtle transparent sky-400 accent for active page */
+    --axcl-sidebar-current-text: #38bdf8;   /* Vibrant sky-400 blue for active text */
+    --axcl-sidebar-current-border: #38bdf8; /* Left border sky-400 indicator */
+    
+    --axcl-sidebar-icon: #64748b;           /* Muted slate-500 expand icons */
+    --axcl-sidebar-icon-hover: #cbd5e1;
+
+    /* Main Content Styling */
+    --axcl-content-bg: #ffffff;
+    --axcl-content-text: #334155;          /* Refined slate gray */
+    --axcl-content-heading: #0f172a;       /* Deep navy/charcoal */
+    --axcl-content-link: #2563eb;          /* Elegant blue link */
+    --axcl-content-link-hover: #1d4ed8;
+
+    /* Admonitions (GitHub style alerts) */
+    --axcl-admonition-radius: 8px;
+    
+    --axcl-note-border: rgba(208, 215, 222, 0.6);
+    --axcl-note-bg: #f6f8fa;
+    --axcl-note-text: #24292f;
+    --axcl-note-icon: #24292f;
+
+    --axcl-tip-border: rgba(45, 212, 191, 0.3);
+    --axcl-tip-bg: #f0fdfa;
+    --axcl-tip-text: #0f766e;
+    --axcl-tip-icon: #0f766e;
+
+    --axcl-warning-border: rgba(245, 158, 11, 0.3);
+    --axcl-warning-bg: #fffbeb;
+    --axcl-warning-text: #b45309;
+    --axcl-warning-icon: #b45309;
+
+    --axcl-caution-border: rgba(239, 68, 68, 0.3);
+    --axcl-caution-bg: #fef2f2;
+    --axcl-caution-text: #b91c1c;
+    --axcl-caution-icon: #b91c1c;
 }
 
-.wy-nav-side {
-    background: var(--axcl-sidebar-bg);
+/* ==========================================
+   Global & Typography Overrides
+   ========================================== */
+body, html {
+    font-family: var(--axcl-font-body) !important;
+    color: var(--axcl-content-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.wy-side-nav-search {
-    background: var(--axcl-sidebar-search);
-    color: var(--axcl-sidebar-text-strong);
-    margin-bottom: 0;
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--axcl-font-heading) !important;
+    color: var(--axcl-content-heading);
+    font-weight: 600 !important;
+    letter-spacing: -0.02em;
 }
 
-/* Keep the logo row + search box as one continuous light header area. */
-.wy-side-nav-search>a {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    background: var(--axcl-sidebar-search);
+h1 {
+    font-size: 2.25rem !important;
+    font-weight: 800 !important;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 0.5rem;
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
 }
 
-.wy-side-nav-search>a.icon img.logo {
-    margin-top: 0.35em;
+h2 {
+    font-size: 1.5rem !important;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.35rem;
+    margin-top: 2rem !important;
 }
 
-.wy-side-nav-search>div[role="search"] {
-    margin-top: 0.55em;
-    background: var(--axcl-sidebar-search);
+h3 {
+    font-size: 1.25rem !important;
+    margin-top: 1.75rem !important;
 }
 
-.wy-nav-top {
-    background: var(--axcl-sidebar-hover);
+a {
+    color: var(--axcl-content-link);
+    transition: color 0.16s ease;
 }
 
-.wy-side-nav-search a,
-.wy-side-nav-search .icon,
-.wy-side-nav-search .version {
-    color: var(--axcl-sidebar-text-strong);
+a:hover {
+    color: var(--axcl-content-link-hover);
 }
 
-.wy-side-nav-search a:hover,
-.wy-side-nav-search a:focus {
-    background: #d6d6d6;
-    color: var(--axcl-sidebar-text-strong);
+/* ==========================================
+   Modern Unified Premium Dark Sidebar
+   ========================================== */
+/* Apply a stunning continuous dark gradient across the entire sidebar */
+.wy-grid-for-nav nav.wy-nav-side {
+    background: linear-gradient(180deg, var(--axcl-sidebar-bg-start) 0%, var(--axcl-sidebar-bg-end) 100%) !important;
+    border-right: 1px solid var(--axcl-sidebar-border) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
 }
 
-.wy-side-nav-search input[type="text"] {
-    border-color: #333333;
-    border-radius: 0;
-    box-shadow: none;
+/* Make scroll panel transparent to let the gradient shine through */
+.wy-grid-for-nav nav.wy-nav-side .wy-side-scroll {
+    background: transparent !important;
+    padding-top: 0 !important;
 }
 
-.wy-nav-top a,
-.wy-nav-top i {
-    color: var(--axcl-sidebar-text-invert);
+/* Seamless unified dark search area (strictly eliminates borders, margins & top gaps) */
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--axcl-sidebar-border) !important;
+    padding: 2rem 1.25rem 1.25rem !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
 }
 
-.axcl-breadcrumbs-aside {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.axcl-language-switch {
-    display: inline-flex;
-    align-items: center;
-    gap: 0;
-    margin-top: -7px;
-    padding: 2px;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #fbfcfd, #eef2f6);
-    border: 1px solid #dbe2e9;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.94),
-        0 1px 2px rgba(37, 55, 77, 0.08);
-}
-
-.axcl-language-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 72px;
-    min-height: 28px;
-    padding: 0 14px !important;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: #8a94a1;
-    font-size: 12.4px;
-    font-weight: 700;
-    line-height: normal;
-    text-decoration: none !important;
-    white-space: nowrap;
-    transition:
-        color 0.16s ease,
-        background-color 0.16s ease,
-        box-shadow 0.16s ease,
-        transform 0.16s ease;
-}
-
-.axcl-language-link:hover,
-.axcl-language-link:focus {
-    background: rgba(255, 255, 255, 0.74);
-    border-color: transparent;
-    color: #415164;
-    text-decoration: none !important;
-}
-
-.axcl-language-link.current {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 28px;
-    background: linear-gradient(180deg, #4d5b6c, #344152);
-    border: 1px solid rgba(49, 63, 80, 0.98);
-    border-color: transparent;
+/* Clean vertical column layout for the title & logo to avoid crowdedness */
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search > a {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    background: transparent !important;
     color: #ffffff !important;
-    font-weight: 800;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.14),
-        0 1px 2px rgba(26, 37, 49, 0.18);
+    font-family: var(--axcl-font-heading) !important;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
 }
 
-.axcl-language-link.current:hover,
-.axcl-language-link.current:focus {
-    background: linear-gradient(180deg, #4d5b6c, #344152);
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search > a:hover {
+    background: transparent !important;
+    opacity: 0.9;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search > a.icon img.logo {
+    margin-top: 0.15em;
+    max-height: 44px;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search > div[role="search"] {
+    margin-top: 1rem;
+    background: transparent !important;
+}
+
+/* Premium Search Input Box */
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"] {
+    border: 1px solid #334155 !important;
+    background-color: #1e293b !important;
+    border-radius: 6px !important;
+    color: #f8fafc !important;
+    padding: 0.55rem 0.85rem !important;
+    font-family: var(--axcl-font-body) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"]::placeholder {
+    color: #64748b !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"]:focus {
+    background-color: #0f172a !important;
+    border-color: var(--axcl-sidebar-current-border) !important;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search a,
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search .icon,
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search .version {
+    color: #cbd5e1 !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search a:hover,
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search a:focus {
+    background: rgba(255, 255, 255, 0.05) !important;
     color: #ffffff !important;
 }
 
+.wy-grid-for-nav nav.wy-nav-top {
+    background: var(--axcl-sidebar-bg-start) !important;
+    border-bottom: 1px solid var(--axcl-sidebar-border);
+}
+
+.wy-grid-for-nav nav.wy-nav-top a,
+.wy-grid-for-nav nav.wy-nav-top i {
+    color: #ffffff !important;
+}
+
+/* Eliminate any top gaps, padding or margins that create "black borders" */
 .axcl-sidebar {
-    padding: 4px 0 18px;
+    padding: 12px 0 24px !important;
+    margin-top: 0 !important;
+    background: transparent !important;
 }
 
-.axcl-sidebar[data-lang="zh"]>ul>li.toctree-l1:has(> a[href*="../en/index.html"]),
-.axcl-sidebar[data-lang="en"]>ul>li.toctree-l1:has(> a[href*="../zh/index.html"]) {
-    display: none;
+/* ==========================================
+   CRITICAL OVERRIDE: Remove RTD default light / grey backgrounds
+   ========================================== */
+/* Multi-layered ultra-specific overrides to completely strip default RTD backgrounds */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.on a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l1,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l1 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2.current > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2.current li.toctree-l3 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3.current > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3.current li.toctree-l4 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current a:hover,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a:hover,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a:focus,
+.wy-grid-for-nav nav.wy-nav-side .axcl-sidebar li,
+.wy-grid-for-nav nav.wy-nav-side .axcl-sidebar li a {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    text-decoration: none !important;
 }
 
-.axcl-sidebar[data-homepage="true"][data-lang="zh"]>ul>li.toctree-l1:has(> a[href="en/index.html"]),
-.axcl-sidebar[data-homepage="true"][data-lang="zh"]>ul>li.toctree-l1:has(> a[href="../en/index.html"]) {
-    display: none;
+/* Sidebar navigation links default style - modern typography and transparent base */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a,
+.wy-grid-for-nav nav.wy-nav-side .axcl-sidebar a {
+    color: var(--axcl-sidebar-text) !important;
+    font-family: var(--axcl-font-body) !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    padding: 0.6rem 1.25rem !important;
+    display: block !important;
+    position: relative !important;
+    font-size: 13.5px !important;
+    border-radius: 6px !important;
+    margin: 0.2rem 0.6rem !important;
+    background: transparent !important;
+    border: none !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Hide the generated language root title row so the nav starts from real sections. */
-.axcl-sidebar>ul>li.toctree-l1>a.reference.internal {
-    display: none !important;
+/* Gentle translucent capsule hover effect with micro-animation horizontal shift */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a:hover,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a:focus,
+.wy-grid-for-nav nav.wy-nav-side .axcl-sidebar a:hover,
+.wy-grid-for-nav nav.wy-nav-side .axcl-sidebar a:focus {
+    background-color: var(--axcl-sidebar-hover-bg) !important;
+    color: var(--axcl-sidebar-text-hover) !important;
+    padding-left: 1.45rem !important; /* Premium micro-interactive slide */
 }
 
-.axcl-sidebar>ul>li.toctree-l1>ul {
-    margin-left: 0;
-    padding-left: 0;
+/* Beautiful modern active states - distinct indicator border and sky-blue translucent background */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a.current,
+.wy-grid-for-nav nav.wy-nav-side .axcl-sidebar a.current {
+    background: var(--axcl-sidebar-current-bg) !important;
+    color: var(--axcl-sidebar-current-text) !important;
+    font-weight: 700 !important;
+    border-left: 3px solid var(--axcl-sidebar-current-border) !important;
+    padding-left: calc(1.25rem - 3px) !important;
+    border-radius: 0 6px 6px 0 !important; /* Elegant rounded ends */
 }
 
-.axcl-sidebar {
-    background: transparent;
+/* Precise nested active indentation overrides to maintain proper structure */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a { padding-left: 2rem !important; }
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a:hover { padding-left: 2.2rem !important; }
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a.current { 
+    padding-left: calc(2rem - 3px) !important; 
+    border-left: 3px solid var(--axcl-sidebar-current-border) !important;
 }
 
-.axcl-sidebar a {
-    color: var(--axcl-sidebar-text);
-    line-height: 18px;
-    padding: 0.4045em 1.618em;
-    display: block;
-    position: relative;
-    font-size: 90%;
-    transition: background-color 0.16s ease, color 0.16s ease;
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a { padding-left: 2.75rem !important; }
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a:hover { padding-left: 2.95rem !important; }
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a.current { 
+    padding-left: calc(2.75rem - 3px) !important; 
+    border-left: 3px solid var(--axcl-sidebar-current-border) !important;
 }
 
-.axcl-sidebar a:hover,
-.axcl-sidebar a:focus {
-    background-color: transparent;
-    color: var(--axcl-sidebar-hover);
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a { padding-left: 3.5rem !important; }
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a:hover { padding-left: 3.7rem !important; }
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a.current { 
+    padding-left: calc(3.5rem - 3px) !important; 
+    border-left: 3px solid var(--axcl-sidebar-current-border) !important;
 }
 
-.axcl-sidebar li.toctree-l2>a:hover,
-.axcl-sidebar li.toctree-l3>a:hover,
-.axcl-sidebar li.toctree-l4>a:hover {
-    color: var(--axcl-sidebar-hover) !important;
-}
-
-.axcl-sidebar li.current>a.current,
-.axcl-sidebar a.current {
-    background: var(--axcl-sidebar-current);
-    color: var(--axcl-sidebar-current-text);
-    font-weight: 700;
-    border-left: 3px solid var(--axcl-sidebar-current-border);
-    padding-left: calc(1.618em - 3px);
-}
-
-.axcl-sidebar li.current>a {
-    background: transparent;
-    color: var(--axcl-sidebar-text);
-}
-
-.axcl-sidebar li.current>a:hover,
-.axcl-sidebar li.current>a:focus {
-    background: transparent;
-}
-
-.axcl-sidebar li.current>a button.toctree-expand,
-.axcl-sidebar li.on a button.toctree-expand,
+/* Muted expand and collapse arrow styles with smooth transition rotation */
 .axcl-sidebar li button.toctree-expand {
-    margin-left: 0;
-    margin-right: 0.35rem;
-    width: 1rem;
-    color: var(--axcl-sidebar-icon);
+    color: var(--axcl-sidebar-icon) !important;
+    margin-right: 0.45rem !important;
+    transition: transform 0.2s ease, color 0.2s ease !important;
 }
 
-.axcl-sidebar li.current>a button.toctree-expand,
-.axcl-sidebar li.on a button.toctree-expand {
-    color: var(--axcl-sidebar-icon-strong);
+.axcl-sidebar li a:hover button.toctree-expand {
+    color: var(--axcl-sidebar-icon-hover) !important;
 }
 
-.axcl-sidebar li.toctree-l2>a,
-.axcl-sidebar li.toctree-l3>a,
-.axcl-sidebar li.toctree-l4>a,
-.axcl-sidebar li.toctree-l5>a,
-.axcl-sidebar li.toctree-l6>a,
-.axcl-sidebar li.toctree-l7>a,
-.axcl-sidebar li.toctree-l8>a,
-.axcl-sidebar li.toctree-l9>a,
-.axcl-sidebar li.toctree-l10>a {
-    color: var(--axcl-sidebar-text);
+.axcl-sidebar li.current>a.current button.toctree-expand {
+    color: var(--axcl-sidebar-current-text) !important;
 }
 
 .axcl-sidebar li.toctree-l3,
@@ -237,29 +326,341 @@
     font-size: 0.9em;
 }
 
-.axcl-sidebar li ul {
-    margin-bottom: 0;
-}
-
-.axcl-sidebar li ul li a {
-    margin-bottom: 0;
-}
-
-/* Remove remaining dark strip between search box and menu */
-.wy-side-nav-search + .wy-menu.wy-menu-vertical {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    border-top: 0 !important;
-}
-
-/* In case theme injects a separator pseudo element */
-.wy-side-nav-search + .wy-menu.wy-menu-vertical::before,
-.wy-side-nav-search + .wy-menu.wy-menu-vertical::after {
-    content: none !important;
+/* Hide redundant language root titles in multi-language structure */
+.axcl-sidebar > ul > li.toctree-l1 > a.reference.internal {
     display: none !important;
 }
 
-/* Remove custom top gap that can expose dark sidebar background */
-.axcl-sidebar {
-    padding-top: 0 !important;
+.axcl-sidebar > ul > li.toctree-l1 > ul {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.wy-side-nav-search + .wy-menu.wy-menu-vertical {
+    margin-top: 0 !important;
+    padding-top: 4px !important;
+    border-top: 0 !important;
+}
+
+/* Scrollbar styling for a native premium dark theme experience */
+.wy-side-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.wy-side-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.wy-side-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+}
+.wy-side-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* ==========================================
+   Bilingual Switcher Styling
+   ========================================== */
+.axcl-breadcrumbs-aside {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.axcl-language-switch {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    margin-top: -5px !important;
+    padding: 3px !important;
+    border-radius: 20px !important;
+    background: rgba(241, 245, 249, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.axcl-language-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 68px !important;
+    min-height: 24px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    background: transparent !important;
+    color: #64748b !important;
+    font-family: var(--axcl-font-heading) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    line-height: normal !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.axcl-language-link:hover {
+    color: #0f172a !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    text-decoration: none !important;
+}
+
+.axcl-language-link.current {
+    background: #ffffff !important;
+    color: #2563eb !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* ==========================================
+   Content Area & Sphinx Enhancements
+   ========================================== */
+.wy-nav-content-wrap {
+    background-color: #f8fafc !important;
+}
+
+.wy-nav-content {
+    max-width: 900px !important;
+    padding: 2.5rem 3rem 4rem 3rem !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02) !important;
+    border-radius: 12px !important;
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+@media screen and (max-width: 768px) {
+    .wy-nav-content {
+        padding: 1.5rem 1.5rem 3rem 1.5rem !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+    }
+}
+
+/* Admonitions Redesign (GitHub Alerts Style) */
+.admonition {
+    border-radius: var(--axcl-admonition-radius) !important;
+    padding: 1rem 1.25rem !important;
+    margin: 1.5rem 0 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+
+.admonition-title {
+    font-family: var(--axcl-font-heading) !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    margin: 0 0 0.5rem 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admonition.note {
+    border-color: var(--axcl-note-border) !important;
+    background-color: var(--axcl-note-bg) !important;
+    color: var(--axcl-note-text) !important;
+}
+.admonition.note .admonition-title {
+    color: var(--axcl-note-text) !important;
+}
+.admonition.note .admonition-title::before {
+    content: "💬";
+    font-size: 0.95rem;
+}
+
+.admonition.tip, .admonition.hint {
+    border-color: var(--axcl-tip-border) !important;
+    background-color: var(--axcl-tip-bg) !important;
+    color: var(--axcl-tip-text) !important;
+}
+.admonition.tip .admonition-title, .admonition.hint .admonition-title {
+    color: var(--axcl-tip-text) !important;
+}
+.admonition.tip .admonition-title::before, .admonition.hint .admonition-title::before {
+    content: "💡";
+    font-size: 0.95rem;
+}
+
+.admonition.warning, .admonition.important {
+    border-color: var(--axcl-warning-border) !important;
+    background-color: var(--axcl-warning-bg) !important;
+    color: var(--axcl-warning-text) !important;
+}
+.admonition.warning .admonition-title, .admonition.important .admonition-title {
+    color: var(--axcl-warning-text) !important;
+}
+.admonition.warning .admonition-title::before, .admonition.important .admonition-title::before {
+    content: "⚠️";
+    font-size: 0.95rem;
+}
+
+.admonition.caution, .admonition.danger {
+    border-color: var(--axcl-caution-border) !important;
+    background-color: var(--axcl-caution-bg) !important;
+    color: var(--axcl-caution-text) !important;
+}
+.admonition.caution .admonition-title, .admonition.danger .admonition-title {
+    color: var(--axcl-caution-text) !important;
+}
+.admonition.caution .admonition-title::before, .admonition.danger .admonition-title::before {
+    content: "🛑";
+    font-size: 0.95rem;
+}
+
+/* ==========================================
+   Premium Code Blocks & Inline Code
+   ========================================== */
+
+/* 最外层容器 div.highlight-c.notranslate 等：
+   RTD 主题的 div[class^=highlight] 会匹配这一层并添加白色边框，必须清除。
+   注意带连字符 "highlight-" 避免误伤内层 div.highlight */
+.rst-content div[class^="highlight-"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important; /* 外层不截断，让内层 pre 自己滚动 */
+}
+
+/* 内层 div.highlight：承载所有视觉样式，包括背景、圆角、边框、外边距 */
+.rst-content .highlight {
+    background: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+    margin: 1.25rem 0 !important;
+    overflow: hidden !important; /* 防止内部 pre 溢出圆角 */
+    position: relative !important;
+}
+
+/* 内层 pre：填充整个容器，横向滚动处理长行代码 */
+.rst-content .highlight pre {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 1.25rem 1.5rem !important;
+    font-family: var(--axcl-font-code) !important;
+    font-size: 0.85rem !important;
+    line-height: 1.65 !important;
+    color: #e2e8f0 !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    white-space: pre !important;
+    word-wrap: normal !important;
+    tab-size: 4;
+    -moz-tab-size: 4;
+}
+
+/* literal-block（:: 语法生成）单独处理，因为它是直接的 pre，不在 .highlight 内部 */
+.rst-content pre.literal-block {
+    background: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
+    margin: 1.25rem 0 !important;
+    padding: 1.25rem 1.5rem !important;
+    font-family: var(--axcl-font-code) !important;
+    font-size: 0.85rem !important;
+    line-height: 1.65 !important;
+    color: #e2e8f0 !important;
+    overflow-x: auto !important;
+    white-space: pre !important;
+    word-wrap: normal !important;
+}
+
+/* 行内代码 */
+code.literal, code {
+    font-family: var(--axcl-font-code) !important;
+    font-size: 0.84em !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    padding: 0.15rem 0.4rem !important;
+    border-radius: 4px !important;
+    border: 1px solid #e2e8f0 !important;
+    white-space: nowrap;
+}
+
+/* 代码块内的 inline code 不加额外背景 */
+.rst-content .highlight code {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: inherit !important;
+    font-size: inherit !important;
+}
+
+.admonition code {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* 暗色主题横向滚动条 */
+.rst-content .highlight pre::-webkit-scrollbar,
+.rst-content pre.literal-block::-webkit-scrollbar {
+    height: 5px;
+    width: 5px;
+}
+.rst-content .highlight pre::-webkit-scrollbar-track,
+.rst-content pre.literal-block::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0 0 10px 10px;
+}
+.rst-content .highlight pre::-webkit-scrollbar-thumb,
+.rst-content pre.literal-block::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+}
+.rst-content .highlight pre::-webkit-scrollbar-thumb:hover,
+.rst-content pre.literal-block::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+/* ==========================================
+   Minimal & High Contrast Tables
+   ========================================== */
+table.docutils {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 1.5rem 0 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01) !important;
+}
+
+table.docutils th {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+    font-family: var(--axcl-font-heading) !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    padding: 0.75rem 1rem !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+table.docutils td {
+    padding: 0.75rem 1rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #334155 !important;
+}
+
+table.docutils tr:nth-child(even) td {
+    background-color: #f8fafc !important;
+}
+
+table.docutils tr:hover td {
+    background-color: #f1f5f9 !important;
 }

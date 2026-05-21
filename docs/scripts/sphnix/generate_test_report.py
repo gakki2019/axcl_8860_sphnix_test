@@ -149,7 +149,7 @@ def render_report(build_result: dict[str, object], preflight: dict[str, object] 
         lines.extend([
             '',
             'Playwright 环境预检',
-            '------------------',
+            '------------------------',
             '',
             f'- 浏览器可执行文件：``{preflight.get("executablePath", "")}``',
         ])
