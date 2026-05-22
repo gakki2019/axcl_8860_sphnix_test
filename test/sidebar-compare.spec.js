@@ -414,6 +414,29 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(branchLocator(page, 'Purpose')).toHaveClass(/current/);
     });
 
+    test('switching overview anchors round-trip keeps install children mapped to install links', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/basic/overview.html#id4');
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/basic/overview.html#documentation-structure');
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="zh"]').click();
+        await page.waitForURL('**/zh/basic/overview.html#id4');
+
+        await expect(branchLocator(page, '文档结构')).toHaveClass(/current/);
+
+        await page.locator('.axcl-sidebar a[href="install.html#id4"]').first().evaluate((node) => node.click());
+        await page.waitForURL('**/zh/basic/install.html#id4');
+
+        await expect(branchLocator(page, '文档构建准备')).toHaveClass(/current/);
+        await expect(page.locator('h1')).toContainText('安装指南');
+
+        await page.locator('.axcl-sidebar a[href="#sdk"]').first().evaluate((node) => node.click());
+        await page.waitForURL('**/zh/basic/install.html#sdk');
+
+        await expect(branchLocator(page, 'SDK 环境准备')).toHaveClass(/current/);
+    });
+
     test('switching faq anchors keeps the matching question selected', async ({ page }) => {
         await gotoDocsPage(page, '/zh/faq/index.html#id2');
 
