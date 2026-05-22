@@ -2,7 +2,7 @@ SPHINXBUILD ?= sphinx-build
 PYTHON ?= python3
 SOURCEDIR = source
 BUILDDIR = build
-CONFDIR = .
+CONFDIR = source
 
 .PHONY: help html clean report
 
