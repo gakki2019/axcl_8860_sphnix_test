@@ -3,10 +3,16 @@
 {% block extrahead %}
 {{ super() }}
 <style>
-  html.axcl-nav-pending .wy-nav-side,
-  html.axcl-nav-pending .wy-nav-top,
-  html.axcl-nav-pending .wy-breadcrumbs {
-    visibility: hidden;
+  /* Hide sidebar content (not the background) until JS restores expand/collapse state.
+     Using opacity instead of visibility so the sidebar background gradient stays
+     visible at all times – this prevents the "black flash" on page transitions. */
+  html.axcl-nav-pending .wy-nav-side .wy-side-scroll {
+    opacity: 0;
+  }
+  /* Smooth reveal once state is restored */
+  html.axcl-nav-ready .wy-nav-side .wy-side-scroll {
+    opacity: 1;
+    transition: opacity 0.12s ease-out;
   }
 </style>
 <script>

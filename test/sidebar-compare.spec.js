@@ -332,6 +332,28 @@ test.describe('AXCL sidebar navigation', () => {
         expect(normalizeNavKeys(enState.openKeys)).toEqual(normalizeNavKeys(zhState.openKeys));
     });
 
+    test('switching languages keeps non-focused branch expand and collapse choices on content pages', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/c/context_api.html');
+
+        await branchLinkLocator(page, '基础').click();
+        await branchLinkLocator(page, '概览').click();
+        await branchLinkLocator(page, '常见问题').click();
+
+        await expect(branchLocator(page, '基础')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, '概览')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, '常见问题')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, '开发')).toHaveAttribute('aria-expanded', 'true');
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/develop/c/context_api.html');
+
+        await expect(branchLocator(page, 'Basic')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'Overview')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'FAQ')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'Development')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchLocator(page, 'Context API')).toHaveClass(/current/);
+    });
+
     test('preserves the current page node when switching languages', async ({ page }) => {
         await gotoDocsPage(page, '/zh/develop/arch/system.html');
 
@@ -378,6 +400,20 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(branchLocator(page, 'Purpose')).toHaveClass(/current/);
     });
 
+    test('cross-page navigation to overview anchors preserves the exact anchor during language switching', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/c/event_api.html');
+
+        await page.locator('.axcl-sidebar a[href*="overview.html#id2"]').first().evaluate((node) => node.click());
+        await page.waitForURL('**/zh/basic/overview.html#id2');
+
+        await expect(branchLocator(page, '页面目的')).toHaveClass(/current/);
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/basic/overview.html#purpose');
+
+        await expect(branchLocator(page, 'Purpose')).toHaveClass(/current/);
+    });
+
     test('switching faq anchors keeps the matching question selected', async ({ page }) => {
         await gotoDocsPage(page, '/zh/faq/index.html#id2');
 
@@ -401,6 +437,29 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(branchLocator(page, 'Installation Guide')).toHaveAttribute('aria-expanded', 'true');
         await expect(branchLocator(page, 'SDK Environment Preparation')).toHaveClass(/current/);
         await expect(page.evaluate(() => window.scrollY)).resolves.toBe(0);
+    });
+
+    test('language switch links resolve to the target language root path instead of nesting under the current language', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/c/context_api.html');
+
+        const zhToEnHref = await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').evaluate((node) => ({
+            raw: node.getAttribute('href'),
+            resolved: node.href,
+        }));
+
+        expect(zhToEnHref.resolved).toContain('/en/develop/c/context_api.html');
+        expect(zhToEnHref.resolved).not.toContain('/zh/en/');
+
+        await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="en"]').click();
+        await page.waitForURL('**/en/develop/c/context_api.html');
+
+        const enToZhHref = await page.locator('.axcl-language-switch .axcl-language-link[data-lang-target="zh"]').evaluate((node) => ({
+            raw: node.getAttribute('href'),
+            resolved: node.href,
+        }));
+
+        expect(enToZhHref.resolved).toContain('/zh/develop/c/context_api.html');
+        expect(enToZhHref.resolved).not.toContain('/en/zh/');
     });
 
     test('language switching keeps the current sidebar item at the same visible position', async ({ page }) => {
@@ -502,6 +561,7 @@ test.describe('AXCL sidebar navigation', () => {
         await page.waitForURL('**/zh/basic/install.html#sdk');
 
         await expect(branchLocator(page, 'SDK 环境准备')).toHaveClass(/current/);
+        await expect(branchLocator(page, '下一步')).not.toHaveClass(/current/);
         await expect(page.evaluate(() => window.scrollY)).resolves.toBe(0);
     });
 

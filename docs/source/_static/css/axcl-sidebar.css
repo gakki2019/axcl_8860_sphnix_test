@@ -114,6 +114,7 @@ a:hover {
 .wy-grid-for-nav nav.wy-nav-side .wy-side-scroll {
     background: transparent !important;
     padding-top: 0 !important;
+    overscroll-behavior: contain !important;
 }
 
 /* Seamless unified dark search area (strictly eliminates borders, margins & top gaps) */
@@ -287,6 +288,7 @@ a:hover {
 
 /* Beautiful modern active states - distinct indicator border and sky-blue translucent background */
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a.current,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current > a.current,
 .wy-grid-for-nav nav.wy-nav-side .axcl-sidebar a.current {
     background: var(--axcl-sidebar-current-bg) !important;
     color: var(--axcl-sidebar-current-text) !important;
@@ -302,6 +304,7 @@ a:hover {
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a.current { 
     padding-left: calc(2rem - 3px) !important; 
     border-left: 3px solid var(--axcl-sidebar-current-border) !important;
+    color: var(--axcl-sidebar-current-text) !important;
 }
 
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a { padding-left: 2.75rem !important; }
@@ -309,6 +312,7 @@ a:hover {
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a.current { 
     padding-left: calc(2.75rem - 3px) !important; 
     border-left: 3px solid var(--axcl-sidebar-current-border) !important;
+    color: var(--axcl-sidebar-current-text) !important;
 }
 
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a { padding-left: 3.5rem !important; }
@@ -316,7 +320,9 @@ a:hover {
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a.current { 
     padding-left: calc(3.5rem - 3px) !important; 
     border-left: 3px solid var(--axcl-sidebar-current-border) !important;
+    color: var(--axcl-sidebar-current-text) !important;
 }
+
 
 /* Muted expand and collapse arrow styles with smooth transition rotation */
 .axcl-sidebar li button.toctree-expand {
