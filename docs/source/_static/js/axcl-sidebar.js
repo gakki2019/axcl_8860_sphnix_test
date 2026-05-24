@@ -190,7 +190,8 @@
         return href;
       }
 
-      return `${url.pathname.replace(/^\/(?:zh|en)\//, '').replace(/^\//, '')}${url.hash}`;
+      const m = url.pathname.match(/.*\/(zh|en)\/(.*)$/);
+      return `${m ? m[2] : url.pathname.replace(/^\//, '')}${url.hash}`;
     } catch (error) {
       return href
         .replace(/^(?:\.\.\/)+/, '')
@@ -303,10 +304,10 @@
       }
 
       if (lang === 'zh') {
-        return resolvedPath === '/index.html' || resolvedPath === '/zh/index.html';
+        return resolvedPath === '/index.html' || resolvedPath.endsWith('/zh/index.html');
       }
 
-      return resolvedPath === `/${lang}/index.html`;
+      return resolvedPath.endsWith(`/${lang}/index.html`);
     }) || null;
   }
 
