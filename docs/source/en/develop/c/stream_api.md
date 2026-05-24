@@ -1,4 +1,4 @@
-# Stream API
+# Stream
 
 ## Index
 

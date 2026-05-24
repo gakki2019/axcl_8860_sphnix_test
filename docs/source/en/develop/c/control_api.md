@@ -1,4 +1,4 @@
-# Control API
+# Control
 
 ## Index
 

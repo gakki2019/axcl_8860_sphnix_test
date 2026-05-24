@@ -1,4 +1,4 @@
-# Structure Reference
+# Structure
 
 <a id="axclCrashDumpConfig"></a>
 

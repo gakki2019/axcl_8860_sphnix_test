@@ -1,4 +1,4 @@
-# 事件 API
+# 事件
 
 ## 目录
 
@@ -85,7 +85,8 @@ AXCL_EXPORT axclError axclrtRecordEvent(axclrtEvent event, axclrtStream stream);
 
 #### 返回值
 
-不适用
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -110,7 +111,8 @@ AXCL_EXPORT axclError axclrtStreamWaitEvent(axclrtStream stream, axclrtEvent eve
 
 #### 返回值
 
-不适用
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 
@@ -136,7 +138,8 @@ AXCL_EXPORT axclError axclrtStreamWaitEventWithTimeout(axclrtStream stream, axcl
 
 #### 返回值
 
-不适用
+- `AXCL_SUCC`：成功。
+- `others`：失败。
 
 <br>
 

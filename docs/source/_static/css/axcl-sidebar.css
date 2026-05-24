@@ -7,31 +7,44 @@
     --axcl-font-code: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
 
     /* Modern Unified Premium Dark Sidebar Theme (VitePress/Tailwind Slate-900 style) */
-    --axcl-sidebar-bg-start: #0f172a;       /* Deep slate-900 */
-    --axcl-sidebar-bg-end: #090d16;         /* Deeper slate-950 for beautiful gradient */
-    --axcl-sidebar-border: rgba(255, 255, 255, 0.05); /* Soft premium dark border */
-    
-    --axcl-sidebar-text: #94a3b8;           /* High contrast slate-400 for menu links */
-    --axcl-sidebar-text-hover: #f8fafc;     /* Clean slate-50 on hover */
-    --axcl-sidebar-hover-bg: rgba(255, 255, 255, 0.06); /* Gentle translucent hover tint */
-    
-    --axcl-sidebar-current-bg: rgba(56, 189, 248, 0.08); /* Subtle transparent sky-400 accent for active page */
-    --axcl-sidebar-current-text: #38bdf8;   /* Vibrant sky-400 blue for active text */
-    --axcl-sidebar-current-border: #38bdf8; /* Left border sky-400 indicator */
-    
-    --axcl-sidebar-icon: #64748b;           /* Muted slate-500 expand icons */
+    --axcl-sidebar-bg-start: #0f172a;
+    /* Deep slate-900 */
+    --axcl-sidebar-bg-end: #090d16;
+    /* Deeper slate-950 for beautiful gradient */
+    --axcl-sidebar-border: rgba(255, 255, 255, 0.05);
+    /* Soft premium dark border */
+
+    --axcl-sidebar-text: #94a3b8;
+    /* High contrast slate-400 for menu links */
+    --axcl-sidebar-text-hover: #f8fafc;
+    /* Clean slate-50 on hover */
+    --axcl-sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+    /* Gentle translucent hover tint */
+
+    --axcl-sidebar-current-bg: rgba(56, 189, 248, 0.08);
+    /* Subtle transparent sky-400 accent for active page */
+    --axcl-sidebar-current-text: #38bdf8;
+    /* Vibrant sky-400 blue for active text */
+    --axcl-sidebar-current-border: #38bdf8;
+    /* Left border sky-400 indicator */
+
+    --axcl-sidebar-icon: #64748b;
+    /* Muted slate-500 expand icons */
     --axcl-sidebar-icon-hover: #cbd5e1;
 
     /* Main Content Styling */
     --axcl-content-bg: #ffffff;
-    --axcl-content-text: #334155;          /* Refined slate gray */
-    --axcl-content-heading: #0f172a;       /* Deep navy/charcoal */
-    --axcl-content-link: #2563eb;          /* Elegant blue link */
+    --axcl-content-text: #334155;
+    /* Refined slate gray */
+    --axcl-content-heading: #0f172a;
+    /* Deep navy/charcoal */
+    --axcl-content-link: #2563eb;
+    /* Elegant blue link */
     --axcl-content-link-hover: #1d4ed8;
 
     /* Admonitions (GitHub style alerts) */
     --axcl-admonition-radius: 8px;
-    
+
     --axcl-note-border: rgba(208, 215, 222, 0.6);
     --axcl-note-bg: #f6f8fa;
     --axcl-note-text: #24292f;
@@ -56,14 +69,20 @@
 /* ==========================================
    Global & Typography Overrides
    ========================================== */
-body, html {
+body,
+html {
     font-family: var(--axcl-font-body) !important;
     color: var(--axcl-content-text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: var(--axcl-font-heading) !important;
     color: var(--axcl-content-heading);
     font-weight: 600 !important;
@@ -128,7 +147,7 @@ a:hover {
 }
 
 /* Clean vertical column layout for the title & logo to avoid crowdedness */
-.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search > a {
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search>a {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -143,18 +162,18 @@ a:hover {
     letter-spacing: -0.01em;
 }
 
-.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search > a:hover {
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search>a:hover {
     background: transparent !important;
     opacity: 0.9;
 }
 
-.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search > a.icon img.logo {
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search>a.icon img.logo {
     margin-top: 0.15em;
     max-height: 44px;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
 }
 
-.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search > div[role="search"] {
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search>div[role="search"] {
     margin-top: 1rem;
     background: transparent !important;
 }
@@ -180,6 +199,7 @@ a:hover {
     border-color: var(--axcl-sidebar-current-border) !important;
     box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
 }
+
 .wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"]:not(:placeholder-shown) {
     background-color: #ffffff !important;
     color: #0f172a !important;
@@ -229,22 +249,22 @@ a:hover {
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li a,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current>a,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.on a,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l1,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l1 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l1>a,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2>a,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3>a,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4>a,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5 > a,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2.current > a,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2.current li.toctree-l3 > a,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3.current > a,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3.current li.toctree-l4 > a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5>a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2.current>a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3.current>a,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3.current li.toctree-l4>a,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current a,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current a:hover,
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a:hover,
@@ -283,42 +303,90 @@ a:hover {
 .wy-grid-for-nav nav.wy-nav-side .axcl-sidebar a:focus {
     background-color: var(--axcl-sidebar-hover-bg) !important;
     color: var(--axcl-sidebar-text-hover) !important;
-    padding-left: 1.45rem !important; /* Premium micro-interactive slide */
+    padding-left: 1.45rem !important;
+    /* Premium micro-interactive slide */
 }
 
 /* Beautiful modern active states - distinct indicator border and sky-blue translucent background */
 .wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a.current,
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current > a.current,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current>a.current,
 .wy-grid-for-nav nav.wy-nav-side .axcl-sidebar a.current {
     background: var(--axcl-sidebar-current-bg) !important;
     color: var(--axcl-sidebar-current-text) !important;
     font-weight: 700 !important;
     border-left: 3px solid var(--axcl-sidebar-current-border) !important;
     padding-left: calc(1.25rem - 3px) !important;
-    border-radius: 0 6px 6px 0 !important; /* Elegant rounded ends */
+    border-radius: 0 6px 6px 0 !important;
+    /* Elegant rounded ends */
 }
 
 /* Precise nested active indentation overrides to maintain proper structure */
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a { padding-left: 2rem !important; }
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a:hover { padding-left: 2.2rem !important; }
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a.current { 
-    padding-left: calc(2rem - 3px) !important; 
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a {
+    padding-left: 2rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a:hover {
+    padding-left: 2.2rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a.current {
+    padding-left: calc(2rem - 3px) !important;
     border-left: 3px solid var(--axcl-sidebar-current-border) !important;
     color: var(--axcl-sidebar-current-text) !important;
 }
 
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a { padding-left: 2.75rem !important; }
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a:hover { padding-left: 2.95rem !important; }
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a.current { 
-    padding-left: calc(2.75rem - 3px) !important; 
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a {
+    padding-left: 2.75rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a:hover {
+    padding-left: 2.95rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a.current {
+    padding-left: calc(2.75rem - 3px) !important;
     border-left: 3px solid var(--axcl-sidebar-current-border) !important;
     color: var(--axcl-sidebar-current-text) !important;
 }
 
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a { padding-left: 3.5rem !important; }
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a:hover { padding-left: 3.7rem !important; }
-.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a.current { 
-    padding-left: calc(3.5rem - 3px) !important; 
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a {
+    padding-left: 3.5rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a:hover {
+    padding-left: 3.7rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a.current {
+    padding-left: calc(3.5rem - 3px) !important;
+    border-left: 3px solid var(--axcl-sidebar-current-border) !important;
+    color: var(--axcl-sidebar-current-text) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5 a {
+    padding-left: 4.25rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5 a:hover {
+    padding-left: 4.45rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5 a.current {
+    padding-left: calc(4.25rem - 3px) !important;
+    border-left: 3px solid var(--axcl-sidebar-current-border) !important;
+    color: var(--axcl-sidebar-current-text) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l6 a {
+    padding-left: 5.0rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l6 a:hover {
+    padding-left: 5.2rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l6 a.current {
+    padding-left: calc(5.0rem - 3px) !important;
     border-left: 3px solid var(--axcl-sidebar-current-border) !important;
     color: var(--axcl-sidebar-current-text) !important;
 }
@@ -345,16 +413,16 @@ a:hover {
 }
 
 /* Hide redundant language root titles in multi-language structure */
-.axcl-sidebar > ul > li.toctree-l1 > a.reference.internal {
+.axcl-sidebar>ul>li.toctree-l1>a.reference.internal {
     display: none !important;
 }
 
-.axcl-sidebar > ul > li.toctree-l1 > ul {
+.axcl-sidebar>ul>li.toctree-l1>ul {
     margin-left: 0;
     padding-left: 0;
 }
 
-.wy-side-nav-search + .wy-menu.wy-menu-vertical {
+.wy-side-nav-search+.wy-menu.wy-menu-vertical {
     margin-top: 0 !important;
     padding-top: 4px !important;
     border-top: 0 !important;
@@ -365,13 +433,16 @@ a:hover {
     width: 6px;
     height: 6px;
 }
+
 .wy-side-scroll::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .wy-side-scroll::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 3px;
 }
+
 .wy-side-scroll::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.16);
 }
@@ -485,49 +556,66 @@ a:hover {
     background-color: var(--axcl-note-bg) !important;
     color: var(--axcl-note-text) !important;
 }
+
 .admonition.note .admonition-title {
     color: var(--axcl-note-text) !important;
 }
+
 .admonition.note .admonition-title::before {
     content: "💬";
     font-size: 0.95rem;
 }
 
-.admonition.tip, .admonition.hint {
+.admonition.tip,
+.admonition.hint {
     border-color: var(--axcl-tip-border) !important;
     background-color: var(--axcl-tip-bg) !important;
     color: var(--axcl-tip-text) !important;
 }
-.admonition.tip .admonition-title, .admonition.hint .admonition-title {
+
+.admonition.tip .admonition-title,
+.admonition.hint .admonition-title {
     color: var(--axcl-tip-text) !important;
 }
-.admonition.tip .admonition-title::before, .admonition.hint .admonition-title::before {
+
+.admonition.tip .admonition-title::before,
+.admonition.hint .admonition-title::before {
     content: "💡";
     font-size: 0.95rem;
 }
 
-.admonition.warning, .admonition.important {
+.admonition.warning,
+.admonition.important {
     border-color: var(--axcl-warning-border) !important;
     background-color: var(--axcl-warning-bg) !important;
     color: var(--axcl-warning-text) !important;
 }
-.admonition.warning .admonition-title, .admonition.important .admonition-title {
+
+.admonition.warning .admonition-title,
+.admonition.important .admonition-title {
     color: var(--axcl-warning-text) !important;
 }
-.admonition.warning .admonition-title::before, .admonition.important .admonition-title::before {
+
+.admonition.warning .admonition-title::before,
+.admonition.important .admonition-title::before {
     content: "⚠️";
     font-size: 0.95rem;
 }
 
-.admonition.caution, .admonition.danger {
+.admonition.caution,
+.admonition.danger {
     border-color: var(--axcl-caution-border) !important;
     background-color: var(--axcl-caution-bg) !important;
     color: var(--axcl-caution-text) !important;
 }
-.admonition.caution .admonition-title, .admonition.danger .admonition-title {
+
+.admonition.caution .admonition-title,
+.admonition.danger .admonition-title {
     color: var(--axcl-caution-text) !important;
 }
-.admonition.caution .admonition-title::before, .admonition.danger .admonition-title::before {
+
+.admonition.caution .admonition-title::before,
+.admonition.danger .admonition-title::before {
     content: "🛑";
     font-size: 0.95rem;
 }
@@ -546,7 +634,8 @@ a:hover {
     box-shadow: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: visible !important; /* 外层不截断，让内层 pre 自己滚动 */
+    overflow: visible !important;
+    /* 外层不截断，让内层 pre 自己滚动 */
 }
 
 /* 内层 div.highlight：承载所有视觉样式，包括背景、圆角、边框、外边距 */
@@ -554,9 +643,10 @@ a:hover {
     background: #0f172a !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 10px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
     margin: 1.25rem 0 !important;
-    overflow: hidden !important; /* 防止内部 pre 溢出圆角 */
+    overflow: hidden !important;
+    /* 防止内部 pre 溢出圆角 */
     position: relative !important;
 }
 
@@ -598,7 +688,8 @@ a:hover {
 }
 
 /* 行内代码 */
-code.literal, code {
+code.literal,
+code {
     font-family: var(--axcl-font-code) !important;
     font-size: 0.84em !important;
     background: #f1f5f9 !important;
@@ -629,16 +720,19 @@ code.literal, code {
     height: 5px;
     width: 5px;
 }
+
 .rst-content .highlight pre::-webkit-scrollbar-track,
 .rst-content pre.literal-block::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.03);
     border-radius: 0 0 10px 10px;
 }
+
 .rst-content .highlight pre::-webkit-scrollbar-thumb,
 .rst-content pre.literal-block::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.18);
     border-radius: 3px;
 }
+
 .rst-content .highlight pre::-webkit-scrollbar-thumb:hover,
 .rst-content pre.literal-block::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.32);

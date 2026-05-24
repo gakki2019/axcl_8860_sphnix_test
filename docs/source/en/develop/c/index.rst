@@ -7,7 +7,7 @@ C/C++
    The first visible API entry should remain function-oriented. File-level browsing is not intended as the primary user entry.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    context_api
    control_api
@@ -17,8 +17,5 @@ C/C++
    memory_api
    stream_api
    system_api
-   reference/enum
-   reference/struct
-   reference/macro
-   reference/error
+   reference/index
 

@@ -1,4 +1,4 @@
-# Device API
+# Device
 
 ## Index
 

@@ -1,4 +1,4 @@
-# Context API
+# Context
 
 ## Index
 

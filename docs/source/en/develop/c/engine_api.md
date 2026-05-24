@@ -1,4 +1,4 @@
-# Engine API
+# Engine
 
 ## Index
 
@@ -616,8 +616,7 @@ AXCL_EXPORT const char* axclrtEngineGetModelCompilerVersion(uint64_t modelId);
 
 #### Returns
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `toolchain`: version string
 
 <br>
 

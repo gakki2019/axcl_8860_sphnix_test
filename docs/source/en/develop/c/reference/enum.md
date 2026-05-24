@@ -1,4 +1,4 @@
-# Enum Reference
+# Enum
 
 <a id="AXCL_ERROR_E"></a>
 

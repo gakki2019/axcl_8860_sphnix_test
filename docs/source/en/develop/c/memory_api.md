@@ -1,4 +1,4 @@
-# Memory API
+# Memory
 
 ## Index
 

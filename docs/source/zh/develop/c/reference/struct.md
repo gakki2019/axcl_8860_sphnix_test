@@ -1,4 +1,4 @@
-# 结构体参考
+# 结构体
 
 <a id="axclCrashDumpConfig"></a>
 

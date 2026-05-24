@@ -1,4 +1,4 @@
-# Event API
+# Event
 
 ## Index
 
@@ -85,7 +85,8 @@ AXCL_EXPORT axclError axclrtRecordEvent(axclrtEvent event, axclrtStream stream);
 
 #### Returns
 
-N/A
+- `AXCL_SUCC`: success.
+- `others`: failure.
 
 <br>
 
@@ -110,7 +111,8 @@ AXCL_EXPORT axclError axclrtStreamWaitEvent(axclrtStream stream, axclrtEvent eve
 
 #### Returns
 
-N/A
+- `AXCL_SUCC`: success.
+- `others`: failure.
 
 <br>
 
@@ -136,7 +138,8 @@ AXCL_EXPORT axclError axclrtStreamWaitEventWithTimeout(axclrtStream stream, axcl
 
 #### Returns
 
-N/A
+- `AXCL_SUCC`: success.
+- `others`: failure.
 
 <br>
 

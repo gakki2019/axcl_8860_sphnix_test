@@ -1,4 +1,4 @@
-# Macro Reference
+# Macro
 
 <a id="AXCLRT_ENGINE_MAX_DIM_CNT"></a>
 

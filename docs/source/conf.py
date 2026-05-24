@@ -62,7 +62,7 @@ html_theme_options = {
 	"navigation_depth": 4,
 	"sticky_navigation": True,
 	"includehidden": False,
-	"titles_only": False,
+	"titles_only": True,
 }
 
 html_sidebars = {

@@ -1,4 +1,4 @@
-# 引擎 API
+# 引擎
 
 ## 目录
 
@@ -616,8 +616,7 @@ AXCL_EXPORT const char* axclrtEngineGetModelCompilerVersion(uint64_t modelId);
 
 #### 返回值
 
-- `AXCL_SUCC`：成功。
-- `others`：失败。
+- 编译工具链版字符串
 
 <br>
 

@@ -7,7 +7,7 @@ C/C++
    首个可见的 API 条目应保持以函数为主。按文件浏览并不是主要入口。
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    context_api
    control_api
@@ -17,8 +17,5 @@ C/C++
    memory_api
    stream_api
    system_api
-   reference/enum
-   reference/struct
-   reference/macro
-   reference/error
+   reference/index
 
