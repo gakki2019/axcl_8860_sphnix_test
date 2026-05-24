@@ -7,9 +7,13 @@
 - [axclGetLogLevel](#axclGetLogLevel)
 - [axclInit](#axclInit)
 - [axclSetLogLevel](#axclSetLogLevel)
+- [axclrtGetErrorString](#axclrtGetErrorString)
+- [axclrtGetLastError](#axclrtGetLastError)
 - [axclrtGetSocName](#axclrtGetSocName)
 - [axclrtGetVersion](#axclrtGetVersion)
 - [axclrtGetVersionStr](#axclrtGetVersionStr)
+- [axclrtPeekAtLastError](#axclrtPeekAtLastError)
+- [axclrtSetLastError](#axclrtSetLastError)
 
 <br>
 
@@ -174,6 +178,56 @@ AXCL_EXPORT axclError axclSetLogLevel(int32_t lv);
 
 <br>
 
+<a id="axclrtGetErrorString"></a>
+
+### axclrtGetErrorString
+
+Get the error string description for an error code.
+
+#### Function
+
+```c
+AXCL_EXPORT const char* axclrtGetErrorString(axclError error);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| error | in | The error code. |
+
+#### Returns
+
+- The error description string, or "unknown error" if not found.
+
+<br>
+
+<a id="axclrtGetLastError"></a>
+
+### axclrtGetLastError
+
+Get the last error code in the current thread.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtGetLastError(void);
+```
+
+#### Parameters
+
+N/A
+
+#### Returns
+
+- The last error code.
+
+#### Note
+
+This function also clears the thread-local error to AXCL_SUCC.
+
+<br>
+
 <a id="axclrtGetSocName"></a>
 
 ### axclrtGetSocName
@@ -242,3 +296,49 @@ N/A
 #### Returns
 
 - Version string.
+
+<br>
+
+<a id="axclrtPeekAtLastError"></a>
+
+### axclrtPeekAtLastError
+
+Peek at the last error code without clearing it.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtPeekAtLastError(void);
+```
+
+#### Parameters
+
+N/A
+
+#### Returns
+
+- The last error code.
+
+<br>
+
+<a id="axclrtSetLastError"></a>
+
+### axclrtSetLastError
+
+Set the last error code for the current thread.
+
+#### Function
+
+```c
+AXCL_EXPORT void axclrtSetLastError(axclError error);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| error | in | The error code to set. |
+
+#### Returns
+
+N/A

@@ -8,17 +8,60 @@ Common AXCL status and generic error identifiers.
 
 ```c
 typedef enum {
+    /**
+     * @brief The operation completed successfully.
+     */
     AXCL_SUCC                   = 0x00,
+
+    /**
+     * @brief A generic failure occurred.
+     */
     AXCL_FAIL                   = 0x01,
     AXCL_ERR_UNKNOWN            = AXCL_FAIL,
+
+    /**
+     * @brief A null pointer was passed.
+     */
     AXCL_ERR_NULL_POINTER       = 0x02,
+
+    /**
+     * @brief An invalid parameter was passed.
+     */
     AXCL_ERR_ILLEGAL_PARAM      = 0x03,
+
+    /**
+     * @brief The requested operation is not supported.
+     */
     AXCL_ERR_UNSUPPORT          = 0x04,
+
+    /**
+     * @brief The operation timed out.
+     */
     AXCL_ERR_TIMEOUT            = 0x05,
+
+    /**
+     * @brief The module is busy.
+     */
     AXCL_ERR_BUSY               = 0x06,
+
+    /**
+     * @brief Memory allocation failed.
+     */
     AXCL_ERR_NO_MEMORY          = 0x07,
+
+    /**
+     * @brief Packet encoding failed.
+     */
     AXCL_ERR_ENCODE             = 0x08,
+
+    /**
+     * @brief Packet decoding failed.
+     */
     AXCL_ERR_DECODE             = 0x09,
+
+    /**
+     * @brief An unexpected response was received.
+     */
     AXCL_ERR_UNEXPECT_RESPONSE  = 0x0A,
 
     AXCL_ERR_MODULE_BASE        = 0x20,
@@ -30,18 +73,18 @@ typedef enum {
 
 | Symbol | Value | Description |
 |---|---|---|
-| <a id="AXCL_SUCC"></a>AXCL_SUCC | 0x00 | - |
-| <a id="AXCL_FAIL"></a>AXCL_FAIL | 0x01 | - |
+| <a id="AXCL_SUCC"></a>AXCL_SUCC | 0x00 | The operation completed successfully. |
+| <a id="AXCL_FAIL"></a>AXCL_FAIL | 0x01 | A generic failure occurred. |
 | <a id="AXCL_ERR_UNKNOWN"></a>AXCL_ERR_UNKNOWN | AXCL_FAIL | - |
-| <a id="AXCL_ERR_NULL_POINTER"></a>AXCL_ERR_NULL_POINTER | 0x02 | - |
-| <a id="AXCL_ERR_ILLEGAL_PARAM"></a>AXCL_ERR_ILLEGAL_PARAM | 0x03 | - |
-| <a id="AXCL_ERR_UNSUPPORT"></a>AXCL_ERR_UNSUPPORT | 0x04 | - |
-| <a id="AXCL_ERR_TIMEOUT"></a>AXCL_ERR_TIMEOUT | 0x05 | - |
-| <a id="AXCL_ERR_BUSY"></a>AXCL_ERR_BUSY | 0x06 | - |
-| <a id="AXCL_ERR_NO_MEMORY"></a>AXCL_ERR_NO_MEMORY | 0x07 | - |
-| <a id="AXCL_ERR_ENCODE"></a>AXCL_ERR_ENCODE | 0x08 | - |
-| <a id="AXCL_ERR_DECODE"></a>AXCL_ERR_DECODE | 0x09 | - |
-| <a id="AXCL_ERR_UNEXPECT_RESPONSE"></a>AXCL_ERR_UNEXPECT_RESPONSE | 0x0A | - |
+| <a id="AXCL_ERR_NULL_POINTER"></a>AXCL_ERR_NULL_POINTER | 0x02 | A null pointer was passed. |
+| <a id="AXCL_ERR_ILLEGAL_PARAM"></a>AXCL_ERR_ILLEGAL_PARAM | 0x03 | An invalid parameter was passed. |
+| <a id="AXCL_ERR_UNSUPPORT"></a>AXCL_ERR_UNSUPPORT | 0x04 | The requested operation is not supported. |
+| <a id="AXCL_ERR_TIMEOUT"></a>AXCL_ERR_TIMEOUT | 0x05 | The operation timed out. |
+| <a id="AXCL_ERR_BUSY"></a>AXCL_ERR_BUSY | 0x06 | The module is busy. |
+| <a id="AXCL_ERR_NO_MEMORY"></a>AXCL_ERR_NO_MEMORY | 0x07 | Memory allocation failed. |
+| <a id="AXCL_ERR_ENCODE"></a>AXCL_ERR_ENCODE | 0x08 | Packet encoding failed. |
+| <a id="AXCL_ERR_DECODE"></a>AXCL_ERR_DECODE | 0x09 | Packet decoding failed. |
+| <a id="AXCL_ERR_UNEXPECT_RESPONSE"></a>AXCL_ERR_UNEXPECT_RESPONSE | 0x0A | An unexpected response was received. |
 | <a id="AXCL_ERR_MODULE_BASE"></a>AXCL_ERR_MODULE_BASE | 0x20 | - |
 | <a id="AXCL_ERR_BUTT"></a>AXCL_ERR_BUTT | 0x7F | - |
 

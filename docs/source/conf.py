@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-project = "AXCL SDK Documentation"
-copyright = "2026, AXCL"
+project = "AX8860 AXCL"
+copyright = "2026, Axera Semiconductor Co., Ltd."
 author = "AXCL"
 release = "latest"
 
@@ -13,7 +13,6 @@ extensions = [
 
 templates_path = ["_templates"]
 exclude_patterns = [
-	"build",
 	"Thumbs.db",
 	".DS_Store",
 	"en/asserts/README.md",
@@ -21,7 +20,6 @@ exclude_patterns = [
 	"en/develop/c/index.md",
 	"zh/asserts/README.md",
 	"zh/develop/c/index.md",
-	"zh/en/**",
 ]
 
 source_suffix = {
@@ -45,8 +43,9 @@ suppress_warnings = [
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_logo = "_static/img/logo.svg"
-html_title = "AXCL SDK Documentation"
+html_title = "AX8860 AXCL"
 html_show_sourcelink = False
+html_copy_source = False
 html_css_files = [
 	"css/axcl-sidebar.css",
 ]

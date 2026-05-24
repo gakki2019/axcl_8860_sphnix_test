@@ -46,8 +46,6 @@ Maximum number of dimensions supported by an engine tensor.
 
 ## AXCL_DEF_COMM_ERR
 
-Compose a common-module error code.
-
 ```c
 #define AXCL_DEF_COMM_ERR AXCL_DEF_ERR(AXCL_COMM, (errid))
 ```
@@ -68,8 +66,6 @@ Compose a common-module error code.
 
 ## AXCL_DEF_DAEMON_ERR
 
-Compose a daemon-module error code.
-
 ```c
 #define AXCL_DEF_DAEMON_ERR AXCL_DEF_ERR(AXCL_DAEMON, (errid))
 ```
@@ -79,8 +75,6 @@ Compose a daemon-module error code.
 <a id="AXCL_DEF_ENGINE_ERR"></a>
 
 ## AXCL_DEF_ENGINE_ERR
-
-Compose an engine-module error code.
 
 ```c
 #define AXCL_DEF_ENGINE_ERR AXCL_DEF_ERR(AXCL_ENGINE, (errid))
@@ -100,35 +94,9 @@ Compose a module-specific AXCL error code.
 
 <br>
 
-<a id="AXCL_DEF_IVE_ERR"></a>
-
-## AXCL_DEF_IVE_ERR
-
-Compose an IVE-module error code.
-
-```c
-#define AXCL_DEF_IVE_ERR AXCL_DEF_ERR(AXCL_IVE, (errid))
-```
-
-<br>
-
-<a id="AXCL_DEF_IVPS_ERR"></a>
-
-## AXCL_DEF_IVPS_ERR
-
-Compose an IVPS-module error code.
-
-```c
-#define AXCL_DEF_IVPS_ERR AXCL_DEF_ERR(AXCL_IVPS, (errid))
-```
-
-<br>
-
 <a id="AXCL_DEF_NATIVE_ERR"></a>
 
 ## AXCL_DEF_NATIVE_ERR
-
-Compose a native-module error code.
 
 ```c
 #define AXCL_DEF_NATIVE_ERR AXCL_DEF_ERR(AXCL_NATIVE, (errid))
@@ -140,8 +108,6 @@ Compose a native-module error code.
 
 ## AXCL_DEF_PROTOCOL_ERR
 
-Compose a protocol-module error code.
-
 ```c
 #define AXCL_DEF_PROTOCOL_ERR AXCL_DEF_ERR(AXCL_PROTOCOL, (errid))
 ```
@@ -152,46 +118,8 @@ Compose a protocol-module error code.
 
 ## AXCL_DEF_RT_ERR
 
-Compose a runtime-module error code.
-
 ```c
 #define AXCL_DEF_RT_ERR AXCL_DEF_ERR(AXCL_RUNTIME, (errid))
-```
-
-<br>
-
-<a id="AXCL_DEF_SYS_ERR"></a>
-
-## AXCL_DEF_SYS_ERR
-
-Compose a system-module error code.
-
-```c
-#define AXCL_DEF_SYS_ERR AXCL_DEF_ERR(AXCL_SYS, (errid))
-```
-
-<br>
-
-<a id="AXCL_DEF_VDEC_ERR"></a>
-
-## AXCL_DEF_VDEC_ERR
-
-Compose a video-decode-module error code.
-
-```c
-#define AXCL_DEF_VDEC_ERR AXCL_DEF_ERR(AXCL_VDEC, (errid))
-```
-
-<br>
-
-<a id="AXCL_DEF_VENC_ERR"></a>
-
-## AXCL_DEF_VENC_ERR
-
-Compose a video-encode-module error code.
-
-```c
-#define AXCL_DEF_VENC_ERR AXCL_DEF_ERR(AXCL_VENC, (errid))
 ```
 
 <br>
@@ -211,7 +139,7 @@ Compose a video-encode-module error code.
 ## AXCL_ENGINE
 
 ```c
-#define AXCL_ENGINE (0x1D)
+#define AXCL_ENGINE (0x58)
 ```
 
 <br>
@@ -226,22 +154,22 @@ Compose a video-encode-module error code.
 
 <br>
 
-<a id="AXCL_IVE"></a>
+<a id="AXCL_ID_DEVICE"></a>
 
-## AXCL_IVE
+## AXCL_ID_DEVICE
 
 ```c
-#define AXCL_IVE (0x15)
+#define AXCL_ID_DEVICE (0x31)
 ```
 
 <br>
 
-<a id="AXCL_IVPS"></a>
+<a id="AXCL_ID_HOST"></a>
 
-## AXCL_IVPS
+## AXCL_ID_HOST
 
 ```c
-#define AXCL_IVPS (0x0D)
+#define AXCL_ID_HOST (0x30)
 ```
 
 <br>
@@ -282,36 +210,6 @@ Compose a video-encode-module error code.
 
 ```c
 #define AXCL_RUNTIME (0x52)
-```
-
-<br>
-
-<a id="AXCL_SYS"></a>
-
-## AXCL_SYS
-
-```c
-#define AXCL_SYS (0x0B)
-```
-
-<br>
-
-<a id="AXCL_VDEC"></a>
-
-## AXCL_VDEC
-
-```c
-#define AXCL_VDEC (0x08)
-```
-
-<br>
-
-<a id="AXCL_VENC"></a>
-
-## AXCL_VENC
-
-```c
-#define AXCL_VENC (0x07)
 ```
 
 <br>

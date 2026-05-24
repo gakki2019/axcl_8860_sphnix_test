@@ -7,11 +7,11 @@
     try {
       const url = new URL(href, window.location.href);
       const path = url.pathname;
-      return path === '/' || 
-             path === '/index.html' || 
-             path === '/zh/' || 
-             path === '/zh/index.html' || 
-             path === '/en/' || 
+      return path === '/' ||
+             path === '/index.html' ||
+             path === '/zh/' ||
+             path === '/zh/index.html' ||
+             path === '/en/' ||
              path === '/en/index.html' ||
              path.endsWith('/zh/index.html') ||
              path.endsWith('/en/index.html');
@@ -214,6 +214,24 @@
       return `${url.pathname}${url.hash}`;
     } catch (error) {
       return href;
+    }
+  }
+
+  function findHashTarget(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+
+    const rawId = hash.slice(1);
+    if (!rawId) {
+      return null;
+    }
+
+    try {
+      const decodedId = decodeURIComponent(rawId);
+      return document.getElementById(decodedId) || document.getElementById(rawId);
+    } catch (error) {
+      return document.getElementById(rawId);
     }
   }
 
@@ -871,7 +889,7 @@
           }
           updateSidebarForNewPage(targetUrl.href);
           if (targetUrl.hash) {
-            var ht = document.querySelector(targetUrl.hash);
+            var ht = findHashTarget(targetUrl.hash);
             if (ht) ht.scrollIntoView();
           } else {
             window.scrollTo(0, 0);

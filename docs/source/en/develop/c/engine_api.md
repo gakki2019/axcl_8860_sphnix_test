@@ -85,7 +85,7 @@ AXCL_EXPORT axclError axclrtEngineCreateContext(uint64_t modelId, uint64_t *cont
 
 #### Restriction
 
-RestrictionOne model id could create several running context, and each of them running only with its own settings and memory spaces.
+One model id could create several running context, and each of them running only with its own settings and memory spaces.
 
 <br>
 
@@ -115,7 +115,7 @@ AXCL_EXPORT axclError axclrtEngineCreateIO(axclrtEngineIOInfo ioInfo, axclrtEngi
 
 #### Restriction
 
-RestrictionUsers should call axclrtEngineDestroyIO to release the axclrtEngineIO after using it.
+Users should call axclrtEngineDestroyIO to release the axclrtEngineIO after using it.
 
 <br>
 
@@ -253,7 +253,7 @@ N/A
 
 #### Restriction
 
-RestrictionUser needs to call axclrtEngineInit to initialize the runtime
+User needs to call axclrtEngineInit to initialize the runtime
 
 <br>
 
@@ -348,7 +348,7 @@ AXCL_EXPORT axclError axclrtEngineGetIOInfo(uint64_t modelId, axclrtEngineIOInfo
 
 #### Restriction
 
-RestrictionUsers should call axclrtEngineDestroyIOInfo to release the axclrtEngineIOInfo after using it.
+Users should call axclrtEngineDestroyIOInfo to release the axclrtEngineIOInfo after using it.
 
 <br>
 
@@ -380,7 +380,7 @@ AXCL_EXPORT axclError axclrtEngineGetInputBufferByIndex(axclrtEngineIO io, uint3
 
 #### Restriction
 
-RestrictionThe data buffer is Device memory, and requires user application and release.
+The data buffer is Device memory, and requires user application and release.
 
 <br>
 
@@ -412,7 +412,7 @@ AXCL_EXPORT axclError axclrtEngineGetInputBufferByName(axclrtEngineIO io, const 
 
 #### Restriction
 
-RestrictionThe data buffer is Device memory, and requires user application and release.
+The data buffer is Device memory, and requires user application and release.
 
 <br>
 
@@ -510,7 +510,7 @@ AXCL_EXPORT axclError axclrtEngineGetInputDims(axclrtEngineIOInfo ioInfo, uint32
 
 #### Restriction
 
-RestrictionUsers should release the [axclrtEngineIODims](reference/struct.md#axclrtEngineIODims) after using it.
+Users should release the [axclrtEngineIODims](reference/struct.md#axclrtEngineIODims) after using it.
 
 <br>
 
@@ -674,7 +674,7 @@ AXCL_EXPORT axclError axclrtEngineGetModelTypeFromMem(const void *model, uint64_
 
 #### Restriction
 
-RestrictionThe model memory is Device memory, and requires user application and release.
+The model memory is Device memory, and requires user application and release.
 
 <br>
 
@@ -780,7 +780,7 @@ AXCL_EXPORT axclError axclrtEngineGetOutputBufferByIndex(axclrtEngineIO io, uint
 
 #### Restriction
 
-RestrictionThe data buffer is Device memory, and requires user application and release.
+The data buffer is Device memory, and requires user application and release.
 
 <br>
 
@@ -812,7 +812,7 @@ AXCL_EXPORT axclError axclrtEngineGetOutputBufferByName(axclrtEngineIO io, const
 
 #### Restriction
 
-RestrictionThe data buffer is Device memory, and requires user application and release.
+The data buffer is Device memory, and requires user application and release.
 
 <br>
 
@@ -910,7 +910,7 @@ AXCL_EXPORT axclError axclrtEngineGetOutputDims(axclrtEngineIOInfo ioInfo, uint3
 
 #### Restriction
 
-RestrictionUsers should release the [axclrtEngineIODims](reference/struct.md#axclrtEngineIODims) after using it.
+Users should release the [axclrtEngineIODims](reference/struct.md#axclrtEngineIODims) after using it.
 
 <br>
 
@@ -1026,7 +1026,7 @@ AXCL_EXPORT axclError axclrtEngineGetShapeGroupsCount(axclrtEngineIOInfo ioInfo,
 
 #### Restriction
 
-RestrictionPulsar2 toolchain can specify several shapes in model conversion a time. There is only one shape in a normal model, and so it's no needs to call this function for normally converted model.
+Pulsar2 toolchain can specify several shapes in model conversion a time. There is only one shape in a normal model, and so it's no needs to call this function for normally converted model.
 
 <br>
 
@@ -1085,7 +1085,7 @@ AXCL_EXPORT axclError axclrtEngineGetUsageFromMem(const void *model, uint64_t mo
 
 #### Restriction
 
-RestrictionThe model memory is Device memory, and requires user application and release.
+The model memory is Device memory, and requires user application and release.
 
 <br>
 
@@ -1166,7 +1166,7 @@ AXCL_EXPORT axclError axclrtEngineInit(axclrtEngineVNpuKind npuKind);
 
 #### Restriction
 
-RestrictionUser needs to call axclrtEngineFinalize to finalize the runtime engine after using it
+User needs to call axclrtEngineFinalize to finalize the runtime engine after using it
 
 <br>
 
@@ -1223,7 +1223,7 @@ AXCL_EXPORT axclError axclrtEngineLoadFromMem(const void *model, uint64_t modelS
 
 #### Restriction
 
-RestrictionThe model memory is device memory, and requires user allocation and release
+The model memory is device memory, and requires user allocation and release
 
 <br>
 
@@ -1257,7 +1257,7 @@ AXCL_EXPORT axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet 
 
 #### Restriction
 
-RestrictionZero is not allowed, and the masked bit of the set cannot be out of the affinity range.
+Zero is not allowed, and the masked bit of the set cannot be out of the affinity range.
 
 <br>
 
@@ -1350,7 +1350,7 @@ AXCL_EXPORT axclError axclrtEngineSetInputBufferByIndex(axclrtEngineIO io, uint3
 
 #### Restriction
 
-RestrictionThe data buffer is Device memory, and requires user application and release.
+The data buffer is Device memory, and requires user application and release.
 
 <br>
 
@@ -1382,7 +1382,7 @@ AXCL_EXPORT axclError axclrtEngineSetInputBufferByName(axclrtEngineIO io, const 
 
 #### Restriction
 
-RestrictionThe data buffer is Device memory, and requires user application and release.
+The data buffer is Device memory, and requires user application and release.
 
 <br>
 
@@ -1414,7 +1414,7 @@ AXCL_EXPORT axclError axclrtEngineSetOutputBufferByIndex(axclrtEngineIO io, uint
 
 #### Restriction
 
-RestrictionThe data buffer is Device memory, and requires user application and release.
+The data buffer is Device memory, and requires user application and release.
 
 <br>
 
@@ -1446,7 +1446,7 @@ AXCL_EXPORT axclError axclrtEngineSetOutputBufferByName(axclrtEngineIO io, const
 
 #### Restriction
 
-RestrictionThe data buffer is Device memory, and requires user application and release.
+The data buffer is Device memory, and requires user application and release.
 
 <br>
 
