@@ -1,6 +1,11 @@
 .. raw:: html
 
-    <meta http-equiv="refresh" content="0; url=./zh/index.html" />
+    <script type="text/javascript">
+        window.location.replace("./zh/index.html");
+    </script>
+    <noscript>
+        <meta http-equiv="refresh" content="0; url=./zh/index.html" />
+    </noscript>
 
 AXCL SDK 文档中心
 =================
