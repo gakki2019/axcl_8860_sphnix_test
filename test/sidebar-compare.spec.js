@@ -212,8 +212,8 @@ test.describe('AXCL sidebar navigation', () => {
         const zhDevelop = zhRoot.locator('ul > li:has(> a:has-text("开发"))').first();
         const zhFaq = zhRoot.locator('ul > li:has(> a:has-text("常见问题"))').first();
 
-        await zhBasic.locator(':scope > a').click();
-        await zhDevelop.locator(':scope > a').click();
+        await zhBasic.locator(':scope > a > button.toctree-expand').click();
+        await zhDevelop.locator(':scope > a > button.toctree-expand').click();
         await expect(zhBasic).toHaveAttribute('aria-expanded', 'false');
         await expect(zhDevelop).toHaveAttribute('aria-expanded', 'false');
 
@@ -281,37 +281,46 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(branchLocator(page, '快速开始')).toHaveAttribute('aria-expanded', 'true');
     });
 
-    test('icon and text clicks toggle branches independently', async ({ page }) => {
+    test('toggle buttons fold branches while group labels open the directory pages', async ({ page }) => {
         await gotoDocsPage(page, '/zh/index.html');
 
         const basicToggle = branchToggleLocator(page, '基础');
         const basicChildren = branchChildrenLocator(page, '基础');
-        const developText = branchLinkLocator(page, '开发');
-        const developChildren = branchChildrenLocator(page, '开发');
+        const cppText = branchLinkLocator(page, 'C/C++');
 
         const basicInitial = await readBranchState(page, '基础');
-        const developInitial = await readBranchState(page, '开发');
-        const developChildInitial = await readBranchState(page, 'C/C++');
-        const faqInitial = await readBranchState(page, '常见问题');
 
         await basicToggle.click();
         await expect(branchLocator(page, '基础')).toHaveAttribute('aria-expanded', basicInitial.expanded === 'true' ? 'false' : 'true');
         await expect(basicChildren).toHaveCSS('display', basicInitial.visible === 'block' ? 'none' : 'block');
-        expect(await readBranchState(page, '开发')).toEqual(developInitial);
-        expect(await readBranchState(page, 'C/C++')).toEqual(developChildInitial);
-        expect(await readBranchState(page, '常见问题')).toEqual(faqInitial);
 
-        await developText.click();
-        await expect(branchLocator(page, '开发')).toHaveAttribute('aria-expanded', developInitial.expanded === 'true' ? 'false' : 'true');
-        await expect(developChildren).toHaveCSS('display', developInitial.visible === 'block' ? 'none' : 'block');
-        expect((await readBranchState(page, 'C/C++')).current).toBe(developChildInitial.current);
-        expect((await readBranchState(page, 'C/C++')).expanded).toBe(developChildInitial.expanded);
-        expect(await readBranchState(page, '常见问题')).toEqual(faqInitial);
+        await cppText.click();
+        await page.waitForURL('**/zh/develop/c/index.html');
+        await expect(page.locator('h1')).toContainText('C/C++');
+        await expect(branchLocator(page, 'C/C++')).toHaveClass(/current/);
+    });
 
-        await developText.click();
-        await expect(branchLocator(page, '开发')).toHaveAttribute('aria-expanded', developInitial.expanded);
-        await expect(developChildren).toHaveCSS('display', developInitial.visible);
-        expect(await readBranchState(page, 'C/C++')).toEqual(developChildInitial);
+    test('clicking a branch label returns to its directory page after opening a child page', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/c/index.html');
+
+        await page.locator('.axcl-sidebar a[href="context_api.html"]').first().click();
+        await page.waitForURL('**/zh/develop/c/context_api.html');
+
+        await branchLinkLocator(page, 'C/C++').click();
+        await page.waitForURL('**/zh/develop/c/index.html');
+        await expect(page.locator('h1')).toContainText('C/C++');
+    });
+
+    test('clicking the current branch label keeps the directory page visible instead of collapsing it', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/index.html');
+
+        await branchLinkLocator(page, '开发').click();
+        await page.waitForTimeout(300);
+
+        await expect(page).toHaveURL('http://127.0.0.1:18080/zh/develop/index.html');
+        await expect(branchLocator(page, '开发')).toHaveAttribute('aria-expanded', 'true');
+        await expect(branchChildrenLocator(page, '开发')).toHaveCSS('display', 'block');
+        await expect(page.locator('h1')).toContainText('开发');
     });
 
     test('keeps the active page and sidebar state aligned when switching languages', async ({ page }) => {
@@ -335,9 +344,9 @@ test.describe('AXCL sidebar navigation', () => {
     test('switching languages keeps non-focused branch expand and collapse choices on content pages', async ({ page }) => {
         await gotoDocsPage(page, '/zh/develop/c/context_api.html');
 
-        await branchLinkLocator(page, '基础').click();
-        await branchLinkLocator(page, '概览').click();
-        await branchLinkLocator(page, '常见问题').click();
+        await branchToggleLocator(page, '基础').click();
+        await branchToggleLocator(page, '概览').click();
+        await branchToggleLocator(page, '常见问题').click();
 
         await expect(branchLocator(page, '基础')).toHaveAttribute('aria-expanded', 'true');
         await expect(branchLocator(page, '概览')).toHaveAttribute('aria-expanded', 'true');
@@ -580,7 +589,6 @@ test.describe('AXCL sidebar navigation', () => {
 
         const zhRoot = page.locator('.axcl-sidebar > ul > li:has(> a[href="zh/index.html"])').first();
         const zhBasic = zhRoot.locator('ul > li:has(> a:has-text("基础"))').first();
-        const zhBasicLink = zhBasic.locator(':scope > a').first();
         const zhDevelop = zhRoot.locator('ul > li:has(> a:has-text("开发"))').first();
         const zhDevelopChild = zhRoot.locator('ul li:has(> a:has-text("C/C++"))').first();
         const zhFaq = zhRoot.locator('ul > li:has(> a:has-text("常见问题"))').first();
@@ -606,7 +614,7 @@ test.describe('AXCL sidebar navigation', () => {
             visible: node.querySelector(':scope > ul') ? getComputedStyle(node.querySelector(':scope > ul')).display : null,
         }));
 
-        await zhBasicLink.evaluate((link) => link.click());
+        await zhBasic.locator(':scope > a > button.toctree-expand').click();
         await expect(zhBasic).not.toHaveAttribute('aria-expanded', basicInitial.expanded);
         expect(await zhDevelop.evaluate((node) => ({
             expanded: node.getAttribute('aria-expanded'),
@@ -644,8 +652,8 @@ test.describe('AXCL sidebar navigation', () => {
         const zhDevelop = zhRoot.locator('ul > li:has(> a:has-text("开发"))').first();
         const zhFaq = zhRoot.locator('ul > li:has(> a:has-text("常见问题"))').first();
 
-        await zhBasic.locator(':scope > a').click();
-        await zhDevelop.locator(':scope > a').click();
+        await zhBasic.locator(':scope > a > button.toctree-expand').click();
+        await zhDevelop.locator(':scope > a > button.toctree-expand').click();
 
         await expect(zhBasic).toHaveAttribute('aria-expanded', 'false');
         await expect(zhDevelop).toHaveAttribute('aria-expanded', 'false');
@@ -672,8 +680,8 @@ test.describe('AXCL sidebar navigation', () => {
         const zhDevelop = zhRoot.locator('ul > li:has(> a:has-text("开发"))').first();
         const zhFaq = zhRoot.locator('ul > li:has(> a:has-text("常见问题"))').first();
 
-        await zhBasic.locator(':scope > a').click();
-        await zhDevelop.locator(':scope > a').click();
+        await zhBasic.locator(':scope > a > button.toctree-expand').click();
+        await zhDevelop.locator(':scope > a > button.toctree-expand').click();
         await expect(zhBasic).toHaveAttribute('aria-expanded', 'false');
         await expect(zhDevelop).toHaveAttribute('aria-expanded', 'false');
 
@@ -697,7 +705,7 @@ test.describe('AXCL sidebar navigation', () => {
         const isRootExpanded = await zhRoot.evaluate((node) => node.getAttribute('aria-expanded') === 'true');
         console.log('Root initially expanded:', isRootExpanded);
         if (!isRootExpanded) {
-            await zhRoot.locator(':scope > a').click();
+            await zhRoot.locator(':scope > a > button.toctree-expand').click();
             await expect(zhRoot).toHaveAttribute('aria-expanded', 'true');
             console.log('Root expanded after click');
         }
@@ -708,12 +716,12 @@ test.describe('AXCL sidebar navigation', () => {
         const isExpanded = await zhBasic.evaluate((node) => node.getAttribute('aria-expanded') === 'true');
         console.log('Initially expanded:', isExpanded);
 
-        await zhBasic.locator(':scope > a').click();
+        await zhBasic.locator(':scope > a > button.toctree-expand').click();
         const afterClick = await zhBasic.evaluate((node) => node.getAttribute('aria-expanded') === 'true');
         console.log('After first click, expanded:', afterClick);
         expect(afterClick).not.toBe(isExpanded);
 
-        await zhBasic.locator(':scope > a').click();
+        await zhBasic.locator(':scope > a > button.toctree-expand').click();
         const afterSecondClick = await zhBasic.evaluate((node) => node.getAttribute('aria-expanded') === 'true');
         console.log('After second click, expanded:', afterSecondClick);
         expect(afterSecondClick).toBe(isExpanded);

@@ -737,6 +737,11 @@
       if (!rawHref || isExternalHref(rawHref)) return;
       if (rawHref === '#') {
         linkEl.dataset.axclHrefResolved = window.location.pathname;
+        var parentNode = linkEl.closest('li');
+        var isBranchLink = parentNode && Array.from(parentNode.children).some((child) => child.tagName === 'UL');
+        if (isBranchLink) {
+          linkEl.setAttribute('href', window.location.pathname);
+        }
         return;
       }
       try {
@@ -907,22 +912,6 @@
     bindLanguageSwitchListeners();
     // ===== End SPA Navigation Support =====
 
-    getBranchItems(scope).forEach((node) => {
-      const link = getBranchLink(node);
-      if (!link) {
-        return;
-      }
-      link.addEventListener('click', (event) => {
-        const clickedButton = event.target instanceof Element ? event.target.closest('button.toctree-expand') : null;
-        if (clickedButton) {
-          return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        toggleBranch(node);
-      });
-    });
-
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element ? event.target : null;
       if (!target) {
@@ -965,13 +954,27 @@
       const isBranch = Array.from(node.children).some((child) => child.tagName === 'UL');
       const isCurrentLeaf = link.classList.contains('current') && !isBranch;
       const href = link.getAttribute('href') || '';
+      const resolvedHref = link.dataset.axclHrefResolved || href;
       const isSamePageAnchor = href.startsWith('#') && href !== '#';
       const hasHashTarget = href.includes('#') && !href.endsWith('#');
 
       if (isBranch) {
-        event.preventDefault();
-        event.stopPropagation();
-        toggleBranch(node);
+        const canNavigateBranch = Boolean(resolvedHref) && resolvedHref !== '#' && !isExternalHref(resolvedHref);
+
+        if (href === '#' || !href) {
+          event.preventDefault();
+          if (canNavigateBranch) {
+            syncState();
+            persistSidebarScroll();
+            window.location.href = resolvedHref;
+          }
+        } else {
+          syncState();
+          persistSidebarScroll();
+          if (hasHashTarget) {
+            writeContentScrollResetFlag();
+          }
+        }
         return;
       }
 
@@ -986,12 +989,15 @@
           return;
         }
 
-        // SPA navigation for same-origin leaf links (skip on homepage).
-        var resolvedHref = link.dataset.axclHrefResolved || href;
+        // Use full-page navigation for cross-page leaf links so the sidebar DOM
+        // matches the destination page and branch directory links keep their
+        // real href values after drilling into child pages.
         if (!isExternalHref(resolvedHref) && !isHomepageActive()) {
-          event.preventDefault();
           syncState();
-          performSPANavigation(resolvedHref);
+          persistSidebarScroll();
+          if (hasHashTarget) {
+            writeContentScrollResetFlag();
+          }
           return;
         }
 
