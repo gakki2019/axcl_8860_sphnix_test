@@ -323,6 +323,29 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(page.locator('h1')).toContainText('开发');
     });
 
+    test('cross-page sidebar navigation does not re-hide the sidebar before the destination page loads', async ({ page }) => {
+        await page.addInitScript(() => {
+            window.__axclPendingAdded = false;
+            const originalAdd = DOMTokenList.prototype.add;
+            DOMTokenList.prototype.add = function (...tokens) {
+                if (this === document.documentElement.classList && tokens.includes('axcl-nav-pending')) {
+                    window.__axclPendingAdded = true;
+                }
+                return originalAdd.apply(this, tokens);
+            };
+        });
+
+        await gotoDocsPage(page, '/zh/develop/c/index.html');
+        await page.evaluate(() => {
+            window.__axclPendingAdded = false;
+        });
+
+        await page.locator('.axcl-sidebar a[href="context_api.html"]').first().click();
+        await page.waitForURL('**/zh/develop/c/context_api.html');
+
+        await expect(page.evaluate(() => window.__axclPendingAdded)).resolves.toBe(false);
+    });
+
     test('keeps the active page and sidebar state aligned when switching languages', async ({ page }) => {
         await gotoDocsPage(page, '/zh/develop/c/device_api.html');
 

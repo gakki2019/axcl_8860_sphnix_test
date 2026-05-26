@@ -41,6 +41,10 @@
     return 'axcl-homepage-reset-pending';
   }
 
+  function getSidebarPendingSkipKey() {
+    return 'axcl-sidebar-skip-pending-once';
+  }
+
   function readState(stateKey) {
     try {
       return JSON.parse(window.localStorage.getItem(stateKey) || "{}");
@@ -165,6 +169,14 @@
   function clearHomepageResetPending() {
     try {
       window.sessionStorage.removeItem(getHomepageResetKey());
+    } catch (error) {
+      // Ignore storage failures and keep navigation usable.
+    }
+  }
+
+  function writeSidebarPendingSkipFlag() {
+    try {
+      window.sessionStorage.setItem(getSidebarPendingSkipKey(), 'true');
     } catch (error) {
       // Ignore storage failures and keep navigation usable.
     }
@@ -925,6 +937,7 @@
           event.stopPropagation();
           resetHomepageToDefaultState();
         } else {
+          writeSidebarPendingSkipFlag();
           writeHomepageResetPending();
         }
         return;
@@ -966,11 +979,13 @@
           if (canNavigateBranch) {
             syncState();
             persistSidebarScroll();
+            writeSidebarPendingSkipFlag();
             window.location.href = resolvedHref;
           }
         } else {
           syncState();
           persistSidebarScroll();
+          writeSidebarPendingSkipFlag();
           if (hasHashTarget) {
             writeContentScrollResetFlag();
           }
@@ -995,6 +1010,7 @@
         if (!isExternalHref(resolvedHref) && !isHomepageActive()) {
           syncState();
           persistSidebarScroll();
+          writeSidebarPendingSkipFlag();
           if (hasHashTarget) {
             writeContentScrollResetFlag();
           }

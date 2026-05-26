@@ -17,7 +17,19 @@
   }
 </style>
 <script>
-  document.documentElement.classList.add("axcl-nav-pending");
+  (function () {
+    try {
+      if (window.sessionStorage.getItem("axcl-sidebar-skip-pending-once") === "true") {
+        window.sessionStorage.removeItem("axcl-sidebar-skip-pending-once");
+        document.documentElement.classList.add("axcl-nav-ready");
+        return;
+      }
+    } catch (error) {
+      // Ignore storage failures and fall back to the safe hidden-by-default path.
+    }
+
+    document.documentElement.classList.add("axcl-nav-pending");
+  })();
 </script>
 {% endblock %}
 
