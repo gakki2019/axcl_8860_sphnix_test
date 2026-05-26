@@ -20,7 +20,7 @@ function sidebarRoot(page) {
 }
 
 function branchLocator(page, label) {
-    return sidebarRoot(page).locator(`li:has(> a:has-text(${JSON.stringify(label)}))`).first();
+    return sidebarRoot(page).locator(`li:visible:has(> a:has-text(${JSON.stringify(label)}))`).first();
 }
 
 function branchToggleLocator(page, label) {
@@ -323,6 +323,17 @@ test.describe('AXCL sidebar navigation', () => {
         await expect(page.locator('h1')).toContainText('开发');
     });
 
+    test('current branch toggle button can collapse the active branch', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/c/index.html');
+
+        const developBranch = branchLocator(page, '开发');
+        await expect(developBranch).toHaveAttribute('aria-expanded', 'true');
+
+        await branchToggleLocator(page, '开发').click();
+
+        await expect(developBranch).toHaveAttribute('aria-expanded', 'false');
+    });
+
     test('cross-page sidebar navigation does not re-hide the sidebar before the destination page loads', async ({ page }) => {
         await page.addInitScript(() => {
             window.__axclPendingAdded = false;
@@ -344,6 +355,46 @@ test.describe('AXCL sidebar navigation', () => {
         await page.waitForURL('**/zh/develop/c/context_api.html');
 
         await expect(page.evaluate(() => window.__axclPendingAdded)).resolves.toBe(false);
+    });
+
+    test('cross-page sidebar navigation keeps the same sidebar tree mounted', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/c/index.html');
+
+        await page.evaluate(() => {
+            const sidebar = document.querySelector('.axcl-sidebar');
+            window.__axclSidebarNode = sidebar;
+            if (sidebar) {
+                sidebar.dataset.axclMountedMarker = 'persisted';
+            }
+        });
+
+        await page.locator('.axcl-sidebar a[href="context_api.html"]').first().click();
+        await page.waitForURL('**/zh/develop/c/context_api.html');
+
+        await expect(page.evaluate(() => {
+            const sidebar = document.querySelector('.axcl-sidebar');
+            return sidebar === window.__axclSidebarNode;
+        })).resolves.toBe(true);
+    });
+
+    test('cross-page sidebar navigation keeps expand buttons and branch toggling working', async ({ page }) => {
+        await gotoDocsPage(page, '/zh/develop/arch/system.html');
+
+        await expect(page.locator('.axcl-sidebar button.toctree-expand')).toHaveCount(12);
+
+        await branchLinkLocator(page, 'C/C++').click();
+        await page.waitForURL('**/zh/develop/c/index.html');
+
+        await expect(page.locator('.axcl-sidebar button.toctree-expand')).toHaveCount(12);
+
+        const developBranch = branchLocator(page, '开发');
+        await expect(developBranch).toHaveAttribute('aria-expanded', 'true');
+
+        await branchToggleLocator(page, '开发').click();
+        await expect(developBranch).toHaveAttribute('aria-expanded', 'false');
+
+        await branchToggleLocator(page, '开发').click();
+        await expect(developBranch).toHaveAttribute('aria-expanded', 'true');
     });
 
     test('keeps the active page and sidebar state aligned when switching languages', async ({ page }) => {

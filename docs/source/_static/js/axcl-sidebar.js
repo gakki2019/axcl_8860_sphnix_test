@@ -247,6 +247,70 @@
     }
   }
 
+  function syncElementAttributes(targetNode, sourceNode) {
+    Array.from(targetNode.attributes).forEach((attribute) => {
+      if (!sourceNode.hasAttribute(attribute.name)) {
+        targetNode.removeAttribute(attribute.name);
+      }
+    });
+
+    Array.from(sourceNode.attributes).forEach((attribute) => {
+      if (targetNode.getAttribute(attribute.name) !== attribute.value) {
+        targetNode.setAttribute(attribute.name, attribute.value);
+      }
+    });
+  }
+
+  function morphNode(targetNode, sourceNode) {
+    if (!targetNode || !sourceNode) {
+      return;
+    }
+
+    if (
+      targetNode.nodeType !== sourceNode.nodeType
+      || (targetNode.nodeType === Node.ELEMENT_NODE && targetNode.tagName !== sourceNode.tagName)
+    ) {
+      targetNode.replaceWith(sourceNode.cloneNode(true));
+      return;
+    }
+
+    if (targetNode.nodeType === Node.TEXT_NODE) {
+      if (targetNode.textContent !== sourceNode.textContent) {
+        targetNode.textContent = sourceNode.textContent;
+      }
+      return;
+    }
+
+    if (targetNode.nodeType !== Node.ELEMENT_NODE) {
+      return;
+    }
+
+    syncElementAttributes(targetNode, sourceNode);
+
+    const targetChildren = Array.from(targetNode.childNodes);
+    const sourceChildren = Array.from(sourceNode.childNodes);
+    const maxLength = Math.max(targetChildren.length, sourceChildren.length);
+
+    for (let index = 0; index < maxLength; index += 1) {
+      const currentTargetChild = targetChildren[index] || null;
+      const currentSourceChild = sourceChildren[index] || null;
+
+      if (!currentSourceChild) {
+        if (currentTargetChild) {
+          currentTargetChild.remove();
+        }
+        continue;
+      }
+
+      if (!currentTargetChild) {
+        targetNode.appendChild(currentSourceChild.cloneNode(true));
+        continue;
+      }
+
+      morphNode(currentTargetChild, currentSourceChild);
+    }
+  }
+
   function getBranchItems(tree) {
     const candidates = [];
     if (tree.tagName === 'LI') {
@@ -263,6 +327,29 @@
 
   function getBranchLink(node) {
     return Array.from(node.children).find((child) => child.tagName === 'A') || null;
+  }
+
+  function ensureExpandButtons(tree) {
+    getBranchItems(tree).forEach((node) => {
+      const link = getBranchLink(node);
+      if (!link) {
+        return;
+      }
+
+      const existingButtons = Array.from(link.children).filter((child) => (
+        child.tagName === 'BUTTON' && child.classList.contains('toctree-expand')
+      ));
+      if (existingButtons.length > 0) {
+        existingButtons.slice(1).forEach((button) => button.remove());
+        return;
+      }
+
+      const button = document.createElement('button');
+      button.className = 'toctree-expand';
+      button.type = 'button';
+      button.title = 'Open/close menu';
+      link.prepend(button);
+    });
   }
 
   function toStateKey(href) {
@@ -522,11 +609,16 @@
       const containsCurrent = node.querySelector('a.current') !== null;
 
       var shouldOpen;
-      if (stateKey && Object.prototype.hasOwnProperty.call(state, stateKey)) {
-        // Respect the user's manual expand / collapse choices first.
+      if (node === tree) {
+        // Keep the hidden language root container mounted open so top-level
+        // sections stay visible.
+        shouldOpen = true;
+      } else if (stateKey && Object.prototype.hasOwnProperty.call(state, stateKey)) {
+        // Respect the user's latest manual expand / collapse choice first,
+        // even for the branch that contains the current page.
         shouldOpen = Boolean(state[stateKey]);
-      } else if (containsCurrent || node === tree) {
-        // Without saved user preference, expand branches containing active page or the root node itself.
+      } else if (containsCurrent) {
+        // Without an explicit saved preference, keep the active page path open.
         shouldOpen = true;
       } else {
         // No saved preference: do not override the current rendered state.
@@ -744,25 +836,37 @@
     // Pre-calculate resolved pathnames for relative links without modifying the DOM href.
     // This allows SPA page transitions to uniquely identify nodes and matches Playwright
     // tests that assert on raw Sphinx-generated relative href attributes in the DOM.
-    tree.querySelectorAll('a[href]').forEach(function(linkEl) {
-      var rawHref = linkEl.getAttribute('href');
-      if (!rawHref || isExternalHref(rawHref)) return;
-      if (rawHref === '#') {
-        linkEl.dataset.axclHrefResolved = window.location.pathname;
-        var parentNode = linkEl.closest('li');
-        var isBranchLink = parentNode && Array.from(parentNode.children).some((child) => child.tagName === 'UL');
-        if (isBranchLink) {
-          linkEl.setAttribute('href', window.location.pathname);
-        }
-        return;
-      }
+    function hydrateSidebarLinks(sidebarRoot, baseHref) {
+      var baseUrl;
       try {
-        var resolved = new URL(rawHref, window.location.href);
-        if (resolved.origin === window.location.origin) {
-          linkEl.dataset.axclHrefResolved = resolved.pathname + (resolved.hash || '');
+        baseUrl = new URL(baseHref || window.location.href, window.location.href);
+      } catch (e) {
+        baseUrl = new URL(window.location.href);
+      }
+
+      sidebarRoot.querySelectorAll('a[href]').forEach(function(linkEl) {
+        var rawHref = linkEl.getAttribute('href');
+        if (!rawHref || isExternalHref(rawHref)) return;
+        if (rawHref === '#') {
+          linkEl.dataset.axclHrefResolved = baseUrl.pathname + (baseUrl.hash || '');
+          var parentNode = linkEl.closest('li');
+          var isBranchLink = parentNode && Array.from(parentNode.children).some((child) => child.tagName === 'UL');
+          if (isBranchLink) {
+            linkEl.setAttribute('href', baseUrl.pathname);
+          }
+          return;
         }
-      } catch (e) { /* ignore malformed URLs */ }
-    });
+        try {
+          var resolved = new URL(rawHref, baseUrl.href);
+          if (resolved.origin === window.location.origin) {
+            linkEl.dataset.axclHrefResolved = resolved.pathname + (resolved.hash || '');
+          }
+        } catch (e) { /* ignore malformed URLs */ }
+      });
+    }
+
+    hydrateSidebarLinks(tree, window.location.href);
+    ensureExpandButtons(tree);
 
     applySidebarState();
     updateLanguageSwitchTargets(tree);
@@ -841,31 +945,42 @@
       tree.dataset.homepage = isHomepageUrl(newUrl) ? 'true' : 'false';
       scope = getCurrentLanguageScope(tree);
 
-      // Clear all current markers within current language scope
+      // Only move the active-link marker. `li.current` also represents expanded
+      // branches in RTD markup, so clearing it wholesale causes a visible
+      // collapse/re-open flicker during sidebar navigation.
       scope.querySelectorAll('a.current').forEach(function(el) {
-        el.classList.remove('current');
-      });
-      scope.querySelectorAll('li.current').forEach(function(el) {
         el.classList.remove('current');
       });
       // Prefer exact path + hash matches so same-page anchors do not fall through
       // to the last leaf on the same document.
       var matchedLink = findBestMatchingSidebarLink(scope, targetUrl);
-      // Mark matched link and all ancestor <li>s as current
+      // Mark the matched link itself current; branch visibility is restored by
+      // applyState() based on this active link plus persisted expand state.
       if (matchedLink) {
         matchedLink.classList.add('current');
-        var parentLi = matchedLink.closest('li');
-        while (parentLi) {
-          parentLi.classList.add('current');
-          if (parentLi === scope || !scope.contains(parentLi)) break;
-          var pe = parentLi.parentElement;
-          parentLi = pe ? pe.closest('li') : null;
+      }
+      // Re-apply saved expand / collapse preferences, but keep the freshly
+      // navigated page path visible for this transition only. Manual toggles on
+      // the current page still win later because they persist back to storage.
+      var effectiveState = {
+        ...readState(stateKey),
+      };
+      if (matchedLink) {
+        var currentNode = matchedLink.closest('li');
+        while (currentNode && scope.contains(currentNode)) {
+          var currentStateKey = getBranchStateKey(currentNode);
+          if (currentStateKey) {
+            effectiveState[currentStateKey] = true;
+          }
+          if (currentNode === scope) {
+            break;
+          }
+          var parentList = currentNode.parentElement;
+          currentNode = parentList ? parentList.closest('li') : null;
         }
       }
-      // Language root itself must stay marked current
-      if (scope.tagName === 'LI') scope.classList.add('current');
-      // Re-apply saved expand / collapse preferences
-      applyState(scope, readState(stateKey));
+      writeState(stateKey, effectiveState);
+      applyState(scope, effectiveState);
       window.setTimeout(function() { applyingSidebarState = false; }, 0);
     }
 
@@ -890,12 +1005,17 @@
           var doc = new DOMParser().parseFromString(html, 'text/html');
           var newContent = doc.querySelector('.wy-nav-content');
           var curContent = document.querySelector('.wy-nav-content');
-          if (!newContent || !curContent) {
+          var newSidebar = doc.querySelector('.axcl-sidebar');
+          if (!newContent || !curContent || !newSidebar) {
             window.location.href = targetUrl.href;
             return;
           }
-          // Replace only the content area; sidebar DOM stays intact
+          // Morph the existing sidebar tree instead of replacing it wholesale so
+          // cross-page navigation feels instant without a visible sidebar redraw.
           curContent.innerHTML = newContent.innerHTML;
+          morphNode(tree, newSidebar);
+          ensureExpandButtons(tree);
+          hydrateSidebarLinks(tree, targetUrl.href);
           document.title = doc.title;
           if (!skipPushState) {
             history.pushState(
@@ -905,6 +1025,7 @@
             );
           }
           updateSidebarForNewPage(targetUrl.href);
+          observeBranchItems();
           if (targetUrl.hash) {
             var ht = findHashTarget(targetUrl.hash);
             if (ht) ht.scrollIntoView();
@@ -979,16 +1100,16 @@
           if (canNavigateBranch) {
             syncState();
             persistSidebarScroll();
-            writeSidebarPendingSkipFlag();
-            window.location.href = resolvedHref;
+            performSPANavigation(resolvedHref);
           }
         } else {
+          event.preventDefault();
           syncState();
           persistSidebarScroll();
-          writeSidebarPendingSkipFlag();
           if (hasHashTarget) {
             writeContentScrollResetFlag();
           }
+          performSPANavigation(resolvedHref);
         }
         return;
       }
@@ -1008,12 +1129,13 @@
         // matches the destination page and branch directory links keep their
         // real href values after drilling into child pages.
         if (!isExternalHref(resolvedHref) && !isHomepageActive()) {
+          event.preventDefault();
           syncState();
           persistSidebarScroll();
-          writeSidebarPendingSkipFlag();
           if (hasHashTarget) {
             writeContentScrollResetFlag();
           }
+          performSPANavigation(resolvedHref);
           return;
         }
 
@@ -1031,17 +1153,26 @@
         scheduleSidebarStateRestore();
       }
     });
-    getBranchItems(scope).forEach((node) => {
-      observer.observe(node, {
-        attributes: true,
-        attributeFilter: ['class', 'aria-expanded'],
+    function observeBranchItems() {
+      observer.disconnect();
+      getBranchItems(scope).forEach((node) => {
+        observer.observe(node, {
+          attributes: true,
+          attributeFilter: ['class', 'aria-expanded'],
+        });
       });
-    });
+    }
+    observeBranchItems();
 
     function patchThemeNavigation() {
       const navigation = window.SphinxRtdTheme && window.SphinxRtdTheme.Navigation;
-      if (!navigation || navigation.axclSidebarPatched === true) {
-        return Boolean(navigation);
+      if (!navigation) {
+        return false;
+      }
+
+      if (navigation.axclSidebarPatched === true) {
+        ensureExpandButtons(tree);
+        return true;
       }
 
       function getSidebarScrollTop() {
@@ -1086,6 +1217,7 @@
       }
 
       navigation.axclSidebarPatched = true;
+      ensureExpandButtons(tree);
       return true;
     }
 
@@ -1162,6 +1294,7 @@
       // DOM is fully settled before we reveal.
       window.requestAnimationFrame(function () {
         window.requestAnimationFrame(function () {
+          ensureExpandButtons(tree);
           bindTree(tree);
           revealSidebar();
         });
