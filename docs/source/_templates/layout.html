@@ -22,7 +22,7 @@
 {% endblock %}
 
 {% block menu %}
-{% set current_lang = 'zh' if pagename == 'index' or pagename.startswith('zh/') else 'en' %}
+{% set current_lang = 'en' if pagename.startswith('en/') else 'zh' %}
 {% set is_homepage = pagename in ['index', 'zh/index', 'en/index'] %}
 {% if ax_global_toctree is defined %}
 {% set sidebar_toc = ax_global_toctree(maxdepth=6, collapse=False, includehidden=True, titles_only=True) %}
@@ -35,7 +35,7 @@
 {% endblock %}
 
 {% block document %}
-{% set current_lang = 'zh' if pagename == 'index' or pagename.startswith('zh/') else 'en' %}
+{% set current_lang = 'en' if pagename.startswith('en/') else 'zh' %}
 {% set page_toc = toc|trim %}
 {% set page_toc_title = '本页目录' if current_lang == 'zh' else 'On this page' %}
 <div class="ax-page-layout{% if page_toc %} ax-page-layout-with-toc{% endif %}">
