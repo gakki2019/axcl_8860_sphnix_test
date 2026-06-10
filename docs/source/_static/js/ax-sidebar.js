@@ -22,27 +22,23 @@
 
 
   function getStateKey(lang) {
-    return `axcl-sidebar-state-${lang}`;
+    return `ax-sidebar-state-${lang}`;
   }
 
   function getScrollKey(lang) {
-    return `axcl-sidebar-scroll-${lang}`;
+    return `ax-sidebar-scroll-${lang}`;
   }
 
   function getContentScrollResetKey() {
-    return 'axcl-language-switch-scroll-reset';
+    return 'ax-language-switch-scroll-reset';
   }
 
   function getSidebarFocusRevealKey() {
-    return 'axcl-language-switch-sidebar-focus-reveal';
+    return 'ax-language-switch-sidebar-focus-reveal';
   }
 
   function getHomepageResetKey() {
-    return 'axcl-homepage-reset-pending';
-  }
-
-  function getSidebarPendingSkipKey() {
-    return 'axcl-sidebar-skip-pending-once';
+    return 'ax-homepage-reset-pending';
   }
 
   function readState(stateKey) {
@@ -77,14 +73,6 @@
   function writeScrollTop(scrollKey, scrollTop) {
     try {
       window.sessionStorage.setItem(scrollKey, String(scrollTop));
-    } catch (error) {
-      // Ignore storage failures and keep navigation usable.
-    }
-  }
-
-  function clearScrollTop(scrollKey) {
-    try {
-      window.sessionStorage.removeItem(scrollKey);
     } catch (error) {
       // Ignore storage failures and keep navigation usable.
     }
@@ -182,14 +170,6 @@
     }
   }
 
-  function writeSidebarPendingSkipFlag() {
-    try {
-      window.sessionStorage.setItem(getSidebarPendingSkipKey(), 'true');
-    } catch (error) {
-      // Ignore storage failures and keep navigation usable.
-    }
-  }
-
   function isDesktopSidebarScrollIsolationEnabled() {
     if (typeof window.matchMedia !== 'function') {
       return false;
@@ -237,6 +217,237 @@
     }
   }
 
+
+  const MEDIA_MODULE_NAV = [
+    {
+      title: 'SYS',
+      api: 'api_reference/system_api.html',
+      en: [
+        ['Overview', 'module_guides/sys_overview.html'],
+        ['Control', 'module_guides/sys_control.html'],
+        ['API Reference', 'api_reference/system_api.html#api-summary-and-definition'],
+        ['Data Types', 'api_reference/system_api.html#data-types'],
+        ['Debug', 'module_guides/sys_debug.html'],
+      ],
+      zh: [
+        ['概览', 'module_guides/sys_overview.html'],
+        ['控制', 'module_guides/sys_control.html'],
+        ['API 参考', 'api_reference/system_api.html#api-summary-and-definition'],
+        ['数据类型', 'api_reference/system_api.html#data-types'],
+        ['调试', 'module_guides/sys_debug.html'],
+      ],
+    },
+    {
+      title: 'VENC',
+      api: 'api_reference/venc_api.html',
+      en: [
+        ['Overview', 'module_guides/venc_overview.html'],
+        ['API Reference', 'api_reference/venc_api.html#api-summary-and-definition'],
+        ['Data Types', 'api_reference/venc_api.html#data-types'],
+        ['Debug', 'module_guides/venc_debug.html'],
+      ],
+      zh: [
+        ['概览', 'module_guides/venc_overview.html'],
+        ['API 参考', 'api_reference/venc_api.html#api-summary-and-definition'],
+        ['数据类型', 'api_reference/venc_api.html#data-types'],
+        ['调试', 'module_guides/venc_debug.html'],
+      ],
+    },
+    {
+      title: 'VDEC',
+      en: [
+        ['API Reference', 'api_reference/vdec_api.html#api-summary-and-definition'],
+        ['Data Types', 'api_reference/vdec_api.html#data-types'],
+      ],
+      zh: [
+        ['API 参考', 'api_reference/vdec_api.html#api-summary-and-definition'],
+        ['数据类型', 'api_reference/vdec_api.html#data-types'],
+      ],
+    },
+    {
+      title: 'IVPS',
+      en: [
+        ['API Reference', 'api_reference/ivps_api.html#api-summary-and-definition'],
+        ['Data Types', 'api_reference/ivps_api.html#data-types'],
+      ],
+      zh: [
+        ['API 参考', 'api_reference/ivps_api.html#api-summary-and-definition'],
+        ['数据类型', 'api_reference/ivps_api.html#data-types'],
+      ],
+    },
+    {
+      title: 'Audio',
+      zhTitle: '音频',
+      en: [
+        ['API Reference', 'api_reference/audio_api.html#api-summary-and-definition'],
+        ['Data Types', 'api_reference/audio_api.html#data-types'],
+      ],
+      zh: [
+        ['API 参考', 'api_reference/audio_api.html#api-summary-and-definition'],
+        ['数据类型', 'api_reference/audio_api.html#data-types'],
+      ],
+    },
+    {
+      title: 'IVE',
+      en: [
+        ['API Reference', 'api_reference/ive_api.html#api-summary-and-definition'],
+        ['Data Types', 'api_reference/ive_api.html#data-types'],
+      ],
+      zh: [
+        ['API 参考', 'api_reference/ive_api.html#api-summary-and-definition'],
+        ['数据类型', 'api_reference/ive_api.html#data-types'],
+      ],
+    },
+    {
+      title: 'Cipher',
+      zhTitle: '加解密',
+      en: [
+        ['API Reference', 'api_reference/cipher_api.html#api-summary-and-definition'],
+        ['Data Types', 'api_reference/cipher_api.html#data-types'],
+      ],
+      zh: [
+        ['API 参考', 'api_reference/cipher_api.html#api-summary-and-definition'],
+        ['数据类型', 'api_reference/cipher_api.html#data-types'],
+      ],
+    },
+    {
+      title: 'Engine',
+      zhTitle: '引擎',
+      en: [
+        ['API Reference', 'api_reference/engine_api.html#api-summary-and-definition'],
+        ['Data Types', 'api_reference/engine_api.html#data-types'],
+      ],
+      zh: [
+        ['API 参考', 'api_reference/engine_api.html#api-summary-and-definition'],
+        ['数据类型', 'api_reference/engine_api.html#data-types'],
+      ],
+    },
+  ];
+
+  function getToctreeLevel(node) {
+    if (!node || !node.classList) {
+      return 1;
+    }
+    for (const className of Array.from(node.classList)) {
+      const match = className.match(/^toctree-l(\d+)$/);
+      if (match) {
+        return Number(match[1]);
+      }
+    }
+    return 1;
+  }
+
+  function joinSidebarHref(baseHref, childHref) {
+    if (!baseHref || baseHref === '#') {
+      return childHref;
+    }
+    return `${baseHref.replace(/index\.html(?:#.*)?$/, '')}${childHref}`;
+  }
+
+  function isCurrentSidebarHref(href) {
+    try {
+      const target = new URL(href, window.location.href);
+      const currentPath = window.location.pathname.replace(/\/$/, '/index.html');
+      const targetPath = target.pathname.replace(/\/$/, '/index.html');
+      if (targetPath !== currentPath) {
+        return false;
+      }
+      if (target.hash === '#data-types') {
+        return window.location.hash === '#data-types';
+      }
+      if (target.hash === '#api-summary-and-definition') {
+        return window.location.hash === '' || window.location.hash === '#api-summary-and-definition';
+      }
+      return !target.hash || target.hash === window.location.hash;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function createSidebarLink(text, href) {
+    const link = document.createElement('a');
+    link.className = 'reference internal';
+    link.setAttribute('href', href);
+    link.textContent = text;
+    if (isCurrentSidebarHref(href)) {
+      link.classList.add('current');
+    }
+    return link;
+  }
+
+  function createSidebarItem(level, text, href, children) {
+    const item = document.createElement('li');
+    item.className = `toctree-l${level}`;
+    const link = createSidebarLink(text, href);
+    item.appendChild(link);
+
+    if (children && children.length > 0) {
+      const list = document.createElement('ul');
+      children.forEach((child) => {
+        list.appendChild(createSidebarItem(level + 1, child[0], child[1], []));
+      });
+      item.appendChild(list);
+    }
+
+    if (link.classList.contains('current') || item.querySelector('a.current')) {
+      item.classList.add('current');
+    }
+    return item;
+  }
+
+  function getMediaBranchLanguage(mediaLink) {
+    const text = (mediaLink.textContent || '').trim();
+    if (text.includes('媒体')) {
+      return 'zh';
+    }
+    const href = mediaLink.getAttribute('href') || '';
+    return href.includes('/zh/') || href.startsWith('../../zh/') || href.startsWith('../zh/') ? 'zh' : 'en';
+  }
+
+  function virtualizeMediaSidebar(tree) {
+    if (tree.dataset.axMediaVirtualized === 'true') {
+      return;
+    }
+    tree.dataset.axMediaVirtualized = 'true';
+
+    Array.from(tree.querySelectorAll('a[href]')).forEach((mediaLink) => {
+      const label = (mediaLink.textContent || '').trim();
+      if (label !== 'Media Documentation' && label !== '媒体文档') {
+        return;
+      }
+
+      const mediaItem = mediaLink.closest('li');
+      if (!mediaItem) {
+        return;
+      }
+
+      const lang = getMediaBranchLanguage(mediaLink);
+      const moduleLevel = getToctreeLevel(mediaItem) + 1;
+      const rawBaseHref = mediaLink.getAttribute('href') || '';
+      const childList = document.createElement('ul');
+
+      MEDIA_MODULE_NAV.forEach((moduleInfo) => {
+        const children = moduleInfo[lang].map((entry) => [entry[0], joinSidebarHref(rawBaseHref, entry[1])]);
+        const moduleTitle = lang === 'zh' && moduleInfo.zhTitle ? moduleInfo.zhTitle : moduleInfo.title;
+        childList.appendChild(createSidebarItem(moduleLevel, moduleTitle, '#', children));
+      });
+
+      const errorLabel = lang === 'zh' ? '错误码' : 'Error Codes';
+      childList.appendChild(createSidebarItem(moduleLevel, errorLabel, joinSidebarHref(rawBaseHref, 'api_reference/reference/error.html'), []));
+
+      const existingList = Array.from(mediaItem.children).find((child) => child.tagName === 'UL') || null;
+      if (existingList) {
+        mediaItem.replaceChild(childList, existingList);
+      } else {
+        mediaItem.appendChild(childList);
+      }
+
+      if (mediaItem.querySelector('a.current')) {
+        mediaItem.classList.add('current');
+      }
+    });
+  }
+
   function findHashTarget(hash) {
     if (!hash || hash === '#') {
       return null;
@@ -252,70 +463,6 @@
       return document.getElementById(decodedId) || document.getElementById(rawId);
     } catch (error) {
       return document.getElementById(rawId);
-    }
-  }
-
-  function syncElementAttributes(targetNode, sourceNode) {
-    Array.from(targetNode.attributes).forEach((attribute) => {
-      if (!sourceNode.hasAttribute(attribute.name)) {
-        targetNode.removeAttribute(attribute.name);
-      }
-    });
-
-    Array.from(sourceNode.attributes).forEach((attribute) => {
-      if (targetNode.getAttribute(attribute.name) !== attribute.value) {
-        targetNode.setAttribute(attribute.name, attribute.value);
-      }
-    });
-  }
-
-  function morphNode(targetNode, sourceNode) {
-    if (!targetNode || !sourceNode) {
-      return;
-    }
-
-    if (
-      targetNode.nodeType !== sourceNode.nodeType
-      || (targetNode.nodeType === Node.ELEMENT_NODE && targetNode.tagName !== sourceNode.tagName)
-    ) {
-      targetNode.replaceWith(sourceNode.cloneNode(true));
-      return;
-    }
-
-    if (targetNode.nodeType === Node.TEXT_NODE) {
-      if (targetNode.textContent !== sourceNode.textContent) {
-        targetNode.textContent = sourceNode.textContent;
-      }
-      return;
-    }
-
-    if (targetNode.nodeType !== Node.ELEMENT_NODE) {
-      return;
-    }
-
-    syncElementAttributes(targetNode, sourceNode);
-
-    const targetChildren = Array.from(targetNode.childNodes);
-    const sourceChildren = Array.from(sourceNode.childNodes);
-    const maxLength = Math.max(targetChildren.length, sourceChildren.length);
-
-    for (let index = 0; index < maxLength; index += 1) {
-      const currentTargetChild = targetChildren[index] || null;
-      const currentSourceChild = sourceChildren[index] || null;
-
-      if (!currentSourceChild) {
-        if (currentTargetChild) {
-          currentTargetChild.remove();
-        }
-        continue;
-      }
-
-      if (!currentTargetChild) {
-        targetNode.appendChild(currentSourceChild.cloneNode(true));
-        continue;
-      }
-
-      morphNode(currentTargetChild, currentSourceChild);
     }
   }
 
@@ -337,29 +484,6 @@
     return Array.from(node.children).find((child) => child.tagName === 'A') || null;
   }
 
-  function ensureExpandButtons(tree) {
-    getBranchItems(tree).forEach((node) => {
-      const link = getBranchLink(node);
-      if (!link) {
-        return;
-      }
-
-      const existingButtons = Array.from(link.children).filter((child) => (
-        child.tagName === 'BUTTON' && child.classList.contains('toctree-expand')
-      ));
-      if (existingButtons.length > 0) {
-        existingButtons.slice(1).forEach((button) => button.remove());
-        return;
-      }
-
-      const button = document.createElement('button');
-      button.className = 'toctree-expand';
-      button.type = 'button';
-      button.title = 'Open/close menu';
-      link.prepend(button);
-    });
-  }
-
   function toStateKey(href) {
     const normalized = normalizeHref(href);
     if (!normalized || normalized === '#') {
@@ -369,17 +493,17 @@
   }
 
   function isExpanded(node) {
-    if (node.dataset.axclExpanded === 'true') {
+    if (node.dataset.axExpanded === 'true') {
       return true;
     }
-    if (node.dataset.axclExpanded === 'false') {
+    if (node.dataset.axExpanded === 'false') {
       return false;
     }
     return node.classList.contains('current');
   }
 
   function setExpanded(node, expanded) {
-    node.dataset.axclExpanded = expanded ? 'true' : 'false';
+    node.dataset.axExpanded = expanded ? 'true' : 'false';
     node.classList.toggle('current', expanded);
     node.setAttribute('aria-expanded', expanded ? 'true' : 'false');
   }
@@ -391,7 +515,7 @@
       return linkStateKey;
     }
 
-    const sidebar = node.closest('.axcl-sidebar');
+    const sidebar = node.closest('.ax-sidebar');
     if (
       sidebar
       && sidebar.dataset.homepage === 'true'
@@ -425,7 +549,7 @@
       const href = link ? link.getAttribute('href') || '' : '';
       const resolvedPath = resolveLocalHref(href).split('#')[0];
       if (href === '#') {
-        return true;
+        return lang === (tree.dataset.lang || 'zh');
       }
 
       if (lang === 'zh') {
@@ -434,6 +558,23 @@
 
       return resolvedPath.endsWith(`/${lang}/index.html`);
     }) || null;
+  }
+
+  function hideOtherLanguageRoots(tree) {
+    const currentLang = tree.dataset.lang || 'zh';
+    const roots = [
+      ['zh', getLanguageRootNodeByLang(tree, 'zh')],
+      ['en', getLanguageRootNodeByLang(tree, 'en')],
+    ];
+
+    roots.forEach(([lang, node]) => {
+      if (!node) {
+        return;
+      }
+      const hidden = lang !== currentLang;
+      node.hidden = hidden;
+      node.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+    });
   }
 
   function getLanguageRoot(tree) {
@@ -483,15 +624,6 @@
     return Array.from(topList.children).filter((node) => node.tagName === 'LI');
   }
 
-  function getActiveLanguageRootNode(tree) {
-    const roots = getTopLevelRootNodes(tree);
-    return roots.find((node) => node.querySelector('a.current') !== null) || roots[0] || null;
-  }
-
-  function getTranslatedLanguageRootNode(tree, sourceRootNode) {
-    return getTopLevelRootNodes(tree).find((node) => node !== sourceRootNode) || null;
-  }
-
   function getDirectCurrentNode(rootNode) {
     const candidates = [rootNode, ...Array.from(rootNode.querySelectorAll('li'))];
     const currentNodes = candidates.filter((node) => {
@@ -505,80 +637,54 @@
     return currentNodes[currentNodes.length - 1] || null;
   }
 
-  function getNodeIndexPath(rootNode, targetNode) {
-    const path = [];
-    let currentNode = targetNode;
-
-    while (currentNode && currentNode !== rootNode) {
-      const parentList = currentNode.parentElement;
-      if (!parentList) {
-        return null;
-      }
-
-      const siblings = Array.from(parentList.children).filter((node) => node.tagName === 'LI');
-      const index = siblings.indexOf(currentNode);
-      if (index < 0) {
-        return null;
-      }
-
-      path.unshift(index);
-      currentNode = parentList.closest('li');
+  function getLanguagePathInfo(pathname) {
+    const match = pathname.match(/^(.*\/)(zh|en)\/(.*)$/);
+    if (!match) {
+      return null;
     }
 
-    return currentNode === rootNode ? path : null;
+    return {
+      prefix: match[1],
+      lang: match[2],
+      rest: match[3] || 'index.html',
+    };
   }
 
-  function followNodeIndexPath(rootNode, indexPath) {
-    let currentNode = rootNode;
-
-    for (const index of indexPath) {
-      const childList = Array.from(currentNode.children).find((node) => node.tagName === 'UL') || null;
-      if (!childList) {
-        return null;
-      }
-
-      const children = Array.from(childList.children).filter((node) => node.tagName === 'LI');
-      currentNode = children[index] || null;
-      if (!currentNode) {
-        return null;
-      }
-    }
-
-    return currentNode;
-  }
-
-  function resolveTranslatedCurrentHref(tree, fallbackHref) {
-    const sourceRootNode = getActiveLanguageRootNode(tree);
-    const targetRootNode = sourceRootNode ? getTranslatedLanguageRootNode(tree, sourceRootNode) : null;
-    const currentNode = sourceRootNode ? getDirectCurrentNode(sourceRootNode) : null;
-
-    if (!sourceRootNode || !targetRootNode || !currentNode) {
+  function resolveLanguageSwitchHref(fallbackHref, targetLang) {
+    let fallbackUrl;
+    try {
+      fallbackUrl = new URL(fallbackHref, window.location.href);
+    } catch (error) {
       return fallbackHref;
     }
 
-    const indexPath = getNodeIndexPath(sourceRootNode, currentNode);
-    if (!indexPath) {
-      return fallbackHref;
-    }
-
-    const targetNode = followNodeIndexPath(targetRootNode, indexPath);
-    const targetLink = targetNode ? getBranchLink(targetNode) : null;
-    if (!targetLink) {
+    const currentInfo = getLanguagePathInfo(window.location.pathname);
+    const fallbackInfo = getLanguagePathInfo(fallbackUrl.pathname);
+    if (
+      !currentInfo
+      || !fallbackInfo
+      || currentInfo.lang === targetLang
+      || fallbackInfo.lang !== targetLang
+      || fallbackInfo.rest !== currentInfo.rest
+    ) {
       return resolveLocalHref(fallbackHref);
     }
 
-    return targetLink.dataset.axclHrefResolved
-      || resolveLocalHref(targetLink.getAttribute('href') || fallbackHref)
-      || resolveLocalHref(fallbackHref);
+    fallbackUrl.pathname = `${currentInfo.prefix}${targetLang}/${currentInfo.rest}`;
+    fallbackUrl.hash = '';
+    return `${fallbackUrl.pathname}${fallbackUrl.search}${fallbackUrl.hash}`;
   }
 
   function updateLanguageSwitchTargets(tree) {
-    document.querySelectorAll(".axcl-language-switch .axcl-language-link[data-lang-target]").forEach((link) => {
-      if (!link.dataset.axclBaseHref) {
-        link.dataset.axclBaseHref = link.getAttribute('href') || '';
+    document.querySelectorAll(".ax-language-switch .ax-language-link[data-lang-target]").forEach((link) => {
+      if (!link.dataset.axBaseHref) {
+        link.dataset.axBaseHref = link.getAttribute('href') || '';
       }
 
-      const resolvedHref = resolveTranslatedCurrentHref(tree, link.dataset.axclBaseHref);
+      const resolvedHref = resolveLanguageSwitchHref(
+        link.dataset.axBaseHref,
+        link.dataset.langTarget
+      );
       if (resolvedHref) {
         link.setAttribute('href', resolvedHref);
       }
@@ -617,16 +723,11 @@
       const containsCurrent = node.querySelector('a.current') !== null;
 
       var shouldOpen;
-      if (node === tree) {
-        // Keep the hidden language root container mounted open so top-level
-        // sections stay visible.
-        shouldOpen = true;
-      } else if (stateKey && Object.prototype.hasOwnProperty.call(state, stateKey)) {
-        // Respect the user's latest manual expand / collapse choice first,
-        // even for the branch that contains the current page.
+      if (stateKey && Object.prototype.hasOwnProperty.call(state, stateKey)) {
+        // Respect the user's manual expand / collapse choices first.
         shouldOpen = Boolean(state[stateKey]);
-      } else if (containsCurrent) {
-        // Without an explicit saved preference, keep the active page path open.
+      } else if (containsCurrent || node === tree) {
+        // Without saved user preference, expand branches containing active page or the root node itself.
         shouldOpen = true;
       } else {
         // No saved preference: do not override the current rendered state.
@@ -639,10 +740,12 @@
   }
 
   function bindTree(tree) {
-    if (tree.dataset.axclBound === 'true') {
+    if (tree.dataset.axBound === 'true') {
       return;
     }
-    tree.dataset.axclBound = 'true';
+    tree.dataset.axBound = 'true';
+    hideOtherLanguageRoots(tree);
+    virtualizeMediaSidebar(tree);
 
     const stateKey = getStateKey(tree.dataset.lang || 'zh');
     const scrollKey = getScrollKey(tree.dataset.lang || 'zh');
@@ -792,8 +895,8 @@
 
         getBranchItems(scope).forEach((node) => {
           const shouldOpen =
-            node === scope ||
-            node.parentElement?.closest('li') === scope;
+            node.classList.contains('toctree-l2') ||
+            node.classList.contains('toctree-l1');
           setExpanded(node, shouldOpen);
         });
 
@@ -823,19 +926,9 @@
         return;
       }
       writeState(stateKey, {});
-      clearScrollTop(scrollKey);
-      clearSidebarFocusRevealTarget();
       homepageDefaultsApplied = false;
       applySidebarState();
       restoreSidebarScroll();
-    }
-
-    function prepareHomepageResetNavigation(targetLang) {
-      writeSidebarPendingSkipFlag();
-      writeHomepageResetPending();
-      clearScrollTop(getScrollKey(targetLang));
-      clearSidebarFocusRevealTarget();
-      writeContentScrollResetFlag();
     }
 
 
@@ -854,37 +947,20 @@
     // Pre-calculate resolved pathnames for relative links without modifying the DOM href.
     // This allows SPA page transitions to uniquely identify nodes and matches Playwright
     // tests that assert on raw Sphinx-generated relative href attributes in the DOM.
-    function hydrateSidebarLinks(sidebarRoot, baseHref) {
-      var baseUrl;
-      try {
-        baseUrl = new URL(baseHref || window.location.href, window.location.href);
-      } catch (e) {
-        baseUrl = new URL(window.location.href);
+    tree.querySelectorAll('a[href]').forEach(function(linkEl) {
+      var rawHref = linkEl.getAttribute('href');
+      if (!rawHref || isExternalHref(rawHref)) return;
+      if (rawHref === '#') {
+        linkEl.dataset.axHrefResolved = window.location.pathname;
+        return;
       }
-
-      sidebarRoot.querySelectorAll('a[href]').forEach(function(linkEl) {
-        var rawHref = linkEl.getAttribute('href');
-        if (!rawHref || isExternalHref(rawHref)) return;
-        if (rawHref === '#') {
-          linkEl.dataset.axclHrefResolved = baseUrl.pathname + (baseUrl.hash || '');
-          var parentNode = linkEl.closest('li');
-          var isBranchLink = parentNode && Array.from(parentNode.children).some((child) => child.tagName === 'UL');
-          if (isBranchLink) {
-            linkEl.setAttribute('href', baseUrl.pathname);
-          }
-          return;
+      try {
+        var resolved = new URL(rawHref, window.location.href);
+        if (resolved.origin === window.location.origin) {
+          linkEl.dataset.axHrefResolved = resolved.pathname + (resolved.hash || '');
         }
-        try {
-          var resolved = new URL(rawHref, baseUrl.href);
-          if (resolved.origin === window.location.origin) {
-            linkEl.dataset.axclHrefResolved = resolved.pathname + (resolved.hash || '');
-          }
-        } catch (e) { /* ignore malformed URLs */ }
-      });
-    }
-
-    hydrateSidebarLinks(tree, window.location.href);
-    ensureExpandButtons(tree);
+      } catch (e) { /* ignore malformed URLs */ }
+    });
 
     applySidebarState();
     updateLanguageSwitchTargets(tree);
@@ -892,36 +968,10 @@
 
     var spaAbortController = null;
 
-    function getHomepageUrlForLang(targetLang) {
-      const rootNode = getLanguageRootNodeByLang(tree, targetLang);
-      const rootLink = rootNode ? getBranchLink(rootNode) : null;
-      const resolvedHref = rootLink
-        ? (rootLink.dataset.axclHrefResolved || resolveLocalHref(rootLink.getAttribute('href') || ''))
-        : '';
-
-      if (resolvedHref && resolvedHref !== '#') {
-        return resolvedHref;
-      }
-
-      try {
-        const url = new URL(window.location.href);
-        const pathname = url.pathname;
-        const langPathMatch = pathname.match(/^(.*?)(?:\/(?:zh|en))(?:\/.*)?$/);
-
-        if (langPathMatch) {
-          return `${langPathMatch[1]}/${targetLang}/index.html`;
-        }
-
-        return `/${targetLang}/index.html`;
-      } catch (error) {
-        return `/${targetLang}/index.html`;
-      }
-    }
-
     function bindLanguageSwitchListeners() {
-      document.querySelectorAll(".axcl-language-switch .axcl-language-link[data-lang-target]").forEach(function(switchLink) {
-        if (switchLink.dataset.axclBound === 'true') return;
-        switchLink.dataset.axclBound = 'true';
+      document.querySelectorAll(".ax-language-switch .ax-language-link[data-lang-target]").forEach(function(switchLink) {
+        if (switchLink.dataset.axBound === 'true') return;
+        switchLink.dataset.axBound = 'true';
         switchLink.addEventListener("click", function() {
           var focusRevealSnapshot = getSidebarFocusRevealSnapshot();
           syncState();
@@ -945,7 +995,7 @@
       var targetFull = targetPathname + targetHash;
 
       rootNode.querySelectorAll('a[href]').forEach(function(linkEl) {
-        var resolvedHref = linkEl.dataset.axclHrefResolved;
+        var resolvedHref = linkEl.dataset.axHrefResolved;
         if (!resolvedHref) {
           return;
         }
@@ -989,42 +1039,31 @@
       tree.dataset.homepage = isHomepageUrl(newUrl) ? 'true' : 'false';
       scope = getCurrentLanguageScope(tree);
 
-      // Only move the active-link marker. `li.current` also represents expanded
-      // branches in RTD markup, so clearing it wholesale causes a visible
-      // collapse/re-open flicker during sidebar navigation.
+      // Clear all current markers within current language scope
       scope.querySelectorAll('a.current').forEach(function(el) {
+        el.classList.remove('current');
+      });
+      scope.querySelectorAll('li.current').forEach(function(el) {
         el.classList.remove('current');
       });
       // Prefer exact path + hash matches so same-page anchors do not fall through
       // to the last leaf on the same document.
       var matchedLink = findBestMatchingSidebarLink(scope, targetUrl);
-      // Mark the matched link itself current; branch visibility is restored by
-      // applyState() based on this active link plus persisted expand state.
+      // Mark matched link and all ancestor <li>s as current
       if (matchedLink) {
         matchedLink.classList.add('current');
-      }
-      // Re-apply saved expand / collapse preferences, but keep the freshly
-      // navigated page path visible for this transition only. Manual toggles on
-      // the current page still win later because they persist back to storage.
-      var effectiveState = {
-        ...readState(stateKey),
-      };
-      if (matchedLink) {
-        var currentNode = matchedLink.closest('li');
-        while (currentNode && scope.contains(currentNode)) {
-          var currentStateKey = getBranchStateKey(currentNode);
-          if (currentStateKey) {
-            effectiveState[currentStateKey] = true;
-          }
-          if (currentNode === scope) {
-            break;
-          }
-          var parentList = currentNode.parentElement;
-          currentNode = parentList ? parentList.closest('li') : null;
+        var parentLi = matchedLink.closest('li');
+        while (parentLi) {
+          parentLi.classList.add('current');
+          if (parentLi === scope || !scope.contains(parentLi)) break;
+          var pe = parentLi.parentElement;
+          parentLi = pe ? pe.closest('li') : null;
         }
       }
-      writeState(stateKey, effectiveState);
-      applyState(scope, effectiveState);
+      // Language root itself must stay marked current
+      if (scope.tagName === 'LI') scope.classList.add('current');
+      // Re-apply saved expand / collapse preferences
+      applyState(scope, readState(stateKey));
       window.setTimeout(function() { applyingSidebarState = false; }, 0);
     }
 
@@ -1049,27 +1088,21 @@
           var doc = new DOMParser().parseFromString(html, 'text/html');
           var newContent = doc.querySelector('.wy-nav-content');
           var curContent = document.querySelector('.wy-nav-content');
-          var newSidebar = doc.querySelector('.axcl-sidebar');
-          if (!newContent || !curContent || !newSidebar) {
+          if (!newContent || !curContent) {
             window.location.href = targetUrl.href;
             return;
           }
-          // Morph the existing sidebar tree instead of replacing it wholesale so
-          // cross-page navigation feels instant without a visible sidebar redraw.
+          // Replace only the content area; sidebar DOM stays intact
           curContent.innerHTML = newContent.innerHTML;
-          morphNode(tree, newSidebar);
-          ensureExpandButtons(tree);
-          hydrateSidebarLinks(tree, targetUrl.href);
           document.title = doc.title;
           if (!skipPushState) {
             history.pushState(
-              { axclSPA: true },
+              { axSPA: true },
               doc.title,
               targetUrl.pathname + (targetUrl.hash || '')
             );
           }
           updateSidebarForNewPage(targetUrl.href);
-          observeBranchItems();
           if (targetUrl.hash) {
             var ht = findHashTarget(targetUrl.hash);
             if (ht) ht.scrollIntoView();
@@ -1089,6 +1122,22 @@
     bindLanguageSwitchListeners();
     // ===== End SPA Navigation Support =====
 
+    getBranchItems(scope).forEach((node) => {
+      const link = getBranchLink(node);
+      if (!link) {
+        return;
+      }
+      link.addEventListener('click', (event) => {
+        const clickedButton = event.target instanceof Element ? event.target.closest('button.toctree-expand') : null;
+        if (clickedButton) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        toggleBranch(node);
+      });
+    });
+
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element ? event.target : null;
       if (!target) {
@@ -1097,18 +1146,12 @@
 
       const homepageLogo = target.closest('.wy-side-nav-search a.icon-home, .wy-nav-top a, .wy-breadcrumbs a.icon-home');
       if (homepageLogo) {
-        const currentLang = tree.dataset.lang || 'zh';
-        const chineseHomepageUrl = getHomepageUrlForLang('zh');
-
-        if (currentLang === 'zh' && isHomepageActive()) {
+        if (isHomepageActive()) {
           event.preventDefault();
           event.stopPropagation();
           resetHomepageToDefaultState();
         } else {
-          event.preventDefault();
-          event.stopPropagation();
-          prepareHomepageResetNavigation(currentLang);
-          window.location.href = chineseHomepageUrl;
+          writeHomepageResetPending();
         }
         return;
       }
@@ -1137,29 +1180,13 @@
       const isBranch = Array.from(node.children).some((child) => child.tagName === 'UL');
       const isCurrentLeaf = link.classList.contains('current') && !isBranch;
       const href = link.getAttribute('href') || '';
-      const resolvedHref = link.dataset.axclHrefResolved || href;
       const isSamePageAnchor = href.startsWith('#') && href !== '#';
       const hasHashTarget = href.includes('#') && !href.endsWith('#');
 
       if (isBranch) {
-        const canNavigateBranch = Boolean(resolvedHref) && resolvedHref !== '#' && !isExternalHref(resolvedHref);
-
-        if (href === '#' || !href) {
-          event.preventDefault();
-          if (canNavigateBranch) {
-            syncState();
-            persistSidebarScroll();
-            performSPANavigation(resolvedHref);
-          }
-        } else {
-          event.preventDefault();
-          syncState();
-          persistSidebarScroll();
-          if (hasHashTarget) {
-            writeContentScrollResetFlag();
-          }
-          performSPANavigation(resolvedHref);
-        }
+        event.preventDefault();
+        event.stopPropagation();
+        toggleBranch(node);
         return;
       }
 
@@ -1174,17 +1201,11 @@
           return;
         }
 
-        // Use SPA navigation for internal cross-page leaf links, including the
-        // first leaf click from the homepage after returning via the logo. That
-        // avoids a one-off full document reload/flicker before the user leaves
-        // the homepage context.
-        if (!isExternalHref(resolvedHref) && !isHomepageUrl(resolvedHref)) {
+        // SPA navigation for same-origin leaf links (skip on homepage).
+        var resolvedHref = link.dataset.axHrefResolved || href;
+        if (!isExternalHref(resolvedHref) && !isHomepageActive()) {
           event.preventDefault();
           syncState();
-          persistSidebarScroll();
-          if (hasHashTarget) {
-            writeContentScrollResetFlag();
-          }
           performSPANavigation(resolvedHref);
           return;
         }
@@ -1203,26 +1224,17 @@
         scheduleSidebarStateRestore();
       }
     });
-    function observeBranchItems() {
-      observer.disconnect();
-      getBranchItems(scope).forEach((node) => {
-        observer.observe(node, {
-          attributes: true,
-          attributeFilter: ['class', 'aria-expanded'],
-        });
+    getBranchItems(scope).forEach((node) => {
+      observer.observe(node, {
+        attributes: true,
+        attributeFilter: ['class', 'aria-expanded'],
       });
-    }
-    observeBranchItems();
+    });
 
     function patchThemeNavigation() {
       const navigation = window.SphinxRtdTheme && window.SphinxRtdTheme.Navigation;
-      if (!navigation) {
-        return false;
-      }
-
-      if (navigation.axclSidebarPatched === true) {
-        ensureExpandButtons(tree);
-        return true;
+      if (!navigation || navigation.axSidebarPatched === true) {
+        return Boolean(navigation);
       }
 
       function getSidebarScrollTop() {
@@ -1266,8 +1278,7 @@
         };
       }
 
-      navigation.axclSidebarPatched = true;
-      ensureExpandButtons(tree);
+      navigation.axSidebarPatched = true;
       return true;
     }
 
@@ -1327,14 +1338,14 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    var tree = document.querySelector(".axcl-sidebar");
+    var tree = document.querySelector(".ax-sidebar");
 
     function revealSidebar() {
       // Add the transition class first, then remove the hiding class on the
       // next frame so the CSS transition triggers a smooth fade-in.
-      document.documentElement.classList.add("axcl-nav-ready");
+      document.documentElement.classList.add("ax-nav-ready");
       window.requestAnimationFrame(function () {
-        document.documentElement.classList.remove("axcl-nav-pending");
+        document.documentElement.classList.remove("ax-nav-pending");
       });
     }
 
@@ -1344,7 +1355,6 @@
       // DOM is fully settled before we reveal.
       window.requestAnimationFrame(function () {
         window.requestAnimationFrame(function () {
-          ensureExpandButtons(tree);
           bindTree(tree);
           revealSidebar();
         });

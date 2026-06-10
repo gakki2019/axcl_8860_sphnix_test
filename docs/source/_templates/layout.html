@@ -6,38 +6,52 @@
   /* Hide sidebar content (not the background) until JS restores expand/collapse state.
      Using opacity instead of visibility so the sidebar background gradient stays
      visible at all times – this prevents the "black flash" on page transitions. */
-  html.axcl-nav-pending .wy-nav-side .wy-side-scroll {
+  html.ax-nav-pending .wy-nav-side .wy-side-scroll {
     opacity: 0;
   }
 
   /* Smooth reveal once state is restored */
-  html.axcl-nav-ready .wy-nav-side .wy-side-scroll {
+  html.ax-nav-ready .wy-nav-side .wy-side-scroll {
     opacity: 1;
     transition: opacity 0.12s ease-out;
   }
 </style>
 <script>
-  (function () {
-    try {
-      if (window.sessionStorage.getItem("axcl-sidebar-skip-pending-once") === "true") {
-        window.sessionStorage.removeItem("axcl-sidebar-skip-pending-once");
-        document.documentElement.classList.add("axcl-nav-ready");
-        return;
-      }
-    } catch (error) {
-      // Ignore storage failures and fall back to the safe hidden-by-default path.
-    }
-
-    document.documentElement.classList.add("axcl-nav-pending");
-  })();
+  document.documentElement.classList.add("ax-nav-pending");
 </script>
 {% endblock %}
 
 {% block menu %}
-{% set current_lang = 'en' if pagename.startswith('en/') else 'zh' %}
+{% set current_lang = 'zh' if pagename == 'index' or pagename.startswith('zh/') else 'en' %}
 {% set is_homepage = pagename in ['index', 'zh/index', 'en/index'] %}
+{% if ax_global_toctree is defined %}
+{% set sidebar_toc = ax_global_toctree(maxdepth=6, collapse=False, includehidden=True, titles_only=True) %}
+{% else %}
 {% set sidebar_toc = toctree(maxdepth=6, collapse=False, includehidden=True, titles_only=True) %}
-<div class="axcl-sidebar" data-lang="{{ current_lang }}" data-homepage="{{ 'true' if is_homepage else 'false' }}">
+{% endif %}
+<div class="ax-sidebar" data-lang="{{ current_lang }}" data-homepage="{{ 'true' if is_homepage else 'false' }}">
   {{ sidebar_toc }}
 </div>
+{% endblock %}
+
+{% block document %}
+{% set current_lang = 'zh' if pagename == 'index' or pagename.startswith('zh/') else 'en' %}
+{% set page_toc = toc|trim %}
+{% set page_toc_title = '本页目录' if current_lang == 'zh' else 'On this page' %}
+<div class="ax-page-layout{% if page_toc %} ax-page-layout-with-toc{% endif %}">
+  <div class="ax-article" itemprop="articleBody">
+    {% block body %}{% endblock %}
+  </div>
+  {% if page_toc %}
+  <aside class="ax-page-toc" aria-label="{{ page_toc_title }}">
+    <div class="ax-page-toc-title">{{ page_toc_title }}</div>
+    {{ page_toc }}
+  </aside>
+  {% endif %}
+</div>
+{%- if self.comments()|trim %}
+  <div class="articleComments">
+    {%- block comments %}{% endblock %}
+  </div>
+{%- endif %}
 {% endblock %}

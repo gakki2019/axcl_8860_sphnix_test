@@ -1,0 +1,869 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    /* Base Typography */
+    --ax-font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --ax-font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --ax-font-code: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+    /* Modern Unified Premium Dark Sidebar Theme (VitePress/Tailwind Slate-900 style) */
+    --ax-sidebar-bg-start: #0f172a;
+    /* Deep slate-900 */
+    --ax-sidebar-bg-end: #090d16;
+    /* Deeper slate-950 for beautiful gradient */
+    --ax-sidebar-border: rgba(255, 255, 255, 0.05);
+    /* Soft premium dark border */
+
+    --ax-sidebar-text: #94a3b8;
+    /* High contrast slate-400 for menu links */
+    --ax-sidebar-text-hover: #f8fafc;
+    /* Clean slate-50 on hover */
+    --ax-sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+    /* Gentle translucent hover tint */
+
+    --ax-sidebar-current-bg: rgba(56, 189, 248, 0.08);
+    /* Subtle transparent sky-400 accent for active page */
+    --ax-sidebar-current-text: #38bdf8;
+    /* Vibrant sky-400 blue for active text */
+    --ax-sidebar-current-border: #38bdf8;
+    /* Left border sky-400 indicator */
+
+    --ax-sidebar-icon: #64748b;
+    /* Muted slate-500 expand icons */
+    --ax-sidebar-icon-hover: #cbd5e1;
+
+    /* Main Content Styling */
+    --ax-content-bg: #ffffff;
+    --ax-content-text: #334155;
+    /* Refined slate gray */
+    --ax-content-heading: #0f172a;
+    /* Deep navy/charcoal */
+    --ax-content-link: #2563eb;
+    /* Elegant blue link */
+    --ax-content-link-hover: #1d4ed8;
+
+    /* Admonitions (GitHub style alerts) */
+    --ax-admonition-radius: 8px;
+
+    --ax-note-border: rgba(208, 215, 222, 0.6);
+    --ax-note-bg: #f6f8fa;
+    --ax-note-text: #24292f;
+    --ax-note-icon: #24292f;
+
+    --ax-tip-border: rgba(45, 212, 191, 0.3);
+    --ax-tip-bg: #f0fdfa;
+    --ax-tip-text: #0f766e;
+    --ax-tip-icon: #0f766e;
+
+    --ax-warning-border: rgba(245, 158, 11, 0.3);
+    --ax-warning-bg: #fffbeb;
+    --ax-warning-text: #b45309;
+    --ax-warning-icon: #b45309;
+
+    --ax-caution-border: rgba(239, 68, 68, 0.3);
+    --ax-caution-bg: #fef2f2;
+    --ax-caution-text: #b91c1c;
+    --ax-caution-icon: #b91c1c;
+}
+
+/* ==========================================
+   Global & Typography Overrides
+   ========================================== */
+body,
+html {
+    font-family: var(--ax-font-body) !important;
+    color: var(--ax-content-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--ax-font-heading) !important;
+    color: var(--ax-content-heading);
+    font-weight: 600 !important;
+    letter-spacing: -0.02em;
+}
+
+h1 {
+    font-size: 2.25rem !important;
+    font-weight: 800 !important;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 0.5rem;
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+h2 {
+    font-size: 1.5rem !important;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.35rem;
+    margin-top: 2rem !important;
+}
+
+h3 {
+    font-size: 1.25rem !important;
+    margin-top: 1.75rem !important;
+}
+
+a {
+    color: var(--ax-content-link);
+    transition: color 0.16s ease;
+}
+
+a:hover {
+    color: var(--ax-content-link-hover);
+}
+
+/* ==========================================
+   Modern Unified Premium Dark Sidebar
+   ========================================== */
+/* Apply a stunning continuous dark gradient across the entire sidebar */
+.wy-grid-for-nav nav.wy-nav-side {
+    background: linear-gradient(180deg, var(--ax-sidebar-bg-start) 0%, var(--ax-sidebar-bg-end) 100%) !important;
+    border-right: 1px solid var(--ax-sidebar-border) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Make scroll panel transparent to let the gradient shine through */
+.wy-grid-for-nav nav.wy-nav-side .wy-side-scroll {
+    background: transparent !important;
+    padding-top: 0 !important;
+    overscroll-behavior: contain !important;
+}
+
+/* Seamless unified dark search area (strictly eliminates borders, margins & top gaps) */
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--ax-sidebar-border) !important;
+    padding: 2rem 1.25rem 1.25rem !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Clean vertical column layout for the title & logo to avoid crowdedness */
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search>a {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    font-family: var(--ax-font-heading) !important;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search>a:hover {
+    background: transparent !important;
+    opacity: 0.9;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search>a.icon img.logo {
+    margin-top: 0.15em;
+    max-height: 44px;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search>div[role="search"] {
+    margin-top: 1rem;
+    background: transparent !important;
+}
+
+/* Premium Search Input Box */
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"] {
+    border: 1px solid #334155 !important;
+    background-color: #1e293b !important;
+    border-radius: 6px !important;
+    color: #f8fafc !important;
+    padding: 0.55rem 0.85rem !important;
+    font-family: var(--ax-font-body) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"]::placeholder {
+    color: #64748b !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"]:focus {
+    background-color: #0f172a !important;
+    border-color: var(--ax-sidebar-current-border) !important;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"]:not(:placeholder-shown) {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search input[type="text"]:not(:placeholder-shown):focus {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: var(--ax-sidebar-current-border) !important;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search a,
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search .icon,
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search .version {
+    color: #cbd5e1 !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search a:hover,
+.wy-grid-for-nav nav.wy-nav-side .wy-side-nav-search a:focus {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-top {
+    background: var(--ax-sidebar-bg-start) !important;
+    border-bottom: 1px solid var(--ax-sidebar-border);
+}
+
+.wy-grid-for-nav nav.wy-nav-top a,
+.wy-grid-for-nav nav.wy-nav-top i {
+    color: #ffffff !important;
+}
+
+/* Eliminate any top gaps, padding or margins that create "black borders" */
+.ax-sidebar {
+    padding: 12px 0 24px !important;
+    margin-top: 0 !important;
+    background: transparent !important;
+}
+
+/* ==========================================
+   CRITICAL OVERRIDE: Remove RTD default light / grey backgrounds
+   ========================================== */
+/* Multi-layered ultra-specific overrides to completely strip default RTD backgrounds */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.on a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l1,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l1>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2.current>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3.current>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3.current li.toctree-l4>a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current a:not(.current),
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current a:hover,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a:hover,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a:focus,
+.wy-grid-for-nav nav.wy-nav-side .ax-sidebar li,
+.wy-grid-for-nav nav.wy-nav-side .ax-sidebar li a:not(.current) {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    text-decoration: none !important;
+}
+
+/* Sidebar navigation links default style - modern typography and transparent base */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a,
+.wy-grid-for-nav nav.wy-nav-side .ax-sidebar a {
+    color: var(--ax-sidebar-text) !important;
+    font-family: var(--ax-font-body) !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    padding: 0.6rem 1.25rem !important;
+    display: block !important;
+    position: relative !important;
+    font-size: 13.5px !important;
+    border-radius: 6px !important;
+    margin: 0.2rem 0.6rem !important;
+    background: transparent !important;
+    border: none !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Gentle translucent capsule hover effect with micro-animation horizontal shift */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a:hover,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a:focus,
+.wy-grid-for-nav nav.wy-nav-side .ax-sidebar a:hover,
+.wy-grid-for-nav nav.wy-nav-side .ax-sidebar a:focus {
+    background-color: var(--ax-sidebar-hover-bg) !important;
+    color: var(--ax-sidebar-text-hover) !important;
+    padding-left: 1.45rem !important;
+    /* Premium micro-interactive slide */
+}
+
+/* Beautiful modern active states - distinct indicator border and sky-blue translucent background */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical a.current,
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.current>a.current,
+.wy-grid-for-nav nav.wy-nav-side .ax-sidebar a.current {
+    background: var(--ax-sidebar-current-bg) !important;
+    color: var(--ax-sidebar-current-text) !important;
+    font-weight: 700 !important;
+    border-left: 3px solid var(--ax-sidebar-current-border) !important;
+    padding-left: calc(1.25rem - 3px) !important;
+    border-radius: 0 6px 6px 0 !important;
+    /* Elegant rounded ends */
+}
+
+/* Precise nested active indentation overrides to maintain proper structure */
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a {
+    padding-left: 2rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a:hover {
+    padding-left: 2.2rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l2 a.current {
+    padding-left: calc(2rem - 3px) !important;
+    border-left: 3px solid var(--ax-sidebar-current-border) !important;
+    color: var(--ax-sidebar-current-text) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a {
+    padding-left: 2.75rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a:hover {
+    padding-left: 2.95rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l3 a.current {
+    padding-left: calc(2.75rem - 3px) !important;
+    border-left: 3px solid var(--ax-sidebar-current-border) !important;
+    color: var(--ax-sidebar-current-text) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a {
+    padding-left: 3.5rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a:hover {
+    padding-left: 3.7rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l4 a.current {
+    padding-left: calc(3.5rem - 3px) !important;
+    border-left: 3px solid var(--ax-sidebar-current-border) !important;
+    color: var(--ax-sidebar-current-text) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5 a {
+    padding-left: 4.25rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5 a:hover {
+    padding-left: 4.45rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l5 a.current {
+    padding-left: calc(4.25rem - 3px) !important;
+    border-left: 3px solid var(--ax-sidebar-current-border) !important;
+    color: var(--ax-sidebar-current-text) !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l6 a {
+    padding-left: 5.0rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l6 a:hover {
+    padding-left: 5.2rem !important;
+}
+
+.wy-grid-for-nav nav.wy-nav-side .wy-menu-vertical li.toctree-l6 a.current {
+    padding-left: calc(5.0rem - 3px) !important;
+    border-left: 3px solid var(--ax-sidebar-current-border) !important;
+    color: var(--ax-sidebar-current-text) !important;
+}
+
+
+/* Muted expand and collapse arrow styles with smooth transition rotation */
+.ax-sidebar li button.toctree-expand {
+    color: var(--ax-sidebar-icon) !important;
+    margin-right: 0.45rem !important;
+    transition: transform 0.2s ease, color 0.2s ease !important;
+}
+
+.ax-sidebar li a:hover button.toctree-expand {
+    color: var(--ax-sidebar-icon-hover) !important;
+}
+
+.ax-sidebar li.current>a.current button.toctree-expand {
+    color: var(--ax-sidebar-current-text) !important;
+}
+
+.ax-sidebar li.toctree-l3,
+.ax-sidebar li.toctree-l4 {
+    font-size: 0.9em;
+}
+
+/* Hide redundant language root titles in multi-language structure */
+.ax-sidebar>ul>li.toctree-l1>a.reference.internal {
+    display: none !important;
+}
+
+.ax-sidebar>ul>li.toctree-l1>ul {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.wy-side-nav-search+.wy-menu.wy-menu-vertical {
+    margin-top: 0 !important;
+    padding-top: 4px !important;
+    border-top: 0 !important;
+}
+
+/* Scrollbar styling for a native premium dark theme experience */
+.wy-side-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.wy-side-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.wy-side-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+}
+
+.wy-side-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* ==========================================
+   Bilingual Switcher Styling
+   ========================================== */
+.ax-breadcrumbs-aside {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ax-language-switch {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    margin-top: -5px !important;
+    padding: 3px !important;
+    border-radius: 20px !important;
+    background: rgba(241, 245, 249, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.ax-language-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 68px !important;
+    min-height: 24px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    background: transparent !important;
+    color: #64748b !important;
+    font-family: var(--ax-font-heading) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    line-height: normal !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.ax-language-link:hover {
+    color: #0f172a !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    text-decoration: none !important;
+}
+
+.ax-language-link.current {
+    background: #ffffff !important;
+    color: #2563eb !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* ==========================================
+   Content Area & Sphinx Enhancements
+   ========================================== */
+.wy-nav-content-wrap {
+    background-color: #f8fafc !important;
+}
+
+.wy-nav-content {
+    max-width: 1280px !important;
+    padding: 2.5rem 3rem 4rem 3rem !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02) !important;
+    border-radius: 12px !important;
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.ax-page-layout {
+    display: block;
+}
+
+.ax-page-layout-with-toc {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 2.5rem;
+    align-items: start;
+}
+
+.ax-article {
+    min-width: 0;
+}
+
+.ax-page-toc {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding-left: 1rem;
+    border-left: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.ax-page-toc-title {
+    margin-bottom: 0.75rem;
+    color: #0f172a;
+    font-family: var(--ax-font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.ax-page-toc ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.ax-page-toc li {
+    margin: 0.35rem 0;
+    line-height: 1.35;
+}
+
+.ax-page-toc li ul {
+    margin-top: 0.3rem;
+    padding-left: 0.9rem;
+}
+
+/* Keep API page TOCs focused on function anchors instead of sub-sections
+   like 参数 / 返回值 / 示例. This preserves the function-level jump list
+   while leaving the body content unchanged. */
+.ax-page-toc > ul > li > ul > li > ul > li > ul {
+    display: none;
+}
+
+.ax-page-toc a {
+    display: block;
+    color: #64748b;
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    padding: 0.12rem 0 0.12rem 0.5rem;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.ax-page-toc a:hover,
+.ax-page-toc a:focus {
+    color: #2563eb;
+    border-left-color: #2563eb;
+    text-decoration: none;
+}
+
+@media screen and (max-width: 1100px) {
+    .ax-page-layout {
+        display: block;
+    }
+
+    .ax-page-toc {
+        position: static;
+        max-height: none;
+        margin: 0 0 1.5rem 0;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #f8fafc;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .wy-nav-content {
+        padding: 1.5rem 1.5rem 3rem 1.5rem !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+    }
+}
+
+/* Admonitions Redesign (GitHub Alerts Style) */
+.admonition {
+    border-radius: var(--ax-admonition-radius) !important;
+    padding: 1rem 1.25rem !important;
+    margin: 1.5rem 0 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+
+.admonition-title {
+    font-family: var(--ax-font-heading) !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    margin: 0 0 0.5rem 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admonition.note {
+    border-color: var(--ax-note-border) !important;
+    background-color: var(--ax-note-bg) !important;
+    color: var(--ax-note-text) !important;
+}
+
+.admonition.note .admonition-title {
+    color: var(--ax-note-text) !important;
+}
+
+.admonition.note .admonition-title::before {
+    content: "💬";
+    font-size: 0.95rem;
+}
+
+.admonition.tip,
+.admonition.hint {
+    border-color: var(--ax-tip-border) !important;
+    background-color: var(--ax-tip-bg) !important;
+    color: var(--ax-tip-text) !important;
+}
+
+.admonition.tip .admonition-title,
+.admonition.hint .admonition-title {
+    color: var(--ax-tip-text) !important;
+}
+
+.admonition.tip .admonition-title::before,
+.admonition.hint .admonition-title::before {
+    content: "💡";
+    font-size: 0.95rem;
+}
+
+.admonition.warning,
+.admonition.important {
+    border-color: var(--ax-warning-border) !important;
+    background-color: var(--ax-warning-bg) !important;
+    color: var(--ax-warning-text) !important;
+}
+
+.admonition.warning .admonition-title,
+.admonition.important .admonition-title {
+    color: var(--ax-warning-text) !important;
+}
+
+.admonition.warning .admonition-title::before,
+.admonition.important .admonition-title::before {
+    content: "⚠️";
+    font-size: 0.95rem;
+}
+
+.admonition.caution,
+.admonition.danger {
+    border-color: var(--ax-caution-border) !important;
+    background-color: var(--ax-caution-bg) !important;
+    color: var(--ax-caution-text) !important;
+}
+
+.admonition.caution .admonition-title,
+.admonition.danger .admonition-title {
+    color: var(--ax-caution-text) !important;
+}
+
+.admonition.caution .admonition-title::before,
+.admonition.danger .admonition-title::before {
+    content: "🛑";
+    font-size: 0.95rem;
+}
+
+/* ==========================================
+   Premium Code Blocks & Inline Code
+   ========================================== */
+
+/* 最外层容器 div.highlight-c.notranslate 等：
+   RTD 主题的 div[class^=highlight] 会匹配这一层并添加白色边框，必须清除。
+   注意带连字符 "highlight-" 避免误伤内层 div.highlight */
+.rst-content div[class^="highlight-"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    /* 外层不截断，让内层 pre 自己滚动 */
+}
+
+/* 内层 div.highlight：承载代码块容器样式，token 颜色由 Pygments monokai 输出 */
+.rst-content .highlight {
+    background: #272822 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+    margin: 1.25rem 0 !important;
+    overflow: hidden !important;
+    /* 防止内部 pre 溢出圆角 */
+    position: relative !important;
+}
+
+/* 内层 pre：填充整个容器，横向滚动处理长行代码 */
+.rst-content .highlight pre {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 1.25rem 1.5rem !important;
+    font-family: var(--ax-font-code) !important;
+    font-size: 0.85rem !important;
+    line-height: 1.65 !important;
+    color: #f8f8f2 !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    white-space: pre !important;
+    word-wrap: normal !important;
+    tab-size: 4;
+    -moz-tab-size: 4;
+}
+
+/* literal-block（:: 语法生成）单独处理，因为它是直接的 pre，不在 .highlight 内部 */
+.rst-content pre.literal-block {
+    background: #272822 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
+    margin: 1.25rem 0 !important;
+    padding: 1.25rem 1.5rem !important;
+    font-family: var(--ax-font-code) !important;
+    font-size: 0.85rem !important;
+    line-height: 1.65 !important;
+    color: #f8f8f2 !important;
+    overflow-x: auto !important;
+    white-space: pre !important;
+    word-wrap: normal !important;
+}
+
+/* 行内代码 */
+code.literal,
+code {
+    font-family: var(--ax-font-code) !important;
+    font-size: 0.84em !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    padding: 0.15rem 0.4rem !important;
+    border-radius: 4px !important;
+    border: 1px solid #e2e8f0 !important;
+    white-space: nowrap;
+}
+
+/* 代码块内的 inline code 不加额外背景 */
+.rst-content .highlight code {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: inherit !important;
+    font-size: inherit !important;
+}
+
+.admonition code {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* 暗色主题横向滚动条 */
+.rst-content .highlight pre::-webkit-scrollbar,
+.rst-content pre.literal-block::-webkit-scrollbar {
+    height: 5px;
+    width: 5px;
+}
+
+.rst-content .highlight pre::-webkit-scrollbar-track,
+.rst-content pre.literal-block::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0 0 10px 10px;
+}
+
+.rst-content .highlight pre::-webkit-scrollbar-thumb,
+.rst-content pre.literal-block::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+}
+
+.rst-content .highlight pre::-webkit-scrollbar-thumb:hover,
+.rst-content pre.literal-block::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+/* ==========================================
+   Minimal & High Contrast Tables
+   ========================================== */
+table.docutils {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 1.5rem 0 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01) !important;
+}
+
+table.docutils th {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+    font-family: var(--ax-font-heading) !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    padding: 0.75rem 1rem !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+table.docutils td {
+    padding: 0.75rem 1rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #334155 !important;
+}
+
+table.docutils tr:nth-child(even) td {
+    background-color: #f8fafc !important;
+}
+
+table.docutils tr:hover td {
+    background-color: #f1f5f9 !important;
+}

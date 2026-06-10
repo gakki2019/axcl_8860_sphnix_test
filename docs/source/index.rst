@@ -1,3 +1,10 @@
+AX8860 Development Reference
+============================
+
+This is the root entry of the AXCL documentation site. The page redirects to
+Chinese documentation by default and keeps both Chinese and English entry pages
+in the hidden root toctree so Sphinx can build cross-language documents.
+
 .. raw:: html
 
     <script type="text/javascript">
@@ -7,13 +14,12 @@
         <meta http-equiv="refresh" content="0; url=./zh/index.html" />
     </noscript>
 
-AXCL SDK 文档中心
-=================
-
-正在重定向到中文文档主页...
+For maintainers, keep this root page lightweight and move product-specific
+content into the language entry pages.
 
 .. toctree::
-	:hidden:
+    :hidden:
+    :maxdepth: 2
 
-	zh/index
-	en/index
+    zh/index
+    en/index

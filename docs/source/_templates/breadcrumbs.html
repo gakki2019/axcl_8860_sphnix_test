@@ -50,16 +50,16 @@
         <li class="breadcrumb-item active">{{ title }}</li>
         {%- endblock %}
         {%- block breadcrumbs_aside %}
-        <li class="wy-breadcrumbs-aside axcl-breadcrumbs-aside">
-            <nav class="axcl-language-switch" aria-label="Language switch">
+        <li class="wy-breadcrumbs-aside ax-breadcrumbs-aside">
+            <nav class="ax-language-switch" aria-label="Language switch">
                 {%- if current_lang == 'en' %}
-                <span class="axcl-language-link current">English</span>
-                <a class="axcl-language-link" href="{{ pathto(zh_target) }}"
+                <span class="ax-language-link current">English</span>
+                <a class="ax-language-link" href="{{ pathto(zh_target) }}"
                     data-lang-target="zh">中文</a>
                 {%- else %}
-                <a class="axcl-language-link" href="{{ pathto(en_target) }}"
+                <a class="ax-language-link" href="{{ pathto(en_target) }}"
                     data-lang-target="en">English</a>
-                <span class="axcl-language-link current">中文</span>
+                <span class="ax-language-link current">中文</span>
                 {%- endif %}
             </nav>
             {%- if hasdoc(pagename) and display_vcs_links %}
