@@ -64,6 +64,11 @@ typedef enum {
      */
     AXCL_ERR_UNEXPECT_RESPONSE  = 0x0A,
 
+    /**
+     * @brief Native operation failed without detailed error information.
+     */
+    AXCL_ERR_NATIVE_FAILED      = 0x0B,
+
     AXCL_ERR_MODULE_BASE        = 0x20,
     AXCL_ERR_BUTT               = 0x7F
 } AXCL_ERROR_E;
@@ -85,8 +90,65 @@ typedef enum {
 | <a id="AXCL_ERR_ENCODE"></a>AXCL_ERR_ENCODE | 0x08 | Packet encoding failed. |
 | <a id="AXCL_ERR_DECODE"></a>AXCL_ERR_DECODE | 0x09 | Packet decoding failed. |
 | <a id="AXCL_ERR_UNEXPECT_RESPONSE"></a>AXCL_ERR_UNEXPECT_RESPONSE | 0x0A | An unexpected response was received. |
+| <a id="AXCL_ERR_NATIVE_FAILED"></a>AXCL_ERR_NATIVE_FAILED | 0x0B | Native operation failed without detailed error information. |
 | <a id="AXCL_ERR_MODULE_BASE"></a>AXCL_ERR_MODULE_BASE | 0x20 | - |
 | <a id="AXCL_ERR_BUTT"></a>AXCL_ERR_BUTT | 0x7F | - |
+
+<br>
+
+<a id="axclrtDevAttr"></a>
+
+## axclrtDevAttr
+
+Device attribute type for [axclrtGetDeviceInfo](../device_api.md#axclrtGetDeviceInfo).
+
+```c
+typedef enum axclrtDevAttr {
+    AXCL_DEVICE_ATTR_PHYSICAL_DEVICE_ID = 0,
+    AXCL_DEVICE_ATTR_TYPE,
+    AXCL_DEVICE_ATTR_UID,
+    AXCL_DEVICE_ATTR_PCIE_DOMAIN,
+    AXCL_DEVICE_ATTR_PCIE_BUS,
+    AXCL_DEVICE_ATTR_PCIE_DEV,
+    AXCL_DEVICE_ATTR_PCIE_FUNC,
+    AXCL_DEVICE_ATTR_BUTT
+} axclrtDevAttr;
+```
+
+### Values
+
+| Symbol | Value | Description |
+|---|---|---|
+| <a id="AXCL_DEVICE_ATTR_PHYSICAL_DEVICE_ID"></a>AXCL_DEVICE_ATTR_PHYSICAL_DEVICE_ID | 0 | - |
+| <a id="AXCL_DEVICE_ATTR_TYPE"></a>AXCL_DEVICE_ATTR_TYPE | - | - |
+| <a id="AXCL_DEVICE_ATTR_UID"></a>AXCL_DEVICE_ATTR_UID | - | - |
+| <a id="AXCL_DEVICE_ATTR_PCIE_DOMAIN"></a>AXCL_DEVICE_ATTR_PCIE_DOMAIN | - | - |
+| <a id="AXCL_DEVICE_ATTR_PCIE_BUS"></a>AXCL_DEVICE_ATTR_PCIE_BUS | - | - |
+| <a id="AXCL_DEVICE_ATTR_PCIE_DEV"></a>AXCL_DEVICE_ATTR_PCIE_DEV | - | - |
+| <a id="AXCL_DEVICE_ATTR_PCIE_FUNC"></a>AXCL_DEVICE_ATTR_PCIE_FUNC | - | - |
+| <a id="AXCL_DEVICE_ATTR_BUTT"></a>AXCL_DEVICE_ATTR_BUTT | - | - |
+
+<br>
+
+<a id="axclrtDeviceStatus"></a>
+
+## axclrtDeviceStatus
+
+Device availability status for [axclrtQueryDeviceStatus](../device_api.md#axclrtQueryDeviceStatus).
+
+```c
+typedef enum axclrtDeviceStatus {
+    AXCL_RT_DEVICE_STATUS_ABNORMAL = 0,
+    AXCL_RT_DEVICE_STATUS_NORMAL = 1,
+} axclrtDeviceStatus;
+```
+
+### Values
+
+| Symbol | Value | Description |
+|---|---|---|
+| <a id="AXCL_RT_DEVICE_STATUS_ABNORMAL"></a>AXCL_RT_DEVICE_STATUS_ABNORMAL | 0 | - |
+| <a id="AXCL_RT_DEVICE_STATUS_NORMAL"></a>AXCL_RT_DEVICE_STATUS_NORMAL | 1 | - |
 
 <br>
 
@@ -242,6 +304,52 @@ typedef enum axclrtFileTransferPolicy {
 
 <br>
 
+<a id="axclrtMemAttr"></a>
+
+## axclrtMemAttr
+
+Memory information type for [axclrtGetMemInfo](../memory_api.md#axclrtGetMemInfo).
+
+```c
+typedef enum axclrtMemAttr {
+    AXCL_DDR_CMM = 0,
+    AXCL_DDR_SYS = 1,
+} axclrtMemAttr;
+```
+
+### Values
+
+| Symbol | Value | Description |
+|---|---|---|
+| <a id="AXCL_DDR_CMM"></a>AXCL_DDR_CMM | 0 | - |
+| <a id="AXCL_DDR_SYS"></a>AXCL_DDR_SYS | 1 | - |
+
+<br>
+
+<a id="axclrtMemLocationType"></a>
+
+## axclrtMemLocationType
+
+Memory location type for [axclrtPointerGetAttributes](../memory_api.md#axclrtPointerGetAttributes).
+
+```c
+typedef enum axclrtMemLocationType {
+    AXCL_MEM_LOCATION_TYPE_UNREGISTERED = 0,
+    AXCL_MEM_LOCATION_TYPE_HOST = 1,
+    AXCL_MEM_LOCATION_TYPE_DEVICE = 2,
+} axclrtMemLocationType;
+```
+
+### Values
+
+| Symbol | Value | Description |
+|---|---|---|
+| <a id="AXCL_MEM_LOCATION_TYPE_UNREGISTERED"></a>AXCL_MEM_LOCATION_TYPE_UNREGISTERED | 0 | - |
+| <a id="AXCL_MEM_LOCATION_TYPE_HOST"></a>AXCL_MEM_LOCATION_TYPE_HOST | 1 | - |
+| <a id="AXCL_MEM_LOCATION_TYPE_DEVICE"></a>AXCL_MEM_LOCATION_TYPE_DEVICE | 2 | - |
+
+<br>
+
 <a id="axclrtMemMallocPolicy"></a>
 
 ## axclrtMemMallocPolicy
@@ -295,3 +403,49 @@ typedef enum axclrtMemcpyKind {
 | <a id="AXCL_MEMCPY_DEVICE_TO_DEVICE"></a>AXCL_MEMCPY_DEVICE_TO_DEVICE | 3 | Device memory to device memory |
 | <a id="AXCL_MEMCPY_HOST_PHY_TO_DEVICE"></a>AXCL_MEMCPY_HOST_PHY_TO_DEVICE | 4 | Host physical memory to device memory |
 | <a id="AXCL_MEMCPY_DEVICE_TO_HOST_PHY"></a>AXCL_MEMCPY_DEVICE_TO_HOST_PHY | 5 | Device memory to host physical memory |
+
+<br>
+
+<a id="axclrtPointerAttributeFlag"></a>
+
+## axclrtPointerAttributeFlag
+
+Pointer attribute flags for [axclrtPointerGetAttributes](../memory_api.md#axclrtPointerGetAttributes).
+
+```c
+typedef enum axclrtPointerAttributeFlag {
+    AXCL_POINTER_ATTRIBUTE_FLAG_NONE = 0,
+    AXCL_POINTER_ATTRIBUTE_FLAG_CACHED = 1,
+} axclrtPointerAttributeFlag;
+```
+
+### Values
+
+| Symbol | Value | Description |
+|---|---|---|
+| <a id="AXCL_POINTER_ATTRIBUTE_FLAG_NONE"></a>AXCL_POINTER_ATTRIBUTE_FLAG_NONE | 0 | - |
+| <a id="AXCL_POINTER_ATTRIBUTE_FLAG_CACHED"></a>AXCL_POINTER_ATTRIBUTE_FLAG_CACHED | 1 | - |
+
+<br>
+
+<a id="axclrtStreamStatus"></a>
+
+## axclrtStreamStatus
+
+Stream status enum.
+
+```c
+typedef enum axclrtStreamStatus {
+    AXCL_STREAM_STATUS_COMPLETE  = 0,       /*!< All tasks on the stream have completed */
+    AXCL_STREAM_STATUS_NOT_READY = 1,       /*!< At least one task on the stream has not completed */
+    AXCL_STREAM_STATUS_RESERVED  = 0xFFFF,  /*!< Reserved; set when the query call itself fails */
+} axclrtStreamStatus;
+```
+
+### Values
+
+| Symbol | Value | Description |
+|---|---|---|
+| <a id="AXCL_STREAM_STATUS_COMPLETE"></a>AXCL_STREAM_STATUS_COMPLETE | 0 | All tasks on the stream have completed |
+| <a id="AXCL_STREAM_STATUS_NOT_READY"></a>AXCL_STREAM_STATUS_NOT_READY | 1 | At least one task on the stream has not completed |
+| <a id="AXCL_STREAM_STATUS_RESERVED"></a>AXCL_STREAM_STATUS_RESERVED | 0xFFFF | Reserved; set when the query call itself fails |

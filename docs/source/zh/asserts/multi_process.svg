@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="760" viewBox="0 0 2200 760" role="img" aria-label="AXCL 多 Host App 与 Worker 对应关系图">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#36526f"/>
+    </marker>
+    <style>
+      .bg { fill: #f7fafc; }
+      .title { font: 700 42px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #12263a; }
+      .hostPanel { fill: #eef7ff; stroke: #8db8e3; stroke-width: 3; }
+      .devicePanel { fill: #eefaf3; stroke: #8cc69c; stroke-width: 3; }
+      .app { fill: #ffffff; stroke: #9ec3e8; stroke-width: 3; }
+      .worker { fill: #ffffff; stroke: #9cccaa; stroke-width: 3; }
+      .daemon { fill: #fff9ee; stroke: #dfbd78; stroke-width: 3; }
+      .panelText { font: 700 34px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #28445e; }
+      .boxText { font: 700 30px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #1f3246; }
+      .desc { font: 24px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #617386; }
+      .link { stroke: #36526f; stroke-width: 3.4; fill: none; marker-end: url(#arrow); }
+      .manage { stroke: #b9822f; stroke-width: 3; stroke-dasharray: 9 7; fill: none; marker-end: url(#arrow); }
+      .linkText { font: 24px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #40566f; }
+    </style>
+  </defs>
+
+  <rect width="2200" height="760" class="bg"/>
+  <text x="1100" y="62" text-anchor="middle" class="title">Host App 与 slave_worker 的对应关系</text>
+
+  <rect x="90" y="110" width="900" height="560" rx="26" class="hostPanel"/>
+  <text x="135" y="164" class="panelText">HOST</text>
+
+  <rect x="1210" y="110" width="900" height="560" rx="26" class="devicePanel"/>
+  <text x="1255" y="164" class="panelText">DEVICE</text>
+
+  <rect x="190" y="225" width="260" height="92" rx="16" class="app"/>
+  <text x="320" y="264" text-anchor="middle" class="boxText">App A</text>
+  <text x="320" y="296" text-anchor="middle" class="desc">独立 Host 进程</text>
+
+  <rect x="190" y="365" width="260" height="92" rx="16" class="app"/>
+  <text x="320" y="404" text-anchor="middle" class="boxText">App B</text>
+  <text x="320" y="436" text-anchor="middle" class="desc">独立 Host 进程</text>
+
+  <rect x="190" y="505" width="260" height="92" rx="16" class="app"/>
+  <text x="320" y="544" text-anchor="middle" class="boxText">App C</text>
+  <text x="320" y="576" text-anchor="middle" class="desc">独立 Host 进程</text>
+
+  <rect x="1370" y="225" width="300" height="92" rx="16" class="worker"/>
+  <text x="1520" y="264" text-anchor="middle" class="boxText">slave_worker A</text>
+  <text x="1520" y="296" text-anchor="middle" class="desc">承接 App A 请求</text>
+
+  <rect x="1370" y="365" width="300" height="92" rx="16" class="worker"/>
+  <text x="1520" y="404" text-anchor="middle" class="boxText">slave_worker B</text>
+  <text x="1520" y="436" text-anchor="middle" class="desc">承接 App B 请求</text>
+
+  <rect x="1370" y="505" width="300" height="92" rx="16" class="worker"/>
+  <text x="1520" y="544" text-anchor="middle" class="boxText">slave_worker C</text>
+  <text x="1520" y="576" text-anchor="middle" class="desc">承接 App C 请求</text>
+
+  <rect x="1785" y="225" width="250" height="372" rx="18" class="daemon"/>
+  <text x="1910" y="390" text-anchor="middle" class="boxText">slave_daemon</text>
+  <text x="1910" y="424" text-anchor="middle" class="desc">常驻管理</text>
+  <text x="1910" y="456" text-anchor="middle" class="desc">Worker 生命周期</text>
+
+  <line x1="450" y1="271" x2="1370" y2="271" class="link"/>
+  <text x="790" y="252" class="linkText">专属通信通道</text>
+  <line x1="450" y1="411" x2="1370" y2="411" class="link"/>
+  <text x="790" y="392" class="linkText">专属通信通道</text>
+  <line x1="450" y1="551" x2="1370" y2="551" class="link"/>
+  <text x="790" y="532" class="linkText">专属通信通道</text>
+
+  <line x1="1785" y1="271" x2="1670" y2="271" class="manage"/>
+  <line x1="1785" y1="411" x2="1670" y2="411" class="manage"/>
+  <line x1="1785" y1="551" x2="1670" y2="551" class="manage"/>
+</svg>

@@ -7,5 +7,6 @@
 	:maxdepth: 2
 
 	arch/index
+	build/index
 	c/index
 	python/index

@@ -4,6 +4,7 @@
 
 - [axclrtFree](#axclrtFree)
 - [axclrtFreeHost](#axclrtFreeHost)
+- [axclrtGetMemInfo](#axclrtGetMemInfo)
 - [axclrtMalloc](#axclrtMalloc)
 - [axclrtMallocCached](#axclrtMallocCached)
 - [axclrtMallocHost](#axclrtMallocHost)
@@ -15,6 +16,7 @@
 - [axclrtMemcpyAsync](#axclrtMemcpyAsync)
 - [axclrtMemset](#axclrtMemset)
 - [axclrtMemsetAsync](#axclrtMemsetAsync)
+- [axclrtPointerGetAttributes](#axclrtPointerGetAttributes)
 
 <br>
 
@@ -75,6 +77,33 @@ AXCL_EXPORT axclError axclrtFreeHost(void *hostPtr);
 #### Remark
 
 [axclrtMallocHost](#axclrtMallocHost)
+
+<br>
+
+<a id="axclrtGetMemInfo"></a>
+
+### axclrtGetMemInfo
+
+Get memory information.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtGetMemInfo(axclrtMemAttr attr, size_t *free, size_t *total);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| attr | in | memory info type |
+| free | out | free bytes |
+| total | out | total bytes |
+
+#### Returns
+
+- `AXCL_SUCC`: success.
+- `others`: failure.
 
 <br>
 
@@ -358,12 +387,13 @@ AXCL_EXPORT axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t
 | dstPtr | in | Destination memory. |
 | srcPtr | in | Source memory. |
 | count | in | Number of bytes to copy. |
-| kind | in | Memory copy kind of [axclrtMemcpyKind](reference/enum.md#axclrtMemcpyKind). |
+| kind | in | Memory copy kind of [axclrtMemcpyKind](reference/enum.md#axclrtMemcpyKind). Note: AXCL_MEMCPY_DEVICE_TO_DEVICE is not supported, returns AXCL_ERR_RT_UNSUPPORT. |
 | stream | in | stream created by [axclrtCreateStream](stream_api.md#axclrtCreateStream). |
 
 #### Returns
 
 - `AXCL_SUCC`: success.
+- `AXCL_ERR_RT_UNSUPPORT`: kind is AXCL_MEMCPY_DEVICE_TO_DEVICE.
 - `others`: failure.
 
 <br>
@@ -419,6 +449,32 @@ AXCL_EXPORT axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t coun
 | value | in | Value to set. |
 | count | in | Number of bytes to set. |
 | stream | in | stream created by [axclrtCreateStream](stream_api.md#axclrtCreateStream). |
+
+#### Returns
+
+- `AXCL_SUCC`: success.
+- `others`: failure.
+
+<br>
+
+<a id="axclrtPointerGetAttributes"></a>
+
+### axclrtPointerGetAttributes
+
+Get pointer attributes.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtPointerGetAttributes(const void *ptr, axclrtPtrAttributes *attributes);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| ptr | in | Pointer to query. |
+| attributes | out | Pointer attributes. |
 
 #### Returns
 

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="330" viewBox="0 0 920 330" role="img" aria-labelledby="title desc">
+  <title id="title">Stream ordering relationship diagram</title>
+  <desc id="desc">Tasks in the same Stream execute in submission order. Different Streams have no ordering dependency by default.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#565656" /></marker>
+    <style>
+      .box { fill:#f5f6f8; stroke:#b9bec7; stroke-width:1.5; rx:10; }
+      .title { font:18px sans-serif; fill:#222; text-anchor:middle; dominant-baseline:middle; font-weight:600; }
+      .label { font:15px sans-serif; fill:#222; text-anchor:end; dominant-baseline:middle; }
+      .task { fill:#dcecff; stroke:#b8d5ff; stroke-width:1; rx:6; }
+      .task2 { fill:#e8e2ff; stroke:#d0c4ff; stroke-width:1; rx:6; }
+      .text { font:15px sans-serif; fill:#111; text-anchor:middle; dominant-baseline:middle; }
+      .small { font:13px sans-serif; fill:#444; text-anchor:middle; dominant-baseline:middle; }
+      .line { stroke:#565656; stroke-width:2; fill:none; marker-end:url(#arrow); }
+      .dash { stroke:#999; stroke-width:1.5; stroke-dasharray:7 6; fill:none; }
+    </style>
+  </defs>
+  <rect class="box" x="24" y="24" width="872" height="282" />
+  <text class="title" x="460" y="52">Stream organizes asynchronous task execution order</text>
+
+  <text class="label" x="128" y="112">stream0</text>
+  <path class="line" d="M150,112 L825,112" />
+  <rect class="task" x="185" y="88" width="135" height="48" /><text class="text" x="252" y="112">H2D copy</text>
+  <rect class="task" x="392" y="88" width="135" height="48" /><text class="text" x="459" y="112">Compute task</text>
+  <rect class="task" x="599" y="88" width="135" height="48" /><text class="text" x="666" y="112">D2H copy</text>
+  <text class="small" x="460" y="157">In the same Stream, tasks execute in submission order</text>
+
+  <text class="label" x="128" y="216">stream1</text>
+  <path class="line" d="M150,216 L825,216" />
+  <rect class="task2" x="220" y="192" width="110" height="48" /><text class="text" x="275" y="216">task A</text>
+  <rect class="task2" x="520" y="192" width="110" height="48" /><text class="text" x="575" y="216">task B</text>
+  <path class="dash" d="M275,146 L275,186" />
+  <path class="dash" d="M575,146 L575,186" />
+  <text class="small" x="460" y="270">Different Streams have no default ordering; use Event for dependencies</text>
+</svg>

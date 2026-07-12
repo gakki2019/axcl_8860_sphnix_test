@@ -7,5 +7,6 @@ This section collects architecture notes and language-specific development inter
 	:maxdepth: 2
 
 	arch/index
+	build/index
 	c/index
 	python/index

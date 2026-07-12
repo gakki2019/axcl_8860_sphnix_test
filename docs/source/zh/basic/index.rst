@@ -7,5 +7,5 @@
 	:maxdepth: 1
 
 	overview
-	install
+	install/index
 	quick_start

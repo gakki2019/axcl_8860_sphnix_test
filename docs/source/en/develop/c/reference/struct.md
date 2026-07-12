@@ -9,7 +9,7 @@ Crash dump configuration structure.
 ```c
 typedef struct {
     const char* dump_dir;   /**< Dump file output directory. */
-    const char* dump_type;  /**< Dump type or level such as "Normal" or "FullMemory". */
+    const char* dump_type;  /**< Reserved for compatibility. Ignored by the Breakpad minicoredump implementation. */
 } axclCrashDumpConfig;
 ```
 
@@ -18,7 +18,7 @@ typedef struct {
 | Name | Type | Description |
 |---|---|---|
 | dump_dir | const char * | Dump file output directory. |
-| dump_type | const char * | Dump type or level such as "Normal" or "FullMemory". |
+| dump_type | const char * | Reserved for compatibility. Ignored by the Breakpad minicoredump implementation. |
 
 <br>
 
@@ -41,6 +41,52 @@ typedef struct axclrtEngineIODims {
 |---|---|---|
 | dimCount | int32_t | Number of valid dimensions in the shape. |
 | dims | int32_t[AXCLRT_ENGINE_MAX_DIM_CNT] | Dimension values in logical tensor order. |
+
+<br>
+
+<a id="axclrtMemLocation"></a>
+
+## axclrtMemLocation
+
+Memory location information.
+
+```c
+typedef struct axclrtMemLocation {
+    axclrtMemLocationType type;
+    int32_t id;
+} axclrtMemLocation;
+```
+
+### Fields
+
+| Name | Type | Description |
+|---|---|---|
+| type | axclrtMemLocationType | - |
+| id | int32_t | - |
+
+<br>
+
+<a id="axclrtPtrAttributes"></a>
+
+## axclrtPtrAttributes
+
+Pointer attributes returned by [axclrtPointerGetAttributes](../memory_api.md#axclrtPointerGetAttributes).
+
+```c
+typedef struct axclrtPtrAttributes {
+    axclrtMemLocation location;
+    uint32_t flags;
+    uint32_t rsv[3];
+} axclrtPtrAttributes;
+```
+
+### Fields
+
+| Name | Type | Description |
+|---|---|---|
+| location | axclrtMemLocation | - |
+| flags | uint32_t | - |
+| rsv | uint32_t[3] | - |
 
 <br>
 

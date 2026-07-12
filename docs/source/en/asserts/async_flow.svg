@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="560" viewBox="0 0 980 560" role="img" aria-labelledby="title desc">
+  <title id="title">Async task submission, execution, and synchronization</title>
+  <desc id="desc">Host submits asynchronous tasks to the Device Stream FIFO. The Device executes tasks in FIFO order. The Sync node returns after preceding tasks complete; later tasks are outside this synchronization scope.</desc>
+  <defs>
+    <linearGradient id="bg" x1="24" y1="24" x2="956" y2="536" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" />
+      <stop offset="1" stop-color="#f1f5f9" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.12" />
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#475569" /></marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#2563eb" /></marker>
+    <marker id="arrow-return" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#f97316" /></marker>
+    <marker id="arrow-small" markerWidth="7" markerHeight="7" refX="6" refY="2.5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,5 L7,2.5 z" fill="#94a3b8" /></marker>
+    <style>
+      text { font-family:"Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif; }
+      .panel { fill:url(#bg); stroke:#cbd5e1; stroke-width:1.2; rx:14; }
+      .host-panel { fill:#fff7ed; stroke:#fdba74; stroke-width:1.4; rx:12; filter:url(#shadow); }
+      .device-panel { fill:#eff6ff; stroke:#93c5fd; stroke-width:1.4; rx:12; filter:url(#shadow); }
+      .group { fill:#ffffff; stroke:#d1d5db; stroke-width:1.1; rx:10; filter:url(#shadow); }
+      .task { fill:#dbeafe; stroke:#93c5fd; stroke-width:1; rx:7; }
+      .sync { fill:#ffedd5; stroke:#fdba74; stroke-width:1; rx:7; }
+      .later { fill:#ede9fe; stroke:#c4b5fd; stroke-width:1; rx:7; }
+      .exec { fill:#dcfce7; stroke:#86efac; stroke-width:1; rx:7; }
+      .title { font-size:20px; fill:#0f172a; text-anchor:middle; dominant-baseline:middle; font-weight:700; letter-spacing:0.5px; }
+      .section { font-size:17px; fill:#0f172a; text-anchor:middle; dominant-baseline:middle; font-weight:700; letter-spacing:0.4px; }
+      .side { font-size:15px; fill:#334155; text-anchor:middle; dominant-baseline:middle; font-weight:700; }
+      .small { font-size:13px; fill:#475569; text-anchor:middle; dominant-baseline:middle; font-weight:400; }
+      .tiny { font-size:12px; fill:#475569; text-anchor:middle; dominant-baseline:middle; font-weight:600; }
+      .note { font-size:12px; fill:#c2410c; text-anchor:middle; dominant-baseline:middle; font-weight:600; }
+      .node { font-size:14px; fill:#0f172a; text-anchor:middle; dominant-baseline:middle; font-weight:500; }
+      .num { fill:#2563eb; stroke:#1d4ed8; stroke-width:1; }
+      .num-text { font-size:12px; fill:#fff; text-anchor:middle; dominant-baseline:middle; font-weight:700; }
+      .line { stroke:#475569; stroke-width:2; fill:none; marker-end:url(#arrow); stroke-linecap:round; stroke-linejoin:round; }
+      .order { stroke:#94a3b8; stroke-width:1.1; stroke-dasharray:4 4; fill:none; marker-end:url(#arrow-small); stroke-linecap:round; }
+      .blue { stroke:#2563eb; stroke-width:2; fill:none; marker-end:url(#arrow-blue); stroke-linecap:round; }
+      .return { stroke:#f97316; stroke-width:2.2; fill:none; marker-end:url(#arrow-return); stroke-linecap:round; stroke-linejoin:round; }
+      .scope { stroke:#fb923c; stroke-width:1.8; stroke-dasharray:8 6; fill:none; rx:10; opacity:0.95; }
+    </style>
+  </defs>
+
+  <rect class="panel" x="24" y="24" width="932" height="512" rx="16" />
+  <text class="title" x="490" y="54">Async task submission, execution, and synchronization</text>
+
+  <!-- Host and Device panels -->
+  <rect class="host-panel" x="58" y="84" width="250" height="412" rx="14" />
+  <text class="section" x="183" y="108">HOST</text>
+  <text class="side" x="183" y="132">Tasks</text>
+
+  <rect class="device-panel" x="356" y="84" width="566" height="412" rx="14" />
+  <text class="section" x="639" y="108">DEVICE</text>
+  <text class="side" x="639" y="132">Stream</text>
+  <text class="side" x="480" y="152">FIFO</text>
+  <text class="side" x="780" y="152">Task execution</text>
+
+  <!-- Host tasks -->
+  <rect class="task" rx="7" x="103" y="174" width="160" height="34" /><circle class="num" cx="123" cy="191" r="10" /><text class="num-text" x="123" y="191">1</text><text class="node" x="188" y="191">H2D copy</text>
+  <rect class="task" rx="7" x="103" y="228" width="160" height="34" /><circle class="num" cx="123" cy="245" r="10" /><text class="num-text" x="123" y="245">2</text><text class="node" x="188" y="245">Inference</text>
+  <rect class="task" rx="7" x="103" y="282" width="160" height="34" /><circle class="num" cx="123" cy="299" r="10" /><text class="num-text" x="123" y="299">3</text><text class="node" x="188" y="299">D2H copy</text>
+  <rect class="sync" rx="7" x="103" y="336" width="160" height="48" /><circle class="num" cx="123" cy="352" r="10" /><text class="num-text" x="123" y="352">4</text><text class="node" x="188" y="352">Sync node</text><text class="tiny" x="188" y="370">Host blocks</text>
+  <rect class="later" rx="7" x="103" y="436" width="160" height="34" /><circle class="num" cx="123" cy="453" r="10" /><text class="num-text" x="123" y="453">5</text><text class="node" x="188" y="453">Later task</text>
+
+  <!-- Device FIFO tasks -->
+  <rect class="group" x="380" y="166" width="200" height="318" rx="12" />
+  <rect class="task" rx="7" x="400" y="174" width="160" height="34" /><circle class="num" cx="420" cy="191" r="10" /><text class="num-text" x="420" y="191">1</text><text class="node" x="485" y="191">H2D copy</text>
+  <rect class="task" rx="7" x="400" y="228" width="160" height="34" /><circle class="num" cx="420" cy="245" r="10" /><text class="num-text" x="420" y="245">2</text><text class="node" x="485" y="245">Inference</text>
+  <rect class="task" rx="7" x="400" y="282" width="160" height="34" /><circle class="num" cx="420" cy="299" r="10" /><text class="num-text" x="420" y="299">3</text><text class="node" x="485" y="299">D2H copy</text>
+  <rect class="sync" rx="7" x="400" y="336" width="160" height="34" /><circle class="num" cx="420" cy="353" r="10" /><text class="num-text" x="420" y="353">4</text><text class="node" x="485" y="353">Sync node</text>
+  <rect class="later" rx="7" x="400" y="436" width="160" height="34" /><circle class="num" cx="420" cy="453" r="10" /><text class="num-text" x="420" y="453">5</text><text class="node" x="485" y="453">Later task</text>
+
+  <!-- Device execute tasks -->
+  <rect class="group" x="680" y="166" width="200" height="318" rx="12" />
+  <rect class="exec" rx="7" x="700" y="174" width="160" height="34" /><circle class="num" cx="720" cy="191" r="10" /><text class="num-text" x="720" y="191">1</text><text class="node" x="785" y="191">H2D copy</text>
+  <rect class="exec" rx="7" x="700" y="228" width="160" height="34" /><circle class="num" cx="720" cy="245" r="10" /><text class="num-text" x="720" y="245">2</text><text class="node" x="785" y="245">Inference</text>
+  <rect class="exec" rx="7" x="700" y="282" width="160" height="34" /><circle class="num" cx="720" cy="299" r="10" /><text class="num-text" x="720" y="299">3</text><text class="node" x="785" y="299">D2H copy</text>
+  <rect class="sync" rx="7" x="700" y="336" width="160" height="34" /><circle class="num" cx="720" cy="353" r="10" /><text class="num-text" x="720" y="353">4</text><text class="node" x="785" y="353">Sync / return</text>
+  <rect class="later" rx="7" x="700" y="436" width="160" height="34" /><circle class="num" cx="720" cy="453" r="10" /><text class="num-text" x="720" y="453">5</text><text class="node" x="785" y="453">Later task</text>
+
+  <!-- submit arrows -->
+  <path class="blue" d="M263,191 L397,191" /><text class="tiny" x="330" y="180">Submit</text>
+  <path class="blue" d="M263,245 L397,245" /><text class="tiny" x="330" y="234">Submit</text>
+  <path class="blue" d="M263,299 L397,299" /><text class="tiny" x="330" y="288">Submit</text>
+  <path class="blue" d="M263,353 L397,353" /><text class="tiny" x="330" y="342">Submit</text>
+  <path class="blue" d="M263,453 L397,453" /><text class="tiny" x="330" y="442">Submit</text>
+
+  <!-- execute arrows -->
+  <path class="line" d="M566,191 L690,191" /><text class="tiny" x="628" y="180">Execute</text>
+  <path class="line" d="M566,245 L690,245" /><text class="tiny" x="628" y="234">Execute</text>
+  <path class="line" d="M566,299 L690,299" /><text class="tiny" x="628" y="288">Execute</text>
+  <path class="line" d="M566,353 L690,353" /><text class="tiny" x="628" y="342">Execute</text>
+  <path class="line" d="M566,453 L690,453" /><text class="tiny" x="628" y="442">Execute</text>
+
+  <!-- vertical order arrows: Host submit, FIFO, and task execution -->
+  <path class="order" d="M183,211 L183,225" />
+  <path class="order" d="M183,265 L183,279" />
+  <path class="order" d="M183,319 L183,333" />
+  <path class="order" d="M183,390 L183,432" />
+
+  <path class="order" d="M480,212 L480,222" />
+  <path class="order" d="M480,266 L480,276" />
+  <path class="order" d="M480,320 L480,330" />
+  <path class="order" d="M480,382 L480,426" />
+
+  <path class="order" d="M780,212 L780,222" />
+  <path class="order" d="M780,266 L780,276" />
+  <path class="order" d="M780,320 L780,330" />
+  <path class="order" d="M780,382 L780,426" />
+
+  <path class="line" d="M895,174 L895,482" />
+  <text class="small" x="912" y="318" transform="rotate(90 912 318)">Execution order</text>
+
+  <!-- sync scope and return line -->
+  <rect class="scope" x="388" y="168" width="184" height="214" />
+  <path class="return" d="M860,353 L912,353 L912,392 L183,392" />
+  <text class="note" x="183" y="405">Sync waits for 1/2/3, then submit task 5</text>
+</svg>

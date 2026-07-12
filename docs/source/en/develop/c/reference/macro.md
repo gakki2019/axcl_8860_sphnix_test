@@ -144,6 +144,30 @@ Compose a module-specific AXCL error code.
 
 <br>
 
+<a id="AXCL_EVENT_DEFAULT"></a>
+
+## AXCL_EVENT_DEFAULT
+
+Default event creation flag.
+
+```c
+#define AXCL_EVENT_DEFAULT 0x0
+```
+
+<br>
+
+<a id="AXCL_EVENT_DISABLE_TIMING"></a>
+
+## AXCL_EVENT_DISABLE_TIMING
+
+Disable event timing flag.
+
+```c
+#define AXCL_EVENT_DISABLE_TIMING 0x2
+```
+
+<br>
+
 <a id="AXCL_EXPORT"></a>
 
 ## AXCL_EXPORT

@@ -1,26 +1,26 @@
 # 控制
 
-## 目录
+## 1. 目录
 
 - [axclrtControlExecuteShellCmd](#axclrtControlExecuteShellCmd)
 
 <br>
 
-## API
+## 2. API
 
 <a id="axclrtControlExecuteShellCmd"></a>
 
-### axclrtControlExecuteShellCmd
+### 2.1. axclrtControlExecuteShellCmd
 
 执行 Shell 命令。
 
-#### 函数
+#### 2.1.1. 函数
 
 ```c
 AXCL_EXPORT axclError axclrtControlExecuteShellCmd(const char *cmd, const char *const args[], size_t argc, const char **output, int32_t timeout);
 ```
 
-#### 参数
+#### 2.1.2. 参数
 
 | 名称    | 方向 | 说明                   |
 | ------- | ---- | ---------------------- |
@@ -30,7 +30,7 @@ AXCL_EXPORT axclError axclrtControlExecuteShellCmd(const char *cmd, const char *
 | output  | out  | 命令输出。             |
 | timeout | in   | 超时时间，单位为毫秒。 |
 
-#### 返回值
+#### 2.1.3. 返回值
 
 - `AXCL_SUCC`：成功。
 - `others`：失败。

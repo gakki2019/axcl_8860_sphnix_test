@@ -1,8 +1,6 @@
 AXCL SDK Documentation
 ======================
 
-This site contains the bilingual AXCL SDK documentation built with Sphinx. The current page is the English entry point.
-
 Language switch: :doc:`简体中文 </zh/index>`
 
 .. toctree::
@@ -12,3 +10,4 @@ Language switch: :doc:`简体中文 </zh/index>`
 	basic/index
 	develop/index
 	faq/index
+	appendix/index

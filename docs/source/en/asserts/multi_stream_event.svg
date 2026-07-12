@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1180" viewBox="0 0 760 1180" role="img" aria-labelledby="title desc">
+  <title id="title">Multi-Stream dependency relationship through Event diagram</title>
+  <desc id="desc">After AXCL initialization, create two Streams and Event e. s0 executes task A and records e. s1 executes independent task and waits for e; after e is set, task B that depends on task A continues. Finally synchronize the Streams, destroy resources, and finalize.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569" />
+    </marker>
+    <marker id="arrow-e" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#f97316" />
+    </marker>
+    <style>
+      text { font-family:"Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif; }
+      .page-title { font-size:19px; fill:#0f172a; text-anchor:middle; dominant-baseline:middle; font-weight:700; }
+      .flow-box { fill:#cfe0ff; stroke:#9dbdff; stroke-width:1.2; rx:7; }
+      .stream-area { fill:#eef2f7; stroke:#cbd5e1; stroke-width:1.2; rx:8; }
+      .stream-box { fill:#cfe0ff; stroke:#9dbdff; stroke-width:1.2; rx:6; }
+      .record-box { fill:#ffedd5; stroke:#fdba74; stroke-width:1.2; rx:6; }
+      .wait-box { fill:#fee2e2; stroke:#fca5a5; stroke-width:1.2; rx:6; }
+      .label { font-size:14px; fill:#0f172a; text-anchor:middle; dominant-baseline:middle; font-weight:500; }
+      .api { font-size:13px; fill:#1d4ed8; text-anchor:middle; dominant-baseline:middle; font-weight:600; }
+      .small { font-size:12px; fill:#475569; text-anchor:middle; dominant-baseline:middle; }
+      .note { font-size:12px; fill:#c2410c; text-anchor:middle; dominant-baseline:middle; font-weight:600; }
+      .line { stroke:#475569; stroke-width:1.7; fill:none; marker-end:url(#arrow); }
+      .line-noarrow { stroke:#475569; stroke-width:1.5; fill:none; }
+      .e-line { stroke:#f97316; stroke-width:1.8; fill:none; marker-end:url(#arrow-e); stroke-linejoin:round; }
+    </style>
+  </defs>
+
+  <text class="page-title" x="380" y="28">Multi-Stream dependency through Event</text>
+
+  <!-- top common flow -->
+  <rect class="flow-box" x="250" y="48" width="260" height="58" />
+  <text class="label" x="380" y="70">Initialize</text>
+  <text class="api" x="380" y="91">axclInit(NULL)</text>
+
+  <path class="line" d="M380,106 L380,138" />
+  <rect class="flow-box" x="250" y="138" width="260" height="58" />
+  <text class="label" x="380" y="160">Select runtime Device</text>
+  <text class="api" x="380" y="181">axclrtSetDevice(0)</text>
+
+  <path class="line" d="M380,196 L380,228" />
+
+  <!-- stream area -->
+  <rect class="stream-area" x="42" y="228" width="676" height="558" />
+
+  <!-- left s0 -->
+  <rect class="stream-box" x="74" y="258" width="260" height="58" />
+  <text class="label" x="204" y="280">Create s0</text>
+  <text class="api" x="204" y="301">axclrtCreateStream(&amp;s0)</text>
+
+  <path class="line" d="M204,316 L204,348" />
+  <rect class="record-box" x="74" y="348" width="260" height="58" />
+  <text class="label" x="204" y="370">Create e</text>
+  <text class="api" x="204" y="391">axclrtCreateEvent(&amp;e)</text>
+
+  <path class="line" d="M204,406 L204,438" />
+  <rect class="stream-box" x="74" y="438" width="260" height="58" />
+  <text class="label" x="204" y="460">Submit and execute task A</text>
+  <text class="api" x="204" y="481">Submit task A to s0</text>
+
+  <path class="line" d="M204,496 L204,528" />
+  <rect class="record-box" x="74" y="528" width="260" height="58" />
+  <text class="label" x="204" y="550">Record e in s0</text>
+  <text class="api" x="204" y="571">axclrtRecordEvent(e, s0)</text>
+
+  <path class="line" d="M204,586 L204,626" />
+  <rect class="stream-box" x="74" y="626" width="260" height="36" />
+  <text class="label" x="204" y="644">s0 later tasks ...</text>
+
+  <path class="line" d="M204,662 L204,700" />
+  <rect class="stream-box" x="74" y="700" width="260" height="58" />
+  <text class="label" x="204" y="722">Wait for s0 tasks</text>
+  <text class="api" x="204" y="743">axclrtSynchronizeStream(s0)</text>
+
+  <!-- right s1 -->
+  <rect class="stream-box" x="426" y="258" width="260" height="58" />
+  <text class="label" x="556" y="280">Create s1</text>
+  <text class="api" x="556" y="301">axclrtCreateStream(&amp;s1)</text>
+
+  <path class="line" d="M556,316 L556,348" />
+  <rect class="stream-box" x="426" y="348" width="260" height="58" />
+  <text class="label" x="556" y="370">Submit and execute independent task</text>
+  <text class="api" x="556" y="391">Submit independent task to s1</text>
+
+  <path class="line" d="M556,406 L556,438" />
+  <rect class="wait-box" x="426" y="438" width="260" height="58" />
+  <text class="label" x="556" y="460">Wait for e</text>
+  <text class="api" x="556" y="481">axclrtStreamWaitEvent(s1, e)</text>
+
+  <path class="line" d="M556,496 L556,528" />
+  <rect class="stream-box" x="426" y="528" width="260" height="58" />
+  <text class="label" x="556" y="550">Submit and execute task B</text>
+  <text class="api" x="556" y="571">task B depends on task A</text>
+
+  <path class="line" d="M556,586 L556,626" />
+  <rect class="stream-box" x="426" y="626" width="260" height="36" />
+  <text class="label" x="556" y="644">s1 later tasks ...</text>
+
+  <path class="line" d="M556,662 L556,700" />
+  <rect class="stream-box" x="426" y="700" width="260" height="58" />
+  <text class="label" x="556" y="722">Wait for s1 tasks</text>
+  <text class="api" x="556" y="743">axclrtSynchronizeStream(s1)</text>
+
+  <!-- Event dependency between streams -->
+  <path class="e-line" d="M334,557 L380,557 L380,467 L423,467" />
+  <text class="note" x="382" y="542">e set</text>
+  <text class="note" x="382" y="486">release s1</text>
+
+  <!-- bottom common flow -->
+  <path class="line-noarrow" d="M204,758 L204,796 L380,796" />
+  <path class="line-noarrow" d="M556,758 L556,796 L380,796" />
+  <path class="line" d="M380,796 L380,838" />
+  <rect class="flow-box" x="250" y="838" width="260" height="58" />
+  <text class="label" x="380" y="860">Destroy e</text>
+  <text class="api" x="380" y="881">axclrtDestroyEvent(e)</text>
+
+  <path class="line" d="M380,896 L380,924" />
+  <rect class="flow-box" x="230" y="924" width="300" height="74" />
+  <text class="label" x="380" y="944">Destroy Stream</text>
+  <text class="api" x="380" y="964">axclrtDestroyStream(s0)</text>
+  <text class="api" x="380" y="982">axclrtDestroyStream(s1)</text>
+
+  <path class="line" d="M380,998 L380,1028" />
+  <rect class="flow-box" x="250" y="1028" width="260" height="58" />
+  <text class="label" x="380" y="1050">Reset Device</text>
+  <text class="api" x="380" y="1071">axclrtResetDevice(0)</text>
+
+  <path class="line" d="M380,1086 L380,1114" />
+  <rect class="flow-box" x="250" y="1114" width="260" height="44" />
+  <text class="label" x="380" y="1133">Finalize</text>
+  <text class="api" x="380" y="1150">axclFinalize()</text>
+</svg>

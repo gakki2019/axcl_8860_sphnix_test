@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="310" viewBox="0 0 980 310">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .panel { fill: #ffffff; stroke: #d6dee9; stroke-width: 1.5; rx: 16; }
+      .hostPanel { fill: #f5f9ff; stroke: #9cc5ef; }
+      .devPanel { fill: #f5fbf6; stroke: #9bd2a6; }
+      .boxHost { fill: #edf6ff; stroke: #6aa9e9; stroke-width: 1.5; rx: 10; }
+      .boxDev { fill: #edf9f0; stroke: #66bd7a; stroke-width: 1.5; rx: 10; }
+      .title { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 20px; font-weight: 700; fill: #1e293b; }
+      .label { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 16px; font-weight: 700; fill: #263445; }
+      .small { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 13px; fill: #64748b; }
+      .smallRight { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 13px; fill: #64748b; text-anchor: end; }
+      .code { font-family: Consolas, 'Courier New', monospace; font-size: 13px; fill: #334155; }
+      .arrowBlue { stroke: #2f6fb5; stroke-width: 2.4; fill: none; marker-end: url(#arrowBlue); }
+      .arrowGreen { stroke: #3f9560; stroke-width: 2.4; fill: none; marker-end: url(#arrowGreen); }
+      .arrowDown { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arrowDown); }
+      .captionBlue { font-family: Consolas, 'Courier New', monospace; font-size: 13px; font-weight: 700; fill: #2f6fb5; }
+      .captionGreen { font-family: Consolas, 'Courier New', monospace; font-size: 13px; font-weight: 700; fill: #3f9560; text-anchor: end; }
+      .step { fill: #eef4ff; stroke: #5b7fc7; stroke-width: 1.2; }
+      .stepText { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 12px; font-weight: 700; fill: #285f9f; text-anchor: middle; }
+    </style>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f6fb5"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#3f9560"/>
+    </marker>
+    <marker id="arrowDown" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="980" height="310"/>
+
+  <rect class="panel hostPanel" x="40" y="40" width="300" height="220"/>
+  <rect class="panel devPanel" x="640" y="40" width="300" height="220"/>
+
+  <text class="title" x="70" y="78">HOST</text>
+  <text class="title" x="670" y="78">DEVICE</text>
+
+  <rect class="boxHost" x="75" y="100" width="230" height="70"/>
+  <text class="label" x="104" y="130">Input image</text>
+  <text class="code" x="104" y="154">Image data</text>
+
+  <rect class="boxHost" x="75" y="188" width="230" height="50"/>
+  <text class="label" x="104" y="219">Detection result</text>
+
+  <rect class="boxDev" x="675" y="100" width="230" height="70"/>
+  <text class="label" x="704" y="130">CNN detection model</text>
+  <text class="small" x="704" y="154">Read image and infer</text>
+
+  <rect class="boxDev" x="675" y="188" width="230" height="50"/>
+  <text class="label" x="704" y="219">Detection result</text>
+
+  <path class="arrowBlue" d="M 305 135 L 675 135"/>
+  <circle class="step" cx="405" cy="135" r="14"/>
+  <text class="stepText" x="405" y="140">1</text>
+  <text class="small" x="420" y="158">Copy image from Host to Device</text>
+  <text class="captionBlue" x="420" y="120">axclrtMemcpy(H2D)</text>
+
+  <path class="arrowDown" d="M 790 170 L 790 188"/>
+  <circle class="step" cx="820" cy="179" r="14"/>
+  <text class="stepText" x="820" y="184">2</text>
+
+  <path class="arrowGreen" d="M 675 213 L 305 213"/>
+  <circle class="step" cx="575" cy="213" r="14"/>
+  <text class="stepText" x="575" y="218">3</text>
+  <text class="smallRight" x="560" y="197">Copy result from Device to Host</text>
+  <text class="captionGreen" x="560" y="240">axclrtMemcpy(D2H)</text>
+</svg>

@@ -1,6 +1,6 @@
 # AXCL API 索引
 
-## API 页面
+## 1. API 页面
 
 - [上下文 API](context_api.md)
 - [控制 API](control_api.md)
@@ -13,7 +13,7 @@
 
 <br>
 
-## 参考页面
+## 2. 参考页面
 
 - [枚举](reference/enum.md)
 - [结构体与类型定义](reference/struct.md)

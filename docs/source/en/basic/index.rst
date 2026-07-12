@@ -7,5 +7,5 @@ This section introduces the AXCL SDK at a product level before readers move into
 	:maxdepth: 1
 
 	overview
-	install
+	install/index
 	quick_start

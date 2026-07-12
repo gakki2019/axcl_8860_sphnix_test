@@ -1,0 +1,200 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="2760" viewBox="0 0 3000 2760" role="img" aria-label="AXCL Host Device 系统架构图">
+  <defs>
+    <linearGradient id="hostGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef7ff"/>
+      <stop offset="1" stop-color="#f9fcff"/>
+    </linearGradient>
+    <linearGradient id="deviceGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eefaf3"/>
+      <stop offset="1" stop-color="#fbfefc"/>
+    </linearGradient>
+    <linearGradient id="pcieGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#24415f"/>
+      <stop offset="0.55" stop-color="#2f5f86"/>
+      <stop offset="1" stop-color="#24415f"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-8%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#16324a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #f5f8fb; }
+      .panelHost { fill: url(#hostGrad); stroke: #5b8ec2; stroke-width: 4; filter: url(#shadow); }
+      .panelDevice { fill: url(#deviceGrad); stroke: #5fa878; stroke-width: 4; filter: url(#shadow); }
+      .sideHost { fill: #24415f; }
+      .sideDevice { fill: #2f5f45; }
+      .rowHost { fill: #e7f1fb; stroke: #c8dbed; stroke-width: 2.5; }
+      .rowDevice { fill: #e8f5ed; stroke: #c8dfcf; stroke-width: 2.5; }
+      .cardHost { fill: #ffffff; stroke: #b9d1ea; stroke-width: 3; filter: url(#shadow); }
+      .cardDevice { fill: #ffffff; stroke: #bddbc7; stroke-width: 3; filter: url(#shadow); }
+      .cardKernel { fill: #fff9ee; stroke: #dfbd78; stroke-width: 3; filter: url(#shadow); }
+      .cardHw { fill: #f8fbff; stroke: #c2d2e3; stroke-width: 3; filter: url(#shadow); }
+      .pcie { fill: url(#pcieGrad); filter: url(#shadow); }
+      .pcieLeft { fill: #1e354f; opacity: 0.92; }
+      .title { font: 700 40px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #0f2135; }
+      .titleSmall { font: 700 36px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #0f2135; }
+      .subtitle { font: 27px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #4e6278; }
+      .note { font: 27px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #627384; }
+      .rowText { font: 700 40px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #385068; }
+      .sideText { font: 700 49px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #ffffff; letter-spacing: 23px; }
+      .pcieText { font: 700 49px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #ffffff; letter-spacing: 4px; }
+      .chip { fill: #f5f9fd; stroke: #bacadd; stroke-width: 2.4; }
+      .chipBlue { fill: #edf6ff; stroke: #99bee4; stroke-width: 2.4; }
+      .chipGreen { fill: #eef9f1; stroke: #9cccaa; stroke-width: 2.4; }
+      .chipGold { fill: #fff7e8; stroke: #deb76d; stroke-width: 2.4; }
+      .deployText { font: 600 25px Consolas, 'Noto Sans Mono CJK SC', monospace; fill: #465a70; }
+      .tag { font: 700 25px Consolas, 'Noto Sans Mono CJK SC', monospace; fill: #43576d; }
+      .hwTag { font: 700 32px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #395068; }
+    </style>
+  </defs>
+
+  <rect width="3000" height="2760" class="bg"/>
+
+  <!-- HOST -->
+  <rect x="58" y="48" width="2884" height="1140" rx="28" class="panelHost"/>
+  <rect x="58" y="48" width="128" height="1140" rx="24" class="sideHost"/>
+  <text x="123" y="618" text-anchor="middle" transform="rotate(-90 123 618)" class="sideText">HOST</text>
+
+  <rect x="186" y="48" width="332" height="270" class="rowHost"/>
+  <rect x="186" y="318" width="332" height="300" class="rowHost"/>
+  <rect x="186" y="618" width="332" height="265" class="rowHost"/>
+  <rect x="186" y="883" width="332" height="305" class="rowHost"/>
+  <text x="352" y="202" text-anchor="middle" class="rowText">应用层</text>
+  <text x="352" y="486" text-anchor="middle" class="rowText">SDK 层</text>
+  <text x="352" y="722" text-anchor="middle" class="rowText">协议 /</text>
+  <text x="352" y="768" text-anchor="middle" class="rowText">通信层</text>
+  <text x="352" y="1055" text-anchor="middle" class="rowText">内核层</text>
+
+  <!-- Host application layer -->
+  <rect x="555" y="78" width="520" height="215" rx="18" class="cardHost"/>
+  <text x="595" y="138" class="titleSmall">业务应用</text>
+  <text x="595" y="190" class="subtitle">承载用户业务逻辑</text>
+  <text x="595" y="253" class="deployText">application</text>
+
+  <rect x="1105" y="78" width="460" height="215" rx="18" class="cardHost"/>
+  <text x="1145" y="138" class="titleSmall">FFmpeg</text>
+  <text x="1145" y="190" class="subtitle">编解码和图像变化硬化</text>
+  <text x="1145" y="253" class="deployText">ffmpeg</text>
+
+  <rect x="1595" y="78" width="460" height="215" rx="18" class="cardHost"/>
+  <text x="1635" y="138" class="titleSmall">AXStream</text>
+  <text x="1635" y="190" class="subtitle">媒体流式处理框架</text>
+  <text x="1635" y="253" class="deployText">AXStream</text>
+
+  <rect x="2085" y="78" width="805" height="215" rx="18" class="cardHost"/>
+  <text x="2125" y="138" class="titleSmall">设备监控和管理</text>
+  <text x="2125" y="190" class="subtitle">查询设备状态和系统控制</text>
+  <text x="2125" y="253" class="deployText">axcl-smi</text>
+
+  <!-- Host API layer -->
+  <rect x="555" y="348" width="620" height="245" rx="18" class="cardHost"/>
+  <text x="595" y="410" class="title">运行时库</text>
+  <text x="595" y="466" class="subtitle">核心对象: device, context, stream, task, event, ...</text>
+  <text x="595" y="544" class="deployText">libaxcl_rt.so</text>
+
+  <rect x="1205" y="348" width="700" height="245" rx="18" class="cardHost"/>
+  <text x="1245" y="410" class="title">NATIVE RPC 库</text>
+  <text x="1245" y="466" class="subtitle">RPC 调用 NATIVE SDK</text>
+  <text x="1245" y="544" class="deployText">libaxcl_sys.so | libaxcl_vdec.so | libaxcl_venc.so | ...</text>
+
+  <rect x="1935" y="348" width="955" height="245" rx="18" class="cardHost"/>
+  <text x="1975" y="410" class="title">Python API</text>
+  <text x="1975" y="466" class="subtitle">基于 C API 封装</text>
+  <text x="1975" y="544" class="deployText">python</text>
+
+  <!-- Protocol / comm layer -->
+  <rect x="555" y="638" width="2335" height="230" rx="18" class="cardHost"/>
+  <text x="595" y="700" class="title">协议通信库</text>
+  <text x="595" y="756" class="subtitle">封包、通道管理和跨端传输</text>
+  <text x="595" y="818" class="deployText">libaxcl_protocol.so | libaxcl_comm.so</text>
+
+  <!-- Host kernel layer -->
+  <rect x="555" y="910" width="1010" height="250" rx="18" class="cardKernel"/>
+  <text x="595" y="972" class="title">运行时控制驱动</text>
+  <text x="595" y="1028" class="subtitle">设备枚举、端口和连接控制等</text>
+  <text x="595" y="1104" class="deployText">axcl_rt.ko</text>
+
+  <rect x="1595" y="910" width="1295" height="250" rx="18" class="cardKernel"/>
+  <text x="1635" y="972" class="title">通信传输驱动</text>
+  <text x="1635" y="1028" class="subtitle">跨端消息和 DMA 数据搬运</text>
+  <text x="1635" y="1104" class="deployText">ax_comm.ko</text>
+
+  <!-- PCIe -->
+  <rect x="58" y="1260" width="2884" height="122" rx="18" class="pcie"/>
+  <rect x="58" y="1260" width="340" height="122" rx="18" class="pcieLeft"/>
+  <text x="164" y="1338" class="pcieText">传输</text>
+  <text x="1500" y="1338" text-anchor="middle" class="pcieText">PCIe 等物理传输通道</text>
+
+  <!-- DEVICE -->
+  <rect x="58" y="1445" width="2884" height="1275" rx="28" class="panelDevice"/>
+  <rect x="58" y="1445" width="128" height="1275" rx="24" class="sideDevice"/>
+  <text x="123" y="2082" text-anchor="middle" transform="rotate(-90 123 2082)" class="sideText">DEVICE</text>
+
+  <rect x="186" y="1445" width="332" height="245" class="rowDevice"/>
+  <rect x="186" y="1690" width="332" height="260" class="rowDevice"/>
+  <rect x="186" y="1950" width="332" height="255" class="rowDevice"/>
+  <rect x="186" y="2205" width="332" height="255" class="rowDevice"/>
+  <rect x="186" y="2460" width="332" height="260" class="rowDevice"/>
+  <text x="352" y="1581" text-anchor="middle" class="rowText">内核层</text>
+  <text x="352" y="1828" text-anchor="middle" class="rowText">协议 /</text>
+  <text x="352" y="1874" text-anchor="middle" class="rowText">通信层</text>
+  <text x="352" y="2090" text-anchor="middle" class="rowText">服务层</text>
+  <text x="352" y="2345" text-anchor="middle" class="rowText">SDK 层</text>
+  <text x="352" y="2605" text-anchor="middle" class="rowText">硬件层</text>
+
+  <!-- Device kernel layer -->
+  <rect x="555" y="1470" width="735" height="220" rx="18" class="cardKernel"/>
+  <text x="595" y="1530" class="titleSmall">设备控制驱动</text>
+  <text x="595" y="1584" class="subtitle">控制通道和异常上报等</text>
+  <text x="595" y="1654" class="deployText">axcl_dev.ko</text>
+
+  <rect x="1325" y="1470" width="735" height="220" rx="18" class="cardKernel"/>
+  <text x="1365" y="1530" class="titleSmall">工作监控驱动</text>
+  <text x="1365" y="1584" class="subtitle">监控工作进程状态</text>
+  <text x="1365" y="1654" class="deployText">axcl_wk_monitor.ko</text>
+
+  <rect x="2095" y="1470" width="795" height="220" rx="18" class="cardKernel"/>
+  <text x="2135" y="1530" class="titleSmall">通信传输驱动</text>
+  <text x="2135" y="1584" class="subtitle">跨端消息和 DMA 通道</text>
+  <text x="2135" y="1654" class="deployText">ax_comm.ko</text>
+
+  <!-- Device protocol / communication layer -->
+  <rect x="555" y="1715" width="2335" height="215" rx="18" class="cardDevice"/>
+  <text x="595" y="1775" class="title">协议通信库</text>
+  <text x="595" y="1828" class="subtitle">请求解析、响应封包和传输支撑</text>
+  <text x="595" y="1888" class="deployText">libax_protocol.so | libax_comm.so</text>
+
+  <!-- Device service layer -->
+  <rect x="555" y="1980" width="1010" height="210" rx="18" class="cardDevice"/>
+  <text x="595" y="2040" class="titleSmall">守护进程</text>
+  <text x="595" y="2090" class="subtitle">处理控制请求并管理 Worker 生命周期</text>
+  <text x="595" y="2152" class="deployText">slave_daemon</text>
+
+  <rect x="1595" y="1980" width="1295" height="210" rx="18" class="cardDevice"/>
+  <text x="1635" y="2040" class="titleSmall">工作进程</text>
+  <text x="1635" y="2090" class="subtitle">解析请求并调度任务</text>
+  <text x="1635" y="2152" class="deployText">slave_worker</text>
+
+  <!-- Device SDK layer -->
+  <rect x="555" y="2230" width="2335" height="215" rx="18" class="cardDevice"/>
+  <text x="595" y="2290" class="title">NATIVE SDK</text>
+  <text x="595" y="2340" class="subtitle">设备端 SDK 接口</text>
+  <text x="595" y="2394" class="deployText">libax_sys.so | libax_ivps.so | libax_vdec.so | libax_venc.so | libax_engine.so | ...</text>
+
+  <!-- Device hardware layer -->
+  <rect x="555" y="2500" width="2335" height="175" rx="18" class="cardHw"/>
+  <text x="595" y="2560" class="note">硬件资源</text>
+  <rect x="595" y="2600" width="130" height="50" rx="10" class="chip"/>
+  <text x="629" y="2636" class="hwTag">CPU</text>
+  <rect x="755" y="2600" width="130" height="50" rx="10" class="chip"/>
+  <text x="788" y="2636" class="hwTag">NPU</text>
+  <rect x="915" y="2600" width="130" height="50" rx="10" class="chip"/>
+  <text x="948" y="2636" class="hwTag">VPU</text>
+  <rect x="1075" y="2600" width="130" height="50" rx="10" class="chip"/>
+  <text x="1112" y="2636" class="hwTag">IVE</text>
+  <rect x="1235" y="2600" width="150" height="50" rx="10" class="chip"/>
+  <text x="1271" y="2636" class="hwTag">IVPS</text>
+  <rect x="1415" y="2600" width="130" height="50" rx="10" class="chip"/>
+  <text x="1450" y="2636" class="hwTag">DMA</text>
+  <rect x="1575" y="2600" width="130" height="50" rx="10" class="chip"/>
+  <text x="1612" y="2636" class="hwTag">...</text>
+</svg>

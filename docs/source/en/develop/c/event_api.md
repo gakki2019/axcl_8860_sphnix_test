@@ -3,7 +3,9 @@
 ## Index
 
 - [axclrtCreateEvent](#axclrtCreateEvent)
+- [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags)
 - [axclrtDestroyEvent](#axclrtDestroyEvent)
+- [axclrtEventElapsedTime](#axclrtEventElapsedTime)
 - [axclrtRecordEvent](#axclrtRecordEvent)
 - [axclrtStreamWaitEvent](#axclrtStreamWaitEvent)
 - [axclrtStreamWaitEventWithTimeout](#axclrtStreamWaitEventWithTimeout)
@@ -39,6 +41,32 @@ AXCL_EXPORT axclError axclrtCreateEvent(axclrtEvent *event);
 
 <br>
 
+<a id="axclrtCreateEventWithFlags"></a>
+
+### axclrtCreateEventWithFlags
+
+Create an event with flags.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtCreateEventWithFlags(axclrtEvent *event, uint32_t flags);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| event | out | pointer to created event |
+| flags | in | event creation flags (AXCL_EVENT_DEFAULT or AXCL_EVENT_DISABLE_TIMING) |
+
+#### Returns
+
+- `AXCL_SUCC`: success.
+- `others`: failure.
+
+<br>
+
 <a id="axclrtDestroyEvent"></a>
 
 ### axclrtDestroyEvent
@@ -56,6 +84,33 @@ AXCL_EXPORT axclError axclrtDestroyEvent(axclrtEvent event);
 | Name | Direction | Description |
 |---|---|---|
 | event | in | event created by [axclrtCreateEvent](#axclrtCreateEvent) to destroy. |
+
+#### Returns
+
+- `AXCL_SUCC`: success.
+- `others`: failure.
+
+<br>
+
+<a id="axclrtEventElapsedTime"></a>
+
+### axclrtEventElapsedTime
+
+Compute the elapsed time between two events.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtEventElapsedTime(float *ms, axclrtEvent startEvent, axclrtEvent endEvent);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| ms | out | pointer to float to store elapsed time in milliseconds |
+| startEvent | in | start event (must have been recorded) |
+| endEvent | in | end event (must have been recorded and completed) |
 
 #### Returns
 

@@ -5,6 +5,7 @@
 - [axclrtCreateStream](#axclrtCreateStream)
 - [axclrtDestroyStream](#axclrtDestroyStream)
 - [axclrtDestroyStreamForce](#axclrtDestroyStreamForce)
+- [axclrtStreamQuery](#axclrtStreamQuery)
 - [axclrtSynchronizeStream](#axclrtSynchronizeStream)
 - [axclrtSynchronizeStreamWithTimeout](#axclrtSynchronizeStreamWithTimeout)
 
@@ -84,6 +85,32 @@ AXCL_EXPORT axclError axclrtDestroyStreamForce(axclrtStream stream);
 
 - `AXCL_SUCC`: success.
 - `others`: failure.
+
+<br>
+
+<a id="axclrtStreamQuery"></a>
+
+### axclrtStreamQuery
+
+Query the execution status of all tasks on a stream (non-blocking).
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtStreamQuery(axclrtStream stream, axclrtStreamStatus *status);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to query. |
+| status | out | pointer to receive the stream status. |
+
+#### Returns
+
+- `AXCL_SUCC`: if the query was successful; check status for the stream state.
+- `others`: if the query call itself failed; status is set to AXCL_STREAM_STATUS_RESERVED.
 
 <br>
 

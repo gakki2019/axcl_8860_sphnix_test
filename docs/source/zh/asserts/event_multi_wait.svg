@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="380" viewBox="0 0 900 380" role="img" aria-labelledby="title desc">
+  <title id="title">多个任务等待同一个事件示意图</title>
+  <desc id="desc">Device 内有 stream1、stream2 和 stream3 三条任务序列。stream1 中 task1 后插入 Event Record，stream2 和 stream3 中分别插入 Event Wait。Event Record 完成后，两个 Event Wait 放行后续 task2 和 task3。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#565656" /></marker>
+    <marker id="arrow-dash" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#777" /></marker>
+    <style>
+      .device { fill:#f5f6f8; stroke:#b9bec7; stroke-width:1.5; rx:10; }
+      .title { font:18px sans-serif; fill:#333; text-anchor:middle; dominant-baseline:middle; }
+      .lane-label { font:14px sans-serif; fill:#222; text-anchor:end; dominant-baseline:middle; }
+      .task { fill:#c8dcff; stroke:#c8dcff; stroke-width:1; rx:4; }
+      .record { fill:#28bdb3; stroke:#28bdb3; stroke-width:1; rx:4; }
+      .wait { fill:#5a78f0; stroke:#5a78f0; stroke-width:1; rx:4; }
+      .node-text { font:16px sans-serif; fill:#111; text-anchor:middle; dominant-baseline:middle; }
+      .white-text { font:16px sans-serif; fill:#fff; text-anchor:middle; dominant-baseline:middle; }
+      .small { font:13px sans-serif; fill:#333; text-anchor:middle; dominant-baseline:middle; }
+      .line { stroke:#565656; stroke-width:2.2; fill:none; marker-end:url(#arrow); }
+      .dash { stroke:#777; stroke-width:1.5; stroke-dasharray:8 7; fill:none; marker-end:url(#arrow-dash); }
+    </style>
+  </defs>
+  <rect class="device" x="20" y="16" width="860" height="344" />
+  <text class="title" x="450" y="42">Device</text>
+  <text class="lane-label" x="98" y="110">stream1</text><text class="lane-label" x="98" y="130">任务序列</text>
+  <text class="lane-label" x="98" y="220">stream2</text><text class="lane-label" x="98" y="240">任务序列</text>
+  <text class="lane-label" x="98" y="318">stream3</text><text class="lane-label" x="98" y="338">任务序列</text>
+  <path class="line" d="M112,120 L840,120" />
+  <path class="line" d="M112,230 L840,230" />
+  <path class="line" d="M112,328 L840,328" />
+  <rect class="task" x="170" y="95" width="150" height="50" /><text class="node-text" x="245" y="120">task1</text>
+  <rect class="record" x="390" y="95" width="170" height="50" /><text class="white-text" x="475" y="120">Event Record</text>
+  <rect class="wait" x="390" y="205" width="170" height="50" /><text class="white-text" x="475" y="230">Event Wait</text>
+  <rect class="task" x="650" y="205" width="150" height="50" /><text class="node-text" x="725" y="230">task2</text>
+  <rect class="wait" x="390" y="303" width="170" height="50" /><text class="white-text" x="475" y="328">Event Wait</text>
+  <rect class="task" x="650" y="303" width="150" height="50" /><text class="node-text" x="725" y="328">task3</text>
+  <text class="small" x="562" y="78">task1 完成事件</text>
+  <path class="dash" d="M475,145 L475,205" />
+  <text class="small" x="582" y="184">等到事件后执行后续任务</text>
+  <path class="dash" d="M475,145 C300,205 300,270 475,303" />
+  <text class="small" x="582" y="286">等到事件后执行后续任务</text>
+</svg>

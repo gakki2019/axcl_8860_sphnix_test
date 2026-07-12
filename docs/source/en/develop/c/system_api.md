@@ -281,21 +281,26 @@ AXCL_EXPORT axclError axclrtGetVersion(int32_t *major, int32_t *minor, int32_t *
 
 ### axclrtGetVersionStr
 
-Get axcl version string.
+Get the version string for a specified source.
 
 #### Function
 
 ```c
-AXCL_EXPORT const char* axclrtGetVersionStr();
+AXCL_EXPORT axclError axclrtGetVersionStr(const char *name, char *buf, uint32_t size);
 ```
 
 #### Parameters
 
-N/A
+| Name | Direction | Description |
+|---|---|---|
+| name | in | Version source, supported values: "driver" and "firmware". "driver" returns the SDK build version string. "firmware" returns the device firmware version string. |
+| buf | out | Buffer used to store the version string. The result is always NUL-terminated when size > 0. |
+| size | in | Size of buf in bytes. If the buffer is too small, the output is truncated to fit. |
 
 #### Returns
 
-- Version string.
+- `AXCL_SUCC`: success.
+- `others`: failure.
 
 <br>
 

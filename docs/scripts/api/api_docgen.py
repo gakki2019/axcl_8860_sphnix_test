@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 import xml.etree.ElementTree as ET
+import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -284,22 +285,12 @@ def ensure_directories() -> None:
 
 def load_blacklist(path: Path) -> dict[str, str]:
     blacklist: dict[str, str] = {}
-    current_id = ""
-    current_reason = ""
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        stripped = raw_line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        if stripped.startswith("- id:"):
-            if current_id:
-                blacklist[current_id] = current_reason
-            current_id = stripped.split(":", 1)[1].strip()
-            current_reason = ""
-            continue
-        if stripped.startswith("reason:"):
-            current_reason = stripped.split(":", 1)[1].strip().strip('"')
-    if current_id:
-        blacklist[current_id] = current_reason
+    with path.open("r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    if data and "groups" in data:
+        for item in data["groups"]:
+            if "id" in item:
+                blacklist[item["id"]] = item.get("reason", "")
     return blacklist
 
 
@@ -378,6 +369,18 @@ def strip_ref_tokens(text: str) -> str:
 
 def normalize_enum_initializer(text: str) -> str:
     return re.sub(r"^=\s*", "", strip_ref_tokens(text)).strip()
+
+
+def normalize_file_path(path_str: str) -> str:
+    if not path_str:
+        return ""
+    p = Path(path_str)
+    if p.is_absolute():
+        try:
+            return p.relative_to(REPO_ROOT).as_posix()
+        except ValueError:
+            pass
+    return path_str
 
 
 def normalize_paragraphs(text: str) -> str:
@@ -472,13 +475,18 @@ def parse_restrictions(member: ET.Element) -> list[str]:
             continue
         text = normalize_paragraphs(xml_text(section))
         if text:
-            restrictions.append(text.replace("Restriction\n", "", 1))
+            # text contains "Restriction" at the beginning since xml_text concatenates it without spacing
+            if text.startswith("Restriction"):
+                text = text[11:].lstrip()
+            restrictions.append(text)
     return restrictions
 
 
 def resolve_links(text: str, refs: list[str], symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook, source_page: Path, source_symbol: str, line: int) -> str:
-    resolved = text
     ref_names = list(dict.fromkeys([*refs, *extract_token_refs(text)]))
+    ref_names.sort(key=len, reverse=True)
+
+    replacements: dict[str, str] = {}
     for ref_name in ref_names:
         token = f"@@REF:{ref_name}@@"
         if ref_name in duplicates or ref_name not in symbol_index:
@@ -493,7 +501,7 @@ def resolve_links(text: str, refs: list[str], symbol_index: dict[str, SymbolLoca
                 line,
                 f"Unable to resolve @ref target '{ref_name}'.",
             )
-            resolved = resolved.replace(token, ref_name)
+            replacements[token] = ref_name
             continue
         location = symbol_index[ref_name]
         target_path = os.path.relpath(location.page, source_page.parent).replace(os.sep, "/")
@@ -501,8 +509,12 @@ def resolve_links(text: str, refs: list[str], symbol_index: dict[str, SymbolLoca
             link = f"[{ref_name}](#{location.anchor})"
         else:
             link = f"[{ref_name}]({target_path}#{location.anchor})"
-        resolved = resolved.replace(token, link)
-    return resolved
+        replacements[token] = link
+
+    def replacer(match: re.Match) -> str:
+        return replacements.get(match.group(0), match.group(0))
+
+    return re.sub(r"@@REF:[^@]+@@", replacer, text)
 
 
 def normalized_refs(refs: list[tuple[str, int]]) -> list[str]:
@@ -547,7 +559,7 @@ def parse_functions(report: ReportBook) -> tuple[dict[str, str], dict[str, str],
         group_pages[group_id] = f"{sanitize_filename(group_title)}_api.md"
         for member in compound.findall(".//memberdef[@kind='function']"):
             location = member.find("location")
-            file_path = (location.get("file") if location is not None else "") or ""
+            file_path = normalize_file_path((location.get("file") if location is not None else "") or "")
             line = int(location.get("line", "0")) if location is not None else 0
             signature = f"{normalize_paragraphs(xml_text(member.find('definition')))}{normalize_paragraphs(xml_text(member.find('argsstring')))};"
             params = [
@@ -599,7 +611,7 @@ def parse_reference_data(report: ReportBook) -> tuple[list[MacroDoc], list[Macro
         for member in compound.findall(".//memberdef"):
             kind = member.get("kind", "")
             location = member.find("location")
-            file_path = (location.get("file") if location is not None else "") or ""
+            file_path = normalize_file_path((location.get("file") if location is not None else "") or "")
             line = int(location.get("line", "0")) if location is not None else 0
             symbol = normalize_paragraphs(xml_text(member.find("name")))
             if kind not in ALLOWED_TOP_LEVEL_KINDS:
@@ -685,7 +697,7 @@ def parse_reference_data(report: ReportBook) -> tuple[list[MacroDoc], list[Macro
         if compound is None or compound.get("kind") != "struct":
             continue
         location = compound.find("location")
-        file_path = (location.get("file") if location is not None else "") or ""
+        file_path = normalize_file_path((location.get("file") if location is not None else "") or "")
         line = int(location.get("line", "0")) if location is not None else 0
         fields: list[StructFieldDoc] = []
         for member in compound.findall(".//memberdef[@kind='variable']"):
@@ -733,23 +745,24 @@ def scan_source_comments(blacklist: dict[str, str]) -> tuple[set[str], list[Sour
     group_defs: set[str] = set()
     records: list[SourceCommentRecord] = []
     block_pattern = re.compile(r"/\*\*(.*?)\*/", re.DOTALL)
+
+    def line_for_offset(offset: int, line_starts: list[int]) -> int:
+        line = 1
+        for start in line_starts:
+            if start > offset:
+                break
+            line += 1
+        return line - 1
+
     for path in sorted(INCLUDE_DIR.glob("*.h")):
         content = path.read_text(encoding="utf-8")
         line_starts = [0]
         for match in re.finditer(r"\n", content):
             line_starts.append(match.end())
 
-        def line_for_offset(offset: int) -> int:
-            line = 1
-            for start in line_starts:
-                if start > offset:
-                    break
-                line += 1
-            return line - 1
-
         for block in block_pattern.finditer(content):
             block_text = block.group(1)
-            block_start_line = line_for_offset(block.start())
+            block_start_line = line_for_offset(block.start(), line_starts)
             for match in re.finditer(r"@defgroup\s+(\w+)", block_text):
                 group_defs.add(match.group(1))
 
@@ -852,11 +865,11 @@ def collect_orphaned_symbols(report: ReportBook, functions: list[FunctionDoc], g
             if symbol in grouped:
                 continue
             location = member.find("location")
-            file_path = (location.get("file") if location is not None else "") or ""
+            file_path = normalize_file_path((location.get("file") if location is not None else "") or "")
             line = int(location.get("line", "0")) if location is not None else 0
             report.add(
                 "orphaned_symbol.tsv",
-                "ERROR",
+                "WARN",
                 symbol,
                 "function",
                 file_path,
@@ -1006,7 +1019,7 @@ def render_returns_with_links(function: FunctionDoc, page_path: Path, symbol_ind
 
 
 def render_function_page(functions: list[FunctionDoc], page_path: Path, symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook, group_title: str) -> str:
-    lines = [f"# {group_title} API", ""]
+    lines = [f"# {group_title}", ""]
     append_heading(lines, "Index", 2, insert_br=False)
     if functions:
         for function in functions:
@@ -1061,7 +1074,7 @@ def append_reference_sections(lines: list[str], sections: list[tuple[str, list[s
 
 
 def render_macro_page(macros: list[MacroDoc], page_path: Path, symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook) -> str:
-    lines = ["# Macro Reference", ""]
+    lines = ["# Macro", ""]
     first_macro = True
     for macro in macros:
         append_anchored_heading(lines, macro.symbol, 2, insert_br=not first_macro)
@@ -1073,7 +1086,7 @@ def render_macro_page(macros: list[MacroDoc], page_path: Path, symbol_index: dic
 
 
 def render_struct_page(structs: list[StructDoc], typedefs: list[TypedefDoc], page_path: Path, symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook) -> str:
-    lines = ["# Structure Reference", ""]
+    lines = ["# Structure", ""]
     first_struct = True
     for struct_doc in structs:
         append_anchored_heading(lines, struct_doc.symbol, 2, insert_br=not first_struct)
@@ -1097,7 +1110,7 @@ def render_struct_page(structs: list[StructDoc], typedefs: list[TypedefDoc], pag
 
 
 def render_enum_page(enums: list[EnumDoc], page_path: Path, symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook) -> str:
-    lines = ["# Enum Reference", ""]
+    lines = ["# Enum", ""]
     first_enum = True
     for enum_doc in enums:
         append_anchored_heading(lines, enum_doc.symbol, 2, insert_br=not first_enum)
@@ -1139,12 +1152,18 @@ def run_error_probe(error_macros: list[MacroDoc]) -> dict[str, tuple[str, str, s
     def build_and_run(name: str, extra_flags: list[str]) -> dict[str, tuple[str, str]]:
         binary_path = ERROR_PROBE_DIR / f"probe_{name}"
         output_path = ERROR_PROBE_DIR / f"probe_{name}.tsv"
-        subprocess.run(
-            [cc, "-std=c11", "-I", str(INCLUDE_DIR), str(probe_source), "-o", str(binary_path), *extra_flags],
-            cwd=REPO_ROOT,
-            check=True,
-        )
-        completed = subprocess.run([str(binary_path)], cwd=REPO_ROOT, check=True, text=True, capture_output=True)
+        try:
+            subprocess.run(
+                [cc, "-std=c11", "-I", str(INCLUDE_DIR), str(probe_source), "-o", str(binary_path), *extra_flags],
+                cwd=REPO_ROOT,
+                check=True,
+            )
+            completed = subprocess.run([str(binary_path)], cwd=REPO_ROOT, check=True, text=True, capture_output=True)
+        except subprocess.CalledProcessError:
+            raise
+        finally:
+            if binary_path.exists():
+                binary_path.unlink()
         output_path.write_text(completed.stdout, encoding="utf-8")
         records: dict[str, tuple[str, str]] = {}
         for raw_line in completed.stdout.splitlines():
@@ -1158,8 +1177,12 @@ def run_error_probe(error_macros: list[MacroDoc]) -> dict[str, tuple[str, str, s
     merged_lines = ["symbol\thost_hex\thost_int32\tdevice_hex\tdevice_int32"]
     merged: dict[str, tuple[str, str, str, str]] = {}
     for symbol in symbols:
-        host_hex, host_int = host[symbol]
-        device_hex, device_int = device[symbol]
+        host_record = host.get(symbol)
+        device_record = device.get(symbol)
+        if not host_record or not device_record:
+            continue
+        host_hex, host_int = host_record
+        device_hex, device_int = device_record
         merged[symbol] = (host_hex, host_int, device_hex, device_int)
         merged_lines.append(f"{symbol}\t{host_hex}\t{host_int}\t{device_hex}\t{device_int}")
     write_text(merged_path, "\n".join(merged_lines))
@@ -1172,7 +1195,7 @@ def render_error_page(error_macros: list[MacroDoc], error_values: dict[str, tupl
         family = macro.symbol.removeprefix("AXCL_ERR_").split("_", 1)[0]
         families[family].append(macro)
 
-    lines = ["# Error Code Reference", ""]
+    lines = ["# Error Code", ""]
     first_family = True
     for family in sorted(families):
         items = sorted(families[family], key=lambda item: item.symbol)
@@ -1455,7 +1478,7 @@ def validate_markdown(pages: list[Path], report: ReportBook) -> None:
         for idx, line in enumerate(lines, start=1):
             if line.count("|") >= 2 and line.strip().startswith("|"):
                 pipe_count = line.count("|")
-                if idx < len(lines):
+                if idx <= len(lines) - 1:
                     header = lines[idx]
                     if header.strip().startswith("|") and header.count("|") != pipe_count:
                         report.add(

@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="840" viewBox="0 0 2200 840" role="img" aria-label="AXCL Worker 释放过程时序图">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2f5f8f"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#557fc0"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 42px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #12263a; }
+      .hostPanel { fill: #edf6ff; stroke: #86b7e8; stroke-width: 3; }
+      .devicePanel { fill: #eefbf5; stroke: #82c99d; stroke-width: 3; }
+      .panelTitle { font: 700 34px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #28445e; }
+      .laneBoxHost { fill: #ffffff; stroke: #88b8e8; stroke-width: 2.5; filter: url(#shadow); }
+      .laneBoxDevice { fill: #ffffff; stroke: #89cda0; stroke-width: 2.5; filter: url(#shadow); }
+      .laneText { font: 700 29px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #263b52; }
+      .laneSub { font: 22px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #65768a; }
+      .life { stroke: #aab8c8; stroke-width: 2.1; stroke-dasharray: 9 9; }
+      .step { font: 25px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #34495e; text-anchor: middle; }
+      .small { font: 22px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #65768a; }
+      .arrow { stroke: #2f5f8f; stroke-width: 3.2; fill: none; marker-end: url(#arrow); }
+      .return { stroke: #557fc0; stroke-width: 3; fill: none; stroke-dasharray: 8 7; marker-end: url(#arrowBlue); }
+      .boundary { stroke: #aebdca; stroke-width: 3; stroke-dasharray: 12 10; }
+      .boundaryLabel { font: 700 24px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #52677b; text-anchor: middle; }
+      .boundaryLatin { font: 700 23px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #52677b; text-anchor: middle; }
+      .transportHint { stroke: #8ea3b6; stroke-width: 2; stroke-linecap: round; opacity: 0.55; }
+      .transportDot { fill: #8ea3b6; opacity: 0.65; }
+    </style>
+    <filter id="shadow" x="-5%" y="-8%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#16324a" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <rect width="2200" height="840" class="bg"/>
+  <text x="1100" y="62" text-anchor="middle" class="title">Host App 退出</text>
+
+  <rect x="70" y="92" width="930" height="700" rx="26" class="hostPanel"/>
+  <rect x="1200" y="92" width="930" height="700" rx="26" class="devicePanel"/>
+  <line x1="1100" y1="92" x2="1100" y2="792" class="boundary"/>
+  <g aria-label="PCIe 传输">
+    <line x1="1100" y1="260" x2="1100" y2="710" class="transportHint"/>
+    <circle cx="1100" cy="260" r="4" class="transportDot"/>
+    <circle cx="1100" cy="710" r="4" class="transportDot"/>
+    <text x="1100" y="168" class="boundaryLatin">PCIe</text>
+    <text x="1100" y="202" class="boundaryLabel">传</text>
+    <text x="1100" y="234" class="boundaryLabel">输</text>
+  </g>
+  <text x="115" y="146" class="panelTitle">HOST</text>
+  <text x="1245" y="146" class="panelTitle">DEVICE</text>
+
+  <rect x="190" y="185" width="250" height="66" rx="14" class="laneBoxHost"/>
+  <text x="315" y="227" text-anchor="middle" class="laneText">App</text>
+  <line x1="315" y1="251" x2="315" y2="735" class="life"/>
+
+  <rect x="630" y="185" width="250" height="66" rx="14" class="laneBoxHost"/>
+  <text x="755" y="227" text-anchor="middle" class="laneText">driver</text>
+  <line x1="755" y1="251" x2="755" y2="735" class="life"/>
+
+  <rect x="1245" y="185" width="250" height="66" rx="14" class="laneBoxDevice"/>
+  <text x="1370" y="227" text-anchor="middle" class="laneText">driver</text>
+  <line x1="1370" y1="251" x2="1370" y2="735" class="life"/>
+
+  <rect x="1540" y="185" width="250" height="66" rx="14" class="laneBoxDevice"/>
+  <text x="1665" y="227" text-anchor="middle" class="laneText">slave_daemon</text>
+  <line x1="1665" y1="251" x2="1665" y2="735" class="life"/>
+
+  <rect x="1835" y="185" width="250" height="66" rx="14" class="laneBoxDevice"/>
+  <text x="1960" y="227" text-anchor="middle" class="laneText">slave_worker</text>
+  <line x1="1960" y1="251" x2="1960" y2="735" class="life"/>
+
+  <line x1="315" y1="330" x2="755" y2="330" class="arrow"/>
+  <text x="535" y="315" class="step">释放 Device / 退出</text>
+
+  <line x1="755" y1="390" x2="1370" y2="390" class="arrow"/>
+  <text x="1063" y="372" class="step">释放通信资源</text>
+
+  <line x1="1370" y1="460" x2="1665" y2="460" class="arrow"/>
+  <text x="1518" y="445" class="step">释放通信资源</text>
+
+  <line x1="1665" y1="530" x2="1960" y2="530" class="arrow"/>
+  <text x="1813" y="515" class="step">kill</text>
+
+  <line x1="1960" y1="585" x2="1665" y2="585" class="return"/>
+  <text x="1813" y="570" class="step">退出</text>
+
+  <line x1="1665" y1="625" x2="1370" y2="625" class="return"/>
+  <text x="1518" y="610" class="step">返回释放结果</text>
+
+  <line x1="1370" y1="665" x2="755" y2="665" class="return"/>
+  <text x="1063" y="650" class="step">返回释放状态</text>
+
+  <line x1="755" y1="700" x2="315" y2="700" class="return"/>
+  <text x="535" y="685" class="step">退出完成</text>
+</svg>

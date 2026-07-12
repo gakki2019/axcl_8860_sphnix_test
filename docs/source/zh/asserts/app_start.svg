@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1120" viewBox="0 0 2200 1120" role="img" aria-label="AXCL Worker 创建过程时序图">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2f5f8f"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#557fc0"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 42px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #12263a; }
+      .hostPanel { fill: #edf6ff; stroke: #86b7e8; stroke-width: 3; }
+      .devicePanel { fill: #eefbf5; stroke: #82c99d; stroke-width: 3; }
+      .panelTitle { font: 700 34px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #28445e; }
+      .laneBoxHost { fill: #ffffff; stroke: #88b8e8; stroke-width: 2.5; filter: url(#shadow); }
+      .laneBoxDevice { fill: #ffffff; stroke: #89cda0; stroke-width: 2.5; filter: url(#shadow); }
+      .laneText { font: 700 29px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #263b52; }
+      .laneSub { font: 22px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #65768a; }
+      .life { stroke: #aab8c8; stroke-width: 2.1; stroke-dasharray: 9 9; }
+      .step { font: 25px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #34495e; text-anchor: middle; }
+      .small { font: 22px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #65768a; }
+      .arrow { stroke: #2f5f8f; stroke-width: 3.2; fill: none; marker-end: url(#arrow); }
+      .return { stroke: #557fc0; stroke-width: 3; fill: none; stroke-dasharray: 8 7; marker-end: url(#arrowBlue); }
+      .comm { stroke: #2f7d57; stroke-width: 3.4; fill: none; marker-end: url(#arrow); }
+      .boundary { stroke: #aebdca; stroke-width: 3; stroke-dasharray: 12 10; }
+      .boundaryLabel { font: 700 24px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #52677b; text-anchor: middle; }
+      .boundaryLatin { font: 700 23px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #52677b; text-anchor: middle; }
+      .transportHint { stroke: #8ea3b6; stroke-width: 2; stroke-linecap: round; opacity: 0.55; }
+      .transportDot { fill: #8ea3b6; opacity: 0.65; }
+      .phaseSep { stroke: #cbd5df; stroke-width: 2; stroke-dasharray: 8 8; }
+      .phaseText { font: 700 22px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #64748b; text-anchor: middle; }
+      .fragmentBox { fill: #ffffff; fill-opacity: 0.42; stroke: #9fb2c5; stroke-width: 2.2; }
+      .fragmentTab { fill: #e8f1fa; stroke: #9fb2c5; stroke-width: 2.2; }
+      .fragmentLabel { font: 700 22px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #3f5f7a; }
+      .fragmentNote { font: 700 22px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #3f5f7a; }
+      .band { fill: #ffffff; stroke: #d7e3ef; stroke-width: 2; }
+      .bandText { font: 700 24px Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #3b6288; }
+    </style>
+    <filter id="shadow" x="-5%" y="-8%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#16324a" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <rect width="2200" height="1120" class="bg"/>
+  <text x="1100" y="62" text-anchor="middle" class="title">Host App 启动</text>
+
+  <rect x="70" y="92" width="930" height="1000" rx="26" class="hostPanel"/>
+  <rect x="1200" y="92" width="930" height="1000" rx="26" class="devicePanel"/>
+  <line x1="1100" y1="92" x2="1100" y2="1092" class="boundary"/>
+  <g aria-label="PCIe 传输">
+    <line x1="1100" y1="260" x2="1100" y2="995" class="transportHint"/>
+    <circle cx="1100" cy="260" r="4" class="transportDot"/>
+    <circle cx="1100" cy="995" r="4" class="transportDot"/>
+    <text x="1100" y="168" class="boundaryLatin">PCIe</text>
+    <text x="1100" y="202" class="boundaryLabel">传</text>
+    <text x="1100" y="234" class="boundaryLabel">输</text>
+  </g>
+  <text x="115" y="146" class="panelTitle">HOST</text>
+  <text x="1245" y="146" class="panelTitle">DEVICE</text>
+
+  <rect x="190" y="185" width="250" height="66" rx="14" class="laneBoxHost"/>
+  <text x="315" y="227" text-anchor="middle" class="laneText">App</text>
+  <line x1="315" y1="251" x2="315" y2="1058" class="life"/>
+
+  <rect x="630" y="185" width="250" height="66" rx="14" class="laneBoxHost"/>
+  <text x="755" y="227" text-anchor="middle" class="laneText">driver</text>
+  <line x1="755" y1="251" x2="755" y2="1058" class="life"/>
+
+  <rect x="1245" y="185" width="250" height="66" rx="14" class="laneBoxDevice"/>
+  <text x="1370" y="227" text-anchor="middle" class="laneText">driver</text>
+  <line x1="1370" y1="251" x2="1370" y2="1058" class="life"/>
+
+  <rect x="1540" y="185" width="250" height="66" rx="14" class="laneBoxDevice"/>
+  <text x="1665" y="227" text-anchor="middle" class="laneText">slave_daemon</text>
+  <line x1="1665" y1="251" x2="1665" y2="1058" class="life"/>
+
+  <rect x="1835" y="185" width="250" height="66" rx="14" class="laneBoxDevice"/>
+  <text x="1960" y="227" text-anchor="middle" class="laneText">slave_worker</text>
+  <line x1="1960" y1="251" x2="1960" y2="1058" class="life"/>
+
+  <rect x="1540" y="300" width="250" height="48" rx="12" class="band"/>
+  <text x="1665" y="331" text-anchor="middle" class="bandText">常驻守护进程</text>
+
+  <line x1="315" y1="405" x2="755" y2="405" class="arrow"/>
+  <text x="535" y="389" class="step">激活 Device</text>
+
+  <line x1="755" y1="465" x2="1370" y2="465" class="arrow"/>
+  <text x="1063" y="447" class="step">申请通信资源</text>
+
+  <line x1="1370" y1="535" x2="1665" y2="535" class="arrow"/>
+  <text x="1518" y="520" class="step">请求通信资源</text>
+
+  <line x1="1665" y1="600" x2="1960" y2="600" class="arrow"/>
+  <text x="1813" y="585" class="step">vfork</text>
+
+  <line x1="1960" y1="650" x2="1665" y2="650" class="return"/>
+  <text x="1813" y="635" class="step">就绪</text>
+
+  <line x1="1665" y1="700" x2="1370" y2="700" class="return"/>
+  <text x="1518" y="685" class="step">返回通信资源</text>
+
+  <line x1="1370" y1="750" x2="755" y2="750" class="return"/>
+  <text x="1063" y="735" class="step">返回通信资源</text>
+
+  <line x1="755" y1="800" x2="315" y2="800" class="return"/>
+  <text x="535" y="785" class="step">Device 激活完成</text>
+
+  <rect x="285" y="855" width="1705" height="190" rx="10" class="fragmentBox"/>
+  <path d="M285 855 H455 L425 890 H285 Z" class="fragmentTab"/>
+  <text x="320" y="880" class="fragmentLabel">激活后</text>
+
+  <line x1="315" y1="945" x2="1960" y2="945" class="comm"/>
+  <text x="1135" y="930" class="step">任务请求</text>
+  <line x1="1960" y1="980" x2="315" y2="980" class="return"/>
+  <text x="1135" y="1005" class="step">任务回复</text>
+</svg>

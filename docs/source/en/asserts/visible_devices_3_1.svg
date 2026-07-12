@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="360" viewBox="0 0 860 360" role="img" aria-labelledby="title desc">
+  <title id="title">AXCL_VISIBLE_DEVICES=3,1 logical device mapping diagram</title>
+  <desc id="desc">The system has physical devices 0, 1, 2, and 3. After AXCL_VISIBLE_DEVICES=3,1 is set, logical deviceId 0 maps to physical device 3, logical deviceId 1 maps to physical device 1, and physical devices 0 and 2 are not visible to the current process.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#355C9A" />
+    </marker>
+    <marker id="arrow-dash" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#999999" />
+    </marker>
+    <style>
+      .group { fill: #f8fafc; stroke: #9aa4b2; stroke-width: 1.5; rx: 12; }
+      .group-title { font: 700 16px sans-serif; fill: #1f2937; }
+      .node-physical { fill: #eef2ff; stroke: #4f6fad; stroke-width: 1.5; rx: 8; }
+      .node-logical { fill: #e8f7ef; stroke: #2f8f5b; stroke-width: 1.5; rx: 8; }
+      .node-hidden { fill: #f3f4f6; stroke: #9ca3af; stroke-width: 1.5; rx: 8; }
+      .text { font: 14px sans-serif; fill: #111827; dominant-baseline: middle; text-anchor: middle; }
+      .label { font: 13px sans-serif; fill: #355C9A; dominant-baseline: middle; text-anchor: middle; }
+      .hidden-label { font: 12px sans-serif; fill: #6b7280; dominant-baseline: middle; text-anchor: middle; }
+      .solid { stroke: #355C9A; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke: #999999; stroke-width: 1.8; stroke-dasharray: 6 5; fill: none; marker-end: url(#arrow-dash); }
+    </style>
+  </defs>
+
+  <rect class="group" x="40" y="34" width="260" height="292" />
+  <text class="group-title" x="170" y="60" text-anchor="middle">System physical devices</text>
+
+  <rect class="group" x="560" y="70" width="250" height="148" />
+  <text class="group-title" x="685" y="96" text-anchor="middle">Logical devices visible to current process</text>
+
+  <rect class="node-physical" x="92" y="84" width="156" height="42" />
+  <text class="text" x="170" y="105">Physical device 0</text>
+  <rect class="node-physical" x="92" y="144" width="156" height="42" />
+  <text class="text" x="170" y="165">Physical device 1</text>
+  <rect class="node-physical" x="92" y="204" width="156" height="42" />
+  <text class="text" x="170" y="225">Physical device 2</text>
+  <rect class="node-physical" x="92" y="264" width="156" height="42" />
+  <text class="text" x="170" y="285">Physical device 3</text>
+
+  <rect class="node-logical" x="612" y="118" width="146" height="42" />
+  <text class="text" x="685" y="139">Logical deviceId 0</text>
+  <rect class="node-logical" x="612" y="168" width="146" height="42" />
+  <text class="text" x="685" y="189">Logical deviceId 1</text>
+
+  <rect class="node-hidden" x="612" y="246" width="146" height="42" />
+  <text class="text" x="685" y="267">Not visible</text>
+
+  <path class="solid" d="M612,139 C500,139 410,285 248,285" />
+  <text class="label" x="428" y="202">maps to</text>
+  <path class="solid" d="M612,189 C500,189 410,165 248,165" />
+  <text class="label" x="428" y="175">maps to</text>
+
+  <path class="dashed" d="M248,105 C398,105 470,246 612,258" />
+  <text class="hidden-label" x="414" y="116">not in AXCL_VISIBLE_DEVICES</text>
+  <path class="dashed" d="M248,225 C398,225 470,273 612,274" />
+  <text class="hidden-label" x="414" y="238">not in AXCL_VISIBLE_DEVICES</text>
+
+  <text x="430" y="332" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#4b5563">AXCL_VISIBLE_DEVICES=3,1: logical deviceId is renumbered by list order</text>
+</svg>
