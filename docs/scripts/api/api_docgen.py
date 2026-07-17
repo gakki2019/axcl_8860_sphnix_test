@@ -97,6 +97,7 @@ REPORT_HEADERS = {
 
 ALLOWED_TOP_LEVEL_KINDS = {"define", "enum", "typedef", "function"}
 UNSUPPORTED_TAGS = {"pre": "ERROR", "post": "ERROR", "example": "ERROR"}
+LINEBREAK_TOKEN = "@@LINEBREAK@@"
 
 
 @dataclass
@@ -162,6 +163,12 @@ class ReturnDoc:
 
 
 @dataclass
+class CodeBlock:
+    language: str
+    code: str
+
+
+@dataclass
 class FunctionDoc:
     symbol: str
     group_id: str
@@ -169,6 +176,7 @@ class FunctionDoc:
     file: str
     line: int
     brief: str
+    details: str
     signature: str
     params: list[ParamDoc]
     returns: list[ReturnDoc]
@@ -178,6 +186,8 @@ class FunctionDoc:
     warnings: list[str]
     restrictions: list[str]
     examples: list[str]
+    paragraphs: dict[str, list[str]]
+    section_order: list[str]
     refs: list[tuple[str, int]]
 
 
@@ -345,6 +355,60 @@ def xml_text(node: ET.Element | None) -> str:
     return text.strip()
 
 
+def source_code_blocks(file_path: str, declaration_line: int) -> list[CodeBlock]:
+    if not file_path or declaration_line <= 1:
+        return []
+    source_path = Path(file_path)
+    if not source_path.is_absolute():
+        source_path = REPO_ROOT / source_path
+    if not source_path.exists():
+        return []
+
+    lines = source_path.read_text(encoding="utf-8").splitlines()
+    comment_end = min(declaration_line - 1, len(lines) - 1)
+    while comment_end >= 0 and "*/" not in lines[comment_end]:
+        comment_end -= 1
+    if comment_end < 0:
+        return []
+    comment_start = comment_end
+    while comment_start >= 0 and "/**" not in lines[comment_start]:
+        comment_start -= 1
+    if comment_start < 0:
+        return []
+
+    blocks: list[CodeBlock] = []
+    language = ""
+    code_lines: list[str] = []
+    in_code = False
+    for raw_line in lines[comment_start + 1 : comment_end]:
+        match = re.match(r"^\s*\*(.*)$", raw_line)
+        content = match.group(1) if match else raw_line
+        stripped = content.strip()
+        if not in_code:
+            code_match = re.fullmatch(r"@code(?:\{\.([^}]+)\})?", stripped)
+            if code_match:
+                language = (code_match.group(1) or "").lower()
+                code_lines = []
+                in_code = True
+            continue
+        if stripped == "@endcode":
+            blocks.append(CodeBlock(language, "\n".join(code_lines).rstrip("\n")))
+            language = ""
+            code_lines = []
+            in_code = False
+            continue
+        code_lines.append(content)
+    return blocks
+
+
+def programlisting_overrides(member: ET.Element, file_path: str, declaration_line: int) -> dict[int, CodeBlock]:
+    listings = list(member.iter("programlisting"))
+    source_blocks = source_code_blocks(file_path, declaration_line)
+    if len(listings) != len(source_blocks):
+        return {}
+    return {id(listing): block for listing, block in zip(listings, source_blocks)}
+
+
 def extract_refs(node: ET.Element | None) -> list[str]:
     if node is None:
         return []
@@ -412,16 +476,10 @@ def split_ref_text(raw_target: str) -> tuple[str, str]:
     return target.strip(), suffix
 
 
-def section_texts(member: ET.Element, kind: str) -> list[str]:
-    texts: list[str] = []
-    for section in member.findall(f".//simplesect[@kind='{kind}']"):
-        text = normalize_paragraphs(xml_text(section))
-        if text:
-            texts.append(text)
-    return texts
+def parse_programlisting(programlisting: ET.Element, override: CodeBlock | None = None) -> str:
+    if override is not None:
+        return override.code
 
-
-def parse_programlisting(programlisting: ET.Element) -> str:
     def collect_code_text(node: ET.Element) -> str:
         parts: list[str] = []
         if node.tag == "sp":
@@ -443,43 +501,204 @@ def parse_programlisting(programlisting: ET.Element) -> str:
     return "\n".join(lines).rstrip()
 
 
-def parse_examples(member: ET.Element) -> list[str]:
+def programlisting_language(programlisting: ET.Element, override: CodeBlock | None = None) -> str:
+    if override is not None:
+        return override.language
+    filename = programlisting.get("filename", "")
+    if filename.startswith(".") and len(filename) > 1:
+        return filename[1:].lower()
+    return ""
+
+
+def normalize_inline_xml(text: str) -> str:
+    text = text.replace("\xa0", " ")
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(rf"\s*{LINEBREAK_TOKEN}\s*", "\n", text)
+    return text.strip()
+
+
+def render_code_span(text: str) -> str:
+    """Render text as a Markdown code span without colliding with embedded backticks."""
+    backtick_runs = re.findall(r"`+", text)
+    fence = "`" * (max((len(run) for run in backtick_runs), default=0) + 1)
+    padding = " " if text.startswith("`") or text.endswith("`") else ""
+    return f"{fence}{padding}{text}{padding}{fence}"
+
+
+def render_inline_xml(node: ET.Element) -> str:
+    if node.tag == "ref":
+        raw_target = "".join(node.itertext()).strip()
+        target, suffix = split_ref_text(raw_target)
+        return f"@@REF:{target}@@{suffix}"
+    if node.tag == "ulink":
+        label = "".join(node.itertext()).strip()
+        url = node.get("url", "").strip()
+        return f"[{label}]({url})" if url else label
+    if node.tag == "computeroutput":
+        return render_code_span("".join(node.itertext()))
+    if node.tag == "linebreak":
+        return LINEBREAK_TOKEN
+    pieces: list[str] = []
+    if node.tag == "sp":
+        return " "
+    if node.text:
+        pieces.append(node.text)
+    for child in node:
+        if child.tag == "ref":
+            raw_target = "".join(child.itertext()).strip()
+            target, suffix = split_ref_text(raw_target)
+            pieces.append(f"@@REF:{target}@@{suffix}")
+        elif child.tag == "linebreak":
+            pieces.append(LINEBREAK_TOKEN)
+        else:
+            pieces.append(render_inline_xml(child))
+        if child.tail:
+            pieces.append(child.tail)
+    return "".join(pieces)
+
+
+def render_paragraph_markdown(node: ET.Element, overrides: dict[int, CodeBlock], excluded_tags: set[str] | None = None) -> str:
+    excluded_tags = excluded_tags or set()
+    blocks: list[str] = []
+    inline_parts: list[str] = [node.text or ""]
+
+    def flush_inline() -> None:
+        text = normalize_inline_xml("".join(inline_parts))
+        inline_parts.clear()
+        if text:
+            blocks.append(text)
+
+    for child in node:
+        if child.tag not in excluded_tags:
+            if child.tag in {"programlisting", "itemizedlist", "orderedlist"}:
+                flush_inline()
+                block = render_xml_markdown(child, overrides).strip()
+                if block:
+                    blocks.append(block)
+            else:
+                inline_parts.append(render_inline_xml(child))
+        if child.tail:
+            inline_parts.append(child.tail)
+    flush_inline()
+    return "\n\n".join(blocks)
+
+
+def render_xml_markdown(node: ET.Element | None, overrides: dict[int, CodeBlock]) -> str:
+    if node is None:
+        return ""
+    if node.tag == "programlisting":
+        override = overrides.get(id(node))
+        language = programlisting_language(node, override)
+        fence = f"```{language}" if language else "```"
+        return f"{fence}\n{parse_programlisting(node, override)}\n```"
+    if node.tag in {"itemizedlist", "orderedlist"}:
+        ordered = node.tag == "orderedlist"
+        items: list[str] = []
+        for index, item in enumerate(node.findall("listitem"), start=1):
+            content = render_xml_markdown(item, overrides).strip()
+            marker = f"{index}. " if ordered else "- "
+            continuation = " " * len(marker)
+            content_lines = content.splitlines() or [""]
+            rendered = [f"{marker}{content_lines[0]}"]
+            rendered.extend(
+                f"{continuation}{line}" if line else ""
+                for line in content_lines[1:]
+            )
+            items.append("\n".join(rendered))
+        return "\n".join(items)
+    if node.tag == "listitem":
+        blocks = [render_xml_markdown(child, overrides).strip() for child in node]
+        return "\n\n".join(block for block in blocks if block)
+    if node.tag == "para":
+        return render_paragraph_markdown(node, overrides)
+
+    blocks: list[str] = []
+    if node.text and normalize_inline_xml(node.text):
+        blocks.append(normalize_inline_xml(node.text))
+    for child in node:
+        block = render_xml_markdown(child, overrides).strip()
+        if block:
+            blocks.append(block)
+        if child.tail and normalize_inline_xml(child.tail):
+            blocks.append(normalize_inline_xml(child.tail))
+    return "\n\n".join(blocks)
+
+
+def parse_unsectioned_details(member: ET.Element, overrides: dict[int, CodeBlock]) -> str:
+    details = member.find("detaileddescription")
+    if details is None:
+        return ""
+    blocks: list[str] = []
+    for child in details:
+        if child.tag == "para":
+            block = render_paragraph_markdown(
+                child,
+                overrides,
+                {"parameterlist", "simplesect"},
+            ).strip()
+        elif child.tag in {"parameterlist", "simplesect"}:
+            block = ""
+        else:
+            block = render_xml_markdown(child, overrides).strip()
+        if block:
+            blocks.append(block)
+    return normalize_paragraphs("\n\n".join(blocks))
+
+
+def render_section_content(section: ET.Element, overrides: dict[int, CodeBlock] | None = None) -> str:
+    overrides = overrides or {}
+    contents = [
+        render_xml_markdown(child, overrides).strip()
+        for child in section
+        if child.tag != "title"
+    ]
+    return "\n\n".join(content for content in contents if content)
+
+
+def section_texts(member: ET.Element, kind: str, overrides: dict[int, CodeBlock] | None = None) -> list[str]:
+    overrides = overrides or {}
+    texts: list[str] = []
+    for section in member.findall(f".//simplesect[@kind='{kind}']"):
+        text = normalize_paragraphs(render_section_content(section, overrides))
+        if text:
+            texts.append(text)
+    return texts
+
+
+def parse_examples(member: ET.Element, overrides: dict[int, CodeBlock]) -> list[str]:
     blocks: list[str] = []
     for section in member.findall(".//simplesect[@kind='par']"):
         title = normalize_paragraphs(xml_text(section.find("title")))
         if title != "Example":
             continue
-        programlisting = section.find(".//programlisting")
-        if programlisting is None:
-            text = normalize_paragraphs(xml_text(section))
-            if text:
-                blocks.append(text)
-            continue
-        code = parse_programlisting(programlisting)
-        filename = programlisting.get("filename", "")
-        language = ""
-        if filename.startswith(".") and len(filename) > 1:
-            language = filename[1:].lower()
-        fence = "```"
-        if language:
-            fence = f"```{language}"
-        blocks.append(f"{fence}\n{code}\n```")
+        text = normalize_paragraphs(render_section_content(section, overrides))
+        if text:
+            blocks.append(text)
     return blocks
 
 
-def parse_restrictions(member: ET.Element) -> list[str]:
+def parse_restrictions(member: ET.Element, overrides: dict[int, CodeBlock]) -> list[str]:
     restrictions: list[str] = []
     for section in member.findall(".//simplesect[@kind='par']"):
         title = normalize_paragraphs(xml_text(section.find("title")))
         if title != "Restriction":
             continue
-        text = normalize_paragraphs(xml_text(section))
+        text = normalize_paragraphs(render_section_content(section, overrides))
         if text:
-            # text contains "Restriction" at the beginning since xml_text concatenates it without spacing
-            if text.startswith("Restriction"):
-                text = text[11:].lstrip()
             restrictions.append(text)
     return restrictions
+
+
+def parse_named_paragraphs(member: ET.Element, overrides: dict[int, CodeBlock]) -> dict[str, list[str]]:
+    paragraphs: dict[str, list[str]] = defaultdict(list)
+    for section in member.findall(".//simplesect[@kind='par']"):
+        title = normalize_paragraphs(xml_text(section.find("title")))
+        if not title or title in {"Example", "Restriction"}:
+            continue
+        text = normalize_paragraphs(render_section_content(section, overrides))
+        if text:
+            paragraphs[title].append(text)
+    return dict(paragraphs)
 
 
 def resolve_links(text: str, refs: list[str], symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook, source_page: Path, source_symbol: str, line: int) -> str:
@@ -531,16 +750,47 @@ def sanitize_filename(name: str) -> str:
     return slug or "api"
 
 
-def parse_parameter_list(member: ET.Element, kind: str) -> list[tuple[str, str, str]]:
+def parse_parameter_list(member: ET.Element, kind: str, overrides: dict[int, CodeBlock] | None = None) -> list[tuple[str, str, str]]:
+    overrides = overrides or {}
     records: list[tuple[str, str, str]] = []
     for plist in member.findall(f".//parameterlist[@kind='{kind}']"):
         for item in plist.findall("parameteritem"):
             names = item.findall("parameternamelist/parametername")
             descriptions = item.findall("parameterdescription")
-            description = normalize_paragraphs("\n".join(xml_text(desc) for desc in descriptions))
+            description = normalize_paragraphs(
+                "\n".join(render_xml_markdown(desc, overrides) for desc in descriptions)
+            )
             for name in names:
                 records.append((name.text or "", name.get("direction", ""), description))
     return records
+
+
+def function_section_order(member: ET.Element) -> list[str]:
+    details = member.find("detaileddescription")
+    if details is None:
+        return []
+    section_names: list[str] = []
+    for node in details.iter():
+        title = ""
+        if node.tag == "parameterlist" and node.get("kind") == "retval":
+            title = "Returns"
+        elif node.tag == "simplesect":
+            kind = node.get("kind", "")
+            if kind == "par":
+                par_title = normalize_paragraphs(xml_text(node.find("title")))
+                if par_title:
+                    title = par_title
+            elif kind == "note":
+                title = "Note"
+            elif kind in {"remark", "see"}:
+                title = "Remark"
+            elif kind in {"warning", "attention"}:
+                title = "Warning"
+            elif kind == "return":
+                title = "Returns"
+        if title and title not in section_names:
+            section_names.append(title)
+    return section_names
 
 
 def parse_functions(report: ReportBook) -> tuple[dict[str, str], dict[str, str], list[FunctionDoc], dict[str, list[FunctionDoc]]]:
@@ -561,32 +811,40 @@ def parse_functions(report: ReportBook) -> tuple[dict[str, str], dict[str, str],
             location = member.find("location")
             file_path = normalize_file_path((location.get("file") if location is not None else "") or "")
             line = int(location.get("line", "0")) if location is not None else 0
+            overrides = programlisting_overrides(member, file_path, line)
             signature = f"{normalize_paragraphs(xml_text(member.find('definition')))}{normalize_paragraphs(xml_text(member.find('argsstring')))};"
+            signature = re.sub(r",\s*\.\.\.", ", ...", signature)
             params = [
                 ParamDoc(name, direction, description)
-                for name, direction, description in parse_parameter_list(member, "param")
+                for name, direction, description in parse_parameter_list(member, "param", overrides)
             ]
             returns = [
                 ReturnDoc(name, description)
-                for name, _, description in parse_parameter_list(member, "retval")
+                for name, _, description in parse_parameter_list(member, "retval", overrides)
             ]
-            return_texts = [normalize_paragraphs(xml_text(section)) for section in member.findall(".//simplesect[@kind='return']")]
+            return_texts = [
+                normalize_paragraphs(render_section_content(section, overrides))
+                for section in member.findall(".//simplesect[@kind='return']")
+            ]
             function = FunctionDoc(
                 symbol=normalize_paragraphs(xml_text(member.find("name"))),
                 group_id=group_id,
                 group_title=group_title,
                 file=file_path,
                 line=line,
-                brief=normalize_paragraphs(xml_text(member.find("briefdescription"))),
+                brief=normalize_paragraphs(render_xml_markdown(member.find("briefdescription"), overrides)),
+                details=parse_unsectioned_details(member, overrides),
                 signature=signature.strip(),
                 params=params,
                 returns=returns,
                 return_texts=[text for text in return_texts if text],
-                notes=section_texts(member, "note"),
-                remarks=section_texts(member, "remark") + section_texts(member, "see"),
-                warnings=section_texts(member, "warning") + section_texts(member, "attention"),
-                restrictions=parse_restrictions(member),
-                examples=parse_examples(member),
+                notes=section_texts(member, "note", overrides),
+                remarks=section_texts(member, "remark", overrides) + section_texts(member, "see", overrides),
+                warnings=section_texts(member, "warning", overrides) + section_texts(member, "attention", overrides),
+                restrictions=parse_restrictions(member, overrides),
+                examples=parse_examples(member, overrides),
+                paragraphs=parse_named_paragraphs(member, overrides),
+                section_order=function_section_order(member),
                 refs=[(split_ref_text(name)[0], line) for name in extract_refs(member) if split_ref_text(name)[0]],
             )
             functions.append(function)
@@ -724,8 +982,8 @@ def parse_reference_data(report: ReportBook) -> tuple[list[MacroDoc], list[Macro
                 symbol=normalize_paragraphs(xml_text(compound.find("compoundname"))),
                 file=file_path,
                 line=line,
-                brief=normalize_paragraphs(xml_text(compound.find("briefdescription"))),
-                details=normalize_paragraphs(xml_text(compound.find("detaileddescription"))),
+                brief=normalize_paragraphs(render_xml_markdown(compound.find("briefdescription"), {})),
+                details=normalize_paragraphs(render_xml_markdown(compound.find("detaileddescription"), {})),
                 remarks=section_texts(compound, "remark") + section_texts(compound, "see"),
                 warnings=section_texts(compound, "warning") + section_texts(compound, "attention"),
                 definition=definition,
@@ -1034,21 +1292,37 @@ def render_function_page(functions: list[FunctionDoc], page_path: Path, symbol_i
         append_anchored_heading(lines, function.symbol, 3, insert_br=not first_function)
         first_function = False
         lines.append(resolve_links(function.brief, refs, symbol_index, duplicates, report, page_path, function.symbol, function.line))
-        lines.extend(["", "#### Function", "", "```c", function.signature or "N/A", "```", "", "#### Parameters", "", render_parameters_with_links(function, page_path, symbol_index, duplicates, report), "", "#### Returns", "", render_returns_with_links(function, page_path, symbol_index, duplicates, report), ""])
+        if function.details:
+            lines.extend(["", resolve_links(function.details, refs, symbol_index, duplicates, report, page_path, function.symbol, function.line)])
+        lines.extend(["", "#### Function", "", "```c", function.signature or "N/A", "```", "", "#### Parameters", "", render_parameters_with_links(function, page_path, symbol_index, duplicates, report), ""])
 
-        optional_sections = [
-            ("Note", function.notes),
-            ("Remark", function.remarks),
-            ("Warning", function.warnings),
-            ("Restriction", function.restrictions),
-            ("Example", function.examples),
-        ]
-        for title, contents in optional_sections:
+        sections = {
+            "Example": function.examples,
+            "Note": function.notes,
+            "Remark": function.remarks,
+            "Warning": function.warnings,
+            "Restriction": function.restrictions,
+            "Returns": [render_returns_with_links(function, page_path, symbol_index, duplicates, report)],
+        }
+        for title, contents in function.paragraphs.items():
+            sections.setdefault(title, []).extend(contents)
+        section_order = list(function.section_order)
+        for title in ("Returns", "Note", "Remark", "Warning", "Restriction", "Example"):
+            if title not in section_order and sections[title]:
+                section_order.append(title)
+        for title in function.paragraphs:
+            if title not in section_order:
+                section_order.append(title)
+        for title in section_order:
+            contents = sections[title]
             if not contents:
                 continue
             lines.extend([f"#### {title}", ""])
             for content in contents:
-                lines.append(resolve_links(content, refs, symbol_index, duplicates, report, page_path, function.symbol, function.line))
+                if title == "Returns":
+                    lines.append(content)
+                else:
+                    lines.append(resolve_links(content, refs, symbol_index, duplicates, report, page_path, function.symbol, function.line))
                 lines.append("")
     return "\n".join(lines)
 
@@ -1091,7 +1365,9 @@ def render_struct_page(structs: list[StructDoc], typedefs: list[TypedefDoc], pag
     for struct_doc in structs:
         append_anchored_heading(lines, struct_doc.symbol, 2, insert_br=not first_struct)
         first_struct = False
-        lines.extend(["", resolve_links(struct_doc.brief or struct_doc.details or "", [], symbol_index, duplicates, report, page_path, struct_doc.symbol, struct_doc.line), ""])
+        descriptions = list(dict.fromkeys(filter(None, [struct_doc.brief, struct_doc.details])))
+        for description in descriptions:
+            lines.extend(["", resolve_links(description, [], symbol_index, duplicates, report, page_path, struct_doc.symbol, struct_doc.line), ""])
         lines.extend(["```c", strip_ref_tokens(struct_doc.definition or ""), "```", ""])
         if struct_doc.fields:
             append_heading(lines, "Fields", 3, insert_br=False)
@@ -1506,7 +1782,9 @@ def validate_markdown(pages: list[Path], report: ReportBook) -> None:
                         "Rendered Markdown link points to a missing page.",
                     )
                     continue
-                if anchor and anchor not in anchor_index.get(destination, set()):
+                if destination not in anchor_index:
+                    anchor_index[destination] = collect_anchors(destination)
+                if anchor and anchor not in anchor_index[destination]:
                     report.add(
                         "broken_link.tsv",
                         "ERROR",

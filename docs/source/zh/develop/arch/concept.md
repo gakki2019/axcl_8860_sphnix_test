@@ -23,6 +23,8 @@ AXCL runtime 使用 **Device、Context、Stream、Task、Event** 这几类核心
 | Task | 否，内部对象 | 隶属于 Stream | runtime 内部调度和等待的最小工作单元 | runtime 内部管理 |
 | Event | 是，[axclrtEvent](../c/reference/struct.md#axclrtEvent) | 隶属于 Device | Stream 间同步、Host 等待、耗时测量 | [axclrtCreateEvent](../c/event_api.md#axclrtCreateEvent)、[axclrtRecordEvent](../c/event_api.md#axclrtRecordEvent)、[axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent) |
 
+<a id="DEVICE"></a>
+
 ## 2. Device
 
 Device 是 AXCL runtime 管理的 AXERA AI 计算设备。Host 进程可以看到一个或多个 Device，并通过逻辑 `deviceId` 选择目标设备。
@@ -68,6 +70,8 @@ AXCL 对外使用的是当前进程可见的逻辑设备 ID，runtime 内部再�
 - **物理设备 ID** 来自 runtime 探测到的设备信息，是驱动和通信层识别设备时使用的 ID；
 - **逻辑设备 ID** 是 AXCL 暴露给当前进程使用的连续编号，取值范围为 `0` 到 `device count - 1`；
 - 通过 [axclrtGetDeviceCount](../c/device_api.md#axclrtGetDeviceCount) 查询当前进程可见的逻辑设备个数。
+
+<a id="AXCL_VISIBLE_DEVICES"></a>
 
 #### 2.1.1. AXCL_VISIBLE_DEVICES
 
@@ -117,6 +121,8 @@ Device 与其下对象存在生命周期依赖：
 
 - [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) 会等待当前线程所绑定 Context 对应 Device 上已提交的相关任务完成。
 - [axclrtSynchronizeDeviceWithTimeout](../c/device_api.md#axclrtSynchronizeDeviceWithTimeout) 支持超时等待， `timeout` 单位为毫秒，`-1` 表示无限等待。
+
+<a id="CONTEXT"></a>
 
 ## 3. Context
 
@@ -228,6 +234,8 @@ int main(void) {
 }
 ```
 
+<a id="STREAM"></a>
+
 ## 4. Stream
 
 Stream 是 Context 下的逻辑任务流。它用于组织任务顺序，是 AXCL 异步执行模型的核心对象。
@@ -280,6 +288,8 @@ axclFinalize();
 - `AXCL_STREAM_STATUS_COMPLETE` 表示查询时刻 Stream 上没有未完成任务；
 - `AXCL_STREAM_STATUS_NOT_READY` 表示查询时刻仍有任务未完成；
 
+<a id="TASK"></a>
+
 ## 5. Task
 
 Task 是 AXCL runtime 内部用于描述一次任务执行的最小调度单元，比如：
@@ -297,6 +307,7 @@ Task 会被提交到某一条 Stream 中排队执行。runtime 使用 token、�
 1. **顺序性**：同一 Stream 内的 Task 按提交顺序执行。
 2. **完成边界**：异步 API 返回后，Task 可能只是已入队；真正完成需要通过 Stream、Event 或 Device 同步接口确认。
 
+<a id="EVENT"></a>
 
 ## 6. Event
 

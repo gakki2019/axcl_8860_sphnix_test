@@ -1,24 +1,26 @@
 # 结构体
 
-<a id="axclCrashDumpConfig"></a>
+<a id="axclMinidumpConfig"></a>
 
-## 1. axclCrashDumpConfig
+## 1. axclMinidumpConfig
 
-Crash dump 配置结构体。
+Minidump 配置结构体。
+
+所有字段均为可选字段，可以为 NULL。
 
 ```c
 typedef struct {
-    const char* dump_dir;   /**< Dump 文件输出目录。 */
-    const char* dump_type;  /**< 兼容性保留字段；Breakpad minicoredump 实现会忽略该字段。 */
-} axclCrashDumpConfig;
+    const char* dump_dir;   /**< 首选 Dump 目录。AXCL_DUMP_DIR 设置为非空值时忽略此字段。 */
+    const char* dump_type;  /**< 保留供将来使用，当前会忽略该字段。 */
+} axclMinidumpConfig;
 ```
 
 ### 1.1. 字段
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dump_dir | const char * | Dump 文件输出目录。 |
-| dump_type | const char * | 兼容性保留字段；Breakpad minicoredump 实现会忽略该字段。 |
+| dump_dir | const char * | 首选 Dump 目录。`AXCL_DUMP_DIR` 设置为非空值时忽略此字段。 |
+| dump_type | const char * | 保留供将来使用，当前会忽略该字段。 |
 
 <br>
 

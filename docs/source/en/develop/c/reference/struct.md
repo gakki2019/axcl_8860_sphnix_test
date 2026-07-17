@@ -1,24 +1,26 @@
 # Structure
 
-<a id="axclCrashDumpConfig"></a>
+<a id="axclMinidumpConfig"></a>
 
-## axclCrashDumpConfig
+## axclMinidumpConfig
 
-Crash dump configuration structure.
+Minidump configuration structure.
+
+All fields are optional and may be NULL.
 
 ```c
 typedef struct {
-    const char* dump_dir;   /**< Dump file output directory. */
-    const char* dump_type;  /**< Reserved for compatibility. Ignored by the Breakpad minicoredump implementation. */
-} axclCrashDumpConfig;
+    const char* dump_dir;   /**< Preferred dump directory. Ignored when AXCL_DUMP_DIR is set to a non-empty value. */
+    const char* dump_type;  /**< Reserved for future use. Currently ignored. */
+} axclMinidumpConfig;
 ```
 
 ### Fields
 
 | Name | Type | Description |
 |---|---|---|
-| dump_dir | const char * | Dump file output directory. |
-| dump_type | const char * | Reserved for compatibility. Ignored by the Breakpad minicoredump implementation. |
+| dump_dir | const char * | Preferred dump directory. Ignored when AXCL_DUMP_DIR is set to a non-empty value. |
+| dump_type | const char * | Reserved for future use. Currently ignored. |
 
 <br>
 
@@ -52,8 +54,8 @@ Memory location information.
 
 ```c
 typedef struct axclrtMemLocation {
-    axclrtMemLocationType type;
-    int32_t id;
+    axclrtMemLocationType type;  /**< Memory location type. */
+    int32_t id;                  /**< Virtual device ID for device memory; otherwise -1. */
 } axclrtMemLocation;
 ```
 
@@ -61,8 +63,8 @@ typedef struct axclrtMemLocation {
 
 | Name | Type | Description |
 |---|---|---|
-| type | axclrtMemLocationType | - |
-| id | int32_t | - |
+| type | axclrtMemLocationType | Memory location type. |
+| id | int32_t | Virtual device ID for device memory; otherwise -1. |
 
 <br>
 
@@ -74,9 +76,9 @@ Pointer attributes returned by [axclrtPointerGetAttributes](../memory_api.md#axc
 
 ```c
 typedef struct axclrtPtrAttributes {
-    axclrtMemLocation location;
-    uint32_t flags;
-    uint32_t rsv[3];
+    axclrtMemLocation location;  /**< Pointer location information. */
+    uint32_t flags;              /**< Bitwise combination of @ref axclrtPointerAttributeFlag values. */
+    uint32_t rsv[3];             /**< Reserved for future use. */
 } axclrtPtrAttributes;
 ```
 
@@ -84,9 +86,9 @@ typedef struct axclrtPtrAttributes {
 
 | Name | Type | Description |
 |---|---|---|
-| location | axclrtMemLocation | - |
-| flags | uint32_t | - |
-| rsv | uint32_t[3] | - |
+| location | axclrtMemLocation | Pointer location information. |
+| flags | uint32_t | Bitwise combination of [axclrtPointerAttributeFlag](enum.md#axclrtPointerAttributeFlag) values. |
+| rsv | uint32_t[3] | Reserved for future use. |
 
 <br>
 
@@ -118,8 +120,6 @@ typedef struct {
 
 ## axclError
 
-Public AXCL error code type.
-
 ```c
 typedef int32_t axclError
 ```
@@ -130,10 +130,20 @@ typedef int32_t axclError
 
 ## axclrtContext
 
-Runtime context handle.
-
 ```c
 typedef void* axclrtContext
+```
+
+<br>
+
+<a id="axclrtDeviceStateCallback"></a>
+
+## axclrtDeviceStateCallback
+
+Device state callback.
+
+```c
+typedef void(* axclrtDeviceStateCallback) (uint32_t deviceId, axclrtDeviceState state, void *args)
 ```
 
 <br>
@@ -141,8 +151,6 @@ typedef void* axclrtContext
 <a id="axclrtEngineIO"></a>
 
 ## axclrtEngineIO
-
-Opaque handle used to bind engine input and output buffers.
 
 ```c
 typedef void* axclrtEngineIO
@@ -154,8 +162,6 @@ typedef void* axclrtEngineIO
 
 ## axclrtEngineIOInfo
 
-Opaque handle used to query engine input and output metadata.
-
 ```c
 typedef void* axclrtEngineIOInfo
 ```
@@ -165,8 +171,6 @@ typedef void* axclrtEngineIOInfo
 <a id="axclrtEngineSet"></a>
 
 ## axclrtEngineSet
-
-Bitmask describing the engine core affinity set.
 
 ```c
 typedef uint32_t axclrtEngineSet
@@ -178,8 +182,6 @@ typedef uint32_t axclrtEngineSet
 
 ## axclrtEvent
 
-Runtime event handle.
-
 ```c
 typedef void* axclrtEvent
 ```
@@ -189,8 +191,6 @@ typedef void* axclrtEvent
 <a id="axclrtStream"></a>
 
 ## axclrtStream
-
-Runtime stream handle.
 
 ```c
 typedef void* axclrtStream

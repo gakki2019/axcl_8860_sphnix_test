@@ -266,7 +266,7 @@ find /tmp/axcl-symbols/device/arm64_glibc/symbols/lib -maxdepth 3 -name '*.sym' 
 #include <cstdlib>
 ```
 
-`main()` 中 `axclInitializeCrashDump(nullptr);` 后的临时改动：
+`main()` 中 `axclInitializeMinidump(nullptr);` 后的临时改动：
 
 ```cpp
 if (std::getenv("AXCL_SAMPLE_RUNTIME_NULL_DEREF")) {
@@ -281,10 +281,10 @@ if (std::getenv("AXCL_SAMPLE_RUNTIME_NULL_DEREF")) {
 +#include <cstdlib>
  #include <thread>
  #include "axcl.h"
- #include "axcl_crash_dump.h"
+ #include "axcl_minidump.h"
 @@
  int main(int argc, char *argv[]) {
-     axclInitializeCrashDump(nullptr);
+     axclInitializeMinidump(nullptr);
 +
 +    if (std::getenv("AXCL_SAMPLE_RUNTIME_NULL_DEREF")) {
 +        volatile int *null_ptr = nullptr;

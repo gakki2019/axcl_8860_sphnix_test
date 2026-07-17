@@ -9,13 +9,15 @@ C/C++
 .. toctree::
    :maxdepth: 3
 
-   context_api
-   control_api
+   system_api
    device_api
-   engine_api
+   context_api
+   stream_api
    event_api
    memory_api
-   stream_api
-   system_api
+   engine_api
+   control_api
+   minidump_api
+   other_api
    reference/index
 

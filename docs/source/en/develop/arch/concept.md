@@ -23,6 +23,8 @@ AXCL runtime uses **Device, Context, Stream, Task, and Event** to organize the e
 | Task | No, internal object | Belongs to Stream | Minimum work unit tracked and scheduled by runtime internally | Managed by runtime internally |
 | Event | Yes, [axclrtEvent](../c/reference/struct.md#axclrtEvent) | Belongs to Device | Stream synchronization, Host waiting, elapsed-time measurement | [axclrtCreateEvent](../c/event_api.md#axclrtCreateEvent), [axclrtRecordEvent](../c/event_api.md#axclrtRecordEvent), [axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent) |
 
+<a id="DEVICE"></a>
+
 ## 2. Device
 
 A Device is an AXERA AI compute device managed by AXCL runtime. A Host process can see one or more Devices and selects the target device by logical `deviceId`.
@@ -68,6 +70,8 @@ AXCL exposes logical device IDs visible to the current process. Runtime maps eac
 - **Physical device ID** comes from device information probed by runtime, and is the ID used by the driver and communication layer to identify a device.
 - **Logical device ID** is the continuous ID exposed by AXCL to the current process, in the range `0` to `device count - 1`.
 - Use [axclrtGetDeviceCount](../c/device_api.md#axclrtGetDeviceCount) to query the number of logical devices visible to the current process.
+
+<a id="AXCL_VISIBLE_DEVICES"></a>
 
 #### 2.1.1. AXCL_VISIBLE_DEVICES
 
@@ -117,6 +121,8 @@ Device and its child objects have lifecycle dependencies:
 
 - [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) waits for related submitted tasks on the Device corresponding to the Context bound to the current thread.
 - [axclrtSynchronizeDeviceWithTimeout](../c/device_api.md#axclrtSynchronizeDeviceWithTimeout) supports timeout waiting. The `timeout` unit is milliseconds, and `-1` means waiting indefinitely.
+
+<a id="CONTEXT"></a>
 
 ## 3. Context
 
@@ -228,6 +234,8 @@ int main(void) {
 }
 ```
 
+<a id="STREAM"></a>
+
 ## 4. Stream
 
 A Stream is a logical task stream under a Context. It is used to organize task ordering and is a core object in the AXCL asynchronous execution model.
@@ -281,6 +289,8 @@ axclFinalize();
 - `AXCL_STREAM_STATUS_COMPLETE` means there is no unfinished task on the Stream at query time.
 - `AXCL_STREAM_STATUS_NOT_READY` means there are still unfinished tasks at query time.
 
+<a id="TASK"></a>
+
 ## 5. Task
 
 Task is the minimum runtime-internal scheduling unit that describes one task execution, for example:
@@ -297,6 +307,8 @@ From the user point of view, Task mainly matters in two ways:
 
 1. **Ordering**: tasks in the same Stream execute in submission order.
 2. **Completion boundary**: after an asynchronous API returns, the Task may only have been enqueued; real completion needs to be confirmed through Stream, Event, or Device synchronization APIs.
+
+<a id="EVENT"></a>
 
 ## 6. Event
 

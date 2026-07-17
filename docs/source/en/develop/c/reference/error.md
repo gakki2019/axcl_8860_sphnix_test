@@ -4,18 +4,18 @@
 
 | Symbol | Host Hex | Host Int32 | Device Hex | Device Int32 | Description |
 |---|---|---|---|---|---|
-| <a id="AXCL_ERR_COMM_ALREADY_OPEN"></a>AXCL_ERR_COMM_ALREADY_OPEN | 0x80305022 | -2144317406 | 0x80315022 | -2144251870 | The common channel is already open. |
+| <a id="AXCL_ERR_COMM_ALREADY_OPEN"></a>AXCL_ERR_COMM_ALREADY_OPEN | 0x80305022 | -2144317406 | 0x80315022 | -2144251870 | The communication channel is already open. |
 | <a id="AXCL_ERR_COMM_BUSY"></a>AXCL_ERR_COMM_BUSY | 0x80305006 | -2144317434 | 0x80315006 | -2144251898 | The module is busy. |
 | <a id="AXCL_ERR_COMM_CANCELED"></a>AXCL_ERR_COMM_CANCELED | 0x8030502B | -2144317397 | 0x8031502B | -2144251861 | The operation was canceled. |
-| <a id="AXCL_ERR_COMM_CLOSED"></a>AXCL_ERR_COMM_CLOSED | 0x80305024 | -2144317404 | 0x80315024 | -2144251868 | The common channel was closed. |
-| <a id="AXCL_ERR_COMM_FAIL"></a>AXCL_ERR_COMM_FAIL | 0x80305020 | -2144317408 | 0x80315020 | -2144251872 | A generic failure occurred in the common module. |
+| <a id="AXCL_ERR_COMM_CLOSED"></a>AXCL_ERR_COMM_CLOSED | 0x80305024 | -2144317404 | 0x80315024 | -2144251868 | The communication channel was closed. |
+| <a id="AXCL_ERR_COMM_FAIL"></a>AXCL_ERR_COMM_FAIL | 0x80305020 | -2144317408 | 0x80315020 | -2144251872 | A generic failure occurred. |
 | <a id="AXCL_ERR_COMM_ILLEGAL_PARAM"></a>AXCL_ERR_COMM_ILLEGAL_PARAM | 0x80305003 | -2144317437 | 0x80315003 | -2144251901 | An invalid parameter was passed. |
-| <a id="AXCL_ERR_COMM_INIT_FAILED"></a>AXCL_ERR_COMM_INIT_FAILED | 0x80305025 | -2144317403 | 0x80315025 | -2144251867 | Initialization failed. |
+| <a id="AXCL_ERR_COMM_INIT_FAILED"></a>AXCL_ERR_COMM_INIT_FAILED | 0x80305025 | -2144317403 | 0x80315025 | -2144251867 | Initialize failed. |
 | <a id="AXCL_ERR_COMM_INTERRUPTED"></a>AXCL_ERR_COMM_INTERRUPTED | 0x8030502C | -2144317396 | 0x8031502C | -2144251860 | The operation was interrupted. |
 | <a id="AXCL_ERR_COMM_INVALID_STATE"></a>AXCL_ERR_COMM_INVALID_STATE | 0x8030502A | -2144317398 | 0x8031502A | -2144251862 | The module is in an invalid state for this operation. |
 | <a id="AXCL_ERR_COMM_IO"></a>AXCL_ERR_COMM_IO | 0x80305023 | -2144317405 | 0x80315023 | -2144251869 | An I/O error occurred. |
 | <a id="AXCL_ERR_COMM_NOT_FOUND"></a>AXCL_ERR_COMM_NOT_FOUND | 0x80305026 | -2144317402 | 0x80315026 | -2144251866 | The requested resource was not found. |
-| <a id="AXCL_ERR_COMM_NOT_OPEN"></a>AXCL_ERR_COMM_NOT_OPEN | 0x80305021 | -2144317407 | 0x80315021 | -2144251871 | The common channel is not open. |
+| <a id="AXCL_ERR_COMM_NOT_OPEN"></a>AXCL_ERR_COMM_NOT_OPEN | 0x80305021 | -2144317407 | 0x80315021 | -2144251871 | The communication channel is not open. |
 | <a id="AXCL_ERR_COMM_NO_MEMORY"></a>AXCL_ERR_COMM_NO_MEMORY | 0x80305007 | -2144317433 | 0x80315007 | -2144251897 | Memory allocation failed. |
 | <a id="AXCL_ERR_COMM_NULL_POINTER"></a>AXCL_ERR_COMM_NULL_POINTER | 0x80305002 | -2144317438 | 0x80315002 | -2144251902 | A null pointer was passed. |
 | <a id="AXCL_ERR_COMM_PROTO_VIOLATION"></a>AXCL_ERR_COMM_PROTO_VIOLATION | 0x80305029 | -2144317399 | 0x80315029 | -2144251863 | A protocol violation was detected. |

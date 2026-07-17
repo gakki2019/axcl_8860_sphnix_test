@@ -266,7 +266,7 @@ Temporary change in the include area:
 #include <cstdlib>
 ```
 
-Temporary change after `axclInitializeCrashDump(nullptr);` in `main()`:
+Temporary change after `axclInitializeMinidump(nullptr);` in `main()`:
 
 ```cpp
 if (std::getenv("AXCL_SAMPLE_RUNTIME_NULL_DEREF")) {
@@ -281,10 +281,10 @@ The temporary code diff is as follows:
 +#include <cstdlib>
  #include <thread>
  #include "axcl.h"
- #include "axcl_crash_dump.h"
+ #include "axcl_minidump.h"
 @@
  int main(int argc, char *argv[]) {
-     axclInitializeCrashDump(nullptr);
+     axclInitializeMinidump(nullptr);
 +
 +    if (std::getenv("AXCL_SAMPLE_RUNTIME_NULL_DEREF")) {
 +        volatile int *null_ptr = nullptr;

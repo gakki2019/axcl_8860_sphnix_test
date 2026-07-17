@@ -16,6 +16,8 @@ Maximum number of dimensions supported by an engine tensor.
 
 ## AXCL_COMM
 
+Communication sub module ID.
+
 ```c
 #define AXCL_COMM (0x50)
 ```
@@ -25,6 +27,8 @@ Maximum number of dimensions supported by an engine tensor.
 <a id="AXCL_CTRL"></a>
 
 ## AXCL_CTRL
+
+Control sub module ID.
 
 ```c
 #define AXCL_CTRL (0x57)
@@ -36,6 +40,8 @@ Maximum number of dimensions supported by an engine tensor.
 
 ## AXCL_DAEMON
 
+Daemon sub module ID.
+
 ```c
 #define AXCL_DAEMON (0x55)
 ```
@@ -45,6 +51,8 @@ Maximum number of dimensions supported by an engine tensor.
 <a id="AXCL_DEF_COMM_ERR"></a>
 
 ## AXCL_DEF_COMM_ERR
+
+Compose AXCL_COMM sub module error code.
 
 ```c
 #define AXCL_DEF_COMM_ERR AXCL_DEF_ERR(AXCL_COMM, (errid))
@@ -56,6 +64,8 @@ Maximum number of dimensions supported by an engine tensor.
 
 ## AXCL_DEF_CTRL_ERR
 
+Compose AXCL_CTRL sub module error code.
+
 ```c
 #define AXCL_DEF_CTRL_ERR AXCL_DEF_ERR(AXCL_CTRL, (errid))
 ```
@@ -65,6 +75,8 @@ Maximum number of dimensions supported by an engine tensor.
 <a id="AXCL_DEF_DAEMON_ERR"></a>
 
 ## AXCL_DEF_DAEMON_ERR
+
+Compose AXCL_DAEMON sub module error code.
 
 ```c
 #define AXCL_DEF_DAEMON_ERR AXCL_DEF_ERR(AXCL_DAEMON, (errid))
@@ -76,6 +88,8 @@ Maximum number of dimensions supported by an engine tensor.
 
 ## AXCL_DEF_ENGINE_ERR
 
+Compose AXCL_ENGINE sub module error code.
+
 ```c
 #define AXCL_DEF_ENGINE_ERR AXCL_DEF_ERR(AXCL_ENGINE, (errid))
 ```
@@ -86,7 +100,7 @@ Maximum number of dimensions supported by an engine tensor.
 
 ## AXCL_DEF_ERR
 
-Compose a module-specific AXCL error code.
+Compose error code. ----------------------------------------------------------------------| |1| FIXED | AX_ID_AXCL | SUB_MODULE_ID | ERR_ID | |---------------------------------------------------------------------| |1|< 7bits >|<- 8bits ->|<- 8bits ->|<- 8bits ->|.
 
 ```c
 #define AXCL_DEF_ERR ((axclError)((0x80000000L) | ((AX_ID_AXCL) << 16 ) | ((sub) << 8) | (errid)))
@@ -98,6 +112,8 @@ Compose a module-specific AXCL error code.
 
 ## AXCL_DEF_NATIVE_ERR
 
+Compose AXCL_NATIVE sub module error code.
+
 ```c
 #define AXCL_DEF_NATIVE_ERR AXCL_DEF_ERR(AXCL_NATIVE, (errid))
 ```
@@ -107,6 +123,8 @@ Compose a module-specific AXCL error code.
 <a id="AXCL_DEF_PROTOCOL_ERR"></a>
 
 ## AXCL_DEF_PROTOCOL_ERR
+
+Compose AXCL_PROTOCOL sub module error code.
 
 ```c
 #define AXCL_DEF_PROTOCOL_ERR AXCL_DEF_ERR(AXCL_PROTOCOL, (errid))
@@ -118,6 +136,8 @@ Compose a module-specific AXCL error code.
 
 ## AXCL_DEF_RT_ERR
 
+Compose AXCL_RUNTIME sub module error code.
+
 ```c
 #define AXCL_DEF_RT_ERR AXCL_DEF_ERR(AXCL_RUNTIME, (errid))
 ```
@@ -128,6 +148,8 @@ Compose a module-specific AXCL error code.
 
 ## AXCL_DEF_WORKER_ERR
 
+Compose AXCL_WORKER sub module error code.
+
 ```c
 #define AXCL_DEF_WORKER_ERR AXCL_DEF_ERR(AXCL_WORKER, (errid))
 ```
@@ -137,6 +159,8 @@ Compose a module-specific AXCL error code.
 <a id="AXCL_ENGINE"></a>
 
 ## AXCL_ENGINE
+
+Engine sub module ID.
 
 ```c
 #define AXCL_ENGINE (0x58)
@@ -182,6 +206,8 @@ Disable event timing flag.
 
 ## AXCL_ID_DEVICE
 
+AXCL DEVICE ID.
+
 ```c
 #define AXCL_ID_DEVICE (0x31)
 ```
@@ -191,6 +217,8 @@ Disable event timing flag.
 <a id="AXCL_ID_HOST"></a>
 
 ## AXCL_ID_HOST
+
+AXCL HOST ID.
 
 ```c
 #define AXCL_ID_HOST (0x30)
@@ -202,6 +230,8 @@ Disable event timing flag.
 
 ## AXCL_LITE
 
+Lite sub module ID.
+
 ```c
 #define AXCL_LITE (0x53)
 ```
@@ -211,6 +241,8 @@ Disable event timing flag.
 <a id="AXCL_NATIVE"></a>
 
 ## AXCL_NATIVE
+
+Native sub module ID.
 
 ```c
 #define AXCL_NATIVE (0x54)
@@ -222,6 +254,8 @@ Disable event timing flag.
 
 ## AXCL_PROTOCOL
 
+Protocol sub module ID.
+
 ```c
 #define AXCL_PROTOCOL (0x51)
 ```
@@ -231,6 +265,8 @@ Disable event timing flag.
 <a id="AXCL_RUNTIME"></a>
 
 ## AXCL_RUNTIME
+
+Runtime sub module ID.
 
 ```c
 #define AXCL_RUNTIME (0x52)
@@ -242,6 +278,8 @@ Disable event timing flag.
 
 ## AXCL_WORKER
 
+Worker sub module ID.
+
 ```c
 #define AXCL_WORKER (0x56)
 ```
@@ -251,6 +289,8 @@ Disable event timing flag.
 <a id="AX_ID_AXCL"></a>
 
 ## AX_ID_AXCL
+
+AXCL module ID.
 
 ```c
 #define AX_ID_AXCL (0x30)

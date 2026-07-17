@@ -8,6 +8,8 @@
 - [Engine API](engine_api.md)
 - [Event API](event_api.md)
 - [Memory API](memory_api.md)
+- [Minidump API](minidump_api.md)
+- [Other API](other_api.md)
 - [Stream API](stream_api.md)
 - [System API](system_api.md)
 

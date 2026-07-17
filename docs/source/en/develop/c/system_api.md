@@ -2,60 +2,18 @@
 
 ## Index
 
-- [axclAppLog](#axclAppLog)
 - [axclFinalize](#axclFinalize)
-- [axclGetLogLevel](#axclGetLogLevel)
 - [axclInit](#axclInit)
-- [axclSetLogLevel](#axclSetLogLevel)
-- [axclrtGetErrorString](#axclrtGetErrorString)
-- [axclrtGetLastError](#axclrtGetLastError)
-- [axclrtGetSocName](#axclrtGetSocName)
-- [axclrtGetVersion](#axclrtGetVersion)
-- [axclrtGetVersionStr](#axclrtGetVersionStr)
-- [axclrtPeekAtLastError](#axclrtPeekAtLastError)
-- [axclrtSetLastError](#axclrtSetLastError)
 
 <br>
 
 ## API
 
-<a id="axclAppLog"></a>
-
-### axclAppLog
-
-Record an application log in the following format. [date time][tid][level][APP][function][file][line]: formatted message Example: axclAppLog(5, func, NULL, LINE, "json: %s, device: %d", json, device); log: [2024-11-12 14:24:22.380][1330][C][APP][main][53]: json: ./axcl.json, device: 129.
-
-#### Function
-
-```c
-AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint32_t line, const char *fmt,...);
-```
-
-#### Parameters
-
-| Name | Direction | Description |
-|---|---|---|
-| lv | in | log level, refer to [axclSetLogLevel](#axclSetLogLevel). |
-| func | in | function name; if set to NULL, the function name will not be printed. |
-| file | in | file name; if set to NULL, the file name will not be printed. |
-| line | in | line number |
-| fmt | in | format string for the log message, max. length is 1024. |
-
-#### Returns
-
-N/A
-
-#### Remark
-
-[axclSetLogLevel](#axclSetLogLevel)
-
-<br>
-
 <a id="axclFinalize"></a>
 
 ### axclFinalize
 
-Finalize axcl runtime.
+Deinitialize the AXCL runtime and release its resources.
 
 #### Function
 
@@ -69,13 +27,13 @@ N/A
 
 #### Returns
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`: Success.
+- `others`: Failure.
 
 #### Note
 
-[axclFinalize](#axclFinalize) must be called explicitly before quit, otherwise causes terminated abort.
-Do not call [axclFinalize](#axclFinalize) in destructor.
+- [axclFinalize](#axclFinalize) must be called explicitly before process exit. Every successful call to [axclInit](#axclInit) increments the internal reference count and must have a matching call to [axclFinalize](#axclFinalize). A failed [axclInit](#axclInit) does not require a matching call.
+- Do not call this function during C++ static or global object destruction, where AXCL runtime dependencies may already have been destroyed.
 
 #### Remark
 
@@ -83,36 +41,11 @@ Do not call [axclFinalize](#axclFinalize) in destructor.
 
 <br>
 
-<a id="axclGetLogLevel"></a>
-
-### axclGetLogLevel
-
-Get axcl log level.
-
-#### Function
-
-```c
-AXCL_EXPORT axclError axclGetLogLevel(int32_t *lv);
-```
-
-#### Parameters
-
-| Name | Direction | Description |
-|---|---|---|
-| lv | out | log level |
-
-#### Returns
-
-- `AXCL_SUCC`: success.
-- `others`: failure.
-
-<br>
-
 <a id="axclInit"></a>
 
 ### axclInit
 
-Initialize axcl runtime.
+Initialize the AXCL runtime. This function must be called before using other AXCL APIs.
 
 #### Function
 
@@ -124,226 +57,67 @@ AXCL_EXPORT axclError axclInit(const char *json);
 
 | Name | Direction | Description |
 |---|---|---|
-| json | in | json config of the following:<br>json config file path.<br>json config content string.<br>NULL, use default config. |
+| json | in | JSON configuration file path or JSON content string. NULL or an empty string uses the default configuration. |
 
 #### Returns
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
-
-#### Note
-
-[axclInit](#axclInit) should be callled before any other APIs.
-[axclInit](#axclInit) can be called multiple times, but only the first call of config parameter will be used.
-[axclFinalize](#axclFinalize) should be called in pair with [axclInit](#axclInit), for example: axclInit(NULL); axclInit(NULL); [axclFinalize](#axclFinalize)(); [axclFinalize](#axclFinalize)();
-Usually [axclInit](#axclInit) and [axclFinalize](#axclFinalize) are called in the main function of the application.
+- `AXCL_SUCC`: Success.
+- `others`: Failure.
 
 #### Example
 
 ```c
-int main(int argc, char *argv[]) {
-     axclInit(NULL);
+ int main(int argc, char *argv[]) {
+      axclInit("");
 
-     // TODO:
+      // TODO:
 
-     axclFinalize();
-     return 0;
-}
+      axclFinalize();
+      return 0;
+ }
 ```
-
-<br>
-
-<a id="axclSetLogLevel"></a>
-
-### axclSetLogLevel
-
-Set axcl log level.
-
-#### Function
-
-```c
-AXCL_EXPORT axclError axclSetLogLevel(int32_t lv);
-```
-
-#### Parameters
-
-| Name | Direction | Description |
-|---|---|---|
-| lv | in | log level 0: trace 1: debug 2: info 3: warning 4: error 5: critical 6: off |
-
-#### Returns
-
-- `AXCL_SUCC`: success.
-- `others`: failure.
-
-<br>
-
-<a id="axclrtGetErrorString"></a>
-
-### axclrtGetErrorString
-
-Get the error string description for an error code.
-
-#### Function
-
-```c
-AXCL_EXPORT const char* axclrtGetErrorString(axclError error);
-```
-
-#### Parameters
-
-| Name | Direction | Description |
-|---|---|---|
-| error | in | The error code. |
-
-#### Returns
-
-- The error description string, or "unknown error" if not found.
-
-<br>
-
-<a id="axclrtGetLastError"></a>
-
-### axclrtGetLastError
-
-Get the last error code in the current thread.
-
-#### Function
-
-```c
-AXCL_EXPORT axclError axclrtGetLastError(void);
-```
-
-#### Parameters
-
-N/A
-
-#### Returns
-
-- The last error code.
 
 #### Note
 
-This function also clears the thread-local error to AXCL_SUCC.
+- The runtime lifecycle is reference-counted: each successful [axclInit](#axclInit) increments the reference count and [axclFinalize](#axclFinalize) decrements it. Resources are released only when the count reaches zero.
+- A failed [axclInit](#axclInit) does not acquire a reference and must not be paired with [axclFinalize](#axclFinalize).
+- A process may call [axclInit](#axclInit) multiple times, but each successful call must be paired with [axclFinalize](#axclFinalize)(). For example:
 
-<br>
+  ```c
+      axclInit("") -> axclFinalize() -> axclInit("") -> axclFinalize()
+      axclInit("") -> axclInit("") -> axclFinalize() -> axclFinalize()
+  ```
+- [axclInit](#axclInit) and [axclFinalize](#axclFinalize) are thread-safe. Initialization and cleanup in the main thread are recommended.
+- The reference count must be zero before process exit; otherwise, a joinable runtime thread may cause abnormal process termination during static object destruction.
+- Configuration is loaded only while the reference count is zero. A successful call changes the count from zero to one; later calls do not reload configuration until the count returns to zero:
 
-<a id="axclrtGetSocName"></a>
+  ```c
+      axclInit("config1.json") // Loads config1.json
+      axclInit("config2.json") // Does not load config2.json
+      axclFinalize()
+      axclFinalize()
+      axclInit("config3.json") // Loads config3.json
+      axclFinalize()
+  ```
+- An invalid JSON string or an unreadable configuration path returns `AXCL_ERR_RT_FAIL`. Runtime initialization is not attempted, and the reference count remains zero.
 
-### axclrtGetSocName
+#### JSON
 
-Get chip name.
+- `log.host.level`: Host log level. See [axclSetLogLevel](other_api.md#axclSetLogLevel).
+- `log.host.path`: Host log file path. On Linux, the default is `${AXCL_LOG_DIR}/axcl_host.log` when `AXCL_LOG_DIR` is set and non-empty; otherwise it is `/tmp/axcl/axcl_host.log`.
+- `log.device.level`: Device log level.
+- `log.host.path` takes effect only once during process startup. Calling [axclFinalize](#axclFinalize) and then [axclInit](#axclInit) again does not switch the existing log output to a new path.
 
-#### Function
-
-```c
-AXCL_EXPORT const char* axclrtGetSocName();
-```
-
-#### Parameters
-
-N/A
-
-#### Returns
-
-- Chip name string.
-
-<br>
-
-<a id="axclrtGetVersion"></a>
-
-### axclrtGetVersion
-
-Get axcl version.
-
-#### Function
-
-```c
-AXCL_EXPORT axclError axclrtGetVersion(int32_t *major, int32_t *minor, int32_t *patch);
-```
-
-#### Parameters
-
-| Name | Direction | Description |
-|---|---|---|
-| major | out | major version. |
-| minor | out | minor version. |
-| patch | out | patch version. |
-
-#### Returns
-
-- `AXCL_SUCC`: success.
-- `others`: failure.
-
-<br>
-
-<a id="axclrtGetVersionStr"></a>
-
-### axclrtGetVersionStr
-
-Get the version string for a specified source.
-
-#### Function
-
-```c
-AXCL_EXPORT axclError axclrtGetVersionStr(const char *name, char *buf, uint32_t size);
-```
-
-#### Parameters
-
-| Name | Direction | Description |
-|---|---|---|
-| name | in | Version source, supported values: "driver" and "firmware". "driver" returns the SDK build version string. "firmware" returns the device firmware version string. |
-| buf | out | Buffer used to store the version string. The result is always NUL-terminated when size > 0. |
-| size | in | Size of buf in bytes. If the buffer is too small, the output is truncated to fit. |
-
-#### Returns
-
-- `AXCL_SUCC`: success.
-- `others`: failure.
-
-<br>
-
-<a id="axclrtPeekAtLastError"></a>
-
-### axclrtPeekAtLastError
-
-Peek at the last error code without clearing it.
-
-#### Function
-
-```c
-AXCL_EXPORT axclError axclrtPeekAtLastError(void);
-```
-
-#### Parameters
-
-N/A
-
-#### Returns
-
-- The last error code.
-
-<br>
-
-<a id="axclrtSetLastError"></a>
-
-### axclrtSetLastError
-
-Set the last error code for the current thread.
-
-#### Function
-
-```c
-AXCL_EXPORT void axclrtSetLastError(axclError error);
-```
-
-#### Parameters
-
-| Name | Direction | Description |
-|---|---|---|
-| error | in | The error code to set. |
-
-#### Returns
-
-N/A
+  ```json
+   {
+    "log": {
+   		"host": {
+   			"level": 2,
+   			"path": "/tmp/axcl/axcl_host.log"
+   		},
+   		"device": {
+   			"level": 2
+   		}
+   	}
+   }
+  ```

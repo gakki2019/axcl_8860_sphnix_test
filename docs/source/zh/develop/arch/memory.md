@@ -72,6 +72,8 @@ AXCL 使用 [axclrtMemcpyKind](../c/reference/enum.md#axclrtMemcpyKind) 描述�
 | [AXCL_MEMCPY_HOST_PHY_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_PHY_TO_DEVICE) | Host 物理内存到 Device 物理内存 |
 | [AXCL_MEMCPY_DEVICE_TO_HOST_PHY](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST_PHY) | Device 物理内存到 Host 物理内存 |
 
+<a id="memory-synchronous-copy"></a>
+
 ### 2.2. 同步拷贝
 
 [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) 是同步拷贝接口。对于 Host ↔ Device 拷贝，调用返回表示本次同步拷贝已经完成。
@@ -95,6 +97,8 @@ axclrtFree(devMem);
 axclrtFreeHost(hostMem);
 axclrtResetDevice(0);
 ```
+
+<a id="memory-asynchronous-copy"></a>
 
 ### 2.3. 异步拷贝
 
@@ -138,6 +142,48 @@ axclrtResetDevice(0);
 
 ```{important}
 - [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) 成功返回时，拷贝只是提交到了指定 Stream，并不表示数据已经拷贝完成。异步拷贝的完成状态可通过同步该 Stream、等待记录在该 Stream 上的 Event，或使用 Device 级同步接口确认。
+```
+
+<a id="memory-inter-device-copy"></a>
+
+### 2.4. 设备间拷贝
+
+以下示例演示将 Device 0 上的内存复制到 Device 1。调用者需要先确认两个设备之间支持 Peer Access，再分别开启两个方向的访问权限。以下代码省略错误处理。
+
+```c
+axclInit(NULL);
+
+int32_t canAccessPeer = 0;
+axclrtDeviceCanAccessPeer(&canAccessPeer, 0, 1);
+if (canAccessPeer == 1) {
+    uint32_t reserved = 0U;
+
+    axclrtSetDevice(0);
+    axclrtDeviceEnablePeerAccess(1, reserved);
+
+    void *dev0Mem = NULL;
+    axclrtMalloc(&dev0Mem, 10, AXCL_MEM_MALLOC_NORMAL_ONLY);
+
+    axclrtSetDevice(1);
+    axclrtDeviceEnablePeerAccess(0, reserved);
+
+    void *dev1Mem = NULL;
+    axclrtMalloc(&dev1Mem, 10, AXCL_MEM_MALLOC_NORMAL_ONLY);
+
+    /* 将 Device 0 上的数据复制到 Device 1。 */
+    axclrtMemcpy(dev1Mem, dev0Mem, 10, AXCL_MEMCPY_DEVICE_TO_DEVICE);
+
+    axclrtDeviceDisablePeerAccess(0);
+    axclrtFree(dev1Mem);
+    axclrtResetDevice(1);
+
+    axclrtSetDevice(0);
+    axclrtDeviceDisablePeerAccess(1);
+    axclrtFree(dev0Mem);
+    axclrtResetDeviceForce(0);
+}
+
+axclFinalize();
 ```
 
 ## 3. 其他内存操作

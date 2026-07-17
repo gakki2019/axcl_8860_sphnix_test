@@ -2,14 +2,16 @@
 
 ## 1. API 页面
 
-- [上下文 API](context_api.md)
-- [控制 API](control_api.md)
-- [设备 API](device_api.md)
-- [引擎 API](engine_api.md)
-- [事件 API](event_api.md)
-- [内存 API](memory_api.md)
-- [流 API](stream_api.md)
-- [系统 API](system_api.md)
+- [上下文接口](context_api.md)
+- [控制接口](control_api.md)
+- [设备接口](device_api.md)
+- [引擎接口](engine_api.md)
+- [事件接口](event_api.md)
+- [内存接口](memory_api.md)
+- [小型转储接口](minidump_api.md)
+- [其他接口](other_api.md)
+- [流接口](stream_api.md)
+- [系统接口](system_api.md)
 
 <br>
 

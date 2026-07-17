@@ -72,6 +72,8 @@ AXCL uses [axclrtMemcpyKind](../c/reference/enum.md#axclrtMemcpyKind) to describ
 | [AXCL_MEMCPY_HOST_PHY_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_PHY_TO_DEVICE) | Host physical memory to Device physical memory. |
 | [AXCL_MEMCPY_DEVICE_TO_HOST_PHY](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST_PHY) | Device physical memory to Host physical memory. |
 
+<a id="memory-synchronous-copy"></a>
+
 ### 2.2. Synchronous Copy
 
 [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) is a synchronous copy API. For Host ↔ Device copies, a successful return indicates that the current synchronous copy has completed.
@@ -95,6 +97,8 @@ axclrtFree(devMem);
 axclrtFreeHost(hostMem);
 axclrtResetDevice(0);
 ```
+
+<a id="memory-asynchronous-copy"></a>
 
 ### 2.3. Asynchronous Copy
 
@@ -138,6 +142,48 @@ axclrtResetDevice(0);
 
 ```{important}
 When [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) returns successfully, the copy has only been submitted to the specified Stream. It does not mean that the data has already been copied. Completion of an asynchronous copy can be confirmed by synchronizing that Stream, waiting for an Event recorded on that Stream, or using a Device-level synchronization API.
+```
+
+<a id="memory-inter-device-copy"></a>
+
+### 2.4. Inter-Device Copy
+
+The following example copies memory from Device 0 to Device 1. The application first checks whether Peer Access is supported between the two devices, and then enables access in both directions. Error handling is omitted.
+
+```c
+axclInit(NULL);
+
+int32_t canAccessPeer = 0;
+axclrtDeviceCanAccessPeer(&canAccessPeer, 0, 1);
+if (canAccessPeer == 1) {
+    uint32_t reserved = 0U;
+
+    axclrtSetDevice(0);
+    axclrtDeviceEnablePeerAccess(1, reserved);
+
+    void *dev0Mem = NULL;
+    axclrtMalloc(&dev0Mem, 10, AXCL_MEM_MALLOC_NORMAL_ONLY);
+
+    axclrtSetDevice(1);
+    axclrtDeviceEnablePeerAccess(0, reserved);
+
+    void *dev1Mem = NULL;
+    axclrtMalloc(&dev1Mem, 10, AXCL_MEM_MALLOC_NORMAL_ONLY);
+
+    /* Copy data from Device 0 to Device 1. */
+    axclrtMemcpy(dev1Mem, dev0Mem, 10, AXCL_MEMCPY_DEVICE_TO_DEVICE);
+
+    axclrtDeviceDisablePeerAccess(0);
+    axclrtFree(dev1Mem);
+    axclrtResetDevice(1);
+
+    axclrtSetDevice(0);
+    axclrtDeviceDisablePeerAccess(1);
+    axclrtFree(dev0Mem);
+    axclrtResetDeviceForce(0);
+}
+
+axclFinalize();
 ```
 
 ## 3. Other Memory Operations

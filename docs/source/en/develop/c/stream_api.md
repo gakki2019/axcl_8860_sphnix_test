@@ -17,7 +17,7 @@
 
 ### axclrtCreateStream
 
-Create a stream.
+Create an explicit Stream.
 
 #### Function
 
@@ -29,12 +29,22 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 | Name | Direction | Description |
 |---|---|---|
-| stream | out | pointer to created stream |
+| stream | out | Receives the created Stream handle on success. |
 
 #### Returns
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`: The Stream was created successfully.
+- `others`: Failure.
+
+#### Note
+
+- Tasks in the same Stream execute in submission order. By default, the execution order of tasks in different Streams is not guaranteed.
+- To synchronize different Streams, use [Event semantics](../arch/concept.md#EVENT).
+- Before calling [axclrtDestroyContext](context_api.md#axclrtDestroyContext), destroy all explicitly created Streams in that Context.
+
+#### Remark
+
+[Stream semantics](../arch/concept.md#STREAM) | [axclrtDestroyStream](#axclrtDestroyStream)
 
 <br>
 
@@ -42,7 +52,7 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 ### axclrtDestroyStream
 
-Destroy a stream.
+Destroy a Stream. If it has unfinished tasks, this function blocks until they complete before destroying the Stream.
 
 #### Function
 
@@ -54,12 +64,21 @@ AXCL_EXPORT axclError axclrtDestroyStream(axclrtStream stream);
 
 | Name | Direction | Description |
 |---|---|---|
-| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to destroy. |
+| stream | in | Stream handle returned by [axclrtCreateStream](#axclrtCreateStream). |
 
 #### Returns
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`: The Stream was synchronized and destroyed successfully.
+- `others`: Failure.
+
+#### Note
+
+- This function can destroy only a Stream explicitly created by [axclrtCreateStream](#axclrtCreateStream); it cannot destroy a default Stream. The runtime destroys the default Stream with its owning Context.
+- Before destroying the Stream, this function waits for all tasks previously submitted to it to complete.
+
+#### Remark
+
+[axclrtDestroyStreamForce](#axclrtDestroyStreamForce) | [axclrtSynchronizeStream](#axclrtSynchronizeStream) | [axclrtDestroyContext](context_api.md#axclrtDestroyContext)
 
 <br>
 
@@ -67,7 +86,7 @@ AXCL_EXPORT axclError axclrtDestroyStream(axclrtStream stream);
 
 ### axclrtDestroyStreamForce
 
-Destroy a stream forcefully.
+Destroy a Stream immediately without waiting for submitted tasks to complete.
 
 #### Function
 
@@ -79,12 +98,21 @@ AXCL_EXPORT axclError axclrtDestroyStreamForce(axclrtStream stream);
 
 | Name | Direction | Description |
 |---|---|---|
-| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to destroy. |
+| stream | in | Stream handle returned by [axclrtCreateStream](#axclrtCreateStream). |
 
 #### Returns
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`: The Stream was destroyed successfully.
+- `others`: Failure.
+
+#### Note
+
+- Unlike [axclrtDestroyStream](#axclrtDestroyStream), this function does not wait for submitted tasks to complete.
+- Unfinished tasks may be discarded, and this function does not report stored asynchronous task errors.
+
+#### Remark
+
+[axclrtDestroyStream](#axclrtDestroyStream)
 
 <br>
 
@@ -92,7 +120,7 @@ AXCL_EXPORT axclError axclrtDestroyStreamForce(axclrtStream stream);
 
 ### axclrtStreamQuery
 
-Query the execution status of all tasks on a stream (non-blocking).
+Query whether a specified Stream has unfinished tasks.
 
 #### Function
 
@@ -104,13 +132,13 @@ AXCL_EXPORT axclError axclrtStreamQuery(axclrtStream stream, axclrtStreamStatus 
 
 | Name | Direction | Description |
 |---|---|---|
-| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to query. |
-| status | out | pointer to receive the stream status. |
+| stream | in | Stream handle returned by [axclrtCreateStream](#axclrtCreateStream). |
+| status | out | Receives the task completion status of the Stream on success. |
 
 #### Returns
 
-- `AXCL_SUCC`: if the query was successful; check status for the stream state.
-- `others`: if the query call itself failed; status is set to AXCL_STREAM_STATUS_RESERVED.
+- `AXCL_SUCC`: The task completion status of the Stream was returned successfully.
+- `others`: Failure.
 
 <br>
 
@@ -118,7 +146,7 @@ AXCL_EXPORT axclError axclrtStreamQuery(axclrtStream stream, axclrtStreamStatus 
 
 ### axclrtSynchronizeStream
 
-Synchronize a stream.
+Block until all tasks submitted to a Stream before this call have completed.
 
 #### Function
 
@@ -130,12 +158,16 @@ AXCL_EXPORT axclError axclrtSynchronizeStream(axclrtStream stream);
 
 | Name | Direction | Description |
 |---|---|---|
-| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to synchronize. |
+| stream | in | Stream handle returned by [axclrtCreateStream](#axclrtCreateStream). |
 
 #### Returns
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`: All previously submitted tasks in the Stream completed successfully.
+- `others`: Failure.
+
+#### Remark
+
+[axclrtSynchronizeStreamWithTimeout](#axclrtSynchronizeStreamWithTimeout)
 
 <br>
 
@@ -143,7 +175,7 @@ AXCL_EXPORT axclError axclrtSynchronizeStream(axclrtStream stream);
 
 ### axclrtSynchronizeStreamWithTimeout
 
-Synchronize a stream with timeout.
+Block for up to the specified timeout until all tasks submitted to a Stream before this call have completed.
 
 #### Function
 
@@ -155,10 +187,18 @@ AXCL_EXPORT axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, in
 
 | Name | Direction | Description |
 |---|---|---|
-| stream | in | stream created by [axclrtCreateStream](#axclrtCreateStream) to synchronize. |
-| timeout | in | timeout in milliseconds, -1 for no timeout. |
+| stream | in | Stream handle returned by [axclrtCreateStream](#axclrtCreateStream). |
+| timeout | in | Timeout in milliseconds. `-1` waits indefinitely. |
 
 #### Returns
 
-- `AXCL_SUCC`: success.
-- `others`: failure.
+- `AXCL_SUCC`: All previously submitted tasks in the Stream completed successfully within the timeout.
+- `others`: Failure.
+
+#### Note
+
+- A timeout does not cancel submitted tasks.
+
+#### Remark
+
+[axclrtSynchronizeStream](#axclrtSynchronizeStream)

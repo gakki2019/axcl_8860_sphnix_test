@@ -96,7 +96,7 @@ These modules allow Host applications to use AXERA AI device capabilities in a w
 
 AXCL provides the `axcl-smi` command-line tool for viewing device and process status. Users can use it to check driver and firmware versions, device enumeration, temperature, CPU/NPU utilization, memory usage, and CMM usage, and quickly determine whether the runtime environment is available.
 
-AXCL also includes crash dump support, logging, sample programs, and test programs to help with development, debugging, and issue diagnosis.
+AXCL also includes minidump support, logging, sample programs, and test programs to help with development, debugging, and issue diagnosis.
 
 ## 4. Typical Usage Flow
 
