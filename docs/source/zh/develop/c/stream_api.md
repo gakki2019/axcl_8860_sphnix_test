@@ -2,12 +2,12 @@
 
 ## 1. 目录
 
-- [axclrtCreateStream](#axclrtCreateStream)
-- [axclrtDestroyStream](#axclrtDestroyStream)
-- [axclrtDestroyStreamForce](#axclrtDestroyStreamForce)
-- [axclrtStreamQuery](#axclrtStreamQuery)
-- [axclrtSynchronizeStream](#axclrtSynchronizeStream)
-- [axclrtSynchronizeStreamWithTimeout](#axclrtSynchronizeStreamWithTimeout)
+- [axclrtCreateStream](#axclrtCreateStream)：创建 Stream。
+- [axclrtDestroyStream](#axclrtDestroyStream)：销毁由 [axclrtCreateStream](#axclrtCreateStream) 创建的 Stream。
+- [axclrtDestroyStreamForce](#axclrtDestroyStreamForce)：直接销毁 Stream，不等待已提交的任务完成。
+- [axclrtStreamQuery](#axclrtStreamQuery)：查询指定 Stream 中是否有未完成的任务。
+- [axclrtSynchronizeStream](#axclrtSynchronizeStream)：阻塞等待本次调用前已提交到 Stream 的所有任务完成。
+- [axclrtSynchronizeStreamWithTimeout](#axclrtSynchronizeStreamWithTimeout)：在指定超时时间内，阻塞等待本次调用前已提交到 Stream 的所有任务完成。
 
 <br>
 
@@ -17,7 +17,7 @@
 
 ### 2.1. axclrtCreateStream
 
-创建显式 Stream。
+创建 Stream。
 
 #### 2.1.1. 函数
 
@@ -53,7 +53,9 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 ### 2.2. axclrtDestroyStream
 
-销毁 Stream。如果其中有未完成的任务，本函数会阻塞，待任务完成后再将其销毁。
+销毁由 [axclrtCreateStream](#axclrtCreateStream) 创建的 Stream。
+
+如果其中有未完成的任务，本函数会阻塞，待任务完成后再将其销毁。
 
 #### 2.2.1. 函数
 

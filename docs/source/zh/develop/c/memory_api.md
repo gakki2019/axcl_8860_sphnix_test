@@ -2,21 +2,21 @@
 
 ## 1. 目录
 
-- [axclrtFree](#axclrtFree)
-- [axclrtFreeHost](#axclrtFreeHost)
-- [axclrtGetMemInfo](#axclrtGetMemInfo)
-- [axclrtMalloc](#axclrtMalloc)
-- [axclrtMallocCached](#axclrtMallocCached)
-- [axclrtMallocHost](#axclrtMallocHost)
-- [axclrtMemFlush](#axclrtMemFlush)
-- [axclrtMemInvalidate](#axclrtMemInvalidate)
-- [axclrtMemcmp](#axclrtMemcmp)
-- [axclrtMemcmpAsync](#axclrtMemcmpAsync)
-- [axclrtMemcpy](#axclrtMemcpy)
-- [axclrtMemcpyAsync](#axclrtMemcpyAsync)
-- [axclrtMemset](#axclrtMemset)
-- [axclrtMemsetAsync](#axclrtMemsetAsync)
-- [axclrtPointerGetAttributes](#axclrtPointerGetAttributes)
+- [axclrtFree](#axclrtFree)：释放设备内存。
+- [axclrtFreeHost](#axclrtFreeHost)：释放由 [axclrtMallocHost](#axclrtMallocHost) 分配的 Host 虚拟内存。
+- [axclrtGetMemInfo](#axclrtGetMemInfo)：获取调用线程当前 Context 所属设备的内存容量快照。
+- [axclrtMalloc](#axclrtMalloc)：在调用线程当前 Context 所属的设备上分配物理连续内存。
+- [axclrtMallocCached](#axclrtMallocCached)：在当前 Context 所属的设备上分配 cached 物理连续内存。
+- [axclrtMallocHost](#axclrtMallocHost)：分配 Host 虚拟内存。
+- [axclrtMemFlush](#axclrtMemFlush)：将一段 cached 设备内存的 cache 数据写回 DDR。
+- [axclrtMemInvalidate](#axclrtMemInvalidate)：使一段 cached 设备内存对应的 cache 内容失效。
+- [axclrtMemcmp](#axclrtMemcmp)：同步判断两段设备内存中的字节是否完全相同。
+- [axclrtMemcmpAsync](#axclrtMemcmpAsync)：将两段设备内存的比较操作异步提交到指定的 Stream。
+- [axclrtMemcpy](#axclrtMemcpy)：在 Host 或设备内存之间同步复制字节。
+- [axclrtMemcpyAsync](#axclrtMemcpyAsync)：将 Host 或设备内存复制操作异步提交到指定的 Stream。
+- [axclrtMemset](#axclrtMemset)：同步将设备内存中的字节设置为指定值。
+- [axclrtMemsetAsync](#axclrtMemsetAsync)：将设备内存设置操作异步提交到指定的 Stream。
+- [axclrtPointerGetAttributes](#axclrtPointerGetAttributes)：获取内存分配属性。
 
 <br>
 

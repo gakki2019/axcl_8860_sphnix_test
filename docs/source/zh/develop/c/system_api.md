@@ -2,8 +2,8 @@
 
 ## 1. 目录
 
-- [axclFinalize](#axclFinalize)
-- [axclInit](#axclInit)
+- [axclFinalize](#axclFinalize)：去初始化运行时。
+- [axclInit](#axclInit)：初始化 AXCL 运行时。
 
 <br>
 
@@ -13,7 +13,7 @@
 
 ### 2.1. axclFinalize
 
-去初始化运行时并释放其资源。
+去初始化运行时。
 
 #### 2.1.1. 函数
 
@@ -45,7 +45,7 @@ AXCL_EXPORT axclError axclFinalize();
 
 ### 2.2. axclInit
 
-初始化 AXCL 运行时。使用其他 AXCL API 之前必须先调用本接口。
+初始化 AXCL 运行时。
 
 #### 2.2.1. 函数
 
@@ -79,6 +79,7 @@ AXCL_EXPORT axclError axclInit(const char *json);
 
 #### 2.2.5. 说明
 
+- 使用其他 AXCL API 之前必须先调用本接口。
 - 运行时通过引用计数管理生命周期：每次成功调用 [axclInit](#axclInit) 都会使引用计数加 1，[axclFinalize](#axclFinalize) 使引用计数减 1。只有引用计数降到 0 时才会释放资源。
 - 失败的 [axclInit](#axclInit) 不会获取引用，也不需要与 [axclFinalize](#axclFinalize) 配对。
 - 一个进程可以多次调用 [axclInit](#axclInit)，但每次成功调用都必须与 [axclFinalize](#axclFinalize)() 配对。例如：

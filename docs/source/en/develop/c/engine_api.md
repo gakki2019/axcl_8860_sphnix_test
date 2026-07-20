@@ -2,54 +2,54 @@
 
 ## Index
 
-- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
-- [axclrtEngineCreateIO](#axclrtEngineCreateIO)
-- [axclrtEngineDestroyIO](#axclrtEngineDestroyIO)
-- [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo)
-- [axclrtEngineExecute](#axclrtEngineExecute)
-- [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync)
-- [axclrtEngineFinalize](#axclrtEngineFinalize)
-- [axclrtEngineGetAffinity](#axclrtEngineGetAffinity)
-- [axclrtEngineGetContextAffinity](#axclrtEngineGetContextAffinity)
-- [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo)
-- [axclrtEngineGetInputBufferByIndex](#axclrtEngineGetInputBufferByIndex)
-- [axclrtEngineGetInputBufferByName](#axclrtEngineGetInputBufferByName)
-- [axclrtEngineGetInputDataLayout](#axclrtEngineGetInputDataLayout)
-- [axclrtEngineGetInputDataType](#axclrtEngineGetInputDataType)
-- [axclrtEngineGetInputDims](#axclrtEngineGetInputDims)
-- [axclrtEngineGetInputIndexByName](#axclrtEngineGetInputIndexByName)
-- [axclrtEngineGetInputNameByIndex](#axclrtEngineGetInputNameByIndex)
-- [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex)
-- [axclrtEngineGetModelCompilerVersion](#axclrtEngineGetModelCompilerVersion)
-- [axclrtEngineGetModelType](#axclrtEngineGetModelType)
-- [axclrtEngineGetModelTypeFromMem](#axclrtEngineGetModelTypeFromMem)
-- [axclrtEngineGetModelTypeFromModelId](#axclrtEngineGetModelTypeFromModelId)
-- [axclrtEngineGetNumInputs](#axclrtEngineGetNumInputs)
-- [axclrtEngineGetNumOutputs](#axclrtEngineGetNumOutputs)
-- [axclrtEngineGetOutputBufferByIndex](#axclrtEngineGetOutputBufferByIndex)
-- [axclrtEngineGetOutputBufferByName](#axclrtEngineGetOutputBufferByName)
-- [axclrtEngineGetOutputDataLayout](#axclrtEngineGetOutputDataLayout)
-- [axclrtEngineGetOutputDataType](#axclrtEngineGetOutputDataType)
-- [axclrtEngineGetOutputDims](#axclrtEngineGetOutputDims)
-- [axclrtEngineGetOutputIndexByName](#axclrtEngineGetOutputIndexByName)
-- [axclrtEngineGetOutputNameByIndex](#axclrtEngineGetOutputNameByIndex)
-- [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex)
-- [axclrtEngineGetShapeGroupsCount](#axclrtEngineGetShapeGroupsCount)
-- [axclrtEngineGetUsage](#axclrtEngineGetUsage)
-- [axclrtEngineGetUsageFromMem](#axclrtEngineGetUsageFromMem)
-- [axclrtEngineGetUsageFromModelId](#axclrtEngineGetUsageFromModelId)
-- [axclrtEngineGetVNpuKind](#axclrtEngineGetVNpuKind)
-- [axclrtEngineInit](#axclrtEngineInit)
-- [axclrtEngineLoadFromFile](#axclrtEngineLoadFromFile)
-- [axclrtEngineLoadFromMem](#axclrtEngineLoadFromMem)
-- [axclrtEngineSetAffinity](#axclrtEngineSetAffinity)
-- [axclrtEngineSetContextAffinity](#axclrtEngineSetContextAffinity)
-- [axclrtEngineSetDynamicBatchSize](#axclrtEngineSetDynamicBatchSize)
-- [axclrtEngineSetInputBufferByIndex](#axclrtEngineSetInputBufferByIndex)
-- [axclrtEngineSetInputBufferByName](#axclrtEngineSetInputBufferByName)
-- [axclrtEngineSetOutputBufferByIndex](#axclrtEngineSetOutputBufferByIndex)
-- [axclrtEngineSetOutputBufferByName](#axclrtEngineSetOutputBufferByName)
-- [axclrtEngineUnload](#axclrtEngineUnload)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext): Create an independent Engine execution Context for a loaded model.
+- [axclrtEngineCreateIO](#axclrtEngineCreateIO): Create a Host-side IO binding object from model IO metadata.
+- [axclrtEngineDestroyIO](#axclrtEngineDestroyIO): Destroy an IO binding object created by [axclrtEngineCreateIO](#axclrtEngineCreateIO).
+- [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo): Destroy an IO metadata object created by [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo).
+- [axclrtEngineExecute](#axclrtEngineExecute): Execute model inference synchronously on the current runtime Context's default Stream.
+- [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync): Submit model inference to a Stream.
+- [axclrtEngineFinalize](#axclrtEngineFinalize): Finalize Engine on the device associated with the current Context.
+- [axclrtEngineGetAffinity](#axclrtEngineGetAffinity): Get the NPU-core affinity mask of a loaded model.
+- [axclrtEngineGetContextAffinity](#axclrtEngineGetContextAffinity): Get affinity for one Engine Context; this operation is currently unsupported.
+- [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo): Create a Host-side metadata object describing a loaded model's inputs and outputs.
+- [axclrtEngineGetInputBufferByIndex](#axclrtEngineGetInputBufferByIndex): Get the buffer binding stored for an input index.
+- [axclrtEngineGetInputBufferByName](#axclrtEngineGetInputBufferByName): Get the buffer binding stored for an input tensor name.
+- [axclrtEngineGetInputDataLayout](#axclrtEngineGetInputDataLayout): Get the data layout of an input tensor.
+- [axclrtEngineGetInputDataType](#axclrtEngineGetInputDataType): Get the data type of an input tensor.
+- [axclrtEngineGetInputDims](#axclrtEngineGetInputDims): Get the dimensions of one input tensor and shape group.
+- [axclrtEngineGetInputIndexByName](#axclrtEngineGetInputIndexByName): Find an input tensor index by name.
+- [axclrtEngineGetInputNameByIndex](#axclrtEngineGetInputNameByIndex): Get an input tensor name by index.
+- [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex): Get the required buffer size for one model input and shape group.
+- [axclrtEngineGetModelCompilerVersion](#axclrtEngineGetModelCompilerVersion): Get the compiler toolchain version stored in a loaded model.
+- [axclrtEngineGetModelType](#axclrtEngineGetModelType): Get the core-count classification of a model file.
+- [axclrtEngineGetModelTypeFromMem](#axclrtEngineGetModelTypeFromMem): Get the core-count classification of model data stored in Device memory.
+- [axclrtEngineGetModelTypeFromModelId](#axclrtEngineGetModelTypeFromModelId): Get the core-count classification of a loaded model.
+- [axclrtEngineGetNumInputs](#axclrtEngineGetNumInputs): Get the number of model inputs in an IO metadata object.
+- [axclrtEngineGetNumOutputs](#axclrtEngineGetNumOutputs): Get the number of model outputs in an IO metadata object.
+- [axclrtEngineGetOutputBufferByIndex](#axclrtEngineGetOutputBufferByIndex): Get the buffer binding stored for an output index.
+- [axclrtEngineGetOutputBufferByName](#axclrtEngineGetOutputBufferByName): Get the buffer binding stored for an output tensor name.
+- [axclrtEngineGetOutputDataLayout](#axclrtEngineGetOutputDataLayout): Get the data layout of an output tensor.
+- [axclrtEngineGetOutputDataType](#axclrtEngineGetOutputDataType): Get the data type of an output tensor.
+- [axclrtEngineGetOutputDims](#axclrtEngineGetOutputDims): Get the dimensions of one output tensor and shape group.
+- [axclrtEngineGetOutputIndexByName](#axclrtEngineGetOutputIndexByName): Find an output tensor index by name.
+- [axclrtEngineGetOutputNameByIndex](#axclrtEngineGetOutputNameByIndex): Get an output tensor name by index.
+- [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex): Get the required buffer size for one model output and shape group.
+- [axclrtEngineGetShapeGroupsCount](#axclrtEngineGetShapeGroupsCount): Get the number of shape groups described by an IO metadata object.
+- [axclrtEngineGetUsage](#axclrtEngineGetUsage): Get Engine memory usage for a model file.
+- [axclrtEngineGetUsageFromMem](#axclrtEngineGetUsageFromMem): Get Engine memory usage for model data stored in Device memory.
+- [axclrtEngineGetUsageFromModelId](#axclrtEngineGetUsageFromModelId): Get Engine memory usage for a loaded model.
+- [axclrtEngineGetVNpuKind](#axclrtEngineGetVNpuKind): Get the VNPU mode of Engine on the current Context's device.
+- [axclrtEngineInit](#axclrtEngineInit): Initialize Engine on the device associated with the calling thread's current Context.
+- [axclrtEngineLoadFromFile](#axclrtEngineLoadFromFile): Load an offline model from a Host file into Engine on the current device.
+- [axclrtEngineLoadFromMem](#axclrtEngineLoadFromMem): Load an offline model from Device memory into Engine on the current device.
+- [axclrtEngineSetAffinity](#axclrtEngineSetAffinity): Set the NPU-core affinity mask of a loaded model.
+- [axclrtEngineSetContextAffinity](#axclrtEngineSetContextAffinity): Set affinity for one Engine Context; this operation is currently unsupported.
+- [axclrtEngineSetDynamicBatchSize](#axclrtEngineSetDynamicBatchSize): Store the dynamic batch size used for later execution with an IO binding object.
+- [axclrtEngineSetInputBufferByIndex](#axclrtEngineSetInputBufferByIndex): Bind a Device buffer to an input by index.
+- [axclrtEngineSetInputBufferByName](#axclrtEngineSetInputBufferByName): Bind a Device buffer to an input by tensor name.
+- [axclrtEngineSetOutputBufferByIndex](#axclrtEngineSetOutputBufferByIndex): Bind a Device buffer to an output by index.
+- [axclrtEngineSetOutputBufferByName](#axclrtEngineSetOutputBufferByName): Bind a Device buffer to an output by tensor name.
+- [axclrtEngineUnload](#axclrtEngineUnload): Unload a model from Engine on the current device.
 
 <br>
 

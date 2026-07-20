@@ -2,8 +2,8 @@
 
 ## Index
 
-- [axclFinalize](#axclFinalize)
-- [axclInit](#axclInit)
+- [axclFinalize](#axclFinalize): Deinitialize the AXCL runtime.
+- [axclInit](#axclInit): Initialize the AXCL runtime.
 
 <br>
 
@@ -13,7 +13,7 @@
 
 ### axclFinalize
 
-Deinitialize the AXCL runtime and release its resources.
+Deinitialize the AXCL runtime.
 
 #### Function
 
@@ -45,7 +45,7 @@ N/A
 
 ### axclInit
 
-Initialize the AXCL runtime. This function must be called before using other AXCL APIs.
+Initialize the AXCL runtime.
 
 #### Function
 
@@ -79,6 +79,7 @@ AXCL_EXPORT axclError axclInit(const char *json);
 
 #### Note
 
+- This function must be called before using other AXCL APIs.
 - The runtime lifecycle is reference-counted: each successful [axclInit](#axclInit) increments the reference count and [axclFinalize](#axclFinalize) decrements it. Resources are released only when the count reaches zero.
 - A failed [axclInit](#axclInit) does not acquire a reference and must not be paired with [axclFinalize](#axclFinalize).
 - A process may call [axclInit](#axclInit) multiple times, but each successful call must be paired with [axclFinalize](#axclFinalize)(). For example:

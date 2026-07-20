@@ -2,10 +2,10 @@
 
 ## 1. 目录
 
-- [axclrtCreateContext](#axclrtCreateContext)
-- [axclrtDestroyContext](#axclrtDestroyContext)
-- [axclrtGetCurrentContext](#axclrtGetCurrentContext)
-- [axclrtSetCurrentContext](#axclrtSetCurrentContext)
+- [axclrtCreateContext](#axclrtCreateContext)：显式创建 Context，并将其绑定到当前线程。
+- [axclrtDestroyContext](#axclrtDestroyContext)：销毁由 [axclrtCreateContext](#axclrtCreateContext) 显式创建的 Context。
+- [axclrtGetCurrentContext](#axclrtGetCurrentContext)：获取调用线程的当前 Context。
+- [axclrtSetCurrentContext](#axclrtSetCurrentContext)：将指定 Context 设为调用线程的当前 Context。
 
 <br>
 

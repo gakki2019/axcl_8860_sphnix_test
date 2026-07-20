@@ -2,16 +2,16 @@
 
 ## Index
 
-- [axclrtGetDevice](#axclrtGetDevice)
-- [axclrtGetDeviceCount](#axclrtGetDeviceCount)
-- [axclrtGetDeviceInfo](#axclrtGetDeviceInfo)
-- [axclrtQueryDeviceStatus](#axclrtQueryDeviceStatus)
-- [axclrtRegDeviceStateCallback](#axclrtRegDeviceStateCallback)
-- [axclrtResetDevice](#axclrtResetDevice)
-- [axclrtResetDeviceForce](#axclrtResetDeviceForce)
-- [axclrtSetDevice](#axclrtSetDevice)
-- [axclrtSynchronizeDevice](#axclrtSynchronizeDevice)
-- [axclrtSynchronizeDeviceWithTimeout](#axclrtSynchronizeDeviceWithTimeout)
+- [axclrtGetDevice](#axclrtGetDevice): Get the virtual device ID currently used by the calling thread.
+- [axclrtGetDeviceCount](#axclrtGetDeviceCount): Get the number of devices visible to the current process.
+- [axclrtGetDeviceInfo](#axclrtGetDeviceInfo): Get a device attribute value.
+- [axclrtQueryDeviceStatus](#axclrtQueryDeviceStatus): Query device status.
+- [axclrtRegDeviceStateCallback](#axclrtRegDeviceStateCallback): Register or unregister a device state callback.
+- [axclrtResetDevice](#axclrtResetDevice): Decrement a device's activation reference count and release it when the count reaches 0.
+- [axclrtResetDeviceForce](#axclrtResetDeviceForce): Forcibly release an active device.
+- [axclrtSetDevice](#axclrtSetDevice): Activate a device and bind its default Context to the calling thread.
+- [axclrtSynchronizeDevice](#axclrtSynchronizeDevice): Block until all work submitted to the device associated with the calling thread has completed.
+- [axclrtSynchronizeDeviceWithTimeout](#axclrtSynchronizeDeviceWithTimeout): Block until work submitted to the device associated with the calling thread completes or the timeout expires.
 
 <br>
 

@@ -2,15 +2,15 @@
 
 ## 1. 目录
 
-- [axclrtCreateEvent](#axclrtCreateEvent)
-- [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags)
-- [axclrtDestroyEvent](#axclrtDestroyEvent)
-- [axclrtEventElapsedTime](#axclrtEventElapsedTime)
-- [axclrtRecordEvent](#axclrtRecordEvent)
-- [axclrtStreamWaitEvent](#axclrtStreamWaitEvent)
-- [axclrtStreamWaitEventWithTimeout](#axclrtStreamWaitEventWithTimeout)
-- [axclrtSynchronizeEvent](#axclrtSynchronizeEvent)
-- [axclrtSynchronizeEventWithTimeout](#axclrtSynchronizeEventWithTimeout)
+- [axclrtCreateEvent](#axclrtCreateEvent)：在当前 Context 所属的设备上创建启用计时功能的事件。
+- [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags)：在当前 Context 所属的设备上，根据指定的计时标志创建事件。
+- [axclrtDestroyEvent](#axclrtDestroyEvent)：销毁由 [axclrtCreateEvent](#axclrtCreateEvent) 或 [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags) 创建的事件。
+- [axclrtEventElapsedTime](#axclrtEventElapsedTime)：计算两个事件最近一次已完成记录点之间的设备时间差。
+- [axclrtRecordEvent](#axclrtRecordEvent)：将事件记录点异步提交到指定的 Stream。
+- [axclrtStreamWaitEvent](#axclrtStreamWaitEvent)：异步向指定 Stream 提交事件等待点，使该 Stream 等待事件触发后再继续执行。
+- [axclrtStreamWaitEventWithTimeout](#axclrtStreamWaitEventWithTimeout)：异步向指定 Stream 提交带超时限制的事件等待点。
+- [axclrtSynchronizeEvent](#axclrtSynchronizeEvent)：阻塞 Host 当前线程，直至事件触发。
+- [axclrtSynchronizeEventWithTimeout](#axclrtSynchronizeEventWithTimeout)：阻塞 Host 当前线程，直至事件触发或等待超时。
 
 <br>
 
@@ -97,7 +97,7 @@ AXCL_EXPORT axclError axclrtCreateEventWithFlags(axclrtEvent *event, uint32_t fl
 
 ### 2.3. axclrtDestroyEvent
 
-销毁事件。
+销毁由 [axclrtCreateEvent](#axclrtCreateEvent) 或 [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags) 创建的事件。
 
 #### 2.3.1. 函数
 

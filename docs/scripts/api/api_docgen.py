@@ -464,6 +464,14 @@ def normalize_paragraphs(text: str) -> str:
     return "\n".join(compact).strip()
 
 
+def first_nonempty_line(text: str) -> str:
+    for line in text.splitlines():
+        line = line.strip()
+        if line:
+            return line
+    return ""
+
+
 def split_ref_text(raw_target: str) -> tuple[str, str]:
     target = raw_target.strip()
     suffix = ""
@@ -1277,11 +1285,28 @@ def render_returns_with_links(function: FunctionDoc, page_path: Path, symbol_ind
 
 
 def render_function_page(functions: list[FunctionDoc], page_path: Path, symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook, group_title: str) -> str:
+    resolved_briefs = {
+        function.symbol: resolve_links(
+            function.brief,
+            normalized_refs(function.refs),
+            symbol_index,
+            duplicates,
+            report,
+            page_path,
+            function.symbol,
+            function.line,
+        )
+        for function in functions
+    }
     lines = [f"# {group_title}", ""]
     append_heading(lines, "Index", 2, insert_br=False)
     if functions:
         for function in functions:
-            lines.append(f"- [{function.symbol}](#{function.symbol})")
+            item = f"- [{function.symbol}](#{function.symbol})"
+            summary = first_nonempty_line(resolved_briefs[function.symbol])
+            if summary:
+                item += f": {summary}"
+            lines.append(item)
     else:
         lines.append("No API functions.")
     append_heading(lines, "API", 2, insert_br=True)
@@ -1291,7 +1316,7 @@ def render_function_page(functions: list[FunctionDoc], page_path: Path, symbol_i
         refs = normalized_refs(function.refs)
         append_anchored_heading(lines, function.symbol, 3, insert_br=not first_function)
         first_function = False
-        lines.append(resolve_links(function.brief, refs, symbol_index, duplicates, report, page_path, function.symbol, function.line))
+        lines.append(resolved_briefs[function.symbol])
         if function.details:
             lines.extend(["", resolve_links(function.details, refs, symbol_index, duplicates, report, page_path, function.symbol, function.line)])
         lines.extend(["", "#### Function", "", "```c", function.signature or "N/A", "```", "", "#### Parameters", "", render_parameters_with_links(function, page_path, symbol_index, duplicates, report), ""])

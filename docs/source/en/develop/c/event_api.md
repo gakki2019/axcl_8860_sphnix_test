@@ -2,15 +2,15 @@
 
 ## Index
 
-- [axclrtCreateEvent](#axclrtCreateEvent)
-- [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags)
-- [axclrtDestroyEvent](#axclrtDestroyEvent)
-- [axclrtEventElapsedTime](#axclrtEventElapsedTime)
-- [axclrtRecordEvent](#axclrtRecordEvent)
-- [axclrtStreamWaitEvent](#axclrtStreamWaitEvent)
-- [axclrtStreamWaitEventWithTimeout](#axclrtStreamWaitEventWithTimeout)
-- [axclrtSynchronizeEvent](#axclrtSynchronizeEvent)
-- [axclrtSynchronizeEventWithTimeout](#axclrtSynchronizeEventWithTimeout)
+- [axclrtCreateEvent](#axclrtCreateEvent): Create an Event with timing enabled on the device associated with the current Context.
+- [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags): Create an Event with specified timing behavior on the device associated with the current Context.
+- [axclrtDestroyEvent](#axclrtDestroyEvent): Destroy an Event created by [axclrtCreateEvent](#axclrtCreateEvent) or [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags).
+- [axclrtEventElapsedTime](#axclrtEventElapsedTime): Calculate the elapsed device time between the latest completed records of two Events.
+- [axclrtRecordEvent](#axclrtRecordEvent): Submit an Event record point to a Stream.
+- [axclrtStreamWaitEvent](#axclrtStreamWaitEvent): Submit an indefinite Event wait point to a Stream.
+- [axclrtStreamWaitEventWithTimeout](#axclrtStreamWaitEventWithTimeout): Submit a timed Event wait point to a Stream.
+- [axclrtSynchronizeEvent](#axclrtSynchronizeEvent): Block the Host until an Event is signaled.
+- [axclrtSynchronizeEventWithTimeout](#axclrtSynchronizeEventWithTimeout): Block the Host until an Event is signaled or the timeout expires.
 
 <br>
 

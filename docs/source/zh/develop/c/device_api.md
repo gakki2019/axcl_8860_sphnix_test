@@ -2,16 +2,16 @@
 
 ## 1. 目录
 
-- [axclrtGetDevice](#axclrtGetDevice)
-- [axclrtGetDeviceCount](#axclrtGetDeviceCount)
-- [axclrtGetDeviceInfo](#axclrtGetDeviceInfo)
-- [axclrtQueryDeviceStatus](#axclrtQueryDeviceStatus)
-- [axclrtRegDeviceStateCallback](#axclrtRegDeviceStateCallback)
-- [axclrtResetDevice](#axclrtResetDevice)
-- [axclrtResetDeviceForce](#axclrtResetDeviceForce)
-- [axclrtSetDevice](#axclrtSetDevice)
-- [axclrtSynchronizeDevice](#axclrtSynchronizeDevice)
-- [axclrtSynchronizeDeviceWithTimeout](#axclrtSynchronizeDeviceWithTimeout)
+- [axclrtGetDevice](#axclrtGetDevice)：获取调用线程正在使用的虚拟设备 ID。
+- [axclrtGetDeviceCount](#axclrtGetDeviceCount)：获取当前进程可见的设备数量。
+- [axclrtGetDeviceInfo](#axclrtGetDeviceInfo)：获取设备属性值。
+- [axclrtQueryDeviceStatus](#axclrtQueryDeviceStatus)：查询设备状态。
+- [axclrtRegDeviceStateCallback](#axclrtRegDeviceStateCallback)：注册或注销设备状态回调函数。
+- [axclrtResetDevice](#axclrtResetDevice)：将设备激活引用计数减 1，引用计数变为 0 时释放设备。
+- [axclrtResetDeviceForce](#axclrtResetDeviceForce)：强制释放已激活的设备。
+- [axclrtSetDevice](#axclrtSetDevice)：激活设备，并将该设备的默认 Context 绑定到当前调用线程。
+- [axclrtSynchronizeDevice](#axclrtSynchronizeDevice)：阻塞等待提交到与当前调用线程关联设备的所有任务完成。
+- [axclrtSynchronizeDeviceWithTimeout](#axclrtSynchronizeDeviceWithTimeout)：在超时限制内阻塞等待提交到与当前调用线程关联设备的任务完成。
 
 <br>
 

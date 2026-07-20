@@ -2,8 +2,8 @@
 
 ## 1. 目录
 
-- [axclInitializeMinidump](#axclInitializeMinidump)
-- [axclUninitializeMinidump](#axclUninitializeMinidump)
+- [axclInitializeMinidump](#axclInitializeMinidump)：启用 minidump 功能。
+- [axclUninitializeMinidump](#axclUninitializeMinidump)：禁用 minidump 功能。
 
 <br>
 

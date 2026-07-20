@@ -2,16 +2,16 @@
 
 ## Index
 
-- [axclAppLog](#axclAppLog)
-- [axclGetLogLevel](#axclGetLogLevel)
-- [axclSetLogLevel](#axclSetLogLevel)
-- [axclrtGetErrorString](#axclrtGetErrorString)
-- [axclrtGetLastError](#axclrtGetLastError)
-- [axclrtGetSocName](#axclrtGetSocName)
-- [axclrtGetVersion](#axclrtGetVersion)
-- [axclrtGetVersionStr](#axclrtGetVersionStr)
-- [axclrtPeekAtLastError](#axclrtPeekAtLastError)
-- [axclrtSetLastError](#axclrtSetLastError)
+- [axclAppLog](#axclAppLog): Record an application log in the specified format.
+- [axclGetLogLevel](#axclGetLogLevel): Get the Host log level.
+- [axclSetLogLevel](#axclSetLogLevel): Set the Host log level.
+- [axclrtGetErrorString](#axclrtGetErrorString): Get the description string for an error code.
+- [axclrtGetLastError](#axclrtGetLastError): Get and clear the last error code for the current thread.
+- [axclrtGetSocName](#axclrtGetSocName): Get the chip name string.
+- [axclrtGetVersion](#axclrtGetVersion): Get the AXCL runtime library build version number.
+- [axclrtGetVersionStr](#axclrtGetVersionStr): Get the version string for a specified source.
+- [axclrtPeekAtLastError](#axclrtPeekAtLastError): Get the last error code for the current thread without clearing it.
+- [axclrtSetLastError](#axclrtSetLastError): Set the last error code for the current thread.
 
 <br>
 

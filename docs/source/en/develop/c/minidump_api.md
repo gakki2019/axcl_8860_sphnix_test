@@ -2,8 +2,8 @@
 
 ## Index
 
-- [axclInitializeMinidump](#axclInitializeMinidump)
-- [axclUninitializeMinidump](#axclUninitializeMinidump)
+- [axclInitializeMinidump](#axclInitializeMinidump): Enable minidump.
+- [axclUninitializeMinidump](#axclUninitializeMinidump): Disable minidump.
 
 <br>
 

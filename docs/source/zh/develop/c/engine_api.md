@@ -2,54 +2,54 @@
 
 ## 1. 目录
 
-- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
-- [axclrtEngineCreateIO](#axclrtEngineCreateIO)
-- [axclrtEngineDestroyIO](#axclrtEngineDestroyIO)
-- [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo)
-- [axclrtEngineExecute](#axclrtEngineExecute)
-- [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync)
-- [axclrtEngineFinalize](#axclrtEngineFinalize)
-- [axclrtEngineGetAffinity](#axclrtEngineGetAffinity)
-- [axclrtEngineGetContextAffinity](#axclrtEngineGetContextAffinity)
-- [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo)
-- [axclrtEngineGetInputBufferByIndex](#axclrtEngineGetInputBufferByIndex)
-- [axclrtEngineGetInputBufferByName](#axclrtEngineGetInputBufferByName)
-- [axclrtEngineGetInputDataLayout](#axclrtEngineGetInputDataLayout)
-- [axclrtEngineGetInputDataType](#axclrtEngineGetInputDataType)
-- [axclrtEngineGetInputDims](#axclrtEngineGetInputDims)
-- [axclrtEngineGetInputIndexByName](#axclrtEngineGetInputIndexByName)
-- [axclrtEngineGetInputNameByIndex](#axclrtEngineGetInputNameByIndex)
-- [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex)
-- [axclrtEngineGetModelCompilerVersion](#axclrtEngineGetModelCompilerVersion)
-- [axclrtEngineGetModelType](#axclrtEngineGetModelType)
-- [axclrtEngineGetModelTypeFromMem](#axclrtEngineGetModelTypeFromMem)
-- [axclrtEngineGetModelTypeFromModelId](#axclrtEngineGetModelTypeFromModelId)
-- [axclrtEngineGetNumInputs](#axclrtEngineGetNumInputs)
-- [axclrtEngineGetNumOutputs](#axclrtEngineGetNumOutputs)
-- [axclrtEngineGetOutputBufferByIndex](#axclrtEngineGetOutputBufferByIndex)
-- [axclrtEngineGetOutputBufferByName](#axclrtEngineGetOutputBufferByName)
-- [axclrtEngineGetOutputDataLayout](#axclrtEngineGetOutputDataLayout)
-- [axclrtEngineGetOutputDataType](#axclrtEngineGetOutputDataType)
-- [axclrtEngineGetOutputDims](#axclrtEngineGetOutputDims)
-- [axclrtEngineGetOutputIndexByName](#axclrtEngineGetOutputIndexByName)
-- [axclrtEngineGetOutputNameByIndex](#axclrtEngineGetOutputNameByIndex)
-- [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex)
-- [axclrtEngineGetShapeGroupsCount](#axclrtEngineGetShapeGroupsCount)
-- [axclrtEngineGetUsage](#axclrtEngineGetUsage)
-- [axclrtEngineGetUsageFromMem](#axclrtEngineGetUsageFromMem)
-- [axclrtEngineGetUsageFromModelId](#axclrtEngineGetUsageFromModelId)
-- [axclrtEngineGetVNpuKind](#axclrtEngineGetVNpuKind)
-- [axclrtEngineInit](#axclrtEngineInit)
-- [axclrtEngineLoadFromFile](#axclrtEngineLoadFromFile)
-- [axclrtEngineLoadFromMem](#axclrtEngineLoadFromMem)
-- [axclrtEngineSetAffinity](#axclrtEngineSetAffinity)
-- [axclrtEngineSetContextAffinity](#axclrtEngineSetContextAffinity)
-- [axclrtEngineSetDynamicBatchSize](#axclrtEngineSetDynamicBatchSize)
-- [axclrtEngineSetInputBufferByIndex](#axclrtEngineSetInputBufferByIndex)
-- [axclrtEngineSetInputBufferByName](#axclrtEngineSetInputBufferByName)
-- [axclrtEngineSetOutputBufferByIndex](#axclrtEngineSetOutputBufferByIndex)
-- [axclrtEngineSetOutputBufferByName](#axclrtEngineSetOutputBufferByName)
-- [axclrtEngineUnload](#axclrtEngineUnload)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext)：为已加载的模型创建独立的 Engine 执行 Context。
+- [axclrtEngineCreateIO](#axclrtEngineCreateIO)：根据模型 IO 元数据创建 Host 侧 IO 绑定对象。
+- [axclrtEngineDestroyIO](#axclrtEngineDestroyIO)：销毁由 [axclrtEngineCreateIO](#axclrtEngineCreateIO) 创建的 IO 绑定对象。
+- [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo)：销毁由 [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo) 创建的 IO 元数据对象。
+- [axclrtEngineExecute](#axclrtEngineExecute)：在当前 Runtime Context 的默认 Stream 上同步执行模型推理。
+- [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync)：向 Stream 提交模型推理任务。
+- [axclrtEngineFinalize](#axclrtEngineFinalize)：反初始化当前 Context 所属设备上的 Engine。
+- [axclrtEngineGetAffinity](#axclrtEngineGetAffinity)：获取已加载模型的 NPU 核亲和性掩码。
+- [axclrtEngineGetContextAffinity](#axclrtEngineGetContextAffinity)：获取指定 Engine Context 的亲和性；当前版本不支持此操作。
+- [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo)：创建描述已加载模型输入和输出的 Host 侧 IO 元数据对象。
+- [axclrtEngineGetInputBufferByIndex](#axclrtEngineGetInputBufferByIndex)：获取指定输入索引保存的缓冲区绑定。
+- [axclrtEngineGetInputBufferByName](#axclrtEngineGetInputBufferByName)：获取指定输入张量名称保存的缓冲区绑定。
+- [axclrtEngineGetInputDataLayout](#axclrtEngineGetInputDataLayout)：获取输入张量的数据布局。
+- [axclrtEngineGetInputDataType](#axclrtEngineGetInputDataType)：获取输入张量的数据类型。
+- [axclrtEngineGetInputDims](#axclrtEngineGetInputDims)：获取指定 shape group 中输入张量的维度。
+- [axclrtEngineGetInputIndexByName](#axclrtEngineGetInputIndexByName)：根据名称查找输入张量索引。
+- [axclrtEngineGetInputNameByIndex](#axclrtEngineGetInputNameByIndex)：根据索引获取输入张量名称。
+- [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex)：获取指定 shape group 中模型输入所需的缓冲区大小。
+- [axclrtEngineGetModelCompilerVersion](#axclrtEngineGetModelCompilerVersion)：获取已加载模型中记录的编译工具链版本。
+- [axclrtEngineGetModelType](#axclrtEngineGetModelType)：获取模型文件的 NPU 核数分类。
+- [axclrtEngineGetModelTypeFromMem](#axclrtEngineGetModelTypeFromMem)：获取 Device 内存中模型数据的 NPU 核数分类。
+- [axclrtEngineGetModelTypeFromModelId](#axclrtEngineGetModelTypeFromModelId)：获取已加载模型的 NPU 核数分类。
+- [axclrtEngineGetNumInputs](#axclrtEngineGetNumInputs)：获取 IO 元数据对象中的模型输入数量。
+- [axclrtEngineGetNumOutputs](#axclrtEngineGetNumOutputs)：获取 IO 元数据对象中的模型输出数量。
+- [axclrtEngineGetOutputBufferByIndex](#axclrtEngineGetOutputBufferByIndex)：获取指定输出索引保存的缓冲区绑定。
+- [axclrtEngineGetOutputBufferByName](#axclrtEngineGetOutputBufferByName)：获取指定输出张量名称保存的缓冲区绑定。
+- [axclrtEngineGetOutputDataLayout](#axclrtEngineGetOutputDataLayout)：获取输出张量的数据布局。
+- [axclrtEngineGetOutputDataType](#axclrtEngineGetOutputDataType)：获取输出张量的数据类型。
+- [axclrtEngineGetOutputDims](#axclrtEngineGetOutputDims)：获取指定 shape group 中输出张量的维度。
+- [axclrtEngineGetOutputIndexByName](#axclrtEngineGetOutputIndexByName)：根据名称查找输出张量索引。
+- [axclrtEngineGetOutputNameByIndex](#axclrtEngineGetOutputNameByIndex)：根据索引获取输出张量名称。
+- [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex)：获取指定 shape group 中模型输出所需的缓冲区大小。
+- [axclrtEngineGetShapeGroupsCount](#axclrtEngineGetShapeGroupsCount)：获取 IO 元数据对象中的 shape group 数量。
+- [axclrtEngineGetUsage](#axclrtEngineGetUsage)：获取模型文件的 Engine 内存用量。
+- [axclrtEngineGetUsageFromMem](#axclrtEngineGetUsageFromMem)：获取 Device 内存中模型数据的 Engine 内存用量。
+- [axclrtEngineGetUsageFromModelId](#axclrtEngineGetUsageFromModelId)：获取已加载模型的 Engine 内存用量。
+- [axclrtEngineGetVNpuKind](#axclrtEngineGetVNpuKind)：获取当前 Context 所属设备上 Engine 的 VNPU 模式。
+- [axclrtEngineInit](#axclrtEngineInit)：在调用线程当前 Context 所属的设备上初始化 Engine。
+- [axclrtEngineLoadFromFile](#axclrtEngineLoadFromFile)：从 Host 文件向当前设备的 Engine 加载离线模型。
+- [axclrtEngineLoadFromMem](#axclrtEngineLoadFromMem)：从 Device 内存向当前设备的 Engine 加载离线模型。
+- [axclrtEngineSetAffinity](#axclrtEngineSetAffinity)：设置已加载模型的 NPU 核亲和性掩码。
+- [axclrtEngineSetContextAffinity](#axclrtEngineSetContextAffinity)：设置指定 Engine Context 的亲和性；当前版本不支持此操作。
+- [axclrtEngineSetDynamicBatchSize](#axclrtEngineSetDynamicBatchSize)：在 IO 绑定对象中保存后续推理使用的动态 batch 大小。
+- [axclrtEngineSetInputBufferByIndex](#axclrtEngineSetInputBufferByIndex)：根据索引为输入绑定 Device 缓冲区。
+- [axclrtEngineSetInputBufferByName](#axclrtEngineSetInputBufferByName)：根据张量名称为输入绑定 Device 缓冲区。
+- [axclrtEngineSetOutputBufferByIndex](#axclrtEngineSetOutputBufferByIndex)：根据索引为输出绑定 Device 缓冲区。
+- [axclrtEngineSetOutputBufferByName](#axclrtEngineSetOutputBufferByName)：根据张量名称为输出绑定 Device 缓冲区。
+- [axclrtEngineUnload](#axclrtEngineUnload)：从当前设备的 Engine 中卸载模型。
 
 <br>
 

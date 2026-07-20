@@ -2,7 +2,7 @@
 
 ## Index
 
-- [axclrtControlExecuteShellCmd](#axclrtControlExecuteShellCmd)
+- [axclrtControlExecuteShellCmd](#axclrtControlExecuteShellCmd): Execute a shell command on the device associated with the calling thread's current Context.
 
 <br>
 

@@ -2,21 +2,21 @@
 
 ## Index
 
-- [axclrtFree](#axclrtFree)
-- [axclrtFreeHost](#axclrtFreeHost)
-- [axclrtGetMemInfo](#axclrtGetMemInfo)
-- [axclrtMalloc](#axclrtMalloc)
-- [axclrtMallocCached](#axclrtMallocCached)
-- [axclrtMallocHost](#axclrtMallocHost)
-- [axclrtMemFlush](#axclrtMemFlush)
-- [axclrtMemInvalidate](#axclrtMemInvalidate)
-- [axclrtMemcmp](#axclrtMemcmp)
-- [axclrtMemcmpAsync](#axclrtMemcmpAsync)
-- [axclrtMemcpy](#axclrtMemcpy)
-- [axclrtMemcpyAsync](#axclrtMemcpyAsync)
-- [axclrtMemset](#axclrtMemset)
-- [axclrtMemsetAsync](#axclrtMemsetAsync)
-- [axclrtPointerGetAttributes](#axclrtPointerGetAttributes)
+- [axclrtFree](#axclrtFree): Free Device memory.
+- [axclrtFreeHost](#axclrtFreeHost): Free Host virtual memory allocated by [axclrtMallocHost](#axclrtMallocHost).
+- [axclrtGetMemInfo](#axclrtGetMemInfo): Get a snapshot of memory capacity on the device associated with the calling thread's current Context.
+- [axclrtMalloc](#axclrtMalloc): Allocate physically contiguous memory on the device associated with the calling thread's current Context.
+- [axclrtMallocCached](#axclrtMallocCached): Allocate cached, physically contiguous memory on the device associated with the current Context.
+- [axclrtMallocHost](#axclrtMallocHost): Allocate Host virtual memory.
+- [axclrtMemFlush](#axclrtMemFlush): Write cached data for a Device memory range back to DDR.
+- [axclrtMemInvalidate](#axclrtMemInvalidate): Invalidate cached data for a Device memory range.
+- [axclrtMemcmp](#axclrtMemcmp): Synchronously determine whether two Device memory ranges contain identical bytes.
+- [axclrtMemcmpAsync](#axclrtMemcmpAsync): Asynchronously submit a comparison of two Device memory ranges to a specified Stream.
+- [axclrtMemcpy](#axclrtMemcpy): Synchronously copy bytes between Host or Device memory.
+- [axclrtMemcpyAsync](#axclrtMemcpyAsync): Asynchronously submit a Host or Device memory copy to a specified Stream.
+- [axclrtMemset](#axclrtMemset): Synchronously set bytes in Device memory to a value.
+- [axclrtMemsetAsync](#axclrtMemsetAsync): Asynchronously submit a Device memory set operation to a specified Stream.
+- [axclrtPointerGetAttributes](#axclrtPointerGetAttributes): Get memory allocation attributes.
 
 <br>
 

@@ -2,10 +2,10 @@
 
 ## Index
 
-- [axclrtCreateContext](#axclrtCreateContext)
-- [axclrtDestroyContext](#axclrtDestroyContext)
-- [axclrtGetCurrentContext](#axclrtGetCurrentContext)
-- [axclrtSetCurrentContext](#axclrtSetCurrentContext)
+- [axclrtCreateContext](#axclrtCreateContext): Explicitly create a Context and bind it to the calling thread.
+- [axclrtDestroyContext](#axclrtDestroyContext): Destroy a Context created by [axclrtCreateContext](#axclrtCreateContext).
+- [axclrtGetCurrentContext](#axclrtGetCurrentContext): Get the current Context of the calling thread.
+- [axclrtSetCurrentContext](#axclrtSetCurrentContext): Make a Context current for the calling thread.
 
 <br>
 

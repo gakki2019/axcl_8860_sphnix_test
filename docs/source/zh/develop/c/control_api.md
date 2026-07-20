@@ -2,7 +2,7 @@
 
 ## 1. 目录
 
-- [axclrtControlExecuteShellCmd](#axclrtControlExecuteShellCmd)
+- [axclrtControlExecuteShellCmd](#axclrtControlExecuteShellCmd)：在调用线程当前 Context 所属的设备上执行 shell 命令。
 
 <br>
 

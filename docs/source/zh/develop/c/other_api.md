@@ -2,16 +2,16 @@
 
 ## 1. 目录
 
-- [axclAppLog](#axclAppLog)
-- [axclGetLogLevel](#axclGetLogLevel)
-- [axclSetLogLevel](#axclSetLogLevel)
-- [axclrtGetErrorString](#axclrtGetErrorString)
-- [axclrtGetLastError](#axclrtGetLastError)
-- [axclrtGetSocName](#axclrtGetSocName)
-- [axclrtGetVersion](#axclrtGetVersion)
-- [axclrtGetVersionStr](#axclrtGetVersionStr)
-- [axclrtPeekAtLastError](#axclrtPeekAtLastError)
-- [axclrtSetLastError](#axclrtSetLastError)
+- [axclAppLog](#axclAppLog)：按指定格式记录应用日志。
+- [axclGetLogLevel](#axclGetLogLevel)：获取 Host 日志级别。
+- [axclSetLogLevel](#axclSetLogLevel)：设置 Host 日志级别。
+- [axclrtGetErrorString](#axclrtGetErrorString)：获取错误码对应的错误描述字符串。
+- [axclrtGetLastError](#axclrtGetLastError)：获取并清除当前线程的最后一个错误码。
+- [axclrtGetSocName](#axclrtGetSocName)：获取芯片名称字符串。
+- [axclrtGetVersion](#axclrtGetVersion)：获取 AXCL 运行时库构建版本号。
+- [axclrtGetVersionStr](#axclrtGetVersionStr)：获取指定来源的版本字符串。
+- [axclrtPeekAtLastError](#axclrtPeekAtLastError)：获取当前线程的最后一个错误码，但不清除该错误码。
+- [axclrtSetLastError](#axclrtSetLastError)：设置当前线程的最后一个错误码。
 
 <br>
 
