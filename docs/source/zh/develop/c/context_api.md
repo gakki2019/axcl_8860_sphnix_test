@@ -77,7 +77,8 @@ int main() {
 - [Context 语义](../arch/concept.md#CONTEXT)
 - [axclrtDestroyContext](#axclrtDestroyContext)
 - [axclrtSetDevice](device_api.md#axclrtSetDevice)
-- [axclrtCreateStream](stream_api.md#axclrtCreateStream) | [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
+- [axclrtCreateStream](stream_api.md#axclrtCreateStream)
+- [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
 
 <br>
 
@@ -115,8 +116,10 @@ AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
 
 - [Context 语义](../arch/concept.md#CONTEXT)
 - [axclrtCreateContext](#axclrtCreateContext)
-- [axclrtCreateStream](stream_api.md#axclrtCreateStream) | [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
-- [axclrtSetDevice](device_api.md#axclrtSetDevice) | [axclrtResetDevice](device_api.md#axclrtResetDevice)
+- [axclrtCreateStream](stream_api.md#axclrtCreateStream)
+- [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
+- [axclrtSetDevice](device_api.md#axclrtSetDevice)
+- [axclrtResetDevice](device_api.md#axclrtResetDevice)
 
 <br>
 

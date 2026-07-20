@@ -33,7 +33,7 @@ AXCL_EXPORT bool axclInitializeMinidump(const axclMinidumpConfig *config);
 
 选定的目录必须可写。如果目录不存在，本函数会同时创建缺失的父目录。按以下顺序使用第一个非空值：
 
-1. `AXCL_DUMP_DIR` 环境变量。
+1. [AXCL_DUMP_DIR](../../appendix/environment_variables.md#AXCL_DUMP_DIR) 环境变量。
 2. `config->dump_dir`。
 3. 平台默认目录：Linux 上为 `/tmp`。
 

@@ -68,8 +68,8 @@ AXCL_EXPORT axclError axclrtGetDeviceCount(uint32_t *count);
 #### 2.2.4. 说明
 
 - 本接口返回的是当前进程可见的设备数量，不是已激活的设备数量，也不是连接的设备数量。
-- 环境变量 [AXCL_VISIBLE_DEVICES](../arch/concept.md#AXCL_VISIBLE_DEVICES) 用于控制可见的设备数量。
-- 未配置环境变量 [AXCL_VISIBLE_DEVICES](../arch/concept.md#AXCL_VISIBLE_DEVICES) 时，可见设备数量等于驱动能够识别的已连接设备数量。
+- 环境变量 [AXCL_VISIBLE_DEVICES](../../appendix/environment_variables.md#AXCL_VISIBLE_DEVICES) 用于控制可见的设备数量。
+- 未配置环境变量 [AXCL_VISIBLE_DEVICES](../../appendix/environment_variables.md#AXCL_VISIBLE_DEVICES) 时，可见设备数量等于驱动能够识别的已连接设备数量。
 
 <br>
 
@@ -196,7 +196,9 @@ AXCL_EXPORT axclError axclrtResetDevice(int32_t deviceId);
 
 #### 2.6.5. 参考
 
-[axclrtSetDevice](#axclrtSetDevice) | [axclrtDestroyContext](context_api.md#axclrtDestroyContext) | [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
+- [axclrtSetDevice](#axclrtSetDevice)
+- [axclrtDestroyContext](context_api.md#axclrtDestroyContext)
+- [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
 
 <br>
 
@@ -235,7 +237,9 @@ AXCL_EXPORT axclError axclrtResetDeviceForce(int32_t deviceId);
 
 #### 2.7.5. 参考
 
-[axclrtResetDevice](#axclrtResetDevice) | [axclrtDestroyContext](context_api.md#axclrtDestroyContext) | [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
+- [axclrtResetDevice](#axclrtResetDevice)
+- [axclrtDestroyContext](context_api.md#axclrtDestroyContext)
+- [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
 
 <br>
 
@@ -284,7 +288,8 @@ AXCL_EXPORT axclError axclrtSetDevice(int32_t deviceId);
 
 #### 2.8.6. 参考
 
-[axclrtResetDevice](#axclrtResetDevice) | [axclrtCreateContext](context_api.md#axclrtCreateContext)
+- [axclrtResetDevice](#axclrtResetDevice)
+- [axclrtCreateContext](context_api.md#axclrtCreateContext)
 
 <br>
 

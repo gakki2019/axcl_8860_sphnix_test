@@ -10,7 +10,7 @@ All fields are optional and may be NULL.
 
 ```c
 typedef struct {
-    const char* dump_dir;   /**< Preferred dump directory. Ignored when AXCL_DUMP_DIR is set to a non-empty value. */
+    const char* dump_dir;   /**< Preferred dump directory. An environment-configured directory takes precedence. */
     const char* dump_type;  /**< Reserved for future use. Currently ignored. */
 } axclMinidumpConfig;
 ```
@@ -19,7 +19,7 @@ typedef struct {
 
 | Name | Type | Description |
 |---|---|---|
-| dump_dir | const char * | Preferred dump directory. Ignored when AXCL_DUMP_DIR is set to a non-empty value. |
+| dump_dir | const char * | Preferred dump directory. An environment-configured directory takes precedence. |
 | dump_type | const char * | Reserved for future use. Currently ignored. |
 
 <br>

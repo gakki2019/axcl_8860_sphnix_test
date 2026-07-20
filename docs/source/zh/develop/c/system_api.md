@@ -37,7 +37,7 @@ AXCL_EXPORT axclError axclFinalize();
 
 #### 2.1.5. 参考
 
-[axclInit](#axclInit)
+- [axclInit](#axclInit)
 
 <br>
 
@@ -104,7 +104,7 @@ AXCL_EXPORT axclError axclInit(const char *json);
 #### 2.2.6. JSON
 
 - `log.host.level`：Host 日志级别，参见 [axclSetLogLevel](other_api.md#axclSetLogLevel)。
-- `log.host.path`：Host 日志文件路径。在 Linux 上，如果 `AXCL_LOG_DIR` 已设置且非空，默认路径为 `${AXCL_LOG_DIR}/axcl_host.log`；否则为 `/tmp/axcl/axcl_host.log`。
+- `log.host.path`：Host 日志文件路径。在 Linux 上，如果 [AXCL_LOG_DIR](../../appendix/environment_variables.md#AXCL_LOG_DIR) 已设置且非空，默认路径为 `${AXCL_LOG_DIR}/axcl_host.log`；否则为 `/tmp/axcl/axcl_host.log`。
 - `log.device.level`：Device 日志级别。
 - `log.host.path` 仅在进程启动时生效一次。调用 [axclFinalize](#axclFinalize) 后再次调用 [axclInit](#axclInit)，不会将已经创建的日志切换到新路径。
 

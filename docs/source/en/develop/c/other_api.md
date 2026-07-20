@@ -49,7 +49,7 @@ AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint
 
 #### Remark
 
-[axclSetLogLevel](#axclSetLogLevel)
+- [axclSetLogLevel](#axclSetLogLevel)
 
 #### Returns
 
@@ -81,7 +81,7 @@ AXCL_EXPORT axclError axclGetLogLevel(int32_t *lv);
 
 #### Remark
 
-[axclSetLogLevel](#axclSetLogLevel)
+- [axclSetLogLevel](#axclSetLogLevel)
 
 <br>
 
@@ -164,7 +164,7 @@ Unlike [axclrtPeekAtLastError](#axclrtPeekAtLastError), this function resets the
 
 #### Remark
 
-[axclrtPeekAtLastError](#axclrtPeekAtLastError)
+- [axclrtPeekAtLastError](#axclrtPeekAtLastError)
 
 <br>
 
@@ -274,7 +274,7 @@ Unlike [axclrtGetLastError](#axclrtGetLastError), this function does not reset t
 
 #### Remark
 
-[axclrtGetLastError](#axclrtGetLastError)
+- [axclrtGetLastError](#axclrtGetLastError)
 
 <br>
 

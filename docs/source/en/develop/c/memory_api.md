@@ -53,7 +53,8 @@ AXCL_EXPORT axclError axclrtFree(void *devPtr);
 
 #### Remark
 
-[axclrtMalloc](#axclrtMalloc) | [axclrtMallocCached](#axclrtMallocCached)
+- [axclrtMalloc](#axclrtMalloc)
+- [axclrtMallocCached](#axclrtMallocCached)
 
 <br>
 
@@ -88,7 +89,7 @@ AXCL_EXPORT axclError axclrtFreeHost(void *hostPtr);
 
 #### Remark
 
-[axclrtMallocHost](#axclrtMallocHost)
+- [axclrtMallocHost](#axclrtMallocHost)
 
 <br>
 
@@ -174,7 +175,7 @@ AXCL_EXPORT axclError axclrtMalloc(void **devPtr, size_t size, axclrtMemMallocPo
 
 #### Remark
 
-[axclrtFree](#axclrtFree)
+- [axclrtFree](#axclrtFree)
 
 <br>
 
@@ -212,7 +213,9 @@ AXCL_EXPORT axclError axclrtMallocCached(void **devPtr, size_t size, axclrtMemMa
 
 #### Remark
 
-[axclrtFree](#axclrtFree) | [axclrtMemFlush](#axclrtMemFlush) | [axclrtMemInvalidate](#axclrtMemInvalidate)
+- [axclrtFree](#axclrtFree)
+- [axclrtMemFlush](#axclrtMemFlush)
+- [axclrtMemInvalidate](#axclrtMemInvalidate)
 
 <br>
 
@@ -247,7 +250,7 @@ AXCL_EXPORT axclError axclrtMallocHost(void **hostPtr, size_t size);
 
 #### Remark
 
-[axclrtFreeHost](#axclrtFreeHost)
+- [axclrtFreeHost](#axclrtFreeHost)
 
 <br>
 
@@ -282,7 +285,8 @@ AXCL_EXPORT axclError axclrtMemFlush(void *devPtr, size_t size);
 
 #### Remark
 
-[axclrtMallocCached](#axclrtMallocCached) | [axclrtMemInvalidate](#axclrtMemInvalidate)
+- [axclrtMallocCached](#axclrtMallocCached)
+- [axclrtMemInvalidate](#axclrtMemInvalidate)
 
 <br>
 
@@ -317,7 +321,8 @@ AXCL_EXPORT axclError axclrtMemInvalidate(void *devPtr, size_t size);
 
 #### Remark
 
-[axclrtMallocCached](#axclrtMallocCached) | [axclrtMemFlush](#axclrtMemFlush)
+- [axclrtMallocCached](#axclrtMallocCached)
+- [axclrtMemFlush](#axclrtMemFlush)
 
 <br>
 
@@ -353,7 +358,7 @@ AXCL_EXPORT axclError axclrtMemcmp(const void *devPtr1, const void *devPtr2, siz
 
 #### Remark
 
-[axclrtMemcmpAsync](#axclrtMemcmpAsync)
+- [axclrtMemcmpAsync](#axclrtMemcmpAsync)
 
 <br>
 
@@ -391,7 +396,8 @@ AXCL_EXPORT axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2
 
 #### Remark
 
-[axclrtMemcmp](#axclrtMemcmp) | [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
+- [axclrtMemcmp](#axclrtMemcmp)
+- [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
 
 <br>
 
@@ -463,7 +469,9 @@ For a complete synchronous copy flow, see [Synchronous Copy](../arch/memory.md#m
 
 #### Remark
 
-[axclrtMemcpyAsync](#axclrtMemcpyAsync) | [axclrtMalloc](#axclrtMalloc) | [axclrtMallocHost](#axclrtMallocHost)
+- [axclrtMemcpyAsync](#axclrtMemcpyAsync)
+- [axclrtMalloc](#axclrtMalloc)
+- [axclrtMallocHost](#axclrtMallocHost)
 
 <br>
 
@@ -507,7 +515,8 @@ For a complete H2D asynchronous copy, asynchronous inference, D2H asynchronous c
 
 #### Remark
 
-[axclrtMemcpy](#axclrtMemcpy) | [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
+- [axclrtMemcpy](#axclrtMemcpy)
+- [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
 
 <br>
 
@@ -543,7 +552,7 @@ AXCL_EXPORT axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 
 #### Remark
 
-[axclrtMemsetAsync](#axclrtMemsetAsync)
+- [axclrtMemsetAsync](#axclrtMemsetAsync)
 
 <br>
 
@@ -580,7 +589,8 @@ AXCL_EXPORT axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t coun
 
 #### Remark
 
-[axclrtMemset](#axclrtMemset) | [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
+- [axclrtMemset](#axclrtMemset)
+- [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
 
 <br>
 

@@ -44,7 +44,8 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 #### Remark
 
-[Stream semantics](../arch/concept.md#STREAM) | [axclrtDestroyStream](#axclrtDestroyStream)
+- [Stream semantics](../arch/concept.md#STREAM)
+- [axclrtDestroyStream](#axclrtDestroyStream)
 
 <br>
 
@@ -80,7 +81,9 @@ AXCL_EXPORT axclError axclrtDestroyStream(axclrtStream stream);
 
 #### Remark
 
-[axclrtDestroyStreamForce](#axclrtDestroyStreamForce) | [axclrtSynchronizeStream](#axclrtSynchronizeStream) | [axclrtDestroyContext](context_api.md#axclrtDestroyContext)
+- [axclrtDestroyStreamForce](#axclrtDestroyStreamForce)
+- [axclrtSynchronizeStream](#axclrtSynchronizeStream)
+- [axclrtDestroyContext](context_api.md#axclrtDestroyContext)
 
 <br>
 
@@ -114,7 +117,7 @@ AXCL_EXPORT axclError axclrtDestroyStreamForce(axclrtStream stream);
 
 #### Remark
 
-[axclrtDestroyStream](#axclrtDestroyStream)
+- [axclrtDestroyStream](#axclrtDestroyStream)
 
 <br>
 
@@ -169,7 +172,7 @@ AXCL_EXPORT axclError axclrtSynchronizeStream(axclrtStream stream);
 
 #### Remark
 
-[axclrtSynchronizeStreamWithTimeout](#axclrtSynchronizeStreamWithTimeout)
+- [axclrtSynchronizeStreamWithTimeout](#axclrtSynchronizeStreamWithTimeout)
 
 <br>
 
@@ -203,4 +206,4 @@ AXCL_EXPORT axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, in
 
 #### Remark
 
-[axclrtSynchronizeStream](#axclrtSynchronizeStream)
+- [axclrtSynchronizeStream](#axclrtSynchronizeStream)

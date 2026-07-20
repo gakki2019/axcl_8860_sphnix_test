@@ -345,7 +345,7 @@ tar -xzf /tmp/axcl-minidump-demo/symbols/axcl-host-minidump-symbols.tar.gz \
 
 ### A.5 运行并生成 minidump
 
-设置 `AXCL_DUMP_DIR` 指定 `.dmp` 输出目录，同时设置 `AXCL_SAMPLE_RUNTIME_NULL_DEREF=1` 触发空指针访问：
+设置 [AXCL_DUMP_DIR](../appendix/environment_variables.md#AXCL_DUMP_DIR) 指定 `.dmp` 输出目录，同时设置 `AXCL_SAMPLE_RUNTIME_NULL_DEREF=1` 触发空指针访问：
 
 ```bash
 cd axcl

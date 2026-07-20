@@ -46,7 +46,9 @@ AXCL_EXPORT axclError axclrtCreateEvent(axclrtEvent *event);
 
 #### Remark
 
-[axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags) | [axclrtDestroyEvent](#axclrtDestroyEvent) | [axclrtRecordEvent](#axclrtRecordEvent)
+- [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags)
+- [axclrtDestroyEvent](#axclrtDestroyEvent)
+- [axclrtRecordEvent](#axclrtRecordEvent)
 
 <br>
 
@@ -81,7 +83,9 @@ AXCL_EXPORT axclError axclrtCreateEventWithFlags(axclrtEvent *event, uint32_t fl
 
 #### Remark
 
-[axclrtCreateEvent](#axclrtCreateEvent) | [axclrtDestroyEvent](#axclrtDestroyEvent) | [axclrtEventElapsedTime](#axclrtEventElapsedTime)
+- [axclrtCreateEvent](#axclrtCreateEvent)
+- [axclrtDestroyEvent](#axclrtDestroyEvent)
+- [axclrtEventElapsedTime](#axclrtEventElapsedTime)
 
 <br>
 
@@ -147,7 +151,9 @@ AXCL_EXPORT axclError axclrtEventElapsedTime(float *ms, axclrtEvent startEvent, 
 
 #### Remark
 
-[axclrtRecordEvent](#axclrtRecordEvent) | [axclrtSynchronizeEvent](#axclrtSynchronizeEvent) | [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags)
+- [axclrtRecordEvent](#axclrtRecordEvent)
+- [axclrtSynchronizeEvent](#axclrtSynchronizeEvent)
+- [axclrtCreateEventWithFlags](#axclrtCreateEventWithFlags)
 
 <br>
 
@@ -183,7 +189,9 @@ AXCL_EXPORT axclError axclrtRecordEvent(axclrtEvent event, axclrtStream stream);
 
 #### Remark
 
-[axclrtStreamWaitEvent](#axclrtStreamWaitEvent) | [axclrtSynchronizeEvent](#axclrtSynchronizeEvent) | [axclrtEventElapsedTime](#axclrtEventElapsedTime)
+- [axclrtStreamWaitEvent](#axclrtStreamWaitEvent)
+- [axclrtSynchronizeEvent](#axclrtSynchronizeEvent)
+- [axclrtEventElapsedTime](#axclrtEventElapsedTime)
 
 <br>
 
@@ -218,7 +226,9 @@ AXCL_EXPORT axclError axclrtStreamWaitEvent(axclrtStream stream, axclrtEvent eve
 
 #### Remark
 
-[axclrtStreamWaitEventWithTimeout](#axclrtStreamWaitEventWithTimeout) | [axclrtRecordEvent](#axclrtRecordEvent) | [axclrtSynchronizeEvent](#axclrtSynchronizeEvent)
+- [axclrtStreamWaitEventWithTimeout](#axclrtStreamWaitEventWithTimeout)
+- [axclrtRecordEvent](#axclrtRecordEvent)
+- [axclrtSynchronizeEvent](#axclrtSynchronizeEvent)
 
 <br>
 
@@ -254,7 +264,9 @@ AXCL_EXPORT axclError axclrtStreamWaitEventWithTimeout(axclrtStream stream, axcl
 
 #### Remark
 
-[axclrtStreamWaitEvent](#axclrtStreamWaitEvent) | [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) | [axclrtSynchronizeEventWithTimeout](#axclrtSynchronizeEventWithTimeout)
+- [axclrtStreamWaitEvent](#axclrtStreamWaitEvent)
+- [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
+- [axclrtSynchronizeEventWithTimeout](#axclrtSynchronizeEventWithTimeout)
 
 <br>
 
@@ -287,7 +299,8 @@ Only one Host synchronization request can wait on the same Event at a time. Use 
 
 #### Remark
 
-[axclrtSynchronizeEventWithTimeout](#axclrtSynchronizeEventWithTimeout) | [axclrtRecordEvent](#axclrtRecordEvent)
+- [axclrtSynchronizeEventWithTimeout](#axclrtSynchronizeEventWithTimeout)
+- [axclrtRecordEvent](#axclrtRecordEvent)
 
 <br>
 
@@ -321,4 +334,5 @@ A timeout does not modify or destroy the Event. Only one Host synchronization re
 
 #### Remark
 
-[axclrtSynchronizeEvent](#axclrtSynchronizeEvent) | [axclrtStreamWaitEventWithTimeout](#axclrtStreamWaitEventWithTimeout)
+- [axclrtSynchronizeEvent](#axclrtSynchronizeEvent)
+- [axclrtStreamWaitEventWithTimeout](#axclrtStreamWaitEventWithTimeout)

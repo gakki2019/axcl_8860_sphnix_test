@@ -10,7 +10,7 @@ Minidump 配置结构体。
 
 ```c
 typedef struct {
-    const char* dump_dir;   /**< 首选 Dump 目录。AXCL_DUMP_DIR 设置为非空值时忽略此字段。 */
+    const char* dump_dir;   /**< 首选 Dump 目录。环境变量配置的目录优先。 */
     const char* dump_type;  /**< 保留供将来使用，当前会忽略该字段。 */
 } axclMinidumpConfig;
 ```
@@ -19,7 +19,7 @@ typedef struct {
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dump_dir | const char * | 首选 Dump 目录。`AXCL_DUMP_DIR` 设置为非空值时忽略此字段。 |
+| dump_dir | const char * | 首选 Dump 目录。环境变量配置的目录优先。 |
 | dump_type | const char * | 保留供将来使用，当前会忽略该字段。 |
 
 <br>

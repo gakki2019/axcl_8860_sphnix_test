@@ -68,8 +68,8 @@ AXCL_EXPORT axclError axclrtGetDeviceCount(uint32_t *count);
 #### Note
 
 - This function returns the number of devices visible to the current process, not the number of active devices or the number of connected devices.
-- The [AXCL_VISIBLE_DEVICES](../arch/concept.md#AXCL_VISIBLE_DEVICES) environment variable controls which devices are visible to the current process.
-- If [AXCL_VISIBLE_DEVICES](../arch/concept.md#AXCL_VISIBLE_DEVICES) is not set, the visible device count is equal to the number of connected devices recognized by the driver.
+- The [AXCL_VISIBLE_DEVICES](../../appendix/environment_variables.md#AXCL_VISIBLE_DEVICES) environment variable controls which devices are visible to the current process.
+- If [AXCL_VISIBLE_DEVICES](../../appendix/environment_variables.md#AXCL_VISIBLE_DEVICES) is not set, the visible device count is equal to the number of connected devices recognized by the driver.
 
 <br>
 
@@ -196,7 +196,9 @@ AXCL_EXPORT axclError axclrtResetDevice(int32_t deviceId);
 
 #### Remark
 
-[axclrtSetDevice](#axclrtSetDevice) | [axclrtDestroyContext](context_api.md#axclrtDestroyContext) | [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
+- [axclrtSetDevice](#axclrtSetDevice)
+- [axclrtDestroyContext](context_api.md#axclrtDestroyContext)
+- [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
 
 <br>
 
@@ -235,7 +237,9 @@ AXCL_EXPORT axclError axclrtResetDeviceForce(int32_t deviceId);
 
 #### Remark
 
-[axclrtResetDevice](#axclrtResetDevice) | [axclrtDestroyContext](context_api.md#axclrtDestroyContext) | [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
+- [axclrtResetDevice](#axclrtResetDevice)
+- [axclrtDestroyContext](context_api.md#axclrtDestroyContext)
+- [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
 
 <br>
 
@@ -284,7 +288,8 @@ AXCL_EXPORT axclError axclrtSetDevice(int32_t deviceId);
 
 #### Remark
 
-[axclrtResetDevice](#axclrtResetDevice) | [axclrtCreateContext](context_api.md#axclrtCreateContext)
+- [axclrtResetDevice](#axclrtResetDevice)
+- [axclrtCreateContext](context_api.md#axclrtCreateContext)
 
 <br>
 

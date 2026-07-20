@@ -74,7 +74,11 @@ AXCL_EXPORT axclError axclrtCreateContext(axclrtContext *context, int32_t device
 
 #### Remark
 
-[Context concept](../arch/concept.md#CONTEXT) | [axclrtDestroyContext](#axclrtDestroyContext) | [axclrtSetDevice](device_api.md#axclrtSetDevice) | [axclrtCreateStream](stream_api.md#axclrtCreateStream) | [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
+- [Context concept](../arch/concept.md#CONTEXT)
+- [axclrtDestroyContext](#axclrtDestroyContext)
+- [axclrtSetDevice](device_api.md#axclrtSetDevice)
+- [axclrtCreateStream](stream_api.md#axclrtCreateStream)
+- [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
 
 <br>
 
@@ -110,7 +114,12 @@ AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
 
 #### Remark
 
-[Context concept](../arch/concept.md#CONTEXT) | [axclrtCreateContext](#axclrtCreateContext) | [axclrtCreateStream](stream_api.md#axclrtCreateStream) | [axclrtDestroyStream](stream_api.md#axclrtDestroyStream) | [axclrtSetDevice](device_api.md#axclrtSetDevice) | [axclrtResetDevice](device_api.md#axclrtResetDevice)
+- [Context concept](../arch/concept.md#CONTEXT)
+- [axclrtCreateContext](#axclrtCreateContext)
+- [axclrtCreateStream](stream_api.md#axclrtCreateStream)
+- [axclrtDestroyStream](stream_api.md#axclrtDestroyStream)
+- [axclrtSetDevice](device_api.md#axclrtSetDevice)
+- [axclrtResetDevice](device_api.md#axclrtResetDevice)
 
 <br>
 
@@ -144,7 +153,7 @@ AXCL_EXPORT axclError axclrtGetCurrentContext(axclrtContext *context);
 
 #### Remark
 
-[axclrtSetCurrentContext](#axclrtSetCurrentContext)
+- [axclrtSetCurrentContext](#axclrtSetCurrentContext)
 
 <br>
 
@@ -179,4 +188,4 @@ AXCL_EXPORT axclError axclrtSetCurrentContext(axclrtContext context);
 
 #### Remark
 
-[axclrtGetCurrentContext](#axclrtGetCurrentContext)
+- [axclrtGetCurrentContext](#axclrtGetCurrentContext)

@@ -49,7 +49,7 @@ AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint
 
 #### 2.1.4. 参考
 
-[axclSetLogLevel](#axclSetLogLevel)
+- [axclSetLogLevel](#axclSetLogLevel)
 
 #### 2.1.5. 返回值
 
@@ -81,7 +81,7 @@ AXCL_EXPORT axclError axclGetLogLevel(int32_t *lv);
 
 #### 2.2.4. 参考
 
-[axclSetLogLevel](#axclSetLogLevel)
+- [axclSetLogLevel](#axclSetLogLevel)
 
 <br>
 
@@ -164,7 +164,7 @@ AXCL_EXPORT axclError axclrtGetLastError(void);
 
 #### 2.5.5. 参考
 
-[axclrtPeekAtLastError](#axclrtPeekAtLastError)
+- [axclrtPeekAtLastError](#axclrtPeekAtLastError)
 
 <br>
 
@@ -274,7 +274,7 @@ AXCL_EXPORT axclError axclrtPeekAtLastError(void);
 
 #### 2.9.5. 参考
 
-[axclrtGetLastError](#axclrtGetLastError)
+- [axclrtGetLastError](#axclrtGetLastError)
 
 <br>
 

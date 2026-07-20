@@ -85,7 +85,8 @@ A model can have multiple Engine Contexts, each with independent execution state
 
 #### Remark
 
-[axclrtEngineLoadFromFile](#axclrtEngineLoadFromFile) | [axclrtEngineLoadFromMem](#axclrtEngineLoadFromMem)
+- [axclrtEngineLoadFromFile](#axclrtEngineLoadFromFile)
+- [axclrtEngineLoadFromMem](#axclrtEngineLoadFromMem)
 
 <br>
 
@@ -242,7 +243,8 @@ A successful return does not mean inference has completed. Keep the model, Engin
 
 #### Remark
 
-[axclrtEngineExecute](#axclrtEngineExecute) | [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
+- [axclrtEngineExecute](#axclrtEngineExecute)
+- [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
 
 <br>
 
@@ -299,7 +301,8 @@ AXCL_EXPORT axclError axclrtEngineGetAffinity(uint64_t modelId, axclrtEngineSet 
 
 #### Remark
 
-[axclrtEngineSetAffinity](#axclrtEngineSetAffinity) | [axclrtEngineCreateContext](#axclrtEngineCreateContext)
+- [axclrtEngineSetAffinity](#axclrtEngineSetAffinity)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
 
 <br>
 
@@ -329,7 +332,8 @@ AXCL_EXPORT axclError axclrtEngineGetContextAffinity(uint64_t modelId, uint64_t 
 
 #### Remark
 
-[axclrtEngineGetAffinity](#axclrtEngineGetAffinity) | [axclrtEngineCreateContext](#axclrtEngineCreateContext)
+- [axclrtEngineGetAffinity](#axclrtEngineGetAffinity)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
 
 <br>
 
@@ -363,7 +367,8 @@ Destroy the returned handle with [axclrtEngineDestroyIOInfo](#axclrtEngineDestro
 
 #### Remark
 
-[axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo) | [axclrtEngineCreateIO](#axclrtEngineCreateIO)
+- [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo)
+- [axclrtEngineCreateIO](#axclrtEngineCreateIO)
 
 <br>
 
@@ -563,7 +568,8 @@ AXCL_EXPORT const char* axclrtEngineGetInputNameByIndex(axclrtEngineIOInfo ioInf
 
 #### Remark
 
-[axclrtEngineGetInputIndexByName](#axclrtEngineGetInputIndexByName) | [axclrtEngineGetNumInputs](#axclrtEngineGetNumInputs)
+- [axclrtEngineGetInputIndexByName](#axclrtEngineGetInputIndexByName)
+- [axclrtEngineGetNumInputs](#axclrtEngineGetNumInputs)
 
 <br>
 
@@ -948,7 +954,8 @@ AXCL_EXPORT const char* axclrtEngineGetOutputNameByIndex(axclrtEngineIOInfo ioIn
 
 #### Remark
 
-[axclrtEngineGetOutputIndexByName](#axclrtEngineGetOutputIndexByName) | [axclrtEngineGetNumOutputs](#axclrtEngineGetNumOutputs)
+- [axclrtEngineGetOutputIndexByName](#axclrtEngineGetOutputIndexByName)
+- [axclrtEngineGetNumOutputs](#axclrtEngineGetNumOutputs)
 
 <br>
 
@@ -1004,7 +1011,9 @@ AXCL_EXPORT axclError axclrtEngineGetShapeGroupsCount(axclrtEngineIOInfo ioInfo,
 
 #### Remark
 
-[axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo) | [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex) | [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex)
+- [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo)
+- [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex)
+- [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex)
 
 <br>
 
@@ -1243,7 +1252,8 @@ AXCL_EXPORT axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet 
 
 #### Remark
 
-[axclrtEngineGetAffinity](#axclrtEngineGetAffinity) | [axclrtEngineCreateContext](#axclrtEngineCreateContext)
+- [axclrtEngineGetAffinity](#axclrtEngineGetAffinity)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
 
 <br>
 
@@ -1273,7 +1283,8 @@ AXCL_EXPORT axclError axclrtEngineSetContextAffinity(uint64_t modelId, uint64_t 
 
 #### Remark
 
-[axclrtEngineSetAffinity](#axclrtEngineSetAffinity) | [axclrtEngineCreateContext](#axclrtEngineCreateContext)
+- [axclrtEngineSetAffinity](#axclrtEngineSetAffinity)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
 
 <br>
 

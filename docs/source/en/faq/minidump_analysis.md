@@ -345,7 +345,7 @@ Directories used by this example after extraction:
 
 ### A.5 Run and generate a minidump
 
-Set `AXCL_DUMP_DIR` to specify the `.dmp` output directory, and set `AXCL_SAMPLE_RUNTIME_NULL_DEREF=1` to trigger the null-pointer access:
+Set [AXCL_DUMP_DIR](../appendix/environment_variables.md#AXCL_DUMP_DIR) to specify the `.dmp` output directory, and set `AXCL_SAMPLE_RUNTIME_NULL_DEREF=1` to trigger the null-pointer access:
 
 ```bash
 cd axcl

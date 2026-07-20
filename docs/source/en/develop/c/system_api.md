@@ -37,7 +37,7 @@ N/A
 
 #### Remark
 
-[axclInit](#axclInit)
+- [axclInit](#axclInit)
 
 <br>
 
@@ -105,7 +105,7 @@ AXCL_EXPORT axclError axclInit(const char *json);
 #### JSON
 
 - `log.host.level`: Host log level. See [axclSetLogLevel](other_api.md#axclSetLogLevel).
-- `log.host.path`: Host log file path. On Linux, the default is `${AXCL_LOG_DIR}/axcl_host.log` when `AXCL_LOG_DIR` is set and non-empty; otherwise it is `/tmp/axcl/axcl_host.log`.
+- `log.host.path`: Host log file path. On Linux, the default is `${AXCL_LOG_DIR}/axcl_host.log` when [AXCL_LOG_DIR](../../appendix/environment_variables.md#AXCL_LOG_DIR) is set and non-empty; otherwise it is `/tmp/axcl/axcl_host.log`.
 - `log.device.level`: Device log level.
 - `log.host.path` takes effect only once during process startup. Calling [axclFinalize](#axclFinalize) and then [axclInit](#axclInit) again does not switch the existing log output to a new path.
 

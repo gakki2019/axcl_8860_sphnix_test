@@ -85,7 +85,8 @@ AXCL_EXPORT axclError axclrtEngineCreateContext(uint64_t modelId, uint64_t *cont
 
 #### 2.1.5. 参考
 
-[axclrtEngineLoadFromFile](#axclrtEngineLoadFromFile) | [axclrtEngineLoadFromMem](#axclrtEngineLoadFromMem)
+- [axclrtEngineLoadFromFile](#axclrtEngineLoadFromFile)
+- [axclrtEngineLoadFromMem](#axclrtEngineLoadFromMem)
 
 <br>
 
@@ -242,7 +243,8 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contex
 
 #### 2.6.5. 参考
 
-[axclrtEngineExecute](#axclrtEngineExecute) | [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
+- [axclrtEngineExecute](#axclrtEngineExecute)
+- [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
 
 <br>
 
@@ -299,7 +301,8 @@ AXCL_EXPORT axclError axclrtEngineGetAffinity(uint64_t modelId, axclrtEngineSet 
 
 #### 2.8.4. 参考
 
-[axclrtEngineSetAffinity](#axclrtEngineSetAffinity) | [axclrtEngineCreateContext](#axclrtEngineCreateContext)
+- [axclrtEngineSetAffinity](#axclrtEngineSetAffinity)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
 
 <br>
 
@@ -329,7 +332,8 @@ AXCL_EXPORT axclError axclrtEngineGetContextAffinity(uint64_t modelId, uint64_t 
 
 #### 2.9.4. 参考
 
-[axclrtEngineGetAffinity](#axclrtEngineGetAffinity) | [axclrtEngineCreateContext](#axclrtEngineCreateContext)
+- [axclrtEngineGetAffinity](#axclrtEngineGetAffinity)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
 
 <br>
 
@@ -363,7 +367,8 @@ AXCL_EXPORT axclError axclrtEngineGetIOInfo(uint64_t modelId, axclrtEngineIOInfo
 
 #### 2.10.5. 参考
 
-[axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo) | [axclrtEngineCreateIO](#axclrtEngineCreateIO)
+- [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo)
+- [axclrtEngineCreateIO](#axclrtEngineCreateIO)
 
 <br>
 
@@ -563,7 +568,8 @@ AXCL_EXPORT const char* axclrtEngineGetInputNameByIndex(axclrtEngineIOInfo ioInf
 
 #### 2.17.4. 参考
 
-[axclrtEngineGetInputIndexByName](#axclrtEngineGetInputIndexByName) | [axclrtEngineGetNumInputs](#axclrtEngineGetNumInputs)
+- [axclrtEngineGetInputIndexByName](#axclrtEngineGetInputIndexByName)
+- [axclrtEngineGetNumInputs](#axclrtEngineGetNumInputs)
 
 <br>
 
@@ -948,7 +954,8 @@ AXCL_EXPORT const char* axclrtEngineGetOutputNameByIndex(axclrtEngineIOInfo ioIn
 
 #### 2.31.4. 参考
 
-[axclrtEngineGetOutputIndexByName](#axclrtEngineGetOutputIndexByName) | [axclrtEngineGetNumOutputs](#axclrtEngineGetNumOutputs)
+- [axclrtEngineGetOutputIndexByName](#axclrtEngineGetOutputIndexByName)
+- [axclrtEngineGetNumOutputs](#axclrtEngineGetNumOutputs)
 
 <br>
 
@@ -1004,7 +1011,9 @@ AXCL_EXPORT axclError axclrtEngineGetShapeGroupsCount(axclrtEngineIOInfo ioInfo,
 
 #### 2.33.4. 参考
 
-[axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo) | [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex) | [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex)
+- [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo)
+- [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex)
+- [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex)
 
 <br>
 
@@ -1243,7 +1252,8 @@ AXCL_EXPORT axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet 
 
 #### 2.41.4. 参考
 
-[axclrtEngineGetAffinity](#axclrtEngineGetAffinity) | [axclrtEngineCreateContext](#axclrtEngineCreateContext)
+- [axclrtEngineGetAffinity](#axclrtEngineGetAffinity)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
 
 <br>
 
@@ -1273,7 +1283,8 @@ AXCL_EXPORT axclError axclrtEngineSetContextAffinity(uint64_t modelId, uint64_t 
 
 #### 2.42.4. 参考
 
-[axclrtEngineSetAffinity](#axclrtEngineSetAffinity) | [axclrtEngineCreateContext](#axclrtEngineCreateContext)
+- [axclrtEngineSetAffinity](#axclrtEngineSetAffinity)
+- [axclrtEngineCreateContext](#axclrtEngineCreateContext)
 
 <br>
 

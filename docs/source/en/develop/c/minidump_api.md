@@ -33,7 +33,7 @@ AXCL_EXPORT bool axclInitializeMinidump(const axclMinidumpConfig *config);
 
 The selected directory must be writable. If it does not exist, this function creates it together with any missing parent directories. The first non-empty value in the following order is used:
 
-1. The `AXCL_DUMP_DIR` environment variable.
+1. The [AXCL_DUMP_DIR](../../appendix/environment_variables.md#AXCL_DUMP_DIR) environment variable.
 2. `config->dump_dir`.
 3. The platform default: `/tmp` on Linux.
 
@@ -50,7 +50,7 @@ The selected directory must be writable. If it does not exist, this function cre
 
 #### Remark
 
-[Minidump](../../faq/minidump_analysis.md)
+- [Minidump](../../faq/minidump_analysis.md)
 
 <br>
 
