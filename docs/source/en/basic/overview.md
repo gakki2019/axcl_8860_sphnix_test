@@ -8,7 +8,7 @@ From an application developer's perspective, AXCL hides the details of PCIe comm
 
 ## 2. Logical Architecture
 
-```{image} ../../shared/overview_logic_arch.svg
+```{image} ../asserts/overview_logic_arch.svg
 :alt: AXCL logical architecture
 :align: center
 ```

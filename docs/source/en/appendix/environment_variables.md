@@ -10,6 +10,7 @@ This page summarizes the environment variables supported by the AXCL SDK and too
 | [AXCL_LOG_DIR](#AXCL_LOG_DIR) | SDK / slave_daemon | Specifies the default log directory. |
 | [AXCL_DUMP_DIR](#AXCL_DUMP_DIR) | Minidump | Specifies the minidump output directory. |
 | [AXCL_CONSOLE_LEVEL](#AXCL_CONSOLE_LEVEL) | Logger | Sets the console log level. |
+| [AXCL_SHELL_CMD_OUTPUT_LIMIT](#AXCL_SHELL_CMD_OUTPUT_LIMIT) | SDK | Sets the output limit for remote shell commands. |
 | [AXCL_SHELL_TIMEOUT](#AXCL_SHELL_TIMEOUT) | `axcl-smi` | Sets the timeout for remote shell commands. |
 
 ## SDK Environment Variables
@@ -55,6 +56,12 @@ Sets the minimum AXCL console log level. If the variable is not set, the console
 | `6` | off |
 
 Set this variable before the AXCL logger is first created. Changing it does not reconfigure an existing logger.
+
+<a id="AXCL_SHELL_CMD_OUTPUT_LIMIT"></a>
+
+### AXCL_SHELL_CMD_OUTPUT_LIMIT
+
+Sets the maximum output, in bytes, that a remote shell command can return when the Host calls [axclrtControlExecuteShellCmd](../develop/c/control_api.md#axclrtControlExecuteShellCmd) and requests `output`. The default is `1048576` (1 MiB), and the maximum is `16777216` (16 MiB). Invalid values use the default; values above the maximum are clamped to the maximum. Output that reaches the limit is truncated without changing the command execution result.
 
 ## Tool Environment Variables
 

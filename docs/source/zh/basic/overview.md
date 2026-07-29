@@ -8,7 +8,7 @@
 
 ## 2. 逻辑架构
 
-```{image} ../../shared/overview_logic_arch.svg
+```{image} ../asserts/overview_logic_arch.svg
 :alt: AXCL 逻辑架构
 :align: center
 ```

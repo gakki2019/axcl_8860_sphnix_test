@@ -10,6 +10,7 @@
 | [AXCL_LOG_DIR](#AXCL_LOG_DIR) | SDK / slave_daemon | 指定默认日志目录。 |
 | [AXCL_DUMP_DIR](#AXCL_DUMP_DIR) | Minidump | 指定 minidump 输出目录。 |
 | [AXCL_CONSOLE_LEVEL](#AXCL_CONSOLE_LEVEL) | Logger | 设置控制台日志级别。 |
+| [AXCL_SHELL_CMD_OUTPUT_LIMIT](#AXCL_SHELL_CMD_OUTPUT_LIMIT) | SDK | 设置远端 shell 命令的输出上限。 |
 | [AXCL_SHELL_TIMEOUT](#AXCL_SHELL_TIMEOUT) | `axcl-smi` | 设置远端 shell 命令的超时时间。 |
 
 ## SDK 环境变量
@@ -55,6 +56,12 @@
 | `6` | off |
 
 应在 AXCL Logger 首次创建前设置该变量。修改该变量不会重新配置已经创建的 Logger。
+
+<a id="AXCL_SHELL_CMD_OUTPUT_LIMIT"></a>
+
+### AXCL_SHELL_CMD_OUTPUT_LIMIT
+
+设置 Host 调用 [axclrtControlExecuteShellCmd](../develop/c/control_api.md#axclrtControlExecuteShellCmd) 并请求返回 `output` 时，远端 shell 命令可返回的最大输出量，单位为字节。默认值为 `1048576`（1 MiB），最大值为 `16777216`（16 MiB）。无效值使用默认值；超过最大值时按最大值处理。达到上限的输出会被截断，但不会改变命令的执行结果。
 
 ## 工具环境变量
 
