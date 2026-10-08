@@ -10,3 +10,4 @@
 	concept
 	memory
 	programming
+	collective

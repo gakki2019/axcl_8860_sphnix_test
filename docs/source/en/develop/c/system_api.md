@@ -34,6 +34,7 @@ N/A
 
 - [axclFinalize](#axclFinalize) must be called explicitly before process exit. Every successful call to [axclInit](#axclInit) increments the internal reference count and must have a matching call to [axclFinalize](#axclFinalize). A failed [axclInit](#axclInit) does not require a matching call.
 - Do not call this function during C++ static or global object destruction, where AXCL runtime dependencies may already have been destroyed.
+- Serialize this call with [axclrtMallocHost](memory_api.md#axclrtMallocHost) and [axclrtFreeHost](memory_api.md#axclrtFreeHost) calls in the process.
 
 #### Remark
 
@@ -104,21 +105,10 @@ AXCL_EXPORT axclError axclInit(const char *json);
 
 #### JSON
 
-- `log.host.level`: Host log level. See [axclSetLogLevel](other_api.md#axclSetLogLevel).
-- `log.host.path`: Host log file path. On Linux, the default is `${AXCL_LOG_DIR}/axcl_host.log` when [AXCL_LOG_DIR](../../appendix/environment_variables.md#AXCL_LOG_DIR) is set and non-empty; otherwise it is `/tmp/axcl/axcl_host.log`.
-- `log.device.level`: Device log level.
-- `log.host.path` takes effect only once during process startup. Calling [axclFinalize](#axclFinalize) and then [axclInit](#axclInit) again does not switch the existing log output to a new path.
+- `dma buf size`: DMA buffer size in bytes for the device connection.
 
   ```json
    {
-    "log": {
-   		"host": {
-   			"level": 2,
-   			"path": "/tmp/axcl/axcl_host.log"
-   		},
-   		"device": {
-   			"level": 2
-   		}
-   	}
+    "dma buf size": 4194304
    }
   ```

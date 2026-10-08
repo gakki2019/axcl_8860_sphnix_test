@@ -431,7 +431,6 @@ AXCL_EXPORT axclError axclrtMemcpy(void *dstPtr, const void *srcPtr, size_t coun
 
 - 本函数为同步接口，即在复制完成后返回。
 - 本函数支持 [axclrtMemcpyKind](reference/enum.md#axclrtMemcpyKind) 的全部取值，包括同一设备内的 Device-to-Device 复制。
-- 使用 [AXCL_MEMCPY_HOST_PHY_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_HOST_PHY_TO_DEVICE) 和 [AXCL_MEMCPY_DEVICE_TO_HOST_PHY](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST_PHY) 时，通过对应的指针参数传入 Host 物理地址值。
 - 调用线程必须已有当前 Context。所有设备内存必须属于该 Context 所关联的设备，并且源、目标内存范围在函数返回前必须保持有效。
 
 #### 2.11.5. 示例
@@ -505,8 +504,7 @@ AXCL_EXPORT axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t
 #### 2.12.4. 说明
 
 - 本函数为异步接口，成功返回只表示复制操作已提交，不表示复制已经完成。使用目标内存或释放任一内存前，必须同步 `stream`，例如调用 [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)。
-- 本函数支持 Host-to-Host、Host-to-Device、Device-to-Host、Host-physical-to-Device 和 Device-to-Host-physical 复制；Device-to-Device 复制请使用同步接口 [axclrtMemcpy](#axclrtMemcpy)。
-- 使用 [AXCL_MEMCPY_HOST_PHY_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_HOST_PHY_TO_DEVICE) 和 [AXCL_MEMCPY_DEVICE_TO_HOST_PHY](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST_PHY) 时，通过对应的指针参数传入 Host 物理地址值。
+- 本函数支持 Host-to-Host、Host-to-Device 和 Device-to-Host 复制；Device-to-Device 复制请使用同步接口 [axclrtMemcpy](#axclrtMemcpy)。
 - 所有设备内存必须属于 `stream` 所关联的设备。源、目标内存范围在复制完成前必须保持有效。
 
 #### 2.12.5. 示例

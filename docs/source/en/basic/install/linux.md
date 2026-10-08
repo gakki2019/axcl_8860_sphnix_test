@@ -37,8 +37,23 @@ Package file names usually contain the following fields:
 | ---- | ---- | ---- |
 | Package name | `axhelix` | AXCL package-manager name. |
 | System | `linux` | The package targets a Linux host. |
-| host | `x64` | Host CPU architecture. Common values include `x64`, `aarch64`, `loongarch64`, and `riscv64`. |
+| host | `x64` | Host CPU architecture. Common values include `x64`, `aarch64`, `loongarch64`, `riscv64`, and `ax8860`. |
 | libc | `gnu` | Host libc type. |
+
+```{important}
+The `ax8860` and `aarch64` packages carry the same package architecture
+(`arm64`/`aarch64`), so `dpkg` and `rpm` cannot tell them apart. Pick the package
+that matches your host:
+
+- **`ax8860` package**: the host itself is an AX8860 chip driving its own
+  on-board device side.
+- **`aarch64` package**: the host is a generic ARM64 server or development board
+  with an AX8860 accelerator card attached over PCIe.
+
+If you pick the wrong one, the install script refuses the installation and tells
+you which package to use; nothing is unpacked and no system configuration is
+changed.
+```
 
 ## 3. Installation environment
 
@@ -81,12 +96,13 @@ sudo apt install ./axhelix_linux_x64_gnu.deb
 During installation, the package scripts perform the following operations:
 
 1. Install AXCL files to `/usr/local/axhelix`.
-2. Install driver sources to `/usr/src/axhelix-<version>`.
-3. Build and install kernel modules through DKMS or native make.
-4. Generate module loading configuration and module dependency configuration.
-5. Write dynamic linker configuration, shell environment configuration, and CMake package wrappers.
-6. Load drivers in dependency order.
-7. Write the installation status file `/var/lib/axhelix/install-state`.
+2. Install the PAC firmware supplied at package build time to `/lib/firmware/axcl/ax8860_card.pac`.
+3. Install driver sources to `/usr/src/axhelix-<version>`.
+4. Build and install kernel modules through DKMS or native make.
+5. Generate module loading configuration and module dependency configuration.
+6. Write dynamic linker configuration, shell environment configuration, and CMake package wrappers.
+7. Load drivers in dependency order.
+8. Write the installation status file `/var/lib/axhelix/install-state`.
 
 ```{note}
 If `apt install ./xxx.deb` reports that the `_apt` sandbox cannot access the local file, the current directory is usually not traversable by the `_apt` user. Copy the `.deb` file to an accessible directory such as `/tmp` and install it from there, for example: `cp axhelix_linux_x64_gnu.deb /tmp/ && sudo apt install /tmp/axhelix_linux_x64_gnu.deb`.
@@ -120,7 +136,7 @@ cat /var/lib/axhelix/install-state
 ls /usr/local/axhelix
 
 # Check whether kernel modules are loaded
-lsmod | grep -E '^ax_'
+lsmod | grep -E '^ax'
 ```
 
 Common fields in `/var/lib/axhelix/install-state` are listed below:
@@ -152,6 +168,8 @@ sudo apt purge axhelix
 ```
 
 The uninstall script tries to clean up DKMS/native make modules generated during AXCL installation, driver sources, module configuration, dynamic linker configuration, shell environment configuration, CMake package wrappers, and the installation status file.
+
+Uninstall also removes `/lib/firmware/axcl/ax8860_card.pac` and removes `/lib/firmware/axcl` only when the directory is empty. A pre-existing unmanaged file at the fixed PAC path is overwritten by a fresh install and is not backed up or restored. In-place upgrade and reinstall are not supported; remove the installed package before installing a new package.
 
 ## 5. RPM
 
@@ -203,7 +221,7 @@ cat /var/lib/axhelix/install-state
 ls /usr/local/axhelix
 
 # Check whether kernel modules are loaded
-lsmod | grep -E '^ax_'
+lsmod | grep -E '^ax'
 ```
 
 ### 5.4. Uninstall
@@ -238,7 +256,7 @@ If the log reports a missing kernel build tree, confirm that `/lib/modules/$(una
 No. `degraded-success` means kernel modules were built and installed successfully, but the installation script failed to load the driver automatically. In this case, use the error information in `/var/log/axhelix/install.log` to check the device, permissions, Secure Boot, or module dependency issue. After fixing the issue, rerun the installation configuration flow or load the corresponding driver as indicated by the log, then use `lsmod` to check driver modules with the `ax_` prefix:
 
 ```bash
-lsmod | grep -E '^ax_'
+lsmod | grep -E '^ax'
 ```
 
 ### 6.3. How do I check whether DKMS or native make was used?
@@ -255,6 +273,32 @@ grep '^method=' /var/lib/axhelix/install-state
 
 The uninstall script removes `/etc/profile.d/axhelix.sh`, but an already running shell does not automatically undo environment variables that were previously loaded. Exit the current shell and log in again, or open a new shell before verifying.
 
+### 6.5. What should I do about "package targets ... hosts but kernel ... is ..."?
+
+The package does not match the current host. Switch to the package named in the
+message:
+
+| Message | Meaning | Action |
+| ---- | ---- | ---- |
+| `install the generic axhelix package instead` | An `ax8860` package on a host that is not an AX8860 chip | Install `axhelix_linux_aarch64_*` |
+| `install the AX8860 axhelix package instead` | A generic package on an AX8860 host | Install `axhelix_linux_ax8860_*` |
+
+If you see `cannot read kernel configuration: ...`, the kernel configuration file
+`include/config/auto.conf` is missing or unreadable, so the install script cannot
+decide the host type and refuses to continue. Reinstall the kernel headers or
+kernel-devel matching the running kernel and retry.
+
+The check runs before anything is unpacked: no files are installed, no system
+configuration is changed, and no install state is recorded. Just install the
+correct package.
+
+```{note}
+The log is initialised before the check runs, so `/var/log/axhelix/install.log`
+is still created or overwritten and any previous log is rotated to
+`install.log.prev`. Back up the earlier log first if you need it for
+troubleshooting.
+```
+
 ## 7. Advanced notes
 
 ### 7.1. Installed system paths
@@ -265,6 +309,7 @@ After installation, the AXCL package writes or uses the following system paths. 
 | ---- | ---- |
 | `/usr/local/axhelix` | Default AXCL installation directory. It contains subdirectories such as `bin`, `lib`, `include`, and `test`. |
 | `/usr/local/axhelix/bin/axcl.json` | AXCL package configuration file. |
+| `/lib/firmware/axcl/ax8860_card.pac` | Package-managed device PAC firmware at the fixed loader path. |
 | `/usr/local/axhelix/src/drv` | Driver source payload included in the package. |
 | `/usr/src/axhelix-<version>` | Driver source directory expanded by the installation script, used by DKMS or native make builds. |
 | `/lib/modules/$(uname -r)/extra/axhelix` | AXCL kernel module installation directory for the current kernel. |

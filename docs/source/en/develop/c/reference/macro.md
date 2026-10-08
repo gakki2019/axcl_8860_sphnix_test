@@ -12,6 +12,18 @@ Maximum number of dimensions supported by an engine tensor.
 
 <br>
 
+<a id="AXCL_CCL"></a>
+
+## AXCL_CCL
+
+Collective communication sub module ID.
+
+```c
+#define AXCL_CCL (0x5B)
+```
+
+<br>
+
 <a id="AXCL_COMM"></a>
 
 ## AXCL_COMM
@@ -48,6 +60,18 @@ Daemon sub module ID.
 
 <br>
 
+<a id="AXCL_DEF_CCL_ERR"></a>
+
+## AXCL_DEF_CCL_ERR
+
+Compose AXCL_CCL sub module error code.
+
+```c
+#define AXCL_DEF_CCL_ERR(errid) AXCL_DEF_ERR(AXCL_CCL, (errid))
+```
+
+<br>
+
 <a id="AXCL_DEF_COMM_ERR"></a>
 
 ## AXCL_DEF_COMM_ERR
@@ -55,7 +79,7 @@ Daemon sub module ID.
 Compose AXCL_COMM sub module error code.
 
 ```c
-#define AXCL_DEF_COMM_ERR AXCL_DEF_ERR(AXCL_COMM, (errid))
+#define AXCL_DEF_COMM_ERR(errid) AXCL_DEF_ERR(AXCL_COMM, (errid))
 ```
 
 <br>
@@ -67,7 +91,7 @@ Compose AXCL_COMM sub module error code.
 Compose AXCL_CTRL sub module error code.
 
 ```c
-#define AXCL_DEF_CTRL_ERR AXCL_DEF_ERR(AXCL_CTRL, (errid))
+#define AXCL_DEF_CTRL_ERR(errid) AXCL_DEF_ERR(AXCL_CTRL, (errid))
 ```
 
 <br>
@@ -79,7 +103,7 @@ Compose AXCL_CTRL sub module error code.
 Compose AXCL_DAEMON sub module error code.
 
 ```c
-#define AXCL_DEF_DAEMON_ERR AXCL_DEF_ERR(AXCL_DAEMON, (errid))
+#define AXCL_DEF_DAEMON_ERR(errid) AXCL_DEF_ERR(AXCL_DAEMON, (errid))
 ```
 
 <br>
@@ -91,7 +115,7 @@ Compose AXCL_DAEMON sub module error code.
 Compose AXCL_ENGINE sub module error code.
 
 ```c
-#define AXCL_DEF_ENGINE_ERR AXCL_DEF_ERR(AXCL_ENGINE, (errid))
+#define AXCL_DEF_ENGINE_ERR(errid) AXCL_DEF_ERR(AXCL_ENGINE, (errid))
 ```
 
 <br>
@@ -100,10 +124,29 @@ Compose AXCL_ENGINE sub module error code.
 
 ## AXCL_DEF_ERR
 
-Compose error code. ----------------------------------------------------------------------| |1| FIXED | AX_ID_AXCL | SUB_MODULE_ID | ERR_ID | |---------------------------------------------------------------------| |1|< 7bits >|<- 8bits ->|<- 8bits ->|<- 8bits ->|.
+Compose error code.
+
+```text
+-------------------------------------------------------------------------|
+|1|      FIXED     |    AX_ID_AXCL   |  SUB_MODULE_ID  |     ERR_ID      |
+|------------------------------------------------------------------------|
+|1|<--- 7bits  --->|<---- 8bits ---->|<---- 8bits ---->|<---- 8bits ---->|
+```
 
 ```c
-#define AXCL_DEF_ERR ((axclError)((0x80000000L) | ((AX_ID_AXCL) << 16 ) | ((sub) << 8) | (errid)))
+#define AXCL_DEF_ERR(sub, errid) ((axclError)((0x80000000L) | ((AX_ID_AXCL) << 16 ) | ((sub) << 8) | (errid)))
+```
+
+<br>
+
+<a id="AXCL_DEF_FILE_TRANSFER_ERR"></a>
+
+## AXCL_DEF_FILE_TRANSFER_ERR
+
+Compose AXCL_FILE_TRANSFER sub module error code.
+
+```c
+#define AXCL_DEF_FILE_TRANSFER_ERR(errid) AXCL_DEF_ERR(AXCL_FILE_TRANSFER, (errid))
 ```
 
 <br>
@@ -115,7 +158,7 @@ Compose error code. ------------------------------------------------------------
 Compose AXCL_NATIVE sub module error code.
 
 ```c
-#define AXCL_DEF_NATIVE_ERR AXCL_DEF_ERR(AXCL_NATIVE, (errid))
+#define AXCL_DEF_NATIVE_ERR(errid) AXCL_DEF_ERR(AXCL_NATIVE, (errid))
 ```
 
 <br>
@@ -127,7 +170,7 @@ Compose AXCL_NATIVE sub module error code.
 Compose AXCL_PROTOCOL sub module error code.
 
 ```c
-#define AXCL_DEF_PROTOCOL_ERR AXCL_DEF_ERR(AXCL_PROTOCOL, (errid))
+#define AXCL_DEF_PROTOCOL_ERR(errid) AXCL_DEF_ERR(AXCL_PROTOCOL, (errid))
 ```
 
 <br>
@@ -139,7 +182,19 @@ Compose AXCL_PROTOCOL sub module error code.
 Compose AXCL_RUNTIME sub module error code.
 
 ```c
-#define AXCL_DEF_RT_ERR AXCL_DEF_ERR(AXCL_RUNTIME, (errid))
+#define AXCL_DEF_RT_ERR(errid) AXCL_DEF_ERR(AXCL_RUNTIME, (errid))
+```
+
+<br>
+
+<a id="AXCL_DEF_USRWORK_ERR"></a>
+
+## AXCL_DEF_USRWORK_ERR
+
+Compose AXCL_USRWORK sub module error code.
+
+```c
+#define AXCL_DEF_USRWORK_ERR(errid) AXCL_DEF_ERR(AXCL_USRWORK, (errid))
 ```
 
 <br>
@@ -151,7 +206,7 @@ Compose AXCL_RUNTIME sub module error code.
 Compose AXCL_WORKER sub module error code.
 
 ```c
-#define AXCL_DEF_WORKER_ERR AXCL_DEF_ERR(AXCL_WORKER, (errid))
+#define AXCL_DEF_WORKER_ERR(errid) AXCL_DEF_ERR(AXCL_WORKER, (errid))
 ```
 
 <br>
@@ -202,6 +257,18 @@ Disable event timing flag.
 
 <br>
 
+<a id="AXCL_FILE_TRANSFER"></a>
+
+## AXCL_FILE_TRANSFER
+
+File transfer sub module ID.
+
+```c
+#define AXCL_FILE_TRANSFER (0x59)
+```
+
+<br>
+
 <a id="AXCL_ID_DEVICE"></a>
 
 ## AXCL_ID_DEVICE
@@ -222,6 +289,46 @@ AXCL HOST ID.
 
 ```c
 #define AXCL_ID_HOST (0x30)
+```
+
+<br>
+
+<a id="AXCL_IPC_EXPORT_FLAG_DEFAULT"></a>
+
+## AXCL_IPC_EXPORT_FLAG_DEFAULT
+
+```c
+#define AXCL_IPC_EXPORT_FLAG_DEFAULT 0x0u
+```
+
+<br>
+
+<a id="AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION"></a>
+
+## AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION
+
+```c
+#define AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION 0x1u
+```
+
+<br>
+
+<a id="AXCL_IPC_KEY_MAX_LEN"></a>
+
+## AXCL_IPC_KEY_MAX_LEN
+
+```c
+#define AXCL_IPC_KEY_MAX_LEN 65
+```
+
+<br>
+
+<a id="AXCL_IPC_MAX_TARGETS"></a>
+
+## AXCL_IPC_MAX_TARGETS
+
+```c
+#define AXCL_IPC_MAX_TARGETS 64
 ```
 
 <br>
@@ -274,6 +381,18 @@ Runtime sub module ID.
 
 <br>
 
+<a id="AXCL_USRWORK"></a>
+
+## AXCL_USRWORK
+
+Userworker sub module ID.
+
+```c
+#define AXCL_USRWORK (0x5A)
+```
+
+<br>
+
 <a id="AXCL_WORKER"></a>
 
 ## AXCL_WORKER
@@ -282,6 +401,40 @@ Worker sub module ID.
 
 ```c
 #define AXCL_WORKER (0x56)
+```
+
+<br>
+
+<a id="AX_CCL_EXPORT"></a>
+
+## AX_CCL_EXPORT
+
+```c
+#define AX_CCL_EXPORT
+```
+
+<br>
+
+<a id="AX_CCL_IN_PLACE"></a>
+
+## AX_CCL_IN_PLACE
+
+Sentinel passed as `sendbuff` for collectives that do not take a send buffer (e.g. in-place [axCclAllGather](../axccl_api.md#axCclAllGather) / [axCclReduceScatter](../axccl_api.md#axCclReduceScatter) / [axCclGather](../axccl_api.md#axCclGather) / [axCclScatter](../axccl_api.md#axCclScatter) / [axCclAllToAll](../axccl_api.md#axCclAllToAll)).
+
+```c
+#define AX_CCL_IN_PLACE ((const void *)(-1L))
+```
+
+<br>
+
+<a id="AX_CCL_ROOT_INFO_BYTES"></a>
+
+## AX_CCL_ROOT_INFO_BYTES
+
+Size in bytes of the bootstrap root-info blob. A stable wire constant: it is part of the public ABI and is exchanged between ranks, so changing it is a breaking change (a new versioned struct would be required to grow it). Mirrors NCCL uniqueId.
+
+```c
+#define AX_CCL_ROOT_INFO_BYTES 128
 ```
 
 <br>

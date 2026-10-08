@@ -3,8 +3,8 @@
 ## 1. 目录
 
 - [axclAppLog](#axclAppLog)：按指定格式记录应用日志。
-- [axclGetLogLevel](#axclGetLogLevel)：获取 Host 日志级别。
-- [axclSetLogLevel](#axclSetLogLevel)：设置 Host 日志级别。
+- [axclrtGetLogLevel](#axclrtGetLogLevel)：获取目标组件的日志级别。
+- [axclrtSetLogLevel](#axclrtSetLogLevel)：设置目标组件的日志级别。
 - [axclrtGetErrorString](#axclrtGetErrorString)：获取错误码对应的错误描述字符串。
 - [axclrtGetLastError](#axclrtGetLastError)：获取并清除当前线程的最后一个错误码。
 - [axclrtGetSocName](#axclrtGetSocName)：获取芯片名称字符串。
@@ -33,7 +33,7 @@ AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| lv | in | 日志级别，参见 [axclSetLogLevel](#axclSetLogLevel)。 |
+| lv | in | 日志级别，参见 [axclrtSetLogLevel](#axclrtSetLogLevel)。 |
 | func | in | 函数名；如果设为 NULL，则不打印函数名。 |
 | file | in | 文件名；如果设为 NULL，则不打印文件名。 |
 | line | in | 行号。 |
@@ -49,7 +49,7 @@ AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint
 
 #### 2.1.4. 参考
 
-- [axclSetLogLevel](#axclSetLogLevel)
+- [axclrtSetLogLevel](#axclrtSetLogLevel)
 
 #### 2.1.5. 返回值
 
@@ -57,55 +57,70 @@ AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint
 
 <br>
 
-<a id="axclGetLogLevel"></a>
+<a id="axclrtGetLogLevel"></a>
 
-### 2.2. axclGetLogLevel
+### 2.2. axclrtGetLogLevel
 
-获取 Host 日志级别。
+获取目标组件的日志级别。
 
 #### 2.2.1. 函数
 
 ```c
-AXCL_EXPORT axclError axclGetLogLevel(int32_t *lv);
+AXCL_EXPORT axclError axclrtGetLogLevel(axclrtLogTarget target, int32_t *lv);
 ```
 
 #### 2.2.2. 参数
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| lv | out | 用于接收日志级别的可选指针。如果为 NULL，则不写入任何值。 |
+| target | in | 日志目标，参见 [axclrtLogTarget](reference/enum.md#axclrtLogTarget)。 |
+| lv | out | 用于接收日志级别的非 NULL 指针。 |
 
 #### 2.2.3. 返回值
 
 - `AXCL_SUCC`：成功。
+- 其他错误：失败。
 
 #### 2.2.4. 参考
 
-- [axclSetLogLevel](#axclSetLogLevel)
+- [axclrtSetLogLevel](#axclrtSetLogLevel)
 
 <br>
 
-<a id="axclSetLogLevel"></a>
+<a id="axclrtSetLogLevel"></a>
 
-### 2.3. axclSetLogLevel
+### 2.3. axclrtSetLogLevel
 
-设置 Host 日志级别。
+设置目标组件的日志级别。
 
 #### 2.3.1. 函数
 
 ```c
-AXCL_EXPORT axclError axclSetLogLevel(int32_t lv);
+AXCL_EXPORT axclError axclrtSetLogLevel(axclrtLogTarget target, int32_t lv);
 ```
 
 #### 2.3.2. 参数
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
+| target | in | 日志目标，参见 [axclrtLogTarget](reference/enum.md#axclrtLogTarget)。 |
 | lv | in | 日志级别：0 trace，1 debug，2 info，3 warning，4 error，5 critical，6 off。超出 0～6 范围的值会映射为 warning。 |
 
 #### 2.3.3. 返回值
 
 - `AXCL_SUCC`：成功。
+- 其他错误：失败。
+
+#### 2.3.4. 示例
+
+```c
+  axclrtSetLogLevel(AXCL_LOG_TARGET_HOST_RUNTIME_FILE,     2);   // Host file log -> info
+  axclrtSetLogLevel(AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE,  0);   // Host console -> trace (debugging)
+  axclrtSetDevice(0);
+  axclrtSetLogLevel(AXCL_LOG_TARGET_DEVICE_WORKER_FILE,    2);   // device 0 worker file log -> info
+  axclrtSetDevice(1);
+  axclrtSetLogLevel(AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE, 4);   // device 1 worker console -> error
+```
 
 <br>
 

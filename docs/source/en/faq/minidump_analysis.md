@@ -20,6 +20,10 @@ Function names, source files, and line numbers depend on matching Breakpad symbo
 
 The method for obtaining symbols is described in the [Minidump section of the userspace build document](../develop/build/usr.md#minidump). That section already explains how to generate `axcl-host-minidump-symbols.tar.gz`, `axcl-device-minidump-symbols.tar.gz`, and `axcl-all-minidump-symbols.tar.gz`; this document does not repeat the symbol generation steps.
 
+```{tip}
+Recommended automated script: AXCL provides an offline analysis script `analyze_minidump.sh` that automates archive extraction, symbol paths configuration, and stack unwinding in one command. For details, see [analyze_minidump.sh Tool Documentation](../develop/tools/analyze_minidump.md). Continue reading below for the manual step-by-step procedure.
+```
+
 ## 2. Prepare the minidump and symbols
 
 The following files or directories are involved before analysis:

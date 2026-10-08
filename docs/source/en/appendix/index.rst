@@ -1,7 +1,7 @@
 Appendix
 ========
 
-This section provides common terms, environment variables, supported Host platforms, and copyright information for the AXCL documentation.
+This section provides common terms, environment variables, and supported Host platforms for the AXCL documentation.
 
 .. toctree::
    :maxdepth: 1
@@ -9,4 +9,3 @@ This section provides common terms, environment variables, supported Host platfo
    glossary
    environment_variables
    supported_hosts
-   copyright

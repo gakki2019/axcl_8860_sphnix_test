@@ -37,8 +37,17 @@ ls axhelix_linux_*_*.rpm
 | ---- | ---- | ---- |
 | 包名 | `axhelix` | AXCL 包管理器名称。 |
 | 系统 | `linux` | 当前包面向 Linux 主控。 |
-| host | `x64` | 主控 CPU 架构。常见值包括 `x64`、`aarch64`、`loongarch64`、`riscv64`。 |
+| host | `x64` | 主控 CPU 架构。常见值包括 `x64`、`aarch64`、`loongarch64`、`riscv64`、`ax8860`。 |
 | libc | `gnu` | 主控 libc 类型。 |
+
+```{important}
+`ax8860` 与 `aarch64` 两种包在包管理器看来架构相同（都是 `arm64`/`aarch64`），无法通过 `dpkg`、`rpm` 的架构检查区分。请按实际主控选择安装包：
+
+- **`ax8860` 包**：主控本身是 AX8860 芯片，由该芯片自己驱动板上的设备侧。
+- **`aarch64` 包**：主控是通用 ARM64 服务器或开发板，通过 PCIe 连接 AX8860 加速卡。
+
+装错时安装脚本会拒绝安装并提示应使用哪个包，不会解包或修改系统配置。
+```
 
 ## 3. 安装环境
 
@@ -81,12 +90,13 @@ sudo apt install ./axhelix_linux_x64_gnu.deb
 安装过程中，包脚本会完成以下工作：
 
 1. 将 AXCL 文件安装到 `/usr/local/axhelix`。
-2. 将驱动源码安装到 `/usr/src/axhelix-<version>`。
-3. 通过 DKMS 或 native make 构建并安装内核模块。
-4. 生成模块加载配置和模块依赖配置。
-5. 写入动态链接器配置、shell 环境配置和 CMake package wrapper。
-6. 按依赖顺序加载驱动。
-7. 写入安装状态文件 `/var/lib/axhelix/install-state`。
+2. 将构包时传入的 PAC 固件安装到 `/lib/firmware/axcl/ax8860_card.pac`。
+3. 将驱动源码安装到 `/usr/src/axhelix-<version>`。
+4. 通过 DKMS 或 native make 构建并安装内核模块。
+5. 生成模块加载配置和模块依赖配置。
+6. 写入动态链接器配置、shell 环境配置和 CMake package wrapper。
+7. 按依赖顺序加载驱动。
+8. 写入安装状态文件 `/var/lib/axhelix/install-state`。
 
 ```{note}
 如果 `apt install ./xxx.deb` 提示 `_apt` 沙盒无法访问本地文件，通常是因为当前目录对 `_apt` 用户不可遍历。可先将 `.deb` 拷贝到 `/tmp` 等可访问目录后再安装，例如：`cp axhelix_linux_x64_gnu.deb /tmp/ && sudo apt install /tmp/axhelix_linux_x64_gnu.deb`。
@@ -120,7 +130,7 @@ cat /var/lib/axhelix/install-state
 ls /usr/local/axhelix
 
 # 查看内核模块是否已加载
-lsmod | grep -E '^ax_'
+lsmod | grep -E '^ax'
 ```
 
 `/var/lib/axhelix/install-state` 中常见字段如下：
@@ -152,6 +162,8 @@ sudo apt purge axhelix
 ```
 
 卸载脚本会尝试清理 AXCL 安装阶段生成的 DKMS/native make 模块、驱动源码、模块配置、动态链接器配置、shell 环境配置、CMake package wrapper 和安装状态文件。
+
+卸载还会删除 `/lib/firmware/axcl/ax8860_card.pac`，并仅在 `/lib/firmware/axcl` 为空时删除该目录。安装前已存在但未受 package manager 管理的同名文件会被 payload 覆盖，不备份、不恢复。AXCL package 不支持原位升级或重装；请先卸载旧 package，再安装新 package。
 
 ## 5. RPM
 
@@ -203,7 +215,7 @@ cat /var/lib/axhelix/install-state
 ls /usr/local/axhelix
 
 # 查看内核模块是否已加载
-lsmod | grep -E '^ax_'
+lsmod | grep -E '^ax'
 ```
 
 ### 5.4. 卸载
@@ -238,7 +250,7 @@ sudo cat /var/log/axhelix/install.log
 不是。`degraded-success` 表示内核模块已经构建并安装成功，但安装脚本自动加载驱动失败。此时可根据 `/var/log/axhelix/install.log` 中的错误信息排查设备、权限、Secure Boot 或模块依赖问题；处理完成后，可重新触发安装配置流程或按日志提示加载对应驱动，再通过 `lsmod` 查看 `ax_` 前缀的驱动模块：
 
 ```bash
-lsmod | grep -E '^ax_'
+lsmod | grep -E '^ax'
 ```
 
 ### 6.3. 如何确认使用了 DKMS 还是 native make？
@@ -255,6 +267,25 @@ grep '^method=' /var/lib/axhelix/install-state
 
 卸载脚本会删除 `/etc/profile.d/axhelix.sh`，但已经启动的 shell 不会自动撤销此前加载过的环境变量。请退出当前 shell 后重新登录，或新开一个 shell 再验证。
 
+### 6.5. 提示 "package targets ... hosts but kernel ... is ..." 怎么办？
+
+说明安装包与当前主控不匹配。按提示换包即可：
+
+| 提示 | 含义 | 处理 |
+| ---- | ---- | ---- |
+| `install the generic axhelix package instead` | 装了 `ax8860` 包，但主控不是 AX8860 芯片 | 改装 `axhelix_linux_aarch64_*` |
+| `install the AX8860 axhelix package instead` | 装了通用包，但主控是 AX8860 芯片 | 改装 `axhelix_linux_ax8860_*` |
+
+如果看到 `cannot read kernel configuration: ...`，说明内核配置文件
+`include/config/auto.conf` 缺失或不可读，安装脚本无法判断主控类型，因此拒绝安装。
+请重新安装与当前内核匹配的 headers 或 kernel-devel 后重试。
+
+该检查在解包前完成，不会安装任何文件、不会修改系统配置，也不会写入安装状态，直接重新安装正确的包即可。
+
+```{note}
+拒装前脚本已经初始化了日志，因此 `/var/log/axhelix/install.log` 会被创建或覆盖，上一轮的日志被轮转为 `install.log.prev`。如果需要保留之前的安装日志用于排查，请先备份再重试安装。
+```
+
 ## 7. 高级说明
 
 ### 7.1. 安装后的系统路径
@@ -264,6 +295,7 @@ AXCL 包安装后会写入或使用以下系统路径。排查安装、运行或
 | 路径 | 说明 |
 | ---- | ---- |
 | `/usr/local/axhelix` | AXCL 默认安装目录，包含 `bin`、`lib`、`include`、`test` 等子目录。 |
+| `/lib/firmware/axcl/ax8860_card.pac` | package 管理的设备 PAC 固件，固定路径和文件名。 |
 | `/usr/local/axhelix/bin/axcl.json` | AXCL 包配置文件。 |
 | `/usr/local/axhelix/src/drv` | 包内携带的驱动源码 payload。 |
 | `/usr/src/axhelix-<version>` | 安装脚本展开后的驱动源码目录，用于 DKMS 或 native make 构建。 |

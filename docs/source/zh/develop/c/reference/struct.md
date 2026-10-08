@@ -10,8 +10,8 @@ Minidump 配置结构体。
 
 ```c
 typedef struct {
-    const char* dump_dir;   /**< 首选 Dump 目录。环境变量配置的目录优先。 */
-    const char* dump_type;  /**< 保留供将来使用，当前会忽略该字段。 */
+    const char* dump_dir;   /**< Preferred dump directory. An environment-configured directory takes precedence. */
+    const char* dump_type;  /**< Reserved for future use. Currently ignored. */
 } axclMinidumpConfig;
 ```
 
@@ -19,8 +19,8 @@ typedef struct {
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dump_dir | const char * | 首选 Dump 目录。环境变量配置的目录优先。 |
-| dump_type | const char * | 保留供将来使用，当前会忽略该字段。 |
+| dump_dir | const char * | 首选 Dump 目录。通过环境变量配置的目录优先。 |
+| dump_type | const char * | 保留供将来使用，当前忽略。 |
 
 <br>
 
@@ -28,12 +28,12 @@ typedef struct {
 
 ## 2. axclrtEngineIODims
 
-Engine Shape 查询 API 返回的 Tensor 维度。
+Engine shape 查询 API 返回的 Tensor 维度。
 
 ```c
 typedef struct axclrtEngineIODims {
-    int32_t dimCount;                           /**< Shape 中有效维度的数量。 */
-    int32_t dims[AXCLRT_ENGINE_MAX_DIM_CNT];    /**< 按逻辑 Tensor 顺序排列的维度值。 */
+    int32_t dimCount;                           /**< Number of valid dimensions in the shape. */
+    int32_t dims[AXCLRT_ENGINE_MAX_DIM_CNT];    /**< Dimension values in logical tensor order. */
 } axclrtEngineIODims;
 ```
 
@@ -54,8 +54,8 @@ typedef struct axclrtEngineIODims {
 
 ```c
 typedef struct axclrtMemLocation {
-    axclrtMemLocationType type;
-    int32_t id;
+    axclrtMemLocationType type;  /**< Memory location type. */
+    int32_t id;                  /**< Virtual device ID for device memory; otherwise -1. */
 } axclrtMemLocation;
 ```
 
@@ -63,8 +63,8 @@ typedef struct axclrtMemLocation {
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| type | axclrtMemLocationType | - |
-| id | int32_t | - |
+| type | axclrtMemLocationType | 内存位置类型。 |
+| id | int32_t | 对于 Device 内存，表示虚拟 Device ID；其他情况为 -1。 |
 
 <br>
 
@@ -76,9 +76,9 @@ typedef struct axclrtMemLocation {
 
 ```c
 typedef struct axclrtPtrAttributes {
-    axclrtMemLocation location;
-    uint32_t flags;
-    uint32_t rsv[3];
+    axclrtMemLocation location;  /**< Pointer location information. */
+    uint32_t flags;              /**< Bitwise combination of @ref axclrtPointerAttributeFlag values. */
+    uint32_t rsv[3];             /**< Reserved for future use. */
 } axclrtPtrAttributes;
 ```
 
@@ -86,41 +86,15 @@ typedef struct axclrtPtrAttributes {
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| location | axclrtMemLocation | - |
-| flags | uint32_t | - |
-| rsv | uint32_t[3] | - |
-
-<br>
-
-<a id="mockAttr"></a>
-
-## 5. mockAttr
-
-Mock pipeline 属性。
-
-```c
-typedef struct {
-  uint32_t mode;    /**< Mock 运行模式。 */
-  uint32_t param_a; /**< 辅助参数 A。 */
-  uint32_t param_b; /**< 辅助参数 B。 */
-} mockAttr;
-```
-
-### 5.1. 字段
-
-| 名称 | 类型 | 说明 |
-|---|---|---|
-| mode | uint32_t | Mock 运行模式。 |
-| param_a | uint32_t | 辅助参数 A。 |
-| param_b | uint32_t | 辅助参数 B。 |
+| location | axclrtMemLocation | 指针位置信息。 |
+| flags | uint32_t | [axclrtPointerAttributeFlag](enum.md#axclrtPointerAttributeFlag) 值的按位组合。 |
+| rsv | uint32_t[3] | 保留供将来使用。 |
 
 <br>
 
 <a id="axclError"></a>
 
-## 6. axclError
-
-公开 AXCL 错误码类型。
+## 5. axclError
 
 ```c
 typedef int32_t axclError
@@ -130,9 +104,7 @@ typedef int32_t axclError
 
 <a id="axclrtContext"></a>
 
-## 7. axclrtContext
-
-Runtime Context 句柄。
+## 6. axclrtContext
 
 ```c
 typedef void* axclrtContext
@@ -140,11 +112,21 @@ typedef void* axclrtContext
 
 <br>
 
+<a id="axclrtDeviceStateCallback"></a>
+
+## 7. axclrtDeviceStateCallback
+
+Device 状态回调。
+
+```c
+typedef void(* axclrtDeviceStateCallback) (uint32_t deviceId, axclrtDeviceState state, void *args)
+```
+
+<br>
+
 <a id="axclrtEngineIO"></a>
 
 ## 8. axclrtEngineIO
-
-用于绑定 engine 输入/输出 Buffer 的不透明句柄。
 
 ```c
 typedef void* axclrtEngineIO
@@ -156,8 +138,6 @@ typedef void* axclrtEngineIO
 
 ## 9. axclrtEngineIOInfo
 
-用于查询 engine 输入/输出元数据的不透明句柄。
-
 ```c
 typedef void* axclrtEngineIOInfo
 ```
@@ -167,8 +147,6 @@ typedef void* axclrtEngineIOInfo
 <a id="axclrtEngineSet"></a>
 
 ## 10. axclrtEngineSet
-
-描述 engine core affinity 集合的位掩码。
 
 ```c
 typedef uint32_t axclrtEngineSet
@@ -180,8 +158,6 @@ typedef uint32_t axclrtEngineSet
 
 ## 11. axclrtEvent
 
-Runtime Event 句柄。
-
 ```c
 typedef void* axclrtEvent
 ```
@@ -192,56 +168,6 @@ typedef void* axclrtEvent
 
 ## 12. axclrtStream
 
-Runtime Stream 句柄。
-
 ```c
 typedef void* axclrtStream
-```
-
-<br>
-
-<a id="mockCallbackAEx_t"></a>
-
-## 13. mockCallbackAEx_t
-
-携带状态码调用的回调。
-
-```c
-typedef int32_t(* mockCallbackAEx_t) (int32_t statusCode)
-```
-
-<br>
-
-<a id="mockCallbackA_t"></a>
-
-## 14. mockCallbackA_t
-
-携带状态码和用户上下文调用的回调。
-
-```c
-typedef int32_t(* mockCallbackA_t) (int32_t statusCode, void *userData)
-```
-
-<br>
-
-<a id="mockCallbackBEx_t"></a>
-
-## 15. mockCallbackBEx_t
-
-用于 group 和 frame 通知且不携带用户数据的回调。
-
-```c
-typedef int32_t(* mockCallbackBEx_t) (uint32_t grp, uint32_t frameIndex)
-```
-
-<br>
-
-<a id="mockCallbackB_t"></a>
-
-## 16. mockCallbackB_t
-
-用于 group 和 frame 通知的回调。
-
-```c
-typedef int32_t(* mockCallbackB_t) (uint32_t grp, uint32_t frameIndex, void *userData)
 ```

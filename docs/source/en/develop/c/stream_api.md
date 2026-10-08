@@ -2,8 +2,8 @@
 
 ## Index
 
-- [axclrtCreateStream](#axclrtCreateStream): Create an explicit Stream.
-- [axclrtDestroyStream](#axclrtDestroyStream): Destroy an explicit Stream created by [axclrtCreateStream](#axclrtCreateStream).
+- [axclrtCreateStream](#axclrtCreateStream): Create a Stream.
+- [axclrtDestroyStream](#axclrtDestroyStream): Destroy a Stream created by [axclrtCreateStream](#axclrtCreateStream).
 - [axclrtDestroyStreamForce](#axclrtDestroyStreamForce): Destroy a Stream immediately without waiting for submitted tasks to complete.
 - [axclrtStreamQuery](#axclrtStreamQuery): Query whether a specified Stream has unfinished tasks.
 - [axclrtSynchronizeStream](#axclrtSynchronizeStream): Block until all tasks submitted to a Stream before this call have completed.
@@ -17,7 +17,7 @@
 
 ### axclrtCreateStream
 
-Create an explicit Stream.
+Create a Stream.
 
 #### Function
 
@@ -53,7 +53,7 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 ### axclrtDestroyStream
 
-Destroy an explicit Stream created by [axclrtCreateStream](#axclrtCreateStream).
+Destroy a Stream created by [axclrtCreateStream](#axclrtCreateStream).
 
 If it has unfinished tasks, this function blocks until they complete before destroying the Stream.
 

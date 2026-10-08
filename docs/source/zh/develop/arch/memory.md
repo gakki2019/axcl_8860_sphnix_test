@@ -22,7 +22,7 @@ AXCL 提供同步和异步两类拷贝接口，用于在 Host / Device 之间搬
 
 ### 1.1. Device 内存
 
-AXCL 提供 [axclrtMalloc](../c/memory_api.md#axclrtMalloc) 和 [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) 在 Device 侧分配内存，并通过 `devPtr` 返回给 Host。Host 侧将 `devPtr` 作为 Device 内存句柄传递给 AXCL runtime API。
+AXCL 提供 [axclrtMalloc](../c/memory_api.md#axclrtMalloc) 和 [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) 在 Device 侧分配内存，并通过 `devPtr` 返回给 Host。Host 侧将 `devPtr` 作为 Device 内存句柄传递给 AXCL runtime API。`devPtr` 的值不是 Device 物理地址，不能直接传给 NATIVE SDK 接口。
 
 | 操作 | API | 说明 |
 |---|---|---|
@@ -31,7 +31,8 @@ AXCL 提供 [axclrtMalloc](../c/memory_api.md#axclrtMalloc) 和 [axclrtMallocCac
 | 释放 Device 内存 | [axclrtFree](../c/memory_api.md#axclrtFree) | 释放 `axclrtMalloc` / `axclrtMallocCached` 分配的内存 |
 
 ```{important}
-`devPtr` 不是 Host 进程中的有效可访问地址，不能在 Host 侧直接解引用。
+- `devPtr` 不是 Host 进程中的有效可访问地址，不能在 Host 侧直接解引用。
+- [axclrtFree](../c/memory_api.md#axclrtFree) 必须传入 [axclrtMalloc](../c/memory_api.md#axclrtMalloc) / [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) 返回的基地址，不接受偏移后的指针。
 ```
 
 ### 1.2. Host 内存
@@ -46,7 +47,53 @@ AXCL 提供 [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 在 Host 侧
 ```{note}
 1. 支持使用标准库 `malloc` 分配的内存用于 Host ↔ Device 拷贝，但推荐使用 [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost)。[axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配的内存性能更优，且可通过 [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes) 查询属性。
 2. Host 内存需要按分配接口配对释放：[axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配的内存使用 [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) 释放；标准库 `malloc` 分配的内存使用标准库 `free` 释放。两类分配和释放接口不能混用。
+3. [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配的内存属于进程级 DMA 会话，分配和释放时都不需要设置当前 Context，但进程内至少需要有一个已打开且可用的设备。该内存可用于进程内任意已打开的设备，在被释放或进程内最后一个已打开的设备被 reset 之前一直有效。
 ```
+
+```{important}
+- 调用 [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) 前，必须确保所有使用该内存的异步操作已经完成。
+- [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) / [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) 需要与关闭设备的操作以及 [axclFinalize](../c/system_api.md#axclFinalize) 串行调用。关闭设备的操作包括 [axclrtResetDevice](../c/device_api.md#axclrtResetDevice)、[axclrtResetDeviceForce](../c/device_api.md#axclrtResetDeviceForce)，以及释放设备最后一个激活引用的 [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext)。
+```
+
+### 1.3. 外部 Device 内存
+
+NATIVE SDK 接口（例如 `AX_XXX_YYYY` 类接口）使用 Device 物理地址和 Device 虚拟地址描述内存，与 AXCL 的 `devPtr` 句柄不同。AXCL 提供以下接口，在两者之间转换同一块 Device 内存，使 NATIVE SDK 接口和 AXCL runtime API 可以配合使用。地址和大小通过 [axclrtDevMemDesc](../c/reference/struct.md#axclrtDevMemDesc) 传递。
+
+| 操作 | API | 说明 |
+|---|---|---|
+| 导出 Device 地址 | [axclrtMemGetDevAddr](../c/memory_api.md#axclrtMemGetDevAddr) | 由 `devPtr` 导出 Device 物理地址和虚拟地址，供 NATIVE SDK 接口使用 |
+| 注册外部 Device 内存 | [axclrtMemMapDevAddr](../c/memory_api.md#axclrtMemMapDevAddr) | 将 NATIVE SDK 接口返回的 Device 物理地址和虚拟地址注册为 `devPtr` 句柄 |
+| 注销外部 Device 内存 | [axclrtMemUnmapDevAddr](../c/memory_api.md#axclrtMemUnmapDevAddr) | 注销由 `axclrtMemMapDevAddr` 注册的 `devPtr` 句柄 |
+| 查询地址范围 | [axclrtMemGetAddressRange](../c/memory_api.md#axclrtMemGetAddressRange) | 查询 `devPtr` 所属分配或注册的基地址句柄和总大小 |
+
+```{important}
+- [axclrtMemMapDevAddr](../c/memory_api.md#axclrtMemMapDevAddr) 只创建 `devPtr` 句柄，不创建 NATIVE 虚拟地址映射，也不接管外部内存的所有权。传入的物理地址必须是 Device 物理地址，不能是 `devPtr`；调用者需要保证物理地址和虚拟地址对应同一块有效内存。
+- [axclrtMemUnmapDevAddr](../c/memory_api.md#axclrtMemUnmapDevAddr) 只注销该句柄，不释放 NATIVE 内存。外部内存需要在所有使用该句柄的操作完成后，通过对应的 NATIVE SDK 接口释放。
+- 设备被 reset 后，该设备上已注册的句柄全部失效，不能再使用，也不能再传给 [axclrtMemUnmapDevAddr](../c/memory_api.md#axclrtMemUnmapDevAddr)。
+```
+
+典型调用流程参见 [外部 Device 内存互操作](memory.md#memory-external-device-memory)。
+
+### 1.4. 跨进程共享内存
+
+AXCL 提供以下接口，在多个进程之间共享同一块 Device 内存。分配内存的进程（Producer）导出 IPC Key，其他进程（Consumer）凭 IPC Key 导入，得到本进程内可用的 `devPtr` 句柄。双方访问的是同一块 Device 内存，不需要拷贝数据。
+
+| 操作 | API | 说明 |
+|---|---|---|
+| 导出 | [axclrtIpcMemGetExportKey](../c/memory_api.md#axclrtIpcMemGetExportKey) | Producer 导出本进程分配的 Device 内存基地址，得到 IPC Key |
+| 设置导入白名单 | [axclrtIpcMemSetImportPid](../c/memory_api.md#axclrtIpcMemSetImportPid) | Producer 设置允许导入该 IPC Key 的进程（Host TGID） |
+| 查询 Host TGID | [axclrtDeviceGetBareTgid](../c/device_api.md#axclrtDeviceGetBareTgid) | Consumer 查询自身在初始 PID 命名空间中的 TGID，供 Producer 设置白名单 |
+| 导入 | [axclrtIpcMemImportByKey](../c/memory_api.md#axclrtIpcMemImportByKey) | Consumer 凭 IPC Key 导入，得到本进程的 `devPtr` 句柄 |
+| 关闭 | [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) | Producer 和 Consumer 各自释放 IPC 引用 |
+
+```{important}
+- 共享内存的生命周期由 Producer 决定。Producer 必须保证内存在所有 Consumer 使用结束前不被释放，否则 Consumer 的硬件访问结果未定义；Consumer 关闭 IPC Key 或释放自己的句柄，不会延长 Producer 内存的生命周期。
+- 对同一个 IPC Key，所有 Consumer 应先于 Producer 调用 [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose)。
+- Consumer 调用 [axclrtFree](../c/memory_api.md#axclrtFree) 只释放本进程的映射，不释放 Device 物理内存。
+- 在 Docker、Kubernetes 等容器环境中，白名单必须使用 [axclrtDeviceGetBareTgid](../c/device_api.md#axclrtDeviceGetBareTgid) 返回的 Host TGID，不能使用 `getpid` 返回的容器内 PID。
+```
+
+典型调用流程参见 [跨进程共享内存](memory.md#memory-ipc-shared-memory)。
 
 ## 2. 数据搬运
 
@@ -69,8 +116,6 @@ AXCL 使用 [axclrtMemcpyKind](../c/reference/enum.md#axclrtMemcpyKind) 描述�
 | [AXCL_MEMCPY_HOST_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) | Host 虚拟内存到 Device 物理内存 |
 | [AXCL_MEMCPY_DEVICE_TO_HOST](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST) | Device 物理内存到 Host 虚拟内存 |
 | [AXCL_MEMCPY_DEVICE_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE) | Device 物理内存到 Device 物理内存 |
-| [AXCL_MEMCPY_HOST_PHY_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_PHY_TO_DEVICE) | Host 物理内存到 Device 物理内存 |
-| [AXCL_MEMCPY_DEVICE_TO_HOST_PHY](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST_PHY) | Device 物理内存到 Host 物理内存 |
 
 <a id="memory-synchronous-copy"></a>
 
@@ -186,6 +231,129 @@ if (canAccessPeer == 1) {
 axclFinalize();
 ```
 
+<a id="memory-external-device-memory"></a>
+
+### 2.5. 外部 Device 内存互操作
+
+以下示例展示 AXCL 内存与 NATIVE SDK 接口之间互相传递内存的两个方向，`AX_XXX_YYYY` 表示 NATIVE SDK 接口。以下代码省略错误码检查。
+
+AXCL 分配的内存传给 NATIVE SDK 接口：
+
+```c
+void *devMem = NULL;
+axclrtDevMemDesc desc = {0};
+size_t size = 1024 * 1024;
+
+axclrtSetDevice(0);
+axclrtMalloc(&devMem, size, AXCL_MEM_MALLOC_HUGE_FIRST);
+
+/* 导出 devMem 对应的 Device 物理地址和虚拟地址。access_size 为 0 表示导出到该分配末尾。 */
+axclrtMemGetDevAddr(devMem, 0, &desc);
+
+/* 将 Device 地址传给 NATIVE SDK 接口。接口执行期间，devMem 必须保持有效。 */
+AX_XXX_YYYY(..., desc.device_pa, desc.device_va, ...);
+
+axclrtFree(devMem);
+axclrtResetDevice(0);
+```
+
+NATIVE SDK 接口输出的内存交给 AXCL 使用：
+
+```c
+void *hostMem = NULL;
+void *devMem = NULL;
+axclrtDevMemDesc desc = {0};
+uint64_t phyAddr = 0;
+uint64_t virAddr = 0;
+size_t size = 1024 * 1024;
+
+axclrtSetDevice(0);
+axclrtMallocHost(&hostMem, size);
+
+/* NATIVE SDK 接口输出一块内存，得到 Device 物理地址 phyAddr 和虚拟地址 virAddr。virAddr 可以为 0。 */
+AX_XXX_YYYY(..., &phyAddr, &virAddr, ...);
+
+desc.device_id = 0;
+desc.device_pa = phyAddr;
+desc.device_va = virAddr;
+desc.size = size;
+
+/* 将这块内存注册为 devPtr 句柄，之后可传给 AXCL runtime API。 */
+axclrtMemMapDevAddr(&desc, &devMem);
+axclrtMemcpy(hostMem, devMem, size, AXCL_MEMCPY_DEVICE_TO_HOST);
+
+/* 先注销句柄，再通过 NATIVE SDK 接口释放这块内存。 */
+axclrtMemUnmapDevAddr(devMem);
+AX_XXX_YYYY_Release(...);
+
+axclrtFreeHost(hostMem);
+axclrtResetDevice(0);
+```
+
+<a id="memory-ipc-shared-memory"></a>
+
+### 2.6. 跨进程共享内存
+
+以下示例展示 Producer 进程分配内存，Consumer 进程导入并读取。两个进程之间传递 TGID 和 IPC Key 的方式由应用自行选择，示例中用 `send_to_xxx` / `receive_from_xxx` 表示。以下代码省略错误码检查。
+
+Producer 进程：
+
+```c
+void *devMem = NULL;
+char key[AXCL_IPC_KEY_MAX_LEN];
+int32_t consumerTgid = 0;
+size_t size = 1024 * 1024;
+
+axclrtSetDevice(0);
+axclrtMalloc(&devMem, size, AXCL_MEM_MALLOC_HUGE_FIRST);
+
+/* 导出 devMem，得到 IPC Key。 */
+axclrtIpcMemGetExportKey(devMem, key, sizeof(key), AXCL_IPC_EXPORT_FLAG_DEFAULT);
+
+/* 获取 Consumer 的 Host TGID，并设置为允许导入该 IPC Key 的进程。 */
+receive_from_consumer(&consumerTgid);
+axclrtIpcMemSetImportPid(key, &consumerTgid, 1);
+
+/* 将 IPC Key 传给 Consumer，等待所有 Consumer 使用结束。 */
+send_to_consumer(key);
+wait_for_consumer_done();
+
+axclrtIpcMemClose(key);
+axclrtFree(devMem);
+axclrtResetDevice(0);
+```
+
+Consumer 进程：
+
+```c
+void *hostMem = NULL;
+void *devMem = NULL;
+char key[AXCL_IPC_KEY_MAX_LEN];
+int32_t bareTgid = 0;
+size_t size = 1024 * 1024;
+
+axclrtSetDevice(0);
+axclrtMallocHost(&hostMem, size);
+
+/* 获取本进程的 Host TGID，并通知 Producer。容器环境中必须使用该接口，不能使用 getpid。 */
+axclrtDeviceGetBareTgid(&bareTgid);
+send_to_producer(bareTgid);
+
+/* 收到 IPC Key 后导入，得到本进程可用的 devPtr 句柄。 */
+receive_from_producer(key);
+axclrtIpcMemImportByKey(&devMem, key);
+
+axclrtMemcpy(hostMem, devMem, size, AXCL_MEMCPY_DEVICE_TO_HOST);
+
+/* 先关闭 IPC Key，再释放本进程的映射，最后通知 Producer。 */
+axclrtIpcMemClose(key);
+axclrtFree(devMem);
+notify_producer_done();
+
+axclrtFreeHost(hostMem);
+axclrtResetDevice(0);
+```
+
 ## 3. 其他内存操作
 
 AXCL 还提供 Device 内存置位和比较接口：
@@ -204,6 +372,14 @@ AXCL 还提供 Device 内存置位和比较接口：
 | [axclrtFree](../c/memory_api.md#axclrtFree) | 释放 `axclrtMalloc` / `axclrtMallocCached` 分配的内存 | Device 内存 |
 | [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) | 分配 Host 虚拟内存 | Host 内存 |
 | [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) | 释放 `axclrtMallocHost` 分配的内存 | Host 内存 |
+| [axclrtMemGetAddressRange](../c/memory_api.md#axclrtMemGetAddressRange) | 查询 `devPtr` 所属分配或注册的基地址句柄和总大小 | Device 内存 |
+| [axclrtMemGetDevAddr](../c/memory_api.md#axclrtMemGetDevAddr) | 由 `devPtr` 导出 Device 物理地址和虚拟地址 | Device 内存 |
+| [axclrtMemMapDevAddr](../c/memory_api.md#axclrtMemMapDevAddr) | 将外部 Device 内存注册为 `devPtr` 句柄 | Device 内存 |
+| [axclrtMemUnmapDevAddr](../c/memory_api.md#axclrtMemUnmapDevAddr) | 注销由 `axclrtMemMapDevAddr` 注册的句柄 | Device 内存 |
+| [axclrtIpcMemGetExportKey](../c/memory_api.md#axclrtIpcMemGetExportKey) | 导出 Device 内存并获取 IPC Key | Device 内存 |
+| [axclrtIpcMemSetImportPid](../c/memory_api.md#axclrtIpcMemSetImportPid) | 设置允许导入 IPC Key 的进程白名单 | Device 内存 |
+| [axclrtIpcMemImportByKey](../c/memory_api.md#axclrtIpcMemImportByKey) | 凭 IPC Key 导入共享 Device 内存 | Device 内存 |
+| [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) | 关闭 IPC Key 并释放 IPC 引用 | Device 内存 |
 | [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) | 同步拷贝 Host / Device 数据 | Host 内存、Device 内存 |
 | [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) | 向 Stream 提交异步拷贝请求 | Host 内存、Device 内存 |
 | [axclrtMemset](../c/memory_api.md#axclrtMemset) | 同步设置 Device 内存内容 | Device 内存 |

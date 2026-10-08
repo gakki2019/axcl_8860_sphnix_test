@@ -2,9 +2,13 @@
 
 本文档说明如何编译 `axcl/drv/` 下的 out-of-tree 内核模块。
 
-当前顶层默认模块：
+当前顶层默认模块（按依赖顺序构建）：
+- `ax_pcieh_core`
+- `ax_pcieh_xfer`
+- `ax_pcieh_dbg`
 - `ax_comm`
 - `axcl_rt`
+- `ax_vtty`
 
 ## 1. 环境依赖
 
@@ -22,7 +26,7 @@
 
 仓库内集成交叉编译场景下，`KERNEL_DIR` 需要指向内核 build output 目录。下面示例使用的是相对于 `axcl/drv/build` 的相对路径。
 
-## 2. Usage
+## 2. 用法
 
 ```text
 Usage: make [target] [ARCH=<arch>] [CROSS_COMPILE=<prefix>] [KERNEL_DIR=<path>]
@@ -62,11 +66,11 @@ make clean && make all install
 ```bash
 cd axcl/drv/build
 make ARCH=arm64 \
-  CROSS_COMPILE=/usr/local/gcc-linaro-14.0.0-2023.06-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu- \
+  CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- \
   KERNEL_DIR=../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
   clean && \
 make ARCH=arm64 \
-  CROSS_COMPILE=/usr/local/gcc-linaro-14.0.0-2023.06-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu- \
+  CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- \
   KERNEL_DIR=../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
   all install
 ```
@@ -74,39 +78,57 @@ make ARCH=arm64 \
 ```{note}
 - `KERNEL_DIR` 是相对于当前工作目录解释的。
 - `KERNEL_VER` 会优先读取 `$(KERNEL_DIR)/include/config/kernel.release`。
-- 单模块子目录构建时，需要传入相对于该子目录的内核 build output 路径。
+- 单模块子目录构建时，各模块到内核 build output 的相对层级不同（例如 `axcl/drv/src/comm` 比 `axcl/drv/src/pcie/host/core` 浅一层）。建议传入绝对 `KERNEL_DIR`，同一条命令即可在任意模块目录下运行；若使用相对路径，需按子目录深度调整 `../` 的层数。
 ```
 
-例如从 `axcl/drv/src/comm` 执行：
+例如从 `axcl/drv/src/comm` 执行，使用绝对 `KERNEL_DIR`：
 
 ```bash
 cd axcl/drv/src/comm
 make ARCH=arm64 \
-  CROSS_COMPILE=/usr/local/gcc-linaro-14.0.0-2023.06-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu- \
-  KERNEL_DIR=../../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
+  CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- \
+  KERNEL_DIR=$(pwd)/../../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
   clean && \
 make ARCH=arm64 \
-  CROSS_COMPILE=/usr/local/gcc-linaro-14.0.0-2023.06-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu- \
-  KERNEL_DIR=../../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
+  CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- \
+  KERNEL_DIR=$(pwd)/../../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
   all install
 ```
+
+同一绝对 `KERNEL_DIR` 在更深的模块目录（如 `axcl/drv/src/pcie/host/core`）下同样可用，而相对路径在那里需写成 `../../../../../../build/...`。
 
 ## 5. 输出目录
 
 ```text
 axcl/drv/build/
 ├── out/<arch>-<kernel>/
+│   ├── ax_pcieh_core/
+│   │   └── ax_pcieh_core.ko
+│   ├── ax_pcieh_xfer/
+│   │   └── ax_pcieh_xfer.ko
+│   ├── ax_pcieh_dbg/
+│   │   └── ax_pcieh_dbg.ko
 │   ├── ax_comm/
 │   │   └── ax_comm.ko
-│   └── axcl_rt/
-│       └── axcl_rt.ko
+│   ├── axcl_rt/
+│   │   └── axcl_rt.ko
+│   └── ax_vtty/
+│       └── ax_vtty.ko
 └── ko/<arch>-<kernel>/
     ├── debug/
+    │   ├── ax_pcieh_core.ko
+    │   ├── ax_pcieh_xfer.ko
+    │   ├── ax_pcieh_dbg.ko
     │   ├── ax_comm.ko
-    │   └── axcl_rt.ko
+    │   ├── axcl_rt.ko
+    │   └── ax_vtty.ko
     └── release/
+        ├── ax_pcieh_core.ko
+        ├── ax_pcieh_xfer.ko
+        ├── ax_pcieh_dbg.ko
         ├── ax_comm.ko
-        └── axcl_rt.ko
+        ├── axcl_rt.ko
+        └── ax_vtty.ko
 ```
 
 `debug/` 目录保存未 strip 的模块，`release/` 目录保存执行 `strip --strip-debug` 后的模块。

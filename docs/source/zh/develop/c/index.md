@@ -7,11 +7,13 @@
 - [设备接口](device_api.md)
 - [引擎接口](engine_api.md)
 - [事件接口](event_api.md)
+- [文件接口](file_api.md)
 - [内存接口](memory_api.md)
 - [小型转储接口](minidump_api.md)
 - [其他接口](other_api.md)
 - [流接口](stream_api.md)
 - [系统接口](system_api.md)
+- [Userworker 接口](userworker_api.md)
 
 <br>
 

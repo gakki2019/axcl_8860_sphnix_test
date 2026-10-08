@@ -11,8 +11,10 @@ C/C++
    event_api
    memory_api
    engine_api
+   axccl_api
    control_api
+   file_api
+   userworker_api
    minidump_api
    other_api
    reference/index
-

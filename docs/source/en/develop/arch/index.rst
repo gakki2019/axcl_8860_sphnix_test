@@ -10,3 +10,4 @@ This section introduces AXCL system components, runtime core concepts, and memor
 	concept
 	memory
 	programming
+	collective

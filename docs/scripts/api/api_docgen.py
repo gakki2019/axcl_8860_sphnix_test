@@ -194,6 +194,8 @@ class FunctionDoc:
 @dataclass
 class MacroDoc:
     symbol: str
+    group_ids: list[str]
+    params: list[str]
     file: str
     line: int
     brief: str
@@ -206,6 +208,7 @@ class MacroDoc:
 @dataclass
 class TypedefDoc:
     symbol: str
+    group_ids: list[str]
     file: str
     line: int
     brief: str
@@ -226,6 +229,7 @@ class EnumValueDoc:
 @dataclass
 class EnumDoc:
     symbol: str
+    group_ids: list[str]
     file: str
     line: int
     brief: str
@@ -246,6 +250,7 @@ class StructFieldDoc:
 @dataclass
 class StructDoc:
     symbol: str
+    group_ids: list[str]
     file: str
     line: int
     brief: str
@@ -578,7 +583,7 @@ def render_paragraph_markdown(node: ET.Element, overrides: dict[int, CodeBlock],
 
     for child in node:
         if child.tag not in excluded_tags:
-            if child.tag in {"programlisting", "itemizedlist", "orderedlist"}:
+            if child.tag in {"programlisting", "verbatim", "itemizedlist", "orderedlist"}:
                 flush_inline()
                 block = render_xml_markdown(child, overrides).strip()
                 if block:
@@ -594,6 +599,10 @@ def render_paragraph_markdown(node: ET.Element, overrides: dict[int, CodeBlock],
 def render_xml_markdown(node: ET.Element | None, overrides: dict[int, CodeBlock]) -> str:
     if node is None:
         return ""
+    if node.tag == "verbatim":
+        lines = [re.sub(r"^\s*\* ?", "", line) for line in (node.text or "").splitlines()]
+        text = "\n".join(lines).strip()
+        return f"```text\n{text}\n```"
     if node.tag == "programlisting":
         override = overrides.get(id(node))
         language = programlisting_language(node, override)
@@ -860,12 +869,35 @@ def parse_functions(report: ReportBook) -> tuple[dict[str, str], dict[str, str],
     return group_titles, group_pages, functions, by_group
 
 
+def collect_reference_group_memberships() -> tuple[dict[str, set[str]], dict[str, set[str]]]:
+    member_groups: dict[str, set[str]] = defaultdict(set)
+    compound_groups: dict[str, set[str]] = defaultdict(set)
+
+    for path in sorted(DOXYGEN_XML_DIR.glob("group__*.xml")):
+        root = ET.parse(path).getroot()
+        compound = root.find("compounddef")
+        if compound is None or compound.get("kind") != "group":
+            continue
+        group_id = normalize_paragraphs(xml_text(compound.find("compoundname")))
+        if not group_id:
+            continue
+        for member in compound.findall(".//memberdef"):
+            if member_id := member.get("id"):
+                member_groups[member_id].add(group_id)
+        for innerclass in compound.findall(".//innerclass"):
+            if refid := innerclass.get("refid"):
+                compound_groups[refid].add(group_id)
+
+    return member_groups, compound_groups
+
+
 def parse_reference_data(report: ReportBook) -> tuple[list[MacroDoc], list[MacroDoc], list[TypedefDoc], list[EnumDoc], list[StructDoc]]:
     macros: list[MacroDoc] = []
     error_macros: list[MacroDoc] = []
     typedefs: list[TypedefDoc] = []
     enums: list[EnumDoc] = []
     structs: list[StructDoc] = []
+    member_groups, compound_groups = collect_reference_group_memberships()
 
     for path in sorted(DOXYGEN_XML_DIR.glob("*.xml")):
         if path.name.startswith("group__") or path.name.startswith("struct"):
@@ -893,14 +925,21 @@ def parse_reference_data(report: ReportBook) -> tuple[list[MacroDoc], list[Macro
                 )
                 continue
             if kind == "define":
+                overrides = programlisting_overrides(member, file_path, line)
                 macro = MacroDoc(
                     symbol=symbol,
+                    group_ids=sorted(member_groups.get(member.get("id", ""), set())),
+                    params=[
+                        name
+                        for param in member.findall("param")
+                        if (name := normalize_paragraphs(xml_text(param.find("defname"))))
+                    ],
                     file=file_path,
                     line=line,
-                    brief=normalize_paragraphs(xml_text(member.find("briefdescription"))),
-                    details=normalize_paragraphs(xml_text(member.find("detaileddescription"))),
-                    remarks=section_texts(member, "remark") + section_texts(member, "see"),
-                    warnings=section_texts(member, "warning") + section_texts(member, "attention"),
+                    brief=normalize_paragraphs(render_xml_markdown(member.find("briefdescription"), overrides)),
+                    details=parse_unsectioned_details(member, overrides),
+                    remarks=section_texts(member, "remark", overrides) + section_texts(member, "see", overrides),
+                    warnings=section_texts(member, "warning", overrides) + section_texts(member, "attention", overrides),
                     initializer=normalize_paragraphs(xml_text(member.find("initializer"))),
                 )
                 if symbol.startswith("AXCL_ERR_"):
@@ -911,6 +950,7 @@ def parse_reference_data(report: ReportBook) -> tuple[list[MacroDoc], list[Macro
                 typedefs.append(
                     TypedefDoc(
                         symbol=symbol,
+                        group_ids=sorted(member_groups.get(member.get("id", ""), set())),
                         file=file_path,
                         line=line,
                         brief=normalize_paragraphs(xml_text(member.find("briefdescription"))),
@@ -946,6 +986,7 @@ def parse_reference_data(report: ReportBook) -> tuple[list[MacroDoc], list[Macro
                 enums.append(
                     EnumDoc(
                         symbol=symbol,
+                        group_ids=sorted(member_groups.get(member.get("id", ""), set())),
                         file=file_path,
                         line=line,
                         brief=normalize_paragraphs(xml_text(member.find("briefdescription"))),
@@ -988,6 +1029,7 @@ def parse_reference_data(report: ReportBook) -> tuple[list[MacroDoc], list[Macro
         structs.append(
             StructDoc(
                 symbol=normalize_paragraphs(xml_text(compound.find("compoundname"))),
+                group_ids=sorted(compound_groups.get(compound.get("id", ""), set())),
                 file=file_path,
                 line=line,
                 brief=normalize_paragraphs(render_xml_markdown(compound.find("briefdescription"), {})),
@@ -1378,8 +1420,10 @@ def render_macro_page(macros: list[MacroDoc], page_path: Path, symbol_index: dic
     for macro in macros:
         append_anchored_heading(lines, macro.symbol, 2, insert_br=not first_macro)
         first_macro = False
-        lines.extend(["", resolve_links(macro.brief or macro.details or "", [], symbol_index, duplicates, report, page_path, macro.symbol, macro.line), ""])
-        lines.extend(["```c", strip_ref_tokens(f"#define {macro.symbol} {macro.initializer}".rstrip()), "```", ""])
+        description = "\n\n".join(text for text in (macro.brief, macro.details) if text)
+        lines.extend(["", resolve_links(description, [], symbol_index, duplicates, report, page_path, macro.symbol, macro.line), ""])
+        macro_name = macro.symbol + (f"({', '.join(macro.params)})" if macro.params else "")
+        lines.extend(["```c", strip_ref_tokens(f"#define {macro_name} {macro.initializer}".rstrip()), "```", ""])
         append_reference_sections(lines, [("Remark", macro.remarks), ("Warning", macro.warnings)], page_path, symbol_index, duplicates, report, macro.symbol, macro.line)
     return "\n".join(lines)
 
@@ -1573,6 +1617,54 @@ def collect_blacklisted(report: ReportBook, blacklist: dict[str, str], group_tit
             )
 
 
+def filter_blacklisted_reference_docs(
+    report: ReportBook,
+    blacklist: dict[str, str],
+    group_titles: dict[str, str],
+    macros: list[MacroDoc],
+    error_macros: list[MacroDoc],
+    typedefs: list[TypedefDoc],
+    enums: list[EnumDoc],
+    structs: list[StructDoc],
+) -> tuple[list[MacroDoc], list[MacroDoc], list[TypedefDoc], list[EnumDoc], list[StructDoc]]:
+    def keep(doc: MacroDoc | TypedefDoc | EnumDoc | StructDoc, kind: str) -> bool:
+        excluded_groups = [group_id for group_id in doc.group_ids if group_id in blacklist]
+        if not excluded_groups:
+            return True
+        for group_id in excluded_groups:
+            report.add(
+                "excluded_by_config.tsv",
+                group_id,
+                group_titles.get(group_id, ""),
+                doc.symbol,
+                kind,
+                doc.file,
+                doc.line,
+                blacklist[group_id],
+            )
+            if isinstance(doc, EnumDoc):
+                for value in doc.values:
+                    report.add(
+                        "excluded_by_config.tsv",
+                        group_id,
+                        group_titles.get(group_id, ""),
+                        value.symbol,
+                        "enumvalue",
+                        doc.file,
+                        doc.line,
+                        blacklist[group_id],
+                    )
+        return False
+
+    return (
+        [doc for doc in macros if keep(doc, "macro")],
+        [doc for doc in error_macros if keep(doc, "error")],
+        [doc for doc in typedefs if keep(doc, "typedef")],
+        [doc for doc in enums if keep(doc, "enum")],
+        [doc for doc in structs if keep(doc, "struct")],
+    )
+
+
 def write_outputs(group_titles: dict[str, str], group_pages: dict[str, str], by_group: dict[str, list[FunctionDoc]], macros: list[MacroDoc], typedefs: list[TypedefDoc], enums: list[EnumDoc], structs: list[StructDoc], error_macros: list[MacroDoc], symbol_index: dict[str, SymbolLocation], duplicates: set[str], blacklist: dict[str, str], report: ReportBook, error_values: dict[str, tuple[str, str, str, str]]) -> list[Path]:
     written_pages: list[Path] = []
     for group_id, title in group_titles.items():
@@ -1633,7 +1725,10 @@ def validate_markdown(pages: list[Path], report: ReportBook) -> None:
                 in_code_block = not in_code_block
                 previous_blank = False
                 continue
-            if not in_code_block and stripped_line == "":
+            if in_code_block:
+                previous_blank = False
+                continue
+            if stripped_line == "":
                 if previous_blank:
                     report.add(
                         "markdown_check.tsv",
@@ -1776,7 +1871,13 @@ def validate_markdown(pages: list[Path], report: ReportBook) -> None:
                         )
                     index_h2_seen += 1
 
+        in_code_block = False
         for idx, line in enumerate(lines, start=1):
+            if line.strip().startswith("```"):
+                in_code_block = not in_code_block
+                continue
+            if in_code_block:
+                continue
             if line.count("|") >= 2 and line.strip().startswith("|"):
                 pipe_count = line.count("|")
                 if idx <= len(lines) - 1:
@@ -1843,6 +1944,16 @@ def main() -> int:
     collect_unsupported_tags(report, source_records)
     collect_orphaned_symbols(report, functions, group_titles, blacklist)
     collect_blacklisted(report, blacklist, group_titles, by_group)
+    macros, error_macros, typedefs, enums, structs = filter_blacklisted_reference_docs(
+        report,
+        blacklist,
+        group_titles,
+        macros,
+        error_macros,
+        typedefs,
+        enums,
+        structs,
+    )
 
     if not args.validate_only:
         error_values = run_error_probe(error_macros)

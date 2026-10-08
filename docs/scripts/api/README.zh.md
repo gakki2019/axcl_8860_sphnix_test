@@ -73,8 +73,9 @@ python3 docs/scripts/api/api_docgen.py --validate-only
 
 当前配置能力：
 
-- 支持按 Doxygen group id 做 blacklist 过滤。
-- 被 blacklist 的 group 不会生成 API 页面。
+- 支持按 Doxygen group id 过滤函数和 reference symbol。
+- 显式通过 `@ingroup` 归入 blacklist group 的函数和 reference symbol 不会写入生成的 Markdown。
+- 未声明任何 `@ingroup` 的 reference symbol 仍会写入 reference 页面。
 - 默认配置中包含 `mockApi`。
 
 配置示例：
@@ -104,7 +105,7 @@ groups:
 
 明细报告说明：
 
-- `excluded_by_config.tsv`：被 blacklist 过滤掉的 API 明细。
+- `excluded_by_config.tsv`：被 blacklist 过滤掉的函数和 reference symbol 明细。
 - `undefined_defgroup.tsv`：引用了未定义 `@ingroup` 的符号。
 - `orphaned_symbol.tsv`：未归组的公开函数。
 - `unsupported_symbol_kind.tsv`：当前生成器跳过的顶层符号类型。

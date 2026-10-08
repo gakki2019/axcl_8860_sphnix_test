@@ -14,7 +14,8 @@
 | cmake | >= 3.20   |               |
 | make  | >= 4.3    |               |
 | ninja | >= 1.13.0 | 默认 generator |
-| zig   | >= 0.15.2 |                |
+| zig   | >= 0.15.2 | `x86`、`arm64`、`loongarch64`、`riscv64` 使用 |
+| GNU 交叉工具链 | arm-gnu-toolchain-13.3.rel1 | 仅 `host=ax8860` 使用，固定路径，不用 zig |
 | deb   |           | 制作 deb 包     |
 | rpm   |           | 制作 rpm 包     |
 
@@ -43,9 +44,18 @@ sudo apt install -y cmake make dpkg-dev rpm
 3. 将包含 `zig` 的目录加入 `PATH`。
 4. 通过 `zig version` 验证安装结果。
 
+```{note}
+`host=ax8860` 不使用 zig，固定使用 GNU 交叉工具链（见 [2.5. ax8860 目标](#zh-build-ax8860)）。其余 host 仍需 zig；`host=all` 会同时构建需要 zig 的 host 和 `ax8860`，因此两者都需要具备。
+```
+
+**GNU 交叉工具链（仅 `host=ax8860`）**
+1. 安装 arm-gnu-toolchain-13.3.rel1 到固定路径 `/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/`。
+2. 确认 `/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc` 可执行。
+3. 该路径已写死在 `build/cmake/toolchains/ax8860-linux-gnu-gcc.cmake`，无需加入 `PATH`。
+
 ## 2. 编译
 
-### 2.1. Usage
+### 2.1. 用法
 
 ```text
 Usage: make [target] [host=<host>] [libc=<libc>[,<libc>...]] [debug=yes]
@@ -59,13 +69,13 @@ Targets:
   help      show this message
 
 Options:
-  host=     arm64 | x86 | loongarch64 | riscv64 | all         (default: all)
+  host=     arm64 | x86 | loongarch64 | riscv64 | ax8860 | all (default: all)
   libc=     gnu | musl | gnu,musl | "gnu musl"                (default: see AXCL_HOST_LIBC)
   debug=    yes | no                                          (default: no -> Release)
 
 Examples:
   make clean all install                       # build all linux hosts (matrix)
-  make host=x86 clean all install package      # x86 only, default libc set
+  make host=x86 clean all install package pac=/absolute/path/to/firmware.pac
   make host=arm64 libc=musl clean all install  # aarch64 + musl
 ```
 
@@ -73,16 +83,17 @@ Examples:
 
 | 参数      | 可选项                                          | 默认值 | 参数说明 |
 | --------- | ----------------------------------------------- | ------ | -------- |
-| `host=`   | `arm64`、`x86`、`loongarch64`、`riscv64`、`all` | `all`  | 目标 host。`all` 启用多 host 矩阵。 |
+| `host=`   | `arm64`、`x86`、`loongarch64`、`riscv64`、`ax8860`、`all` | `all`  | 目标 host。`ax8860` 为 aarch64 glibc，固定用 GNU 交叉工具链（不用 zig），见 [2.5. ax8860 目标](#zh-build-ax8860)。`all` 启用多 host 矩阵（默认包含 `ax8860`）。 |
 | `libc=`   | `gnu`、`musl`，可逗号或空格组合                 | 以 `build/config.mk` 当前默认值为准 | C 库选择。当前所有 linux host 默认都为 `gnu`。多值会按 libc 拆分子构建。`host=all` 下此参数被忽略，实际矩阵来自 `build/config.mk`。 |
 | `debug=`  | `yes`、`no`                                     | `no`   | `yes` 时设置 `CMAKE_BUILD_TYPE=Debug`，`no` 时设置 `CMAKE_BUILD_TYPE=Release`。 |
+| `pac=`    | PAC 文件路径                                    | 无     | Linux `package`/`package-only` 必填；支持相对路径、普通空格和中文，文件必须是非空、可读的普通 `.pac` 文件，最终组件不能是符号链接。 |
 
 ### 2.3. 高级参数
 
 | 参数 | 作用 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `AXCL_BUILD_CPU_LIMIT_PERCENT` | 控制内部构建并发预算占在线 CPU 核数的百分比。 | `80` | 日常构建使用默认值即可；共享编译机或需要降低负载时可设为 `50` 或更低。 |
-| `AXCL_ALL_HOSTS` | `host=all` 时实际展开的 host 列表。 | `x86 arm64` | 修改 `axcl/build/config.mk` |
+| `AXCL_ALL_HOSTS` | `host=all` 时实际展开的 host 列表。 | `x86 arm64 ax8860` | 修改 `axcl/build/config.mk` |
 | `AXCL_HOST_LIBC_<arch>` | `host=all` 下指定某个 arch 的 libc 构建矩阵，例如 `AXCL_HOST_LIBC_x64`、`AXCL_HOST_LIBC_aarch64`。 | `gnu` | 默认构建 `gnu`。如需调整默认 libc 矩阵，应修改 `build/config.mk`，不要通过环境变量或 `make` 参数覆盖。 |
 | `AXCL_GLIBC_VERSION` | 指定 gnu libc 目标版本，传递给 Zig gnu toolchain。 | 由 `build/projects/axcl_linux_<arch>.mk` 定义 | 通常不建议修改；默认版本参见下文“[glibc / 动态链接器矩阵](#zh-build-glibc-dynamic-linker-matrix)”。如确需调整，应修改对应 `build/projects/axcl_linux_<arch>.mk`，不要通过环境变量或 `make` 参数覆盖；仅适用于 `libc=gnu`。 |
 | `AXCL_PACKAGE_OUTPUT_DIR` | 覆盖 `.deb` 和 `.rpm` 最终复制目录。 | `out/axcl_linux_<host>_<libc>/package/` | CI 或发布归档时可设置为统一输出目录。 |
@@ -100,7 +111,7 @@ make host=<host> <param>=<value> clean all install
 make host=x86 AXCL_BUILD_CPU_LIMIT_PERCENT=50 clean all install
 
 # 指定 package 输出目录
-make host=x86 AXCL_PACKAGE_OUTPUT_DIR=/tmp/axcl-package clean all install package
+make host=x86 AXCL_PACKAGE_OUTPUT_DIR=/tmp/axcl-package clean all install package pac=/absolute/path/to/firmware.pac
 ```
 
 ```{note}
@@ -115,10 +126,24 @@ make host=x86 AXCL_PACKAGE_OUTPUT_DIR=/tmp/axcl-package clean all install packag
 make clean all install
 
 # 仅构建 x86，并使用默认 libc 集合
-make host=x86 clean all install package
+make host=x86 clean all install package pac=/absolute/path/to/firmware.pac
+
+# 构建 ax8860（GNU 交叉工具链，不用 zig）
+make host=ax8860 clean all install package pac=/absolute/path/to/firmware.pac
 ```
 
-### 2.5. 清理与重建
+(zh-build-ax8860)=
+### 2.5. ax8860 目标
+
+`host=ax8860` 固定使用以下 GNU 交叉工具链：
+
+```text
+/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+```
+
+执行 `make host=ax8860` 时不需要安装 Zig。执行 `make host=all` 时，由于其他目标仍使用 Zig，因此构建环境中仍需安装 Zig。
+
+### 2.6. 清理与重建
 
 - `make clean`：清理当前 host/libc 的 build 与 install 目录。
 - 当配置异常或 CMake cache 卡住时，可直接执行 `rm -rf build/out` 强制重建。
@@ -127,11 +152,13 @@ make host=x86 clean all install package
 
 ```bash
 # 构建、安装并打包当前 all-host 矩阵
-make host=all clean all install package
+make host=all clean all install package pac=/absolute/path/to/firmware.pac
 
 # 通过顶层 Makefile 构建、安装并打包 x86 入口
-make host=x86 clean all install package
+make host=x86 clean all install package pac=/absolute/path/to/firmware.pac
 ```
+
+每个 Linux DEB/RPM 只携带一个 PAC，并将输入文件重命名为固定 payload 路径 `/lib/firmware/axcl/ax8860_card.pac`。PAC 不进入普通 `all/install` 的 final install tree；只在构包时加入 package staging。
 
 包输出目录：
 - 默认：`out/axcl_linux_<host>_<libc>/package/`
@@ -312,7 +339,7 @@ AXCL 提供 `scripts/minidump/collect_symbols.sh` 用于抽取 host/device Break
 
 ### 7.2. 工具链文件索引
 
-本表只列正式支持的 Linux Zig 工具链文件，故意排除了 `*-gcc.cmake`、Windows toolchain 以及 `build/cmake/toolchains/` 下的子目录项。
+本表列出正式支持的 Linux 工具链文件。除 `ax8860` 外，其余 host 均使用 Zig 工具链；本表不列 Windows toolchain 及 `build/cmake/toolchains/` 下的其他子目录项。
 
 | host × libc        | 工具链文件（位于 `build/cmake/toolchains/`） |
 | ------------------ | -------------------------------------------- |
@@ -324,3 +351,4 @@ AXCL 提供 `scripts/minidump/collect_symbols.sh` 用于抽取 host/device Break
 | loongarch64 / musl | `loongarch64-linux-musl-zig.cmake`           |
 | riscv64 / gnu      | `riscv64-linux-gnu-zig.cmake`                |
 | riscv64 / musl     | `riscv64-linux-musl-zig.cmake`               |
+| ax8860 / gnu       | `ax8860-linux-gnu-gcc.cmake`（GNU 交叉工具链，不用 zig） |

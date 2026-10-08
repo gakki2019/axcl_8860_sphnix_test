@@ -14,7 +14,8 @@ The following host-side build environment uses `Ubuntu 22.04` as an example.
 | cmake | >= 3.20 | |
 | make | >= 4.3 | |
 | ninja | >= 1.13.0 | Default generator |
-| zig | >= 0.15.2 | |
+| zig | >= 0.15.2 | Used by `x86`, `arm64`, `loongarch64`, `riscv64` |
+| GNU cross toolchain | arm-gnu-toolchain-13.3.rel1 | Used only by `host=ax8860`; fixed path, no zig |
 | deb | | Generate deb packages |
 | rpm | | Generate rpm packages |
 
@@ -43,6 +44,15 @@ sudo apt install -y cmake make dpkg-dev rpm
 3. Add the directory that contains `zig` to `PATH`.
 4. Verify the installation with `zig version`.
 
+```{note}
+`host=ax8860` does not use zig; it always uses the GNU cross toolchain (see [2.5. ax8860 target](#en-build-ax8860)). Other hosts still require zig. `host=all` builds both the zig-based hosts and `ax8860`, so both toolchains must be available.
+```
+
+**GNU cross toolchain (only for `host=ax8860`)**
+1. Install arm-gnu-toolchain-13.3.rel1 to the fixed path `/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/`.
+2. Verify that `/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc` is executable.
+3. The path is hard-coded in `build/cmake/toolchains/ax8860-linux-gnu-gcc.cmake`, so it does not need to be added to `PATH`.
+
 ## 2. Build
 
 ### 2.1. Usage
@@ -59,13 +69,13 @@ Targets:
   help      show this message
 
 Options:
-  host=     arm64 | x86 | loongarch64 | riscv64 | all         (default: all)
+  host=     arm64 | x86 | loongarch64 | riscv64 | ax8860 | all (default: all)
   libc=     gnu | musl | gnu,musl | "gnu musl"                (default: see AXCL_HOST_LIBC)
   debug=    yes | no                                          (default: no -> Release)
 
 Examples:
   make clean all install                       # build all linux hosts (matrix)
-  make host=x86 clean all install package      # x86 only, default libc set
+  make host=x86 clean all install package pac=/absolute/path/to/firmware.pac
   make host=arm64 libc=musl clean all install  # aarch64 + musl
 ```
 
@@ -73,16 +83,17 @@ Examples:
 
 | Parameter | Values | Default | Description |
 | --- | --- | --- | --- |
-| `host=` | `arm64`, `x86`, `loongarch64`, `riscv64`, `all` | `all` | Target host. `all` enables the multi-host matrix. |
+| `host=` | `arm64`, `x86`, `loongarch64`, `riscv64`, `ax8860`, `all` | `all` | Target host. `ax8860` is an aarch64 glibc target built with the fixed GNU cross toolchain (no zig); see [2.5. ax8860 target](#en-build-ax8860). `all` enables the multi-host matrix (which includes `ax8860`). |
 | `libc=` | `gnu`, `musl`; comma- or space-separated combinations are supported | Depends on the current default in `build/config.mk` | C library selection. All current Linux hosts default to `gnu`. Multiple values are split into per-libc sub-builds. Under `host=all`, this parameter is ignored, and the actual matrix comes from `build/config.mk`. |
 | `debug=` | `yes`, `no` | `no` | `yes` sets `CMAKE_BUILD_TYPE=Debug`; `no` sets `CMAKE_BUILD_TYPE=Release`. |
+| `pac=` | PAC file path | None | Required for Linux `package`/`package-only`; relative paths, ordinary spaces, and non-ASCII characters are supported. The file must be a non-empty, readable regular `.pac` file, and its final path component must not be a symbolic link. |
 
 ### 2.3. Advanced Parameters
 
 | Parameter | Purpose | Default | Description |
 | --- | --- | --- | --- |
 | `AXCL_BUILD_CPU_LIMIT_PERCENT` | Controls the internal build parallelism budget as a percentage of online CPU cores. | `80` | Keep the default for daily builds. On shared build machines or when reducing load, set it to `50` or lower. |
-| `AXCL_ALL_HOSTS` | Host list expanded when `host=all`. | `x86 arm64` | Modify `axcl/build/config.mk`. |
+| `AXCL_ALL_HOSTS` | Host list expanded when `host=all`. | `x86 arm64 ax8860` | Modify `axcl/build/config.mk`. |
 | `AXCL_HOST_LIBC_<arch>` | libc build matrix for one arch under `host=all`, for example `AXCL_HOST_LIBC_x64` or `AXCL_HOST_LIBC_aarch64`. | `gnu` | Defaults to `gnu`. If the default libc matrix must be changed, modify `build/config.mk`; do not override it through an environment variable or a `make` parameter. |
 | `AXCL_GLIBC_VERSION` | Specifies the target gnu libc version and passes it to the Zig gnu toolchain. | Defined by `build/projects/axcl_linux_<arch>.mk` | Usually do not modify it. See [glibc / dynamic linker matrix](#en-build-glibc-dynamic-linker-matrix) for default versions. If it must be adjusted, modify the matching `build/projects/axcl_linux_<arch>.mk`; do not override it through an environment variable or a `make` parameter. It applies only to `libc=gnu`. |
 | `AXCL_PACKAGE_OUTPUT_DIR` | Overrides the final copy directory for `.deb` and `.rpm` files. | `out/axcl_linux_<host>_<libc>/package/` | Set it to a unified output directory for CI or release archiving. |
@@ -100,7 +111,7 @@ Typical examples:
 make host=x86 AXCL_BUILD_CPU_LIMIT_PERCENT=50 clean all install
 
 # Specify the package output directory
-make host=x86 AXCL_PACKAGE_OUTPUT_DIR=/tmp/axcl-package clean all install package
+make host=x86 AXCL_PACKAGE_OUTPUT_DIR=/tmp/axcl-package clean all install package pac=/absolute/path/to/firmware.pac
 ```
 
 ```{note}
@@ -115,10 +126,24 @@ make host=x86 AXCL_PACKAGE_OUTPUT_DIR=/tmp/axcl-package clean all install packag
 make clean all install
 
 # Build x86 only with the default libc set
-make host=x86 clean all install package
+make host=x86 clean all install package pac=/absolute/path/to/firmware.pac
+
+# Build ax8860 (GNU cross toolchain, no zig)
+make host=ax8860 clean all install package pac=/absolute/path/to/firmware.pac
 ```
 
-### 2.5. Clean and Rebuild
+(en-build-ax8860)=
+### 2.5. ax8860 Target
+
+`host=ax8860` always uses the following GNU cross toolchain:
+
+```text
+/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+```
+
+`make host=ax8860` does not require Zig. `make host=all` still requires Zig because the other targets use it.
+
+### 2.6. Clean and Rebuild
 
 - `make clean`: removes the build and install directories for the current host/libc.
 - If the configuration is inconsistent or the CMake cache is stuck, run `rm -rf build/out` to force a rebuild.
@@ -127,11 +152,13 @@ make host=x86 clean all install package
 
 ```bash
 # Build, install, and package the current all-host matrix
-make host=all clean all install package
+make host=all clean all install package pac=/absolute/path/to/firmware.pac
 
 # Build, install, and package the x86 entry through the top-level Makefile
-make host=x86 clean all install package
+make host=x86 clean all install package pac=/absolute/path/to/firmware.pac
 ```
+
+Each Linux DEB/RPM contains exactly one PAC. The input file is renamed to the fixed payload path `/lib/firmware/axcl/ax8860_card.pac`. The PAC is not added to the normal `all/install` final install tree; it is added only to package staging during package generation.
 
 Package output directory:
 - Default: `out/axcl_linux_<host>_<libc>/package/`
@@ -316,7 +343,7 @@ Notes:
 
 ### 7.2. Toolchain File Index
 
-This table lists only officially supported Linux Zig toolchain files. It intentionally excludes `*-gcc.cmake`, Windows toolchains, and subdirectories under `build/cmake/toolchains/`.
+This table lists officially supported Linux toolchain files. Every host except `ax8860` uses a Zig toolchain. It does not list Windows toolchains or other subdirectories under `build/cmake/toolchains/`.
 
 | host × libc | Toolchain file under `build/cmake/toolchains/` |
 | --- | --- |
@@ -328,3 +355,4 @@ This table lists only officially supported Linux Zig toolchain files. It intenti
 | loongarch64 / musl | `loongarch64-linux-musl-zig.cmake` |
 | riscv64 / gnu | `riscv64-linux-gnu-zig.cmake` |
 | riscv64 / musl | `riscv64-linux-musl-zig.cmake` |
+| ax8860 / gnu | `ax8860-linux-gnu-gcc.cmake` (GNU cross toolchain, no zig) |

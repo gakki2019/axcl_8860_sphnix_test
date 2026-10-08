@@ -3,15 +3,15 @@
 ## Index
 
 - [axclAppLog](#axclAppLog): Record an application log in the specified format.
-- [axclGetLogLevel](#axclGetLogLevel): Get the Host log level.
-- [axclSetLogLevel](#axclSetLogLevel): Set the Host log level.
 - [axclrtGetErrorString](#axclrtGetErrorString): Get the description string for an error code.
 - [axclrtGetLastError](#axclrtGetLastError): Get and clear the last error code for the current thread.
+- [axclrtGetLogLevel](#axclrtGetLogLevel): Get the log level of a target component.
 - [axclrtGetSocName](#axclrtGetSocName): Get the chip name string.
 - [axclrtGetVersion](#axclrtGetVersion): Get the AXCL runtime library build version number.
 - [axclrtGetVersionStr](#axclrtGetVersionStr): Get the version string for a specified source.
 - [axclrtPeekAtLastError](#axclrtPeekAtLastError): Get the last error code for the current thread without clearing it.
 - [axclrtSetLastError](#axclrtSetLastError): Set the last error code for the current thread.
+- [axclrtSetLogLevel](#axclrtSetLogLevel): Set the log level of a target component at runtime.
 
 <br>
 
@@ -33,7 +33,7 @@ AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint
 
 | Name | Direction | Description |
 |---|---|---|
-| lv | in | Log level. See [axclSetLogLevel](#axclSetLogLevel). |
+| lv | in | Log level. See [axclrtSetLogLevel](#axclrtSetLogLevel). |
 | func | in | Function name. If NULL, the function name is not printed. |
 | file | in | File name. If NULL, the file name is not printed. |
 | line | in | Line number. |
@@ -49,63 +49,11 @@ AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint
 
 #### Remark
 
-- [axclSetLogLevel](#axclSetLogLevel)
+- [axclrtSetLogLevel](#axclrtSetLogLevel)
 
 #### Returns
 
 N/A
-
-<br>
-
-<a id="axclGetLogLevel"></a>
-
-### axclGetLogLevel
-
-Get the Host log level.
-
-#### Function
-
-```c
-AXCL_EXPORT axclError axclGetLogLevel(int32_t *lv);
-```
-
-#### Parameters
-
-| Name | Direction | Description |
-|---|---|---|
-| lv | out | Optional pointer to receive the log level. If NULL, no value is written. |
-
-#### Returns
-
-- `AXCL_SUCC`: Success.
-
-#### Remark
-
-- [axclSetLogLevel](#axclSetLogLevel)
-
-<br>
-
-<a id="axclSetLogLevel"></a>
-
-### axclSetLogLevel
-
-Set the Host log level.
-
-#### Function
-
-```c
-AXCL_EXPORT axclError axclSetLogLevel(int32_t lv);
-```
-
-#### Parameters
-
-| Name | Direction | Description |
-|---|---|---|
-| lv | in | Log level: 0 trace, 1 debug, 2 info, 3 warning, 4 error, 5 critical, and 6 off. Values outside the range 0 to 6 are mapped to warning. |
-
-#### Returns
-
-- `AXCL_SUCC`: Success.
 
 <br>
 
@@ -165,6 +113,36 @@ Unlike [axclrtPeekAtLastError](#axclrtPeekAtLastError), this function resets the
 #### Remark
 
 - [axclrtPeekAtLastError](#axclrtPeekAtLastError)
+
+<br>
+
+<a id="axclrtGetLogLevel"></a>
+
+### axclrtGetLogLevel
+
+Get the log level of a target component.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtGetLogLevel(axclrtLogTarget target, int32_t *lv);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| target | in | Log target. See [axclrtLogTarget](reference/enum.md#axclrtLogTarget). |
+| lv | out | Non-NULL pointer that receives the log level. |
+
+#### Returns
+
+- `AXCL_SUCC`: Success.
+- `others`: Failure.
+
+#### Remark
+
+- [axclrtSetLogLevel](#axclrtSetLogLevel)
 
 <br>
 
@@ -303,3 +281,40 @@ This function is for internal use and is not recommended for direct use.
 #### Returns
 
 N/A
+
+<br>
+
+<a id="axclrtSetLogLevel"></a>
+
+### axclrtSetLogLevel
+
+Set the log level of a target component at runtime.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtSetLogLevel(axclrtLogTarget target, int32_t lv);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| target | in | Log target. See [axclrtLogTarget](reference/enum.md#axclrtLogTarget). |
+| lv | in | Log level: 0 trace, 1 debug, 2 info, 3 warning, 4 error, 5 critical, and 6 off. Values outside the range 0 to 6 are mapped to warning. |
+
+#### Returns
+
+- `AXCL_SUCC`: Success.
+- `others`: Failure.
+
+#### Example
+
+```c
+  axclrtSetLogLevel(AXCL_LOG_TARGET_HOST_RUNTIME_FILE,     2);   // Host file log -> info
+  axclrtSetLogLevel(AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE,  0);   // Host console -> trace (debugging)
+  axclrtSetDevice(0);
+  axclrtSetLogLevel(AXCL_LOG_TARGET_DEVICE_WORKER_FILE,    2);   // device 0 worker file log -> info
+  axclrtSetDevice(1);
+  axclrtSetLogLevel(AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE, 4);   // device 1 worker console -> error
+```

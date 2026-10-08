@@ -50,7 +50,7 @@ The selected directory must be writable. If it does not exist, this function cre
 
 #### Remark
 
-- [Minidump](../../faq/minidump_analysis.md)
+For more information about minidump, see [Minidump](../../faq/minidump_analysis.md).
 
 <br>
 

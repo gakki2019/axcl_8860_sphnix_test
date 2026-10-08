@@ -10,3 +10,4 @@
 	build/index
 	c/index
 	python/index
+	tools/index

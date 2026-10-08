@@ -3,7 +3,7 @@
 ## Index
 
 - [axclrtCreateContext](#axclrtCreateContext): Explicitly create a Context and bind it to the calling thread.
-- [axclrtDestroyContext](#axclrtDestroyContext): Destroy a Context created by [axclrtCreateContext](#axclrtCreateContext).
+- [axclrtDestroyContext](#axclrtDestroyContext): Destroy a Context explicitly created by [axclrtCreateContext](#axclrtCreateContext).
 - [axclrtGetCurrentContext](#axclrtGetCurrentContext): Get the current Context of the calling thread.
 - [axclrtSetCurrentContext](#axclrtSetCurrentContext): Make a Context current for the calling thread.
 
@@ -86,7 +86,7 @@ AXCL_EXPORT axclError axclrtCreateContext(axclrtContext *context, int32_t device
 
 ### axclrtDestroyContext
 
-Destroy a Context created by [axclrtCreateContext](#axclrtCreateContext).
+Destroy a Context explicitly created by [axclrtCreateContext](#axclrtCreateContext).
 
 #### Function
 
@@ -110,6 +110,7 @@ AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
 - Before calling this function, destroy all Streams explicitly created in this Context.
 - This function blocks until work in the Context's default Stream completes, and then destroys the default Stream automatically.
 - After the Context is destroyed successfully, the runtime removes all bindings to it from all threads.
+- This function releases the device activation reference held by the Context. If that is the final reference, the device is closed; serialize such a call with [axclrtMallocHost](memory_api.md#axclrtMallocHost) and [axclrtFreeHost](memory_api.md#axclrtFreeHost) calls in the process.
 - This function cannot destroy the default Context created by [axclrtSetDevice](device_api.md#axclrtSetDevice). The default Context is destroyed by [axclrtResetDevice](device_api.md#axclrtResetDevice).
 
 #### Remark

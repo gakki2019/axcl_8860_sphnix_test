@@ -1,5 +1,22 @@
 # Error Code
 
+## CCL
+
+| Symbol | Host Hex | Host Int32 | Device Hex | Device Int32 | Description |
+|---|---|---|---|---|---|
+| <a id="AXCL_ERR_CCL_FAIL"></a>AXCL_ERR_CCL_FAIL | 0x80305B20 | -2144314592 | 0x80315B20 | -2144249056 | A generic failure occurred in the CCL module. |
+| <a id="AXCL_ERR_CCL_ILLEGAL_PARAM"></a>AXCL_ERR_CCL_ILLEGAL_PARAM | 0x80305B03 | -2144314621 | 0x80315B03 | -2144249085 | An invalid parameter was passed. |
+| <a id="AXCL_ERR_CCL_INTERNAL"></a>AXCL_ERR_CCL_INTERNAL | 0x80305B23 | -2144314589 | 0x80315B23 | -2144249053 | An internal CCL error occurred. |
+| <a id="AXCL_ERR_CCL_INVALID_COMM"></a>AXCL_ERR_CCL_INVALID_COMM | 0x80305B21 | -2144314591 | 0x80315B21 | -2144249055 | The communicator handle is invalid or uninitialized. |
+| <a id="AXCL_ERR_CCL_INVALID_RANK"></a>AXCL_ERR_CCL_INVALID_RANK | 0x80305B22 | -2144314590 | 0x80315B22 | -2144249054 | The rank argument is out of range. |
+| <a id="AXCL_ERR_CCL_INVALID_STATE"></a>AXCL_ERR_CCL_INVALID_STATE | 0x80305B24 | -2144314588 | 0x80315B24 | -2144249052 | The CCL object is not in a state that permits this operation. |
+| <a id="AXCL_ERR_CCL_NO_MEMORY"></a>AXCL_ERR_CCL_NO_MEMORY | 0x80305B07 | -2144314617 | 0x80315B07 | -2144249081 | Memory allocation failed. |
+| <a id="AXCL_ERR_CCL_NULL_POINTER"></a>AXCL_ERR_CCL_NULL_POINTER | 0x80305B02 | -2144314622 | 0x80315B02 | -2144249086 | A null pointer was passed. |
+| <a id="AXCL_ERR_CCL_TIMEOUT"></a>AXCL_ERR_CCL_TIMEOUT | 0x80305B05 | -2144314619 | 0x80315B05 | -2144249083 | The operation timed out. |
+| <a id="AXCL_ERR_CCL_UNSUPPORT"></a>AXCL_ERR_CCL_UNSUPPORT | 0x80305B04 | -2144314620 | 0x80315B04 | -2144249084 | The requested operation is not supported. |
+
+<br>
+
 ## COMM
 
 | Symbol | Host Hex | Host Int32 | Device Hex | Device Int32 | Description |
@@ -80,6 +97,23 @@
 
 <br>
 
+## FILE
+
+| Symbol | Host Hex | Host Int32 | Device Hex | Device Int32 | Description |
+|---|---|---|---|---|---|
+| <a id="AXCL_ERR_FILE_TRANSFER_DECODE"></a>AXCL_ERR_FILE_TRANSFER_DECODE | 0x80305909 | -2144315127 | 0x80315909 | -2144249591 | A file transfer response could not be decoded. |
+| <a id="AXCL_ERR_FILE_TRANSFER_EMPTY_FILE"></a>AXCL_ERR_FILE_TRANSFER_EMPTY_FILE | 0x80305922 | -2144315102 | 0x80315922 | -2144249566 | An empty file cannot be transferred by the single-file API. |
+| <a id="AXCL_ERR_FILE_TRANSFER_ENCODE"></a>AXCL_ERR_FILE_TRANSFER_ENCODE | 0x80305908 | -2144315128 | 0x80315908 | -2144249592 | A file transfer request could not be encoded. |
+| <a id="AXCL_ERR_FILE_TRANSFER_EXECUTE_FAIL"></a>AXCL_ERR_FILE_TRANSFER_EXECUTE_FAIL | 0x80305920 | -2144315104 | 0x80315920 | -2144249568 | Executing a file transfer operation failed. |
+| <a id="AXCL_ERR_FILE_TRANSFER_ILLEGAL_PARAM"></a>AXCL_ERR_FILE_TRANSFER_ILLEGAL_PARAM | 0x80305903 | -2144315133 | 0x80315903 | -2144249597 | An invalid file transfer parameter was passed. |
+| <a id="AXCL_ERR_FILE_TRANSFER_INVALID_PATH"></a>AXCL_ERR_FILE_TRANSFER_INVALID_PATH | 0x80305924 | -2144315100 | 0x80315924 | -2144249564 | A file transfer path is invalid. |
+| <a id="AXCL_ERR_FILE_TRANSFER_NULL_POINTER"></a>AXCL_ERR_FILE_TRANSFER_NULL_POINTER | 0x80305902 | -2144315134 | 0x80315902 | -2144249598 | A null pointer was passed to a file transfer API. |
+| <a id="AXCL_ERR_FILE_TRANSFER_OPEN_FILE"></a>AXCL_ERR_FILE_TRANSFER_OPEN_FILE | 0x80305921 | -2144315103 | 0x80315921 | -2144249567 | Opening a file for transfer failed. |
+| <a id="AXCL_ERR_FILE_TRANSFER_TIMEOUT"></a>AXCL_ERR_FILE_TRANSFER_TIMEOUT | 0x80305905 | -2144315131 | 0x80315905 | -2144249595 | A file transfer operation timed out. |
+| <a id="AXCL_ERR_FILE_TRANSFER_UNEXPECT_RESPONSE"></a>AXCL_ERR_FILE_TRANSFER_UNEXPECT_RESPONSE | 0x8030590A | -2144315126 | 0x8031590A | -2144249590 | An unexpected file transfer response was received. |
+
+<br>
+
 ## PROTOCOL
 
 | Symbol | Host Hex | Host Int32 | Device Hex | Device Int32 | Description |
@@ -119,6 +153,7 @@
 | <a id="AXCL_ERR_RT_INVALID_FLAGS"></a>AXCL_ERR_RT_INVALID_FLAGS | 0x80305230 | -2144316880 | 0x80315230 | -2144251344 | invalid event flags |
 | <a id="AXCL_ERR_RT_NO_MEMORY"></a>AXCL_ERR_RT_NO_MEMORY | 0x80305207 | -2144316921 | 0x80315207 | -2144251385 | Memory allocation failed. |
 | <a id="AXCL_ERR_RT_NULL_POINTER"></a>AXCL_ERR_RT_NULL_POINTER | 0x80305202 | -2144316926 | 0x80315202 | -2144251390 | A null pointer was passed. |
+| <a id="AXCL_ERR_RT_PEER_ACCESS_NOT_ENABLED"></a>AXCL_ERR_RT_PEER_ACCESS_NOT_ENABLED | 0x80305237 | -2144316873 | 0x80315237 | -2144251337 | Peer access not enabled. |
 | <a id="AXCL_ERR_RT_SHELL_FAIL"></a>AXCL_ERR_RT_SHELL_FAIL | 0x80305236 | -2144316874 | 0x80315236 | -2144251338 | The device shell command could not be completed successfully. |
 | <a id="AXCL_ERR_RT_STREAM_NOT_DESTROYED"></a>AXCL_ERR_RT_STREAM_NOT_DESTROYED | 0x8030522D | -2144316883 | 0x8031522D | -2144251347 | stream not destroyed |
 | <a id="AXCL_ERR_RT_STREAM_NOT_EXIST"></a>AXCL_ERR_RT_STREAM_NOT_EXIST | 0x80305223 | -2144316893 | 0x80315223 | -2144251357 | The stream was not found. |
@@ -127,6 +162,27 @@
 | <a id="AXCL_ERR_RT_TIMEOUT"></a>AXCL_ERR_RT_TIMEOUT | 0x80305205 | -2144316923 | 0x80315205 | -2144251387 | The operation timed out. |
 | <a id="AXCL_ERR_RT_UNEXPECT_RESPONSE"></a>AXCL_ERR_RT_UNEXPECT_RESPONSE | 0x8030520A | -2144316918 | 0x8031520A | -2144251382 | The runtime received an unexpected response. |
 | <a id="AXCL_ERR_RT_UNSUPPORT"></a>AXCL_ERR_RT_UNSUPPORT | 0x80305204 | -2144316924 | 0x80315204 | -2144251388 | The requested operation is not supported. |
+
+<br>
+
+## USRWORK
+
+| Symbol | Host Hex | Host Int32 | Device Hex | Device Int32 | Description |
+|---|---|---|---|---|---|
+| <a id="AXCL_ERR_USRWORK_BUFFER_TOO_SMALL"></a>AXCL_ERR_USRWORK_BUFFER_TOO_SMALL | 0x80305A27 | -2144314841 | 0x80315A27 | -2144249305 | The receive buffer is too small for the complete userworker message. |
+| <a id="AXCL_ERR_USRWORK_DECODE"></a>AXCL_ERR_USRWORK_DECODE | 0x80305A09 | -2144314871 | 0x80315A09 | -2144249335 | A userworker response could not be decoded. |
+| <a id="AXCL_ERR_USRWORK_EMPTY_FILE"></a>AXCL_ERR_USRWORK_EMPTY_FILE | 0x80305A22 | -2144314846 | 0x80315A22 | -2144249310 | The userworker executable is empty. |
+| <a id="AXCL_ERR_USRWORK_ENCODE"></a>AXCL_ERR_USRWORK_ENCODE | 0x80305A08 | -2144314872 | 0x80315A08 | -2144249336 | A userworker request could not be encoded. |
+| <a id="AXCL_ERR_USRWORK_EXECUTE_FAIL"></a>AXCL_ERR_USRWORK_EXECUTE_FAIL | 0x80305A20 | -2144314848 | 0x80315A20 | -2144249312 | Executing a userworker operation failed. |
+| <a id="AXCL_ERR_USRWORK_ILLEGAL_PARAM"></a>AXCL_ERR_USRWORK_ILLEGAL_PARAM | 0x80305A03 | -2144314877 | 0x80315A03 | -2144249341 | An invalid userworker parameter was passed. |
+| <a id="AXCL_ERR_USRWORK_INVALID_PATH"></a>AXCL_ERR_USRWORK_INVALID_PATH | 0x80305A24 | -2144314844 | 0x80315A24 | -2144249308 | A userworker path is invalid. |
+| <a id="AXCL_ERR_USRWORK_NULL_POINTER"></a>AXCL_ERR_USRWORK_NULL_POINTER | 0x80305A02 | -2144314878 | 0x80315A02 | -2144249342 | A null pointer was passed to a userworker API. |
+| <a id="AXCL_ERR_USRWORK_OPEN_CHANNEL"></a>AXCL_ERR_USRWORK_OPEN_CHANNEL | 0x80305A25 | -2144314843 | 0x80315A25 | -2144249307 | Opening a userworker communication channel failed. |
+| <a id="AXCL_ERR_USRWORK_OPEN_FILE"></a>AXCL_ERR_USRWORK_OPEN_FILE | 0x80305A21 | -2144314847 | 0x80315A21 | -2144249311 | Opening a userworker executable failed. |
+| <a id="AXCL_ERR_USRWORK_PROCESS_NOT_FOUND"></a>AXCL_ERR_USRWORK_PROCESS_NOT_FOUND | 0x80305A23 | -2144314845 | 0x80315A23 | -2144249309 | The specified userworker process was not found. |
+| <a id="AXCL_ERR_USRWORK_SEND_DATA"></a>AXCL_ERR_USRWORK_SEND_DATA | 0x80305A26 | -2144314842 | 0x80315A26 | -2144249306 | Sending userworker data failed. |
+| <a id="AXCL_ERR_USRWORK_TIMEOUT"></a>AXCL_ERR_USRWORK_TIMEOUT | 0x80305A05 | -2144314875 | 0x80315A05 | -2144249339 | A userworker operation timed out. |
+| <a id="AXCL_ERR_USRWORK_UNEXPECT_RESPONSE"></a>AXCL_ERR_USRWORK_UNEXPECT_RESPONSE | 0x80305A0A | -2144314870 | 0x80315A0A | -2144249334 | An unexpected userworker response was received. |
 
 <br>
 

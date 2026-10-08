@@ -20,6 +20,10 @@ AXCL 是主从架构：host 侧进程运行在主控端，device 侧 `slave_work
 
 symbols 获取方式见 [用户态构建文档的 Minidump 章节](../develop/build/usr.md#minidump)。该章节已经说明如何生成 `axcl-host-minidump-symbols.tar.gz`、`axcl-device-minidump-symbols.tar.gz`、`axcl-all-minidump-symbols.tar.gz`，本文不重复 symbols 生成步骤。
 
+```{tip}
+推荐使用自动化脚本：AXCL 提供了自动化分析脚本 `analyze_minidump.sh`，可一键完成解包、路径匹配与调用栈解析，详见 [analyze_minidump.sh 工具说明](../develop/tools/analyze_minidump.md)。如需了解底层手工解析细节，请继续参考下文。
+```
+
 ## 2. 准备 minidump 和 symbols
 
 分析前至少涉及以下文件或目录：

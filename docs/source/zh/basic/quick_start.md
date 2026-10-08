@@ -35,7 +35,35 @@ root:/# axcl-smi
 |================================================================================================|
 ```
 
-## 3. 模型跑分
+## 3. 使用 axcl-smi 传输文件
+
+`axcl-smi` 可以通过 Runtime 文件传输服务在主控和指定 Device 之间上传或下载文件：
+
+```bash
+axcl-smi push -d <device> <host_path> <device_path>
+axcl-smi pull -d <device> <device_path> <host_path>
+```
+
+`-d` 必须指定唯一的 Device 编号。`push` 将主控文件上传到 Device，`pull` 将 Device 文件下载到主控：
+
+```bash
+# 将 Host 的模型上传到 0 号 Device。
+axcl-smi push -d 0 ./model.axmodel /tmp/model.axmodel
+
+# 将 0 号 Device 的日志下载到 Host。
+axcl-smi pull -d 0 /tmp/runtime.log ./runtime.log
+```
+
+递归传输目录时必须显式添加 `-r` 或 `--recursive`：
+
+```bash
+axcl-smi push -d 0 -r ./assets /tmp/deploy
+axcl-smi pull -d 0 --recursive /tmp/deploy/assets ./download
+```
+
+目录目标路径、单文件 4 GiB 上限、32 MiB 分片和错误处理遵循[文件接口](../develop/c/file_api.md)。`push` 未添加 `-r` 时只接受 Host 普通文件；`pull` 的源路径位于 Device，由 `-r` 明确选择文件或目录传输。该命令不启动 Userworker，要求 Host Runtime 与 Device `slave_worker` 使用配套版本。
+
+## 4. 模型跑分
 
 `axcl_run_model` 可用于加载 `.axmodel` 模型并统计推理耗时，其中 `-m` 指定模型文件，`-r` 指定重复运行次数：
 
@@ -57,4 +85,3 @@ root:/# axcl_run_model -m yolov5s.axmodel -r 100
    5% =   7.796 ms   90% =   7.808 ms   95% =   7.832 ms     99% =   7.929 ms
   ---------------------------------------------------------------------------
 ```
-

@@ -10,3 +10,4 @@ This section collects architecture notes and language-specific development inter
 	build/index
 	c/index
 	python/index
+	tools/index

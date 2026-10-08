@@ -73,8 +73,9 @@ Current config file:
 
 Current behavior:
 
-- The generator supports group-level blacklist control.
-- A blacklisted group is excluded from generated API pages.
+- The generator supports group-level blacklist control for functions and reference symbols.
+- Functions and reference symbols with an explicit `@ingroup` for a blacklisted group are excluded from generated Markdown.
+- Reference symbols without any `@ingroup` remain in the generated reference pages.
 - The default config contains `mockApi`.
 
 Config example:
@@ -104,7 +105,7 @@ Main summary:
 
 Detailed reports:
 
-- `excluded_by_config.tsv`: APIs filtered out by blacklist config.
+- `excluded_by_config.tsv`: functions and reference symbols filtered out by blacklist config.
 - `undefined_defgroup.tsv`: symbols that reference an undefined `@ingroup`.
 - `orphaned_symbol.tsv`: public functions that were not assigned to any generated API group.
 - `unsupported_symbol_kind.tsv`: top-level symbol kinds currently skipped by the renderer.

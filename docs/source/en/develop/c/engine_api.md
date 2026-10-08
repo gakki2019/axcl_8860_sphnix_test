@@ -7,8 +7,8 @@
 - [axclrtEngineDestroyIO](#axclrtEngineDestroyIO): Destroy an IO binding object created by [axclrtEngineCreateIO](#axclrtEngineCreateIO).
 - [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo): Destroy an IO metadata object created by [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo).
 - [axclrtEngineExecute](#axclrtEngineExecute): Execute model inference synchronously on the current runtime Context's default Stream.
-- [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync): Submit model inference to a Stream.
-- [axclrtEngineFinalize](#axclrtEngineFinalize): Finalize Engine on the device associated with the current Context.
+- [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync): Submit a model inference task to a Stream.
+- [axclrtEngineFinalize](#axclrtEngineFinalize): Deinitialize Engine on the device associated with the current Context.
 - [axclrtEngineGetAffinity](#axclrtEngineGetAffinity): Get the NPU-core affinity mask of a loaded model.
 - [axclrtEngineGetContextAffinity](#axclrtEngineGetContextAffinity): Get affinity for one Engine Context; this operation is currently unsupported.
 - [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo): Create a Host-side metadata object describing a loaded model's inputs and outputs.
@@ -16,10 +16,10 @@
 - [axclrtEngineGetInputBufferByName](#axclrtEngineGetInputBufferByName): Get the buffer binding stored for an input tensor name.
 - [axclrtEngineGetInputDataLayout](#axclrtEngineGetInputDataLayout): Get the data layout of an input tensor.
 - [axclrtEngineGetInputDataType](#axclrtEngineGetInputDataType): Get the data type of an input tensor.
-- [axclrtEngineGetInputDims](#axclrtEngineGetInputDims): Get the dimensions of one input tensor and shape group.
+- [axclrtEngineGetInputDims](#axclrtEngineGetInputDims): Get the dimensions of an input tensor in the specified shape group.
 - [axclrtEngineGetInputIndexByName](#axclrtEngineGetInputIndexByName): Find an input tensor index by name.
 - [axclrtEngineGetInputNameByIndex](#axclrtEngineGetInputNameByIndex): Get an input tensor name by index.
-- [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex): Get the required buffer size for one model input and shape group.
+- [axclrtEngineGetInputSizeByIndex](#axclrtEngineGetInputSizeByIndex): Get the required buffer size for a model input in the specified shape group.
 - [axclrtEngineGetModelCompilerVersion](#axclrtEngineGetModelCompilerVersion): Get the compiler toolchain version stored in a loaded model.
 - [axclrtEngineGetModelType](#axclrtEngineGetModelType): Get the core-count classification of a model file.
 - [axclrtEngineGetModelTypeFromMem](#axclrtEngineGetModelTypeFromMem): Get the core-count classification of model data stored in Device memory.
@@ -30,10 +30,10 @@
 - [axclrtEngineGetOutputBufferByName](#axclrtEngineGetOutputBufferByName): Get the buffer binding stored for an output tensor name.
 - [axclrtEngineGetOutputDataLayout](#axclrtEngineGetOutputDataLayout): Get the data layout of an output tensor.
 - [axclrtEngineGetOutputDataType](#axclrtEngineGetOutputDataType): Get the data type of an output tensor.
-- [axclrtEngineGetOutputDims](#axclrtEngineGetOutputDims): Get the dimensions of one output tensor and shape group.
+- [axclrtEngineGetOutputDims](#axclrtEngineGetOutputDims): Get the dimensions of an output tensor in the specified shape group.
 - [axclrtEngineGetOutputIndexByName](#axclrtEngineGetOutputIndexByName): Find an output tensor index by name.
 - [axclrtEngineGetOutputNameByIndex](#axclrtEngineGetOutputNameByIndex): Get an output tensor name by index.
-- [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex): Get the required buffer size for one model output and shape group.
+- [axclrtEngineGetOutputSizeByIndex](#axclrtEngineGetOutputSizeByIndex): Get the required buffer size for a model output in the specified shape group.
 - [axclrtEngineGetShapeGroupsCount](#axclrtEngineGetShapeGroupsCount): Get the number of shape groups described by an IO metadata object.
 - [axclrtEngineGetUsage](#axclrtEngineGetUsage): Get Engine memory usage for a model file.
 - [axclrtEngineGetUsageFromMem](#axclrtEngineGetUsageFromMem): Get Engine memory usage for model data stored in Device memory.
@@ -214,7 +214,7 @@ The caller must bind valid buffers of the required sizes and keep the model, Eng
 
 ### axclrtEngineExecuteAsync
 
-Submit model inference to a Stream.
+Submit a model inference task to a Stream.
 
 #### Function
 
@@ -252,7 +252,7 @@ A successful return does not mean inference has completed. Keep the model, Engin
 
 ### axclrtEngineFinalize
 
-Finalize Engine on the device associated with the current Context.
+Deinitialize Engine on the device associated with the current Context.
 
 #### Function
 
@@ -266,12 +266,12 @@ N/A
 
 #### Returns
 
-- `AXCL_SUCC`: Engine was finalized successfully.
+- `AXCL_SUCC`: Engine was deinitialized successfully.
 - `others`: Failure.
 
 #### Note
 
-Complete all asynchronous inference and unload all models before finalizing Engine. After finalization, model and Engine Context IDs from this device must no longer be used. Host-side IO metadata and binding objects remain owned by the caller and must still be destroyed with their corresponding destroy functions.
+Complete all asynchronous inference and unload all models before deinitializing Engine. After deinitialization, model and Engine Context IDs from this device must no longer be used. Host-side IO metadata and binding objects remain owned by the caller and must still be destroyed with their corresponding destroy functions.
 
 <br>
 
@@ -490,7 +490,7 @@ AXCL_EXPORT axclError axclrtEngineGetInputDataType(axclrtEngineIOInfo ioInfo, ui
 
 ### axclrtEngineGetInputDims
 
-Get the dimensions of one input tensor and shape group.
+Get the dimensions of an input tensor in the specified shape group.
 
 #### Function
 
@@ -577,7 +577,7 @@ AXCL_EXPORT const char* axclrtEngineGetInputNameByIndex(axclrtEngineIOInfo ioInf
 
 ### axclrtEngineGetInputSizeByIndex
 
-Get the required buffer size for one model input and shape group.
+Get the required buffer size for a model input in the specified shape group.
 
 #### Function
 
@@ -876,7 +876,7 @@ AXCL_EXPORT axclError axclrtEngineGetOutputDataType(axclrtEngineIOInfo ioInfo, u
 
 ### axclrtEngineGetOutputDims
 
-Get the dimensions of one output tensor and shape group.
+Get the dimensions of an output tensor in the specified shape group.
 
 #### Function
 
@@ -963,7 +963,7 @@ AXCL_EXPORT const char* axclrtEngineGetOutputNameByIndex(axclrtEngineIOInfo ioIn
 
 ### axclrtEngineGetOutputSizeByIndex
 
-Get the required buffer size for one model output and shape group.
+Get the required buffer size for a model output in the specified shape group.
 
 #### Function
 

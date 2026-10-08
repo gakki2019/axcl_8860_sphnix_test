@@ -2,9 +2,13 @@
 
 This document describes how to build the out-of-tree kernel modules under `axcl/drv/`.
 
-Current top-level default modules:
+Current top-level default modules (built in dependency order):
+- `ax_pcieh_core`
+- `ax_pcieh_xfer`
+- `ax_pcieh_dbg`
 - `ax_comm`
 - `axcl_rt`
+- `ax_vtty`
 
 ## 1. Environment Dependencies
 
@@ -62,11 +66,11 @@ Build and install against the in-repository arm64 kernel build output:
 ```bash
 cd axcl/drv/build
 make ARCH=arm64 \
-  CROSS_COMPILE=/usr/local/gcc-linaro-14.0.0-2023.06-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu- \
+  CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- \
   KERNEL_DIR=../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
   clean && \
 make ARCH=arm64 \
-  CROSS_COMPILE=/usr/local/gcc-linaro-14.0.0-2023.06-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu- \
+  CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- \
   KERNEL_DIR=../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
   all install
 ```
@@ -74,39 +78,57 @@ make ARCH=arm64 \
 ```{note}
 - `KERNEL_DIR` is interpreted relative to the current working directory.
 - `KERNEL_VER` first reads `$(KERNEL_DIR)/include/config/kernel.release`.
-- When building from a single module subdirectory, pass the kernel build output path relative to that subdirectory.
+- When building from a single module subdirectory, the relative depth to the kernel build output differs per module (for example `axcl/drv/src/comm` is one level shallower than `axcl/drv/src/pcie/host/core`). Prefer passing an absolute `KERNEL_DIR` so the same command works from any module directory; if you use a relative path, adjust the number of `../` segments to match the subdirectory depth.
 ```
 
-For example, from `axcl/drv/src/comm`:
+For example, from `axcl/drv/src/comm`, using an absolute `KERNEL_DIR`:
 
 ```bash
 cd axcl/drv/src/comm
 make ARCH=arm64 \
-  CROSS_COMPILE=/usr/local/gcc-linaro-14.0.0-2023.06-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu- \
-  KERNEL_DIR=../../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
+  CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- \
+  KERNEL_DIR=$(pwd)/../../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
   clean && \
 make ARCH=arm64 \
-  CROSS_COMPILE=/usr/local/gcc-linaro-14.0.0-2023.06-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu- \
-  KERNEL_DIR=../../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
+  CROSS_COMPILE=/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- \
+  KERNEL_DIR=$(pwd)/../../../../build/out/AX8860_emmc_glibc/objs/kernel/linux/linux-6.6.105 \
   all install
 ```
+
+The same absolute `KERNEL_DIR` also works from a deeper module directory such as `axcl/drv/src/pcie/host/core`, whereas a relative path there would need `../../../../../../build/...` instead.
 
 ## 5. Output Directory
 
 ```text
 axcl/drv/build/
 ├── out/<arch>-<kernel>/
+│   ├── ax_pcieh_core/
+│   │   └── ax_pcieh_core.ko
+│   ├── ax_pcieh_xfer/
+│   │   └── ax_pcieh_xfer.ko
+│   ├── ax_pcieh_dbg/
+│   │   └── ax_pcieh_dbg.ko
 │   ├── ax_comm/
 │   │   └── ax_comm.ko
-│   └── axcl_rt/
-│       └── axcl_rt.ko
+│   ├── axcl_rt/
+│   │   └── axcl_rt.ko
+│   └── ax_vtty/
+│       └── ax_vtty.ko
 └── ko/<arch>-<kernel>/
     ├── debug/
+    │   ├── ax_pcieh_core.ko
+    │   ├── ax_pcieh_xfer.ko
+    │   ├── ax_pcieh_dbg.ko
     │   ├── ax_comm.ko
-    │   └── axcl_rt.ko
+    │   ├── axcl_rt.ko
+    │   └── ax_vtty.ko
     └── release/
+        ├── ax_pcieh_core.ko
+        ├── ax_pcieh_xfer.ko
+        ├── ax_pcieh_dbg.ko
         ├── ax_comm.ko
-        └── axcl_rt.ko
+        ├── axcl_rt.ko
+        └── ax_vtty.ko
 ```
 
 The `debug/` directory stores unstripped modules, and the `release/` directory stores modules after `strip --strip-debug`.
