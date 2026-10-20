@@ -13,6 +13,8 @@ This page summarizes the environment variables supported by the AXCL SDK and too
 | [AXCL_HOST_CONSOLE_LEVEL](#AXCL_HOST_CONSOLE_LEVEL) | Host SDK | Sets the Host console level. |
 | [AXCL_DEVICE_WORKER_LOGFILE_LEVEL](#AXCL_DEVICE_WORKER_LOGFILE_LEVEL) | Host SDK | Sets the Device worker log file level (passed to the worker). |
 | [AXCL_DEVICE_WORKER_CONSOLE_LEVEL](#AXCL_DEVICE_WORKER_CONSOLE_LEVEL) | Host SDK | Sets the Device worker console level (passed to the worker). |
+| [AXCL_HOST_TICK_MASK](#AXCL_HOST_TICK_MASK) | Host SDK | Sets the category mask of Host API latency ticks. |
+| [AXCL_DEVICE_WORKER_TICK_MASK](#AXCL_DEVICE_WORKER_TICK_MASK) | Host SDK | Sets the category mask of Device worker latency ticks (passed to the worker). |
 | [AXCL_DEVICE_DAEMON_LOG_LEVEL](#AXCL_DEVICE_DAEMON_LOG_LEVEL) | slave_daemon | Sets the slave_daemon log file level. |
 | [AXCL_SHELL_CMD_OUTPUT_LIMIT](#AXCL_SHELL_CMD_OUTPUT_LIMIT) | SDK | Sets the output limit for remote shell commands. |
 | [AXCL_SMI_SHELL_TIMEOUT](#AXCL_SMI_SHELL_TIMEOUT) | `axcl-smi` | Overrides the timeout for remote shell commands. |
@@ -78,6 +80,34 @@ Sets the minimum level of the Device worker log file. This variable is read by t
 ### AXCL_DEVICE_WORKER_CONSOLE_LEVEL
 
 Sets the minimum level of the Device worker console output. This variable is read by the Host and passed to each spawned worker. Uses the same `0` through `6` scale and `warning` (`3`) default as [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL). Console output is not written to the log file. At runtime, use [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) with `AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE`.
+
+<a id="AXCL_HOST_TICK_MASK"></a>
+
+### AXCL_HOST_TICK_MASK
+
+Sets the category mask of Host API latency ticks, read in [axclInit](../develop/c/system_api.md#axclInit). Accepts a decimal or `0x`-prefixed hexadecimal integer from `0` through `0xFF`; unset, empty, invalid, or out-of-range values mean `0` (disabled).
+
+| Bit | Category | Covered APIs |
+|---|---|---|
+| bit0 | engine | `axclrtEngine*` APIs that send a Device request, such as `axclrtEngineExecute`, `axclrtEngineExecuteAsync`, and `axclrtEngineLoadFromMem` |
+| bit1 | event | `axclrtRecordEvent`, `axclrtStreamWaitEvent[WithTimeout]`, `axclrtSynchronizeEvent[WithTimeout]` |
+| bit2 | stream | `axclrtSynchronizeStream[WithTimeout]` |
+| bit3-7 | Reserved | - |
+
+Each call prints one stderr line in the form `[axcl][tick] <func> dur=<us>us enter=<tick> exit=<tick> freq=<Hz>Hz`. `enter`/`exit` are raw values of the local counter and cannot be compared with the Device side. An API without a timeout calls its timeout variant, so both print a line and the outer duration includes the inner one.
+
+<a id="AXCL_DEVICE_WORKER_TICK_MASK"></a>
+
+### AXCL_DEVICE_WORKER_TICK_MASK
+
+Sets the category mask of Device worker latency ticks. This variable is read by the Host and passed to each spawned worker; the worker does not read its own environment, so no Device configuration change or slave_daemon restart is needed. Uses the same value rules as [AXCL_HOST_TICK_MASK](#AXCL_HOST_TICK_MASK); reserved bits are passed through as-is.
+
+| Bit | Category | Covered APIs |
+|---|---|---|
+| bit0 | engine | All worker handlers of `axclrtEngine*` requests, such as `handle_Run` |
+| bit1-7 | Reserved | - |
+
+The worker inherits stderr from slave_daemon: under systemd it goes to the journal (`journalctl -u axcl-slave-daemon`); under inittab it goes to the console.
 
 <a id="AXCL_DEVICE_DAEMON_LOG_LEVEL"></a>
 

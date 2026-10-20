@@ -170,6 +170,12 @@ AXCL_EXPORT axclError axclrtSynchronizeStream(axclrtStream stream);
 - `AXCL_SUCC`: All previously submitted tasks in the Stream completed successfully.
 - `others`: Failure.
 
+#### Note
+
+- Errors of asynchronous tasks submitted to the Stream, such as [axclrtEngineExecuteAsync](engine_api.md#axclrtEngineExecuteAsync), are reported here rather than by the submitting call. This includes a task the Device rejected because the Stream task queue was full. Only the first such error is returned; it is cleared once returned.
+- Once such an error is recorded, tasks in the Stream that have not started yet are skipped until this call returns the error.
+- An AXCL error code raised on the Device carries [AXCL_ID_DEVICE](reference/macro.md#AXCL_ID_DEVICE) in bits [23:16] instead of [AXCL_ID_HOST](reference/macro.md#AXCL_ID_HOST), so it does not equal the same error code macro expanded in the Host application. Compare bits [15:0] to identify it.
+
 #### Remark
 
 - [axclrtSynchronizeStreamWithTimeout](#axclrtSynchronizeStreamWithTimeout)
@@ -203,6 +209,7 @@ AXCL_EXPORT axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, in
 #### Note
 
 - A timeout does not cancel submitted tasks.
+- Errors of asynchronous tasks are reported as described in [axclrtSynchronizeStream](#axclrtSynchronizeStream).
 
 #### Remark
 

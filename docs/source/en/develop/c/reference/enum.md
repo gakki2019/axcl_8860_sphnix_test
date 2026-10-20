@@ -106,8 +106,8 @@ Collective data types. Coverage follows what frameworks actually emit.
 typedef enum axCclDataType {
     AX_CCL_DT_INT8       = 0,
     AX_CCL_DT_UINT8      = 1,
-    AX_CCL_DT_INT16      = 2,   /* reserved */
-    AX_CCL_DT_UINT16     = 3,   /* reserved */
+    AX_CCL_DT_INT16      = 2,
+    AX_CCL_DT_UINT16     = 3,
     AX_CCL_DT_INT32      = 4,
     AX_CCL_DT_UINT32     = 5,
     AX_CCL_DT_INT64      = 6,
@@ -157,7 +157,9 @@ typedef enum axCclRedOp {
     AX_CCL_OP_MIN  = 2,
     AX_CCL_OP_MAX  = 3,
     AX_CCL_OP_AVG  = 4,
-    AX_CCL_OP_BUTT
+    AX_CCL_OP_BUTT,
+    /* Largest legal custom handle. Built-in numbers and BUTT remain unchanged. */
+    AX_CCL_OP_MAX_CUSTOM = 0x7fffffff
 } axCclRedOp;
 ```
 
@@ -171,6 +173,7 @@ typedef enum axCclRedOp {
 | <a id="AX_CCL_OP_MAX"></a>AX_CCL_OP_MAX | 3 | - |
 | <a id="AX_CCL_OP_AVG"></a>AX_CCL_OP_AVG | 4 | - |
 | <a id="AX_CCL_OP_BUTT"></a>AX_CCL_OP_BUTT | - | - |
+| <a id="AX_CCL_OP_MAX_CUSTOM"></a>AX_CCL_OP_MAX_CUSTOM | 0x7fffffff | - |
 
 <br>
 

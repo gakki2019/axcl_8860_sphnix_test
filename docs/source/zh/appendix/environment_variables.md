@@ -13,6 +13,8 @@
 | [AXCL_HOST_CONSOLE_LEVEL](#AXCL_HOST_CONSOLE_LEVEL) | Host SDK | 设置 Host 控制台级别。 |
 | [AXCL_DEVICE_WORKER_LOGFILE_LEVEL](#AXCL_DEVICE_WORKER_LOGFILE_LEVEL) | Host SDK | 设置 Device worker 日志文件级别（下发给 worker）。 |
 | [AXCL_DEVICE_WORKER_CONSOLE_LEVEL](#AXCL_DEVICE_WORKER_CONSOLE_LEVEL) | Host SDK | 设置 Device worker 控制台级别（下发给 worker）。 |
+| [AXCL_HOST_TICK_MASK](#AXCL_HOST_TICK_MASK) | Host SDK | 设置 Host API 耗时打点的类别掩码。 |
+| [AXCL_DEVICE_WORKER_TICK_MASK](#AXCL_DEVICE_WORKER_TICK_MASK) | Host SDK | 设置 Device worker 耗时打点的类别掩码（下发给 worker）。 |
 | [AXCL_DEVICE_DAEMON_LOG_LEVEL](#AXCL_DEVICE_DAEMON_LOG_LEVEL) | slave_daemon | 设置 slave_daemon 日志文件级别。 |
 | [AXCL_SHELL_CMD_OUTPUT_LIMIT](#AXCL_SHELL_CMD_OUTPUT_LIMIT) | SDK | 设置远端 shell 命令的输出上限。 |
 | [AXCL_SMI_SHELL_TIMEOUT](#AXCL_SMI_SHELL_TIMEOUT) | `axcl-smi` | 覆盖远端 shell 命令超时。 |
@@ -78,6 +80,34 @@
 ### AXCL_DEVICE_WORKER_CONSOLE_LEVEL
 
 设置 Device worker 控制台输出的最低级别。该变量由 Host 读取并下发给每个 spawn 的 worker。取值范围与默认值同 [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL)（`0`～`6`，默认 `warning`）。控制台输出不写入日志文件。运行时可用 [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) 配合 `AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE` 动态修改。
+
+<a id="AXCL_HOST_TICK_MASK"></a>
+
+### AXCL_HOST_TICK_MASK
+
+设置 Host 侧 API 耗时打点的类别掩码，在 [axclInit](../develop/c/system_api.md#axclInit) 时读取。取值为十进制或 `0x` 前缀的十六进制整数，范围 `0`～`0xFF`；未设置、空值、无效值或超出范围时为 `0`（关闭）。
+
+| 位 | 类别 | 覆盖接口 |
+|---|---|---|
+| bit0 | engine | 发起 Device 请求的 `axclrtEngine*` 接口，如 `axclrtEngineExecute`、`axclrtEngineExecuteAsync`、`axclrtEngineLoadFromMem` |
+| bit1 | event | `axclrtRecordEvent`、`axclrtStreamWaitEvent[WithTimeout]`、`axclrtSynchronizeEvent[WithTimeout]` |
+| bit2 | stream | `axclrtSynchronizeStream[WithTimeout]` |
+| bit3～7 | 预留 | - |
+
+每次调用向 stderr 输出一行，格式为 `[axcl][tick] <func> dur=<us>us enter=<tick> exit=<tick> freq=<Hz>Hz`。`enter`/`exit` 为本端计数器原始值，不能与 Device 侧比较。不带超时的接口内部调用带超时的版本，两者会各输出一行，外层耗时包含内层。
+
+<a id="AXCL_DEVICE_WORKER_TICK_MASK"></a>
+
+### AXCL_DEVICE_WORKER_TICK_MASK
+
+设置 Device worker 耗时打点的类别掩码。该变量由 Host 读取并下发给每个 spawn 的 worker；worker 不读取自身环境，因此无需修改 Device 配置或重启 slave_daemon。取值规则同 [AXCL_HOST_TICK_MASK](#AXCL_HOST_TICK_MASK)，预留位原样下发。
+
+| 位 | 类别 | 覆盖接口 |
+|---|---|---|
+| bit0 | engine | worker 中处理 `axclrtEngine*` 请求的全部 handler，如 `handle_Run` |
+| bit1～7 | 预留 | - |
+
+worker 的 stderr 继承自 slave_daemon：systemd 环境进入 journal（`journalctl -u axcl-slave-daemon`），inittab 环境输出到控制台。
 
 <a id="AXCL_DEVICE_DAEMON_LOG_LEVEL"></a>
 

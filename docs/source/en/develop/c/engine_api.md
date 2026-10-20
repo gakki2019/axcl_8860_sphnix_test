@@ -239,7 +239,8 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contex
 
 #### Note
 
-A successful return does not mean inference has completed. Keep the model, Engine Context, and all bound Device buffers valid until the Stream completes, and synchronize the Stream to obtain execution errors.
+- A successful return means the request was sent to the Device, not that inference has completed or that the Device has accepted it. Keep the model, Engine Context, and all bound Device buffers valid until the Stream completes.
+- Errors detected on the Device, including a rejection because the Stream task queue is full, are returned by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) or [axclrtSynchronizeStreamWithTimeout](stream_api.md#axclrtSynchronizeStreamWithTimeout) on the Stream.
 
 #### Remark
 

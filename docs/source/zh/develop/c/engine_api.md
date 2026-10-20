@@ -239,7 +239,8 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contex
 
 #### 2.6.4. 说明
 
-成功返回仅表示推理任务已提交，不表示推理已经完成。在 Stream 完成前，必须确保模型、Engine Context 和所有已绑定的 Device 缓冲区始终有效；同步 Stream 后可获取推理执行阶段的错误。
+- 成功返回仅表示请求已发送到 Device，不表示推理已经完成，也不表示 Device 已接受该请求。在 Stream 完成前，必须确保模型、Engine Context 和所有已绑定的 Device 缓冲区始终有效。
+- Device 侧检测到的错误（包括 Stream 任务队列已满导致请求被拒绝）由该 Stream 的下一次 [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) 或 [axclrtSynchronizeStreamWithTimeout](stream_api.md#axclrtSynchronizeStreamWithTimeout) 返回。
 
 #### 2.6.5. 参考
 

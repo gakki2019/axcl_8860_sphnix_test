@@ -170,7 +170,13 @@ AXCL_EXPORT axclError axclrtSynchronizeStream(axclrtStream stream);
 - `AXCL_SUCC`：Stream 中此前提交的所有任务均成功完成。
 - 其他错误：失败。
 
-#### 2.5.4. 参考
+#### 2.5.4. 说明
+
+- 提交到 Stream 的异步任务（如 [axclrtEngineExecuteAsync](engine_api.md#axclrtEngineExecuteAsync)）出错时，错误由本接口返回，而不是由提交接口返回。其中包括 Stream 任务队列已满、任务被 Device 拒绝的情况。只返回第一个此类错误，返回后即清除。
+- 记录到此类错误后，Stream 中尚未开始执行的任务都会被跳过，直到本接口返回该错误。
+- Device 侧产生的 AXCL 错误码 bit[23:16] 为 [AXCL_ID_DEVICE](reference/macro.md#AXCL_ID_DEVICE)，而不是 [AXCL_ID_HOST](reference/macro.md#AXCL_ID_HOST)，因此与 Host 应用中展开的同名错误码宏不相等。判断错误类型时请比较 bit[15:0]。
+
+#### 2.5.5. 参考
 
 - [axclrtSynchronizeStreamWithTimeout](#axclrtSynchronizeStreamWithTimeout)
 
@@ -203,6 +209,7 @@ AXCL_EXPORT axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, in
 #### 2.6.4. 说明
 
 - 等待超时不会取消已提交的任务。
+- 异步任务错误的上报方式与 [axclrtSynchronizeStream](#axclrtSynchronizeStream) 相同。
 
 #### 2.6.5. 参考
 
