@@ -557,10 +557,9 @@ Mem malloc policy enum.
 
 ```c
 typedef enum axclrtMemMallocPolicy {
-    AXCL_MEM_MALLOC_HUGE_FIRST      = 0,  /*!< Huge first */
-    AXCL_MEM_MALLOC_HUGE_ONLY       = 1,  /*!< Huge only */
-    AXCL_MEM_MALLOC_NORMAL_ONLY     = 2,  /*!< Normal only */
-    AXCL_MEM_MALLOC_SIZE_ALIGN      = 3   /*!< Size aligned */
+    AXCL_MEM_MALLOC_HUGE_FIRST      = 0,  /*!< 128-byte aligned; currently the same as the other page policies */
+    AXCL_MEM_MALLOC_HUGE_ONLY       = 1,  /*!< 128-byte aligned; currently the same as the other page policies */
+    AXCL_MEM_MALLOC_NORMAL_ONLY     = 2   /*!< 128-byte aligned; currently the same as the other page policies */
 } axclrtMemMallocPolicy;
 ```
 
@@ -568,10 +567,9 @@ typedef enum axclrtMemMallocPolicy {
 
 | Symbol | Value | Description |
 |---|---|---|
-| <a id="AXCL_MEM_MALLOC_HUGE_FIRST"></a>AXCL_MEM_MALLOC_HUGE_FIRST | 0 | Huge first |
-| <a id="AXCL_MEM_MALLOC_HUGE_ONLY"></a>AXCL_MEM_MALLOC_HUGE_ONLY | 1 | Huge only |
-| <a id="AXCL_MEM_MALLOC_NORMAL_ONLY"></a>AXCL_MEM_MALLOC_NORMAL_ONLY | 2 | Normal only |
-| <a id="AXCL_MEM_MALLOC_SIZE_ALIGN"></a>AXCL_MEM_MALLOC_SIZE_ALIGN | 3 | Size aligned |
+| <a id="AXCL_MEM_MALLOC_HUGE_FIRST"></a>AXCL_MEM_MALLOC_HUGE_FIRST | 0 | 128-byte aligned; currently the same as the other page policies |
+| <a id="AXCL_MEM_MALLOC_HUGE_ONLY"></a>AXCL_MEM_MALLOC_HUGE_ONLY | 1 | 128-byte aligned; currently the same as the other page policies |
+| <a id="AXCL_MEM_MALLOC_NORMAL_ONLY"></a>AXCL_MEM_MALLOC_NORMAL_ONLY | 2 | 128-byte aligned; currently the same as the other page policies |
 
 <br>
 

@@ -4,7 +4,7 @@
 
 ## AXCLRT_ENGINE_MAX_DIM_CNT
 
-Maximum number of dimensions supported by an engine tensor.
+Capacity of the dimension array in [axclrtEngineIODims](struct.md#axclrtEngineIODims).
 
 ```c
 #define AXCLRT_ENGINE_MAX_DIM_CNT 32
@@ -132,6 +132,8 @@ Compose error code.
 |------------------------------------------------------------------------|
 |1|<--- 7bits  --->|<---- 8bits ---->|<---- 8bits ---->|<---- 8bits ---->|
 ```
+
+Bit 31 is set and the FIXED bits are zero. [AX_ID_AXCL](#AX_ID_AXCL) is [AXCL_ID_HOST](#AXCL_ID_HOST) in Host builds and [AXCL_ID_DEVICE](#AXCL_ID_DEVICE) in Device builds, so the same error raised on the Device differs only in bits [23:16].
 
 ```c
 #define AXCL_DEF_ERR(sub, errid) ((axclError)((0x80000000L) | ((AX_ID_AXCL) << 16 ) | ((sub) << 8) | (errid)))
@@ -419,7 +421,9 @@ Worker sub module ID.
 
 ## AX_CCL_IN_PLACE
 
-Sentinel passed as `sendbuff` for collectives that do not take a send buffer (e.g. in-place [axCclAllGather](../axccl_api.md#axCclAllGather) / [axCclReduceScatter](../axccl_api.md#axCclReduceScatter) / [axCclGather](../axccl_api.md#axCclGather) / [axCclScatter](../axccl_api.md#axCclScatter) / [axCclAllToAll](../axccl_api.md#axCclAllToAll)).
+Sentinel that requests an in-place operation.
+
+Pass it as `sendbuff` of [axCclAllReduce](../axccl_api.md#axCclAllReduce), [axCclReduce](../axccl_api.md#axCclReduce), [axCclBroadcast](../axccl_api.md#axCclBroadcast), [axCclAllGather](../axccl_api.md#axCclAllGather), [axCclReduceScatter](../axccl_api.md#axCclReduceScatter), [axCclGather](../axccl_api.md#axCclGather) (root only), [axCclAllToAll](../axccl_api.md#axCclAllToAll) or [axCclAllToAllV](../axccl_api.md#axCclAllToAllV); the input is then read from `recvbuff` (for AllGather/Gather, from this rank's slice of `recvbuff`). For [axCclScatter](../axccl_api.md#axCclScatter), only the root may pass it, as `recvbuff`. Every other use, including [axCclSend](../axccl_api.md#axCclSend) / [axCclRecv](../axccl_api.md#axCclRecv), is rejected.
 
 ```c
 #define AX_CCL_IN_PLACE ((const void *)(-1L))

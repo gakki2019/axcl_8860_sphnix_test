@@ -11,3 +11,4 @@
 	c/index
 	python/index
 	tools/index
+	debug/index

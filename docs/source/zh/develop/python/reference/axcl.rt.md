@@ -418,7 +418,7 @@ const char * axclrtGetErrorString(axclError error);
 
 #### 2.7.3. 返回值
 
-- `result`: *str* — 错误说明字符串。未知的 AXCL 错误格式化为 `unknown error code 0xXXXXXXXX`。外部模块的错误包含原始错误码和模块 ID。
+- `result`: *str* — 错误说明字符串。没有专用描述、但子模块可识别且通用错误号有对应描述的 AXCL 错误格式化为 `<模块名>: <通用描述>`，例如 `Runtime: Native operation failed without detailed error information.`。其余 AXCL 错误格式化为 `unknown error code 0xXXXXXXXX`。外部模块的错误包含原始错误码和模块 ID。
 
 #### 2.7.4. 说明
 
@@ -1744,7 +1744,7 @@ axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet set);
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
-| set | int | 使用位索引 0 至 2 的非零亲和性掩码；有效值为 0x1 至 0x7。 |
+| set | int | 使用位索引 0 至 7 的非零亲和性掩码；有效值为 0x1 至 0xFF。设备可能根据芯片模式或模型类型施加额外限制。 |
 
 #### 2.37.3. 返回值
 
@@ -4253,7 +4253,7 @@ axclError axclrtMalloc(void **devPtr, size_t size, axclrtMemMallocPolicy policy)
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| size | int | 要分配的字节数。支持的范围为 1 至 UINT32_MAX。 |
+| size | int | 要分配的字节数，至少为 1，且不得超过 Device 侧 CMM 单次分配上限。 |
 | policy | int | Device 内存分配策略。 |
 
 #### 2.92.3. 返回值
@@ -4299,7 +4299,7 @@ axclError axclrtMallocCached(void **devPtr, size_t size, axclrtMemMallocPolicy p
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| size | int | 要分配的字节数。支持的范围为 1 至 UINT32_MAX。 |
+| size | int | 要分配的字节数，至少为 1，且不得超过 Device 侧 CMM 单次分配上限。 |
 | policy | int | Device 内存分配策略。 |
 
 #### 2.93.3. 返回值
@@ -4390,7 +4390,7 @@ axclError axclrtMemFlush(void *devPtr, size_t size);
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | dev_ptr | int &#124; None | 范围起始处的 Device 内存地址。 |
-| size | int | 要刷新的字节数。支持的范围为 1 至 UINT32_MAX。 |
+| size | int | 要刷新的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 
 #### 2.95.3. 返回值
 
@@ -4435,7 +4435,7 @@ axclError axclrtMemInvalidate(void *devPtr, size_t size);
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | dev_ptr | int &#124; None | 待失效范围起始处的 Device 物理内存地址。 |
-| size | int | 要处理的字节数。支持的范围为 1 至 UINT32_MAX。 |
+| size | int | 要处理的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 
 #### 2.96.3. 返回值
 
@@ -4570,7 +4570,7 @@ axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 |---|---|---|
 | dev_ptr | int &#124; None | 开始写入的 Device 内存地址。 |
 | value | int | 要写入的字节值。 |
-| count | int | 要设置的字节数。支持的范围为 1 至 UINT32_MAX。 |
+| count | int | 要设置的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 
 #### 2.99.3. 返回值
 
@@ -4663,7 +4663,7 @@ axclError axclrtMemcmp(const void *devPtr1, const void *devPtr2, size_t count);
 |---|---|---|
 | dev_ptr1 | int &#124; None | 第一个 Device 内存范围的地址。 |
 | dev_ptr2 | int &#124; None | 第二个 Device 内存范围的地址。 |
-| count | int | 要比较的字节数。支持的范围为 1 至 UINT32_MAX。 |
+| count | int | 要比较的字节数，至少为 1，且每个范围都必须位于一块已分配的 Device 内存内。 |
 
 #### 2.101.3. 返回值
 
@@ -4709,7 +4709,7 @@ axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t count, axclrtStr
 |---|---|---|
 | dev_ptr | int &#124; None | 开始写入的 Device 内存地址。 |
 | value | int | 要写入的字节值。 |
-| count | int | 要设置的字节数。支持的范围为 1 至 UINT32_MAX。 |
+| count | int | 要设置的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 | stream | int &#124; None | 接收操作的 Stream。 |
 
 #### 2.102.3. 返回值
@@ -4810,7 +4810,7 @@ axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2, size_t cou
 |---|---|---|
 | dev_ptr1 | int &#124; None | 第一个 Device 内存范围的地址。 |
 | dev_ptr2 | int &#124; None | 第二个 Device 内存范围的地址。 |
-| count | int | 要比较的字节数。支持的范围为 1 至 UINT32_MAX。 |
+| count | int | 要比较的字节数，至少为 1，且每个范围都必须位于一块已分配的 Device 内存内。 |
 | stream | int &#124; None | 接收比较操作的 Stream。 |
 
 #### 2.104.3. 返回值

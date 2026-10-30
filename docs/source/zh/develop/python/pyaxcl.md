@@ -80,7 +80,7 @@ pyAXCL 提供 Runtime 接口和 Native 接口，主要模块与用途如下。
 | `axcl` | AXCL 初始化、去初始化、应用日志接口，以及公共类型和常量。 |
 | `axcl.rt` | Runtime 接口，包括设备选择、线程 context、Host/Device 内存申请与拷贝、C2C DMA、userworker，以及 NPU 模型加载与推理。 |
 | `axcl.sys` | SYS 系统接口，包括内存申请与释放、模块 link/unlink。 |
-| `axcl.sys.ax_pool` | POOL 内存池接口，包括公共池和私有池的配置、创建、内存块申请与释放。 |
+| `axcl.pool` | POOL 内存池接口，包括公共池和私有池的配置、创建、内存块申请与释放。 |
 | `axcl.engine` | Native ENGINE 模型推理接口，包括模型加载、输入输出信息查询及推理执行。 |
 | `axcl.vdec` | H.264/H.265 视频解码和 JPEG 解码接口。 |
 | `axcl.venc` | 将 NV12 图像编码为 H.264/H.265 或 JPEG 的接口。 |

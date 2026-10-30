@@ -31,7 +31,7 @@ The Host-Device boundary is reflected in the following aspects:
 - The Host-side runtime library manages runtime objects and cross-end channels;
 - The Device-side execution environment receives Host requests and calls the local NATIVE SDK to access hardware resources;
 - Host / Device data exchange is completed through the runtime library's data movement capability and communication channels;
-- A successful return from an asynchronous API usually means that the task has been submitted to the runtime or cross-end channel. Task completion must be confirmed through synchronization or status query mechanisms provided by the runtime library.
+- A successful return from an asynchronous API means the task has been submitted, not that it has completed. Task completion and execution errors must be obtained through the synchronization or status query APIs of the runtime library.
 
 ## 2. HOST-side Components
 
@@ -55,8 +55,8 @@ The DEVICE side receives and processes requests from the Host, accesses hardware
 
 | Component | Role |
 |---|---|
-| Device control driver | `axcl_dev.ko`, receiving Host-side control requests and reporting Device status. |
-| Worker monitor driver | `axcl_wk_monitor.ko`, monitoring the lifecycle of Worker processes. |
+| Device control driver | `axcl_dev.ko`, passing Host-side control requests to the daemon and reporting Device and Worker status to the Host. |
+| Worker monitor driver | `axcl_wk_monitor.ko`, monitoring the lifecycle of Worker processes and reporting their exit status. |
 | Communication transport driver | `ax_comm.ko`, providing Device-side cross-end messages and DMA channels. |
 | Protocol / communication libraries | `libax_protocol.so` and `libax_comm.so`, parsing requests, packaging responses, and supporting cross-end transport. |
 | Daemon process | `slave_daemon`, a resident Device-side process that receives control requests and manages Worker lifecycles. |
@@ -66,21 +66,23 @@ The DEVICE side receives and processes requests from the Host, accesses hardware
 
 ## 4. App Start and Exit
 
-After the Device system starts, the resident daemon process `slave_daemon` starts running. When a Host application starts and activates a Device for the first time, AXCL creates the corresponding `slave_worker` on that Device. After activation, the Host application communicates with the corresponding `slave_worker` through a dedicated communication channel.
+After the Device system starts, the resident daemon process `slave_daemon` starts running. [axclInit](../c/system_api.md#axclInit) only detects Devices; no worker is created yet. When a Host process activates a Device for the first time, through [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) or [axclrtCreateContext](../c/context_api.md#axclrtCreateContext), `slave_daemon` starts a `slave_worker` for that process on that Device. After activation, the Host process communicates with its `slave_worker` through a dedicated communication channel.
 
 ```{image} ../../asserts/app_start.svg
 :alt: App start sequence
 :align: center
 ```
 
-When a Host application releases a Device or exits normally, AXCL sends a release request to the Device side. `slave_daemon` terminates the corresponding `slave_worker` and reports the exit status back to the Host side through the control link.
+When a Host process finally releases a Device with [axclrtResetDevice](../c/device_api.md#axclrtResetDevice) or [axclrtResetDeviceForce](../c/device_api.md#axclrtResetDeviceForce), or calls [axclFinalize](../c/system_api.md#axclFinalize), AXCL sends a release request to the Device and waits until the worker has exited. `slave_daemon` terminates the corresponding `slave_worker`, and the Device-side driver reports the worker's exit to the Host. If the Host process exits without releasing the Device, the Host driver closes its channels and the Device reclaims the worker in the same way.
+
+If a `slave_worker` exits unexpectedly while the Device is still in use, AXCL marks the Device offline for that Host process, fails its unfinished tasks, and notifies the callback registered by [axclrtRegDeviceStateCallback](../c/device_api.md#axclrtRegDeviceStateCallback).
 
 ```{image} ../../asserts/app_exit.svg
 :alt: App exit sequence
 :align: center
 ```
 
-The two diagrams summarize the main process of establishing a corresponding Worker when a Host application activates a Device and reclaiming that Worker when the Device is released.
+The two diagrams summarize how a Worker is started when a Host process activates a Device and reclaimed when the Device is released.
 
 ## 5. Multi-process Support
 

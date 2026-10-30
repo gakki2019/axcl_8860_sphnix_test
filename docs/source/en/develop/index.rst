@@ -11,3 +11,4 @@ This section collects architecture notes and language-specific development inter
 	c/index
 	python/index
 	tools/index
+	debug/index

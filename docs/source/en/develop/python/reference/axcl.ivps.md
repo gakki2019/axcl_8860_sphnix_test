@@ -84,8 +84,6 @@ N/A
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1329`.
-
 #### 2.1.5. Example
 
 ```python
@@ -125,8 +123,6 @@ N/A
 #### 2.2.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:1357`.
 
 #### 2.2.5. Example
 
@@ -171,8 +167,6 @@ AX_S32 AX_IVPS_CreateGrp(IVPS_GRP IvpsGrp, const AX_IVPS_GRP_ATTR_T *ptGrpAttr);
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1385`.
-
 #### 2.3.5. Example
 
 ```python
@@ -216,8 +210,6 @@ AX_S32 AX_IVPS_CreateGrpEx(IVPS_GRP *IvpsGrp, const AX_IVPS_GRP_ATTR_T *ptGrpAtt
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1418`.
-
 #### 2.4.5. Example
 
 ```python
@@ -259,8 +251,6 @@ AX_S32 AX_IVPS_DestroyGrp(IVPS_GRP IvpsGrp);
 #### 2.5.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:1452`.
 
 #### 2.5.5. Example
 
@@ -304,8 +294,6 @@ AX_S32 AX_IVPS_StartGrp(IVPS_GRP IvpsGrp);
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1483`.
-
 #### 2.6.5. Example
 
 ```python
@@ -347,8 +335,6 @@ AX_S32 AX_IVPS_StopGrp(IVPS_GRP IvpsGrp);
 #### 2.7.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:1514`.
 
 #### 2.7.5. Example
 
@@ -393,8 +379,6 @@ AX_S32 AX_IVPS_SendFrame(IVPS_GRP IvpsGrp, const AX_VIDEO_FRAME_T *ptFrame, AX_S
 #### 2.8.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:1545`.
 
 #### 2.8.5. Example
 
@@ -441,8 +425,6 @@ AX_S32 AX_IVPS_GetChnFrame(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, AX_VIDEO_FRAME_T 
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1580`.
-
 #### 2.9.5. Example
 
 ```python
@@ -487,8 +469,6 @@ AX_S32 AX_IVPS_ReleaseChnFrame(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, const AX_VIDE
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1618`.
-
 #### 2.10.5. Example
 
 ```python
@@ -531,8 +511,6 @@ AX_S32 AX_IVPS_EnableChn(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn);
 #### 2.11.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:1653`.
 
 #### 2.11.5. Example
 
@@ -577,8 +555,6 @@ AX_S32 AX_IVPS_DisableChn(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn);
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1686`.
-
 #### 2.12.5. Example
 
 ```python
@@ -622,8 +598,6 @@ AX_S32 AX_IVPS_GetChnFd(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn);
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1719`.
-
 #### 2.13.5. Example
 
 ```python
@@ -663,8 +637,6 @@ N/A
 #### 2.14.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:1752`.
 
 #### 2.14.5. Example
 
@@ -709,8 +681,6 @@ AX_S32 AX_IVPS_SetGrpAttr(IVPS_GRP IvpsGrp, const AX_IVPS_GRP_ATTR_T *ptGrpAttr)
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1780`.
-
 #### 2.15.5. Example
 
 ```python
@@ -753,8 +723,6 @@ AX_S32 AX_IVPS_GetGrpAttr(IVPS_GRP IvpsGrp, AX_IVPS_GRP_ATTR_T *ptGrpAttr);
 #### 2.16.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/ivps/ax_ivps.py:1813`.
 
 #### 2.16.5. Example
 
@@ -800,8 +768,6 @@ AX_S32 AX_IVPS_SetChnAttr(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, const AX_IVPS_CHN_
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1847`.
-
 #### 2.17.5. Example
 
 ```python
@@ -846,8 +812,6 @@ AX_S32 AX_IVPS_GetChnAttr(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, AX_IVPS_CHN_ATTR_T
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1882`.
-
 #### 2.18.5. Example
 
 ```python
@@ -891,8 +855,6 @@ AX_S32 AX_IVPS_SetGrpCrop(IVPS_GRP IvpsGrp, const AX_IVPS_CROP_INFO_T *ptCropInf
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1918`.
-
 #### 2.19.5. Example
 
 ```python
@@ -935,8 +897,6 @@ AX_S32 AX_IVPS_GetGrpCrop(IVPS_GRP IvpsGrp, AX_IVPS_CROP_INFO_T *ptCropInfo);
 #### 2.20.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/ivps/ax_ivps.py:1951`.
 
 #### 2.20.5. Example
 
@@ -982,8 +942,6 @@ AX_S32 AX_IVPS_SetChnCrop(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, const AX_IVPS_CROP
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:1985`.
-
 #### 2.21.5. Example
 
 ```python
@@ -1027,8 +985,6 @@ AX_S32 AX_IVPS_GetChnCrop(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, AX_IVPS_CROP_INFO_
 #### 2.22.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/ivps/ax_ivps.py:2020`.
 
 #### 2.22.5. Example
 
@@ -1074,8 +1030,6 @@ AX_S32 AX_IVPS_SetChnCascade(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, AX_BOOL bCascad
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2056`.
-
 #### 2.23.5. Example
 
 ```python
@@ -1118,8 +1072,6 @@ AX_S32 AX_IVPS_SetScaleCoefLevel(const AX_IVPS_SCALE_RANGE_T *ptScaleRange, cons
 #### 2.24.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:2091`.
 
 #### 2.24.5. Example
 
@@ -1164,8 +1116,6 @@ AX_S32 AX_IVPS_GetScaleCoefLevel(const AX_IVPS_SCALE_RANGE_T *ptScaleRange, AX_I
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2124`.
-
 #### 2.25.5. Example
 
 ```python
@@ -1208,8 +1158,6 @@ AX_S32 AX_IVPS_SetPaletteTable(const AX_IVPS_PALETTE_TABLE_T *ptPaletteTable);
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2158`.
-
 #### 2.26.5. Example
 
 ```python
@@ -1250,8 +1198,6 @@ N/A
 #### 2.27.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/ivps/ax_ivps.py:2189`.
 
 #### 2.27.5. Example
 
@@ -1298,8 +1244,6 @@ AX_S32 AX_IVPS_DrawLine(const AX_IVPS_RGN_CANVAS_INFO_T *ptCanvas, AX_IVPS_GDI_A
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2220`.
-
 #### 2.28.5. Example
 
 ```python
@@ -1345,8 +1289,6 @@ AX_S32 AX_IVPS_DrawPolygon(const AX_IVPS_RGN_CANVAS_INFO_T *ptCanvas, AX_IVPS_GD
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2260`.
-
 #### 2.29.5. Example
 
 ```python
@@ -1390,8 +1332,6 @@ AX_S32 AX_IVPS_DrawRect(const AX_IVPS_RGN_CANVAS_INFO_T *ptCanvas, AX_IVPS_GDI_A
 #### 2.30.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:2300`.
 
 #### 2.30.5. Example
 
@@ -1438,8 +1378,6 @@ AX_S32 AX_IVPS_Csc(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSrc, AX_V
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2335`.
-
 #### 2.31.5. Example
 
 ```python
@@ -1484,8 +1422,6 @@ AX_S32 AX_IVPS_CropResize(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSr
 #### 2.32.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:2372`.
 
 #### 2.32.5. Example
 
@@ -1534,8 +1470,6 @@ AX_S32 AX_IVPS_CropResizeV2(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *pt
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2409`.
-
 #### 2.33.5. Example
 
 ```python
@@ -1583,8 +1517,6 @@ AX_S32 AX_IVPS_AlphaBlending(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *p
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2456`.
-
 #### 2.34.5. Example
 
 ```python
@@ -1630,8 +1562,6 @@ AX_S32 AX_IVPS_DrawOsd(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSrc, 
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2499`.
-
 #### 2.35.5. Example
 
 ```python
@@ -1676,8 +1606,6 @@ AX_S32 AX_IVPS_DrawMosaic(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSr
 #### 2.36.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_ivps.py:2539`.
 
 #### 2.36.5. Example
 
@@ -1726,8 +1654,6 @@ AX_S32 AX_IVPS_Rotation(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSrc,
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2579`.
-
 #### 2.37.5. Example
 
 ```python
@@ -1772,8 +1698,6 @@ AX_U64 AX_IVPS_GetBufferSize(AX_U16 uWidth, AX_U16 uHeight, AX_IMG_FORMAT_E eFor
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_ivps.py:2620`.
-
 #### 2.38.5. Example
 
 ```python
@@ -1814,8 +1738,6 @@ N/A
 #### 2.39.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/ivps/ax_rgn.py:151`.
 
 #### 2.39.5. Example
 
@@ -1858,8 +1780,6 @@ AX_S32 AX_RGN_Destroy(AX_RGN_HANDLE hRegion);
 #### 2.40.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_rgn.py:182`.
 
 #### 2.40.5. Example
 
@@ -1904,8 +1824,6 @@ AX_S32 AX_RGN_AttachToChn(AX_RGN_HANDLE hRegion, const AX_MOD_CHN_T *ptRgnChn);
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_rgn.py:213`.
-
 #### 2.41.5. Example
 
 ```python
@@ -1949,8 +1867,6 @@ AX_S32 AX_RGN_DetachFromChn(AX_RGN_HANDLE hRegion, const AX_MOD_CHN_T *pRgnChn);
 
 Return type: `int`.
 
-Source: `python/axcl/ivps/ax_rgn.py:246`.
-
 #### 2.42.5. Example
 
 ```python
@@ -1993,8 +1909,6 @@ AX_S32 AX_RGN_Update(AX_RGN_HANDLE hRegion, const AX_RGN_DISP_GROUP_T *ptDisp);
 #### 2.43.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/ivps/ax_rgn.py:279`.
 
 #### 2.43.5. Example
 

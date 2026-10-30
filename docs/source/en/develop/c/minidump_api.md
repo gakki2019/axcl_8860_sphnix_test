@@ -35,7 +35,7 @@ The selected directory must be writable. If it does not exist, this function cre
 
 1. The [AXCL_DUMP_DIR](../../appendix/environment_variables.md#AXCL_DUMP_DIR) environment variable.
 2. `config->dump_dir`.
-3. The platform default: `/tmp` on Linux.
+3. The platform default: `/tmp` on Linux, or `axcl_dumps` under the user temporary directory on Windows.
 
 #### Note
 
@@ -59,6 +59,8 @@ For more information about minidump, see [Minidump](../../faq/minidump_analysis.
 ### axclUninitializeMinidump
 
 Disable minidump.
+
+After this function returns, a crash no longer generates a `.dmp` file. Calling it when minidump is not enabled has no effect.
 
 #### Function
 

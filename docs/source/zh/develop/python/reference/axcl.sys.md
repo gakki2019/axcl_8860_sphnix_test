@@ -146,14 +146,14 @@ phyaddr, pviraddr, ret = axcl.sys.mem_alloc(size, align, token)
 **C++ 原型**
 
 ```cpp
-AX_S32 AX_SYS_MemAlloc(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U32 size, AX_U32 align, const AX_S8 *token);
+AX_S32 AX_SYS_MemAlloc(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U64 size, AX_U32 align, const AX_S8 *token);
 ```
 
 #### 2.3.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| size | int | 内存大小，单位为字节。 |
+| size | int | 内存大小，单位为字节。上限由内核 `ax_max_malloc_size` 决定，默认为 1 GiB，存在更大分区时提高到最大 CMM 分区大小；超过该上限返回 `AX_ERR_CMM_NOMEM`。 |
 | align | int | 内存对齐要求，单位为字节。当前忽略此参数；SDK 始终按 4 KB 对齐。 |
 | token | str &#124; bytes &#124; None | 分配标识字符串。指定分区使用 "PartitionName:BlockName"，匿名分区使用 "BlockName"。标识字符串长度不得超过 30 字节。 |
 
@@ -194,14 +194,14 @@ phyaddr, pviraddr, ret = axcl.sys.mem_alloc_cached(size, align, token)
 **C++ 原型**
 
 ```cpp
-AX_S32 AX_SYS_MemAllocCached(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U32 size, AX_U32 align, const AX_S8 *token);
+AX_S32 AX_SYS_MemAllocCached(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U64 size, AX_U32 align, const AX_S8 *token);
 ```
 
 #### 2.4.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| size | int | 内存大小，单位为字节。 |
+| size | int | 内存大小，单位为字节。上限由内核 `ax_max_malloc_size` 决定，默认为 1 GiB，存在更大分区时提高到最大 CMM 分区大小；超过该上限返回 `AX_ERR_CMM_NOMEM`。 |
 | align | int | 内存对齐要求，单位为字节。 |
 | token | str &#124; bytes &#124; None | 分配标识字符串。指定分区使用 "PartitionName:BlockName"，匿名分区使用 "BlockName"。标识字符串长度不得超过 30 字节。 |
 
@@ -287,7 +287,7 @@ ret = axcl.sys.mmap(phyaddr, size)
 **C++ 原型**
 
 ```cpp
-AX_VOID * AX_SYS_Mmap(AX_U64 phyaddr, AX_U32 size);
+AX_VOID * AX_SYS_Mmap(AX_U64 phyaddr, AX_U64 size);
 ```
 
 #### 2.6.2. 参数
@@ -332,7 +332,7 @@ ret = axcl.sys.mmap_cache(phyaddr, size)
 **C++ 原型**
 
 ```cpp
-AX_VOID * AX_SYS_MmapCache(AX_U64 phyaddr, AX_U32 size);
+AX_VOID * AX_SYS_MmapCache(AX_U64 phyaddr, AX_U64 size);
 ```
 
 #### 2.7.2. 参数
@@ -377,7 +377,7 @@ ret = axcl.sys.mmap_fast(phyaddr, size)
 **C++ 原型**
 
 ```cpp
-AX_VOID * AX_SYS_MmapFast(AX_U64 phyaddr, AX_U32 size);
+AX_VOID * AX_SYS_MmapFast(AX_U64 phyaddr, AX_U64 size);
 ```
 
 #### 2.8.2. 参数
@@ -422,7 +422,7 @@ ret = axcl.sys.mmap_cache_fast(phyaddr, size)
 **C++ 原型**
 
 ```cpp
-AX_VOID * AX_SYS_MmapCacheFast(AX_U64 phyaddr, AX_U32 size);
+AX_VOID * AX_SYS_MmapCacheFast(AX_U64 phyaddr, AX_U64 size);
 ```
 
 #### 2.9.2. 参数
@@ -467,7 +467,7 @@ ret = axcl.sys.munmap(pviraddr, size)
 **C++ 原型**
 
 ```cpp
-AX_S32 AX_SYS_Munmap(AX_VOID *pviraddr, AX_U32 size);
+AX_S32 AX_SYS_Munmap(AX_VOID *pviraddr, AX_U64 size);
 ```
 
 #### 2.10.2. 参数
@@ -512,7 +512,7 @@ ret = axcl.sys.mflush_cache(phyaddr, pviraddr, size)
 **C++ 原型**
 
 ```cpp
-AX_S32 AX_SYS_MflushCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U32 size);
+AX_S32 AX_SYS_MflushCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U64 size);
 ```
 
 #### 2.11.2. 参数
@@ -558,7 +558,7 @@ ret = axcl.sys.minvalidate_cache(phyaddr, pviraddr, size)
 **C++ 原型**
 
 ```cpp
-AX_S32 AX_SYS_MinvalidateCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U32 size);
+AX_S32 AX_SYS_MinvalidateCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U64 size);
 ```
 
 #### 2.12.2. 参数
@@ -604,7 +604,7 @@ pmem_type, pviraddr, pblock_size, ret = axcl.sys.mem_get_block_info_by_phy(phyad
 **C++ 原型**
 
 ```cpp
-AX_S32 AX_SYS_MemGetBlockInfoByPhy(AX_U64 phyaddr, AX_S32 *pmemType, AX_VOID **pviraddr, AX_U32 *pblockSize);
+AX_S32 AX_SYS_MemGetBlockInfoByPhy(AX_U64 phyaddr, AX_S32 *pmemType, AX_VOID **pviraddr, AX_U64 *pblockSize);
 ```
 
 #### 2.13.2. 参数
@@ -965,7 +965,7 @@ phyaddr, size, ret = axcl.sys.mem_get_max_free_region_info()
 **C++ 原型**
 
 ```cpp
-AX_S32 AX_SYS_MemGetMaxFreeRegionInfo(AX_U64 *pPhyaddr, AX_U32 *pSize);
+AX_S32 AX_SYS_MemGetMaxFreeRegionInfo(AX_U64 *pPhyaddr, AX_U64 *pSize);
 ```
 
 #### 2.21.2. 参数

@@ -4,9 +4,9 @@
 
 在单 SoC 场景中，应用通常面对本地操作系统、本地进程地址空间和本地设备内存层次。AXCL 面向主从架构，Host 侧运行应用和 AXCL runtime，Device 侧提供 AI 计算、媒体处理等硬件能力；两侧地址空间不同，跨端数据访问由 AXCL runtime API 完成。
 
-与单 SoC 场景相比，AXCL 的内存管理更强调 Host 和 Device 之间的边界。Host 虚拟地址、Host 物理地址和 Device 地址具有不同语义，`devPtr` 是传递给 AXCL API 的 Device 内存句柄。
+与单 SoC 场景相比，AXCL 的内存管理更强调 Host 和 Device 之间的边界。Host 虚拟地址和 Device 地址具有不同语义，`devPtr` 是传递给 AXCL API 的不透明 Device 内存句柄，既不是 Host 指针，也不是 Device 地址。
 
-AXCL 提供同步和异步两类拷贝接口，用于在 Host / Device 之间搬运数据。同步拷贝接口返回时，本次拷贝已经完成；异步拷贝接口返回时，只表示拷贝请求已经提交，数据是否可用还需要通过对应的 Stream、Event 或同步接口确认。
+AXCL 提供同步和异步两类拷贝接口，用于在 Host / Device 之间搬运数据。同步拷贝接口返回时，本次拷贝已经完成；异步拷贝接口返回时，拷贝只是已经提交，数据是否可用需要通过对应的 Stream、Event 或 Device 同步接口确认。
 
 ```{image} ../../asserts/memory.svg
 :alt: AXCL Host-Device 内存关系示意图
@@ -22,17 +22,19 @@ AXCL 提供同步和异步两类拷贝接口，用于在 Host / Device 之间搬
 
 ### 1.1. Device 内存
 
-AXCL 提供 [axclrtMalloc](../c/memory_api.md#axclrtMalloc) 和 [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) 在 Device 侧分配内存，并通过 `devPtr` 返回给 Host。Host 侧将 `devPtr` 作为 Device 内存句柄传递给 AXCL runtime API。`devPtr` 的值不是 Device 物理地址，不能直接传给 NATIVE SDK 接口。
+AXCL 提供 [axclrtMalloc](../c/memory_api.md#axclrtMalloc) 和 [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) 在调用线程当前 Context 所属的 Device 上分配内存，并通过 `devPtr` 返回给 Host。Host 将 `devPtr` 作为 Device 内存句柄传递给 AXCL runtime API。`devPtr` 不是 Device 物理地址，不能直接传给 NATIVE SDK 接口；转换方法参见 [外部 Device 内存互操作](memory.md#memory-external-device-memory)。
 
 | 操作 | API | 说明 |
 |---|---|---|
-| 分配 Device 内存 | [axclrtMalloc](../c/memory_api.md#axclrtMalloc) | 分配物理连续 Device 内存 |
-| 分配 cached Device 内存 | [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) | 分配具有 cached 属性的 Device 内存，cached 属性可通过 `axclrtPointerGetAttributes` 查询 |
-| 释放 Device 内存 | [axclrtFree](../c/memory_api.md#axclrtFree) | 释放 `axclrtMalloc` / `axclrtMallocCached` 分配的内存 |
+| 分配 Device 内存 | [axclrtMalloc](../c/memory_api.md#axclrtMalloc) | 分配物理连续 Device 内存。分配的内存不做初始化 |
+| 分配 cached Device 内存 | [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) | 分配具有 cached 属性的物理连续 Device 内存，cached 属性可通过 [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes) 查询。需要时使用 [axclrtMemFlush](../c/memory_api.md#axclrtMemFlush) 和 [axclrtMemInvalidate](../c/memory_api.md#axclrtMemInvalidate) 维护 cache 一致性 |
+| 释放 Device 内存 | [axclrtFree](../c/memory_api.md#axclrtFree) | 释放 `axclrtMalloc` / `axclrtMallocCached` 分配的内存，或释放 `axclrtIpcMemImportByKey` 导入的句柄 |
 
 ```{important}
-- `devPtr` 不是 Host 进程中的有效可访问地址，不能在 Host 侧直接解引用。
-- [axclrtFree](../c/memory_api.md#axclrtFree) 必须传入 [axclrtMalloc](../c/memory_api.md#axclrtMalloc) / [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) 返回的基地址，不接受偏移后的指针。
+- `devPtr` 不是 Host 进程中的可访问地址，不能在 Host 侧解引用。
+- [axclrtFree](../c/memory_api.md#axclrtFree) 必须传入 [axclrtMalloc](../c/memory_api.md#axclrtMalloc) / [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) 返回的基地址句柄，偏移后的指针会被拒绝。
+- 释放本进程分配的内存时，调用线程的当前 Context 必须属于拥有该内存的 Device。
+- 频繁分配和释放会降低性能，建议尽量预先分配内存。
 ```
 
 ### 1.2. Host 内存
@@ -41,13 +43,13 @@ AXCL 提供 [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 在 Host 侧
 
 | 操作 | API | 说明 |
 |---|---|---|
-| 分配 Host 虚拟内存 | [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) | 功能类似标准 `malloc` |
+| 分配 Host 虚拟内存 | [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) | 分配已为 AXCL 数据传输准备好的 Host 内存，Host 访问方式与 `malloc` 分配的内存相同 |
 | 释放 Host 虚拟内存 | [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) | 释放 `axclrtMallocHost` 分配的内存 |
 
 ```{note}
-1. 支持使用标准库 `malloc` 分配的内存用于 Host ↔ Device 拷贝，但推荐使用 [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost)。[axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配的内存性能更优，且可通过 [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes) 查询属性。
-2. Host 内存需要按分配接口配对释放：[axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配的内存使用 [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) 释放；标准库 `malloc` 分配的内存使用标准库 `free` 释放。两类分配和释放接口不能混用。
-3. [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配的内存属于进程级 DMA 会话，分配和释放时都不需要设置当前 Context，但进程内至少需要有一个已打开且可用的设备。该内存可用于进程内任意已打开的设备，在被释放或进程内最后一个已打开的设备被 reset 之前一直有效。
+1. 支持使用标准库 `malloc` 分配的内存用于 Host ↔ Device 拷贝，但推荐使用 [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost)：`malloc` 分配的内存在每次传输时都要 pin 和 unpin，而 [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配的内存已为 DMA 准备好。其属性可通过 [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes) 查询。
+2. Host 内存需要按分配接口配对释放：[axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配的内存使用 [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) 释放；标准库 `malloc` 分配的内存使用标准库 `free` 释放。两组接口不能混用。
+3. [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配的内存属于进程，不属于某个 Device 或 Context。分配和释放时都不需要当前 Context，但进程内至少需要有一个可用的已激活 Device。该内存可用于进程内任意已激活的 Device，在被释放或进程内最后一个已激活的 Device 被释放之前一直有效。
 ```
 
 ```{important}
@@ -80,16 +82,17 @@ AXCL 提供以下接口，在多个进程之间共享同一块 Device 内存。�
 
 | 操作 | API | 说明 |
 |---|---|---|
-| 导出 | [axclrtIpcMemGetExportKey](../c/memory_api.md#axclrtIpcMemGetExportKey) | Producer 导出本进程分配的 Device 内存基地址，得到 IPC Key |
-| 设置导入白名单 | [axclrtIpcMemSetImportPid](../c/memory_api.md#axclrtIpcMemSetImportPid) | Producer 设置允许导入该 IPC Key 的进程（Host TGID） |
+| 导出 | [axclrtIpcMemGetExportKey](../c/memory_api.md#axclrtIpcMemGetExportKey) | Producer 导出本进程通过 `axclrtMalloc` / `axclrtMallocCached` 分配的内存基地址句柄，得到 IPC Key。同一分配同一时刻最多只有一个已导出的 Key。导入得到的句柄以及 `axclrtMemMapDevAddr` 注册的句柄不能导出 |
+| 设置导入白名单 | [axclrtIpcMemSetImportPid](../c/memory_api.md#axclrtIpcMemSetImportPid) | Producer 设置允许导入该 IPC Key 的进程（Host TGID）。每次调用都会替换之前的白名单。如需跳过白名单检查，改为在导出时使用 [AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION](../c/reference/macro.md#AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION) |
 | 查询 Host TGID | [axclrtDeviceGetBareTgid](../c/device_api.md#axclrtDeviceGetBareTgid) | Consumer 查询自身在初始 PID 命名空间中的 TGID，供 Producer 设置白名单 |
-| 导入 | [axclrtIpcMemImportByKey](../c/memory_api.md#axclrtIpcMemImportByKey) | Consumer 凭 IPC Key 导入，得到本进程的 `devPtr` 句柄 |
-| 关闭 | [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) | Producer 和 Consumer 各自释放 IPC 引用 |
+| 导入 | [axclrtIpcMemImportByKey](../c/memory_api.md#axclrtIpcMemImportByKey) | Consumer 凭 IPC Key 导入，得到本进程的 `devPtr` 句柄。拥有该内存的 Device 必须已在 Consumer 进程中激活。每次导入持有一个 IPC 引用，并返回一个新句柄 |
+| 关闭 | [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) | Producer 和 Consumer 各自释放 IPC 引用，每次导出或导入对应一次调用。Producer 关闭该 Key 后，新的导入会失败 |
 
 ```{important}
-- 共享内存的生命周期由 Producer 决定。Producer 必须保证内存在所有 Consumer 使用结束前不被释放，否则 Consumer 的硬件访问结果未定义；Consumer 关闭 IPC Key 或释放自己的句柄，不会延长 Producer 内存的生命周期。
+- 共享内存的生命周期由 Producer 决定。Producer 不得在所有 Consumer 使用结束前释放该内存，否则 Consumer 的 Device 访问结果未定义。Consumer 关闭 IPC Key 或释放句柄，不会延长 Producer 内存的生命周期。
 - 对同一个 IPC Key，所有 Consumer 应先于 Producer 调用 [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose)。
-- Consumer 调用 [axclrtFree](../c/memory_api.md#axclrtFree) 只释放本进程的映射，不释放 Device 物理内存。
+- Consumer 调用 [axclrtFree](../c/memory_api.md#axclrtFree) 只释放本进程的句柄，不释放 Device 物理内存。每次导入都必须同时通过 [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) 和 [axclrtFree](../c/memory_api.md#axclrtFree) 释放。
+- 白名单中的 TGID 仅对添加时已在运行的进程生效，因此需在 Consumer 启动后再设置白名单。
 - 在 Docker、Kubernetes 等容器环境中，白名单必须使用 [axclrtDeviceGetBareTgid](../c/device_api.md#axclrtDeviceGetBareTgid) 返回的 Host TGID，不能使用 `getpid` 返回的容器内 PID。
 ```
 
@@ -113,15 +116,17 @@ AXCL 使用 [axclrtMemcpyKind](../c/reference/enum.md#axclrtMemcpyKind) 描述�
 | 拷贝类型 | 方向 |
 |---|---|
 | [AXCL_MEMCPY_HOST_TO_HOST](../c/reference/enum.md#AXCL_MEMCPY_HOST_TO_HOST) | Host 虚拟内存到 Host 虚拟内存 |
-| [AXCL_MEMCPY_HOST_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) | Host 虚拟内存到 Device 物理内存 |
-| [AXCL_MEMCPY_DEVICE_TO_HOST](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST) | Device 物理内存到 Host 虚拟内存 |
-| [AXCL_MEMCPY_DEVICE_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE) | Device 物理内存到 Device 物理内存 |
+| [AXCL_MEMCPY_HOST_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) | Host 虚拟内存到 Device 内存（`devPtr`） |
+| [AXCL_MEMCPY_DEVICE_TO_HOST](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST) | Device 内存（`devPtr`）到 Host 虚拟内存 |
+| [AXCL_MEMCPY_DEVICE_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE) | Device 内存到 Device 内存，可在同一 Device 内或两个 Device 之间 |
+
+拷贝涉及的 Device 内存必须属于当前 Context 所属的 Device（[axclrtMemcpy](../c/memory_api.md#axclrtMemcpy)），或 Stream 所属的 Device（[axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync)）。两个 Device 之间的 Device-to-Device 拷贝除外，参见 [设备间拷贝](memory.md#memory-inter-device-copy)。
 
 <a id="memory-synchronous-copy"></a>
 
 ### 2.2. 同步拷贝
 
-[axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) 是同步拷贝接口。对于 Host ↔ Device 拷贝，调用返回表示本次同步拷贝已经完成。
+[axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) 是同步拷贝接口，支持所有拷贝方向。调用成功返回表示本次拷贝已经完成。调用线程必须已有当前 Context。
 
 以下示例展示核心调用顺序，省略 [axclInit](../c/system_api.md#axclInit) / [axclFinalize](../c/system_api.md#axclFinalize) 和错误码检查。
 
@@ -147,7 +152,7 @@ axclrtResetDevice(0);
 
 ### 2.3. 异步拷贝
 
-[axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) 会把拷贝请求与指定 [axclrtStream](../c/reference/struct.md#axclrtStream) 关联，使拷贝和同一 Stream 中的其他 Task 按提交顺序执行。
+[axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) 把拷贝提交到指定 [axclrtStream](../c/reference/struct.md#axclrtStream)。拷贝与该 Stream 中的其他 Task 按提交顺序执行，Host-to-Host 拷贝也是如此。
 
 ```c
 axclrtStream stream;
@@ -186,24 +191,30 @@ axclrtResetDevice(0);
 ```
 
 ```{important}
-- [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) 成功返回时，拷贝只是提交到了指定 Stream，并不表示数据已经拷贝完成。异步拷贝的完成状态可通过同步该 Stream、等待记录在该 Stream 上的 Event，或使用 Device 级同步接口确认。
+- [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) 成功返回时，拷贝只是提交到了该 Stream，数据可能尚未拷贝。可通过同步该 Stream、等待在拷贝之后记录到该 Stream 上的 Event，或同步 Device 来确认完成。
+- Device 接受或执行该拷贝时产生的错误，由该 Stream 上的下一次 [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) 返回。
+- 在拷贝完成前，源内存和目标内存都必须保持有效；在此之前不得读取目标内存，也不得释放任一缓冲区。
 ```
 
 <a id="memory-inter-device-copy"></a>
 
 ### 2.4. 设备间拷贝
 
-以下示例演示将 Device 0 上的内存复制到 Device 1。调用者需要先确认两个设备之间支持 Peer Access，再分别开启两个方向的访问权限。以下代码省略错误处理。
+两个 Device 之间的 Device-to-Device 拷贝在当前 Device（[axclrtMemcpy](../c/memory_api.md#axclrtMemcpy)）或 Stream 所属的 Device（[axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync)）上执行。该 Device 必须拥有源内存或目标内存之一，并且必须已通过 [axclrtDeviceEnablePeerAccess](../c/device_api.md#axclrtDeviceEnablePeerAccess) 开启从该 Device 到另一 Device 的 Peer Access。Peer Access 是单向的，作用于整个进程，并在调用 [axclrtDeviceDisablePeerAccess](../c/device_api.md#axclrtDeviceDisablePeerAccess) 之前一直保持开启。[axclrtDeviceCanAccessPeer](../c/device_api.md#axclrtDeviceCanAccessPeer) 用于查询该能力，要求源 Device 已激活。
+
+以下示例演示将 Device 0 上的内存复制到 Device 1。应用先激活 Device 0，确认两个 Device 之间支持 Peer Access，再分别开启两个方向的访问权限。以下代码省略错误处理。
 
 ```c
 axclInit(NULL);
+
+/* 先激活 Device 0；能力查询需要在已激活的 Device 上执行。 */
+axclrtSetDevice(0);
 
 int32_t canAccessPeer = 0;
 axclrtDeviceCanAccessPeer(&canAccessPeer, 0, 1);
 if (canAccessPeer == 1) {
     uint32_t reserved = 0U;
 
-    axclrtSetDevice(0);
     axclrtDeviceEnablePeerAccess(1, reserved);
 
     void *dev0Mem = NULL;
@@ -215,17 +226,21 @@ if (canAccessPeer == 1) {
     void *dev1Mem = NULL;
     axclrtMalloc(&dev1Mem, 10, AXCL_MEM_MALLOC_NORMAL_ONLY);
 
-    /* 将 Device 0 上的数据复制到 Device 1。 */
+    /* 拷贝在当前 Device 1 上执行：Device 1 拥有目标内存，并已开启到 Device 0 的 Peer Access。 */
     axclrtMemcpy(dev1Mem, dev0Mem, 10, AXCL_MEMCPY_DEVICE_TO_DEVICE);
 
     axclrtDeviceDisablePeerAccess(0);
     axclrtFree(dev1Mem);
     axclrtResetDevice(1);
 
+    /* 通过 axclrtSetDevice 切回 Device 0 会再增加一次引用，因此需要释放两次。 */
     axclrtSetDevice(0);
     axclrtDeviceDisablePeerAccess(1);
     axclrtFree(dev0Mem);
-    axclrtResetDeviceForce(0);
+    axclrtResetDevice(0);
+    axclrtResetDevice(0);
+} else {
+    axclrtResetDevice(0);
 }
 
 axclFinalize();
@@ -360,8 +375,8 @@ AXCL 还提供 Device 内存置位和比较接口：
 
 | 操作 | 同步 API | 异步 API | 说明 |
 |---|---|---|---|
-| Device 内存置位 | [axclrtMemset](../c/memory_api.md#axclrtMemset) | [axclrtMemsetAsync](../c/memory_api.md#axclrtMemsetAsync) | `axclrtMemset` 仅支持 Device 内存 |
-| Device 内存比较 | [axclrtMemcmp](../c/memory_api.md#axclrtMemcmp) | [axclrtMemcmpAsync](../c/memory_api.md#axclrtMemcmpAsync) | 用于比较两段 Device 内存；同步接口在内容相同时返回 `AXCL_SUCC` |
+| Device 内存置位 | [axclrtMemset](../c/memory_api.md#axclrtMemset) | [axclrtMemsetAsync](../c/memory_api.md#axclrtMemsetAsync) | 将一段 Device 内存的每个字节设置为指定值。两个接口都仅支持 Device 内存 |
+| Device 内存比较 | [axclrtMemcmp](../c/memory_api.md#axclrtMemcmp) | [axclrtMemcmpAsync](../c/memory_api.md#axclrtMemcmpAsync) | 比较同一 Device 上的两段 Device 内存。同步接口仅在内容相同时返回 `AXCL_SUCC`；失败既可能表示内容不同，也可能表示执行出错。异步接口不报告两段内存是否相同 |
 
 ## 4. 重要API
 
@@ -369,8 +384,8 @@ AXCL 还提供 Device 内存置位和比较接口：
 |---|---|---|
 | [axclrtMalloc](../c/memory_api.md#axclrtMalloc) | 分配 Device 内存 | Device 内存 |
 | [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) | 分配具有 cached 属性的 Device 内存 | Device 内存 |
-| [axclrtFree](../c/memory_api.md#axclrtFree) | 释放 `axclrtMalloc` / `axclrtMallocCached` 分配的内存 | Device 内存 |
-| [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) | 分配 Host 虚拟内存 | Host 内存 |
+| [axclrtFree](../c/memory_api.md#axclrtFree) | 释放 `axclrtMalloc` / `axclrtMallocCached` 分配的内存，或释放 `axclrtIpcMemImportByKey` 导入的句柄 | Device 内存 |
+| [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) | 分配已为 AXCL 数据传输准备好的 Host 虚拟内存 | Host 内存 |
 | [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) | 释放 `axclrtMallocHost` 分配的内存 | Host 内存 |
 | [axclrtMemGetAddressRange](../c/memory_api.md#axclrtMemGetAddressRange) | 查询 `devPtr` 所属分配或注册的基地址句柄和总大小 | Device 内存 |
 | [axclrtMemGetDevAddr](../c/memory_api.md#axclrtMemGetDevAddr) | 由 `devPtr` 导出 Device 物理地址和虚拟地址 | Device 内存 |
@@ -386,5 +401,5 @@ AXCL 还提供 Device 内存置位和比较接口：
 | [axclrtMemsetAsync](../c/memory_api.md#axclrtMemsetAsync) | 向 Stream 提交异步 Device 内存设置请求 | Device 内存 |
 | [axclrtMemcmp](../c/memory_api.md#axclrtMemcmp) | 同步比较两段 Device 内存 | Device 内存 |
 | [axclrtMemcmpAsync](../c/memory_api.md#axclrtMemcmpAsync) | 向 Stream 提交异步 Device 内存比较请求 | Device 内存 |
-| [axclrtGetMemInfo](../c/memory_api.md#axclrtGetMemInfo) | 查询 Device 侧内存容量信息 | Device 内存 |
-| [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes) | 查询指针位置和 flags | Host 内存、Device 内存 |
+| [axclrtGetMemInfo](../c/memory_api.md#axclrtGetMemInfo) | 查询当前 Device 内存容量信息的快照 | Device 内存 |
+| [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes) | 查询 AXCL runtime 所跟踪内存的位置和 flags | Host 内存、Device 内存 |

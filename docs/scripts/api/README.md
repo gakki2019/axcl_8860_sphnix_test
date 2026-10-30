@@ -132,3 +132,31 @@ Error probe outputs:
 - If `--skip-doxygen` fails, regenerate XML first with the full command.
 - If the error probe fails, check whether `cc` or `gcc` is installed and available in `PATH`.
 - If API pages are missing, first inspect `docs/build/api/doxygen/xml` and then `docs/build/api/report/orphaned_symbol.tsv` and `docs/build/api/report/excluded_by_config.tsv`.
+
+## Python API mode
+
+The same entry point also generates Python API Markdown directly from the current
+public bindings and docstrings, without Doxygen or Sphinx autodoc:
+
+```bash
+python3 docs/scripts/api/api_docgen.py --language python
+python3 docs/scripts/api/api_docgen.py --language python --validate-only
+```
+
+The default mode remains C. Python output is written to
+`docs/source/en/develop/python/reference/`; coverage and source documentation issues
+are recorded in `docs/build/api/python/summary.json`. English pages retain source
+descriptions. Chinese Markdown under `docs/source/zh/develop/python/reference/` is
+maintained separately, like the Chinese C/C++ documentation, and is never overwritten
+or deleted by this generator. Both languages cover public functions, not standalone constants or ctypes types.
+Actual Python signatures supply parameter types and defaults; docstrings supply
+descriptions, return items and examples. Python calls appear before C++ prototypes.
+Missing or truncated descriptions and
+C-pointer wording are reported for review, not silently repaired.
+
+From `docs/`, `make python-api` updates English Python pages and `make html` updates
+English C and Python pages before building both languages as HTML. Update source
+docstrings to regenerate English pages, and edit Chinese Markdown separately.
+`--validate-only` checks the English generated pages against the current source.
+Only obsolete English pages carrying the
+Python generator marker are removed. Hand-written pages are never overwritten.

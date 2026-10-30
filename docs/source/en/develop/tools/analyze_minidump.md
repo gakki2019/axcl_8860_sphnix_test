@@ -1,6 +1,6 @@
 # Minidump Analyzer
 
-`analyze_minidump.sh` is an automated offline minidump analysis script provided by AXCL (located in the source repository at `axcl/scripts/minidump/analyze_minidump.sh`). It encapsulates the full workflow of extracting symbols archives, matching host architecture tools, invoking `minidump_stackwalk` for symbolic stack unwinding, and automatically cleaning up temporary extracted files. It rapidly parses a binary `.dmp` crash dump into a human-readable call stack report.
+`analyze_minidump.sh` is the AXCL offline minidump analysis script, located at `scripts/minidump/analyze_minidump.sh` in the AXCL source tree. In one command, it extracts the symbols archives, selects the `minidump_stackwalk` tool that matches the analysis machine, unwinds the stack with symbols, and removes the temporary extracted files. The result is a readable call stack report for a `.dmp` crash dump.
 
 ```{tip}
 For detailed background on minidump generation, Breakpad symbols concepts, manual step-by-step analysis, or troubleshooting, see the FAQ guide: [How to analyze minidumps?](../../faq/minidump_analysis.md).
@@ -10,10 +10,12 @@ For detailed background on minidump generation, Breakpad symbols concepts, manua
 
 Before analyzing a minidump, ensure you have prepared the following files:
 
-1. **Crash minidump file**: e.g. `slave_worker_<pid>_<tid>_<timestamp>.dmp` or `axcl_<process>_<pid>_<tid>_<timestamp>.dmp`.
+1. **Crash minidump file**: named `<process>_<pid>_<tid>_<YYYYmmdd_HHMMSS>.dmp`, for example `slave_worker_773_804_20261008_043713.dmp` for a device crash or `axcl_sample_run_2029764_2029764_20260712_102015.dmp` for a host crash.
 2. **Matching symbols archives from the same build**:
    - **Host symbols archive (Required)**: `axcl-host-minidump-symbols.tar.gz` (provides the `minidump_stackwalk` tool and host symbols).
    - **Device symbols archive (Required for device crashes)**: `axcl-device-pcie-minidump-symbols.tar.gz` or `axcl-device-minidump-symbols.tar.gz`.
+   - `axcl-all-minidump-symbols.tar.gz` contains both host and device symbols and can be passed to both `-H` and `-D`.
+3. **Analysis machine**: Linux x86_64 or aarch64 with `bash` and `tar`.
 
 ```{important}
 Symbols must come from the exact same build as the crashed binaries; otherwise, function names and source line numbers may not be resolved accurately.
@@ -32,9 +34,9 @@ analyze_minidump.sh [device|host] [options]
 | `--dmp <FILE>` | Path to the `.dmp` crash dump file. (No short option) | **Yes** |
 | `-H, --host-symbol-tar <FILE>` | Path to the host symbols archive (`.tar.gz`). Provides `minidump_stackwalk` and host symbols. | **Yes** |
 | `-D, --device-symbol-tar <FILE>` | Path to the device symbols archive (`.tar.gz`). | **Required for device crash** |
-| `device` \| `host` | Target side where the crash occurred (as the first positional argument, or via `-t, --type <TYPE>`). If omitted, auto-detected from the `--dmp` filename prefix (`slave_worker*` for device, `axcl_*` for host). | Optional |
-| `-o, --output-dir <DIR>` | Directory where the output reports and temporary files reside. **Defaults to the directory where `analyze_minidump.sh` is located**. | Optional |
-| `-k, --keep-symbols` | Keep the extracted temporary symbols directory after analysis. By default, temporary extracted symbols are automatically deleted. | Optional |
+| `device` \| `host` | Target side where the crash occurred (as the first positional argument, or via `-t, --type <TYPE>`). If omitted, it is detected from the `--dmp` file name: `slave_worker*` or `slave_daemon*` means device, and `axcl_*` means host. For any other file name, specify it explicitly. | Optional |
+| `-o, --output-dir <DIR>` | Directory for the reports and temporary files; it is created if it does not exist. **Defaults to the directory where `analyze_minidump.sh` is located**, which must then be writable. | Optional |
+| `-k, --keep-symbols` | Keep the extracted symbols in `<output_dir>/symbols_extracted` after analysis; the directory is overwritten on the next run with `-k`. By default, the extracted symbols are deleted. | Optional |
 | `-h, --help` | Show the help message and usage examples. | Optional |
 
 ## 3. Usage Examples
@@ -62,24 +64,26 @@ Analyzing a host-side crash only requires the host symbols package:
 
 ### 3.3 Auto-Detecting Target and Custom Output Directory
 
-When the dump filename starts with standard prefixes such as `slave_worker`, the target type is automatically recognized. Use `-o` to save results to a dedicated directory:
+When the dump file name starts with `slave_worker`, `slave_daemon`, or `axcl_`, the target type is detected automatically. Use `-o` to save the results to a dedicated directory:
 
 ```bash
 ./analyze_minidump.sh \
   -H /path/to/axcl-host-minidump-symbols.tar.gz \
   -D /path/to/axcl-device-pcie-minidump-symbols.tar.gz \
-  --dmp /path/to/slave_worker_773_804.dmp \
+  --dmp /path/to/slave_worker_773_804_20261008_043713.dmp \
   -o /path/to/output_dir
 ```
 
 ## 4. Output Files and Results
 
-Upon execution, the script displays a highlighted summary in the console and creates two report files in the output directory:
+After the analysis, the script prints a summary with up to 15 frames of the crashed thread and writes two report files to the output directory:
 
 1. **Dedicated persistent report**: `<output_dir>/<dmp_basename>_stackwalk.txt`
-   - Named after the original minidump file (e.g. `slave_worker_773_804_20261008_043713_stackwalk.txt`), ensuring past analyses are never overwritten.
+   - Named after the minidump file (e.g. `slave_worker_773_804_20261008_043713_stackwalk.txt`), so reports of different dumps do not overwrite each other.
 2. **Latest result copy**: `<output_dir>/stackwalk.txt`
-   - Always updated with the most recent analysis report for quick inspection.
+   - Overwritten by every analysis with the latest report.
+
+If `minidump_stackwalk` fails, both files still hold its error output, and the script exits with the same non-zero status.
 
 ### Console Output Example
 
@@ -108,4 +112,4 @@ Report saved to: /path/to/slave_worker_773_804_20261008_043713_stackwalk.txt
 Latest copy:  /path/to/stackwalk.txt
 ```
 
-When you see `function_name [source_file.cpp : line]`, you can navigate directly to the responsible source code line to investigate the crash.
+A frame in the form `function_name [source_file.cpp : line]` points to the source line to investigate. If frames show only `module + offset`, check that the symbols come from the same build; see [How to analyze minidumps?](../../faq/minidump_analysis.md).

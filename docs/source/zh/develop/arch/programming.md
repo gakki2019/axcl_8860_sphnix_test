@@ -28,15 +28,15 @@ axclInit
 
 同步接口返回成功时，表示该接口对应的操作已经完成。同步执行方式直观，适合入门程序、调试流程和对并发要求不高的场景。
 
-对于数据搬运、推理执行、Event record/wait 等会向 Stream 提交工作项的接口，通常可以通过接口是否包含 `axclrtStream stream` 参数理解同步/异步语义：不带 `axclrtStream stream` 参数的接口按同步语义理解，返回成功表示对应操作已经完成；带 `axclrtStream stream` 参数的接口按异步语义理解，返回成功表示工作已经提交到指定 Stream，完成状态由后续同步接口确认。Synchronize 和 Query 等控制类接口的语义以接口说明为准。
+对于数据搬运、推理执行、Event record/wait 等提交工作的接口，`axclrtStream stream` 参数通常可以表明其语义：不带该参数的接口是同步接口，返回成功表示对应操作已经完成；带该参数的接口是异步接口，返回成功表示工作已经提交到指定 Stream，完成状态由之后的同步接口确认。Synchronize 和 Query 等控制类接口的语义参见 API 参考。
 
 | 示例 API | 返回语义 |
 |---|---|
 | [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) | 返回成功表示本次拷贝完成 |
 | [axclrtEngineExecute](../c/engine_api.md#axclrtEngineExecute) | 返回成功表示本次 Engine 推理完成 |
-| [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) | 返回成功时目标 Stream 的前序任务已经完成；失败时返回错误 |
-| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | 返回成功时 Event 已置位；超时或失败时返回错误 |
-| [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) | 返回成功时当前 Device 上相关任务已经完成；失败时返回错误 |
+| [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) | 返回成功时目标 Stream 的前序任务已经成功完成；否则返回该 Stream 的第一个异步任务错误 |
+| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | 返回成功时 Event 的最近一次记录已经完成；[axclrtSynchronizeEventWithTimeout](../c/event_api.md#axclrtSynchronizeEventWithTimeout) 在超时时也会返回失败 |
+| [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) | 返回成功时本进程中当前 Device 的所有 Stream 都已完成；否则返回第一个 Stream 错误 |
 
 同步拷贝示例：
 
@@ -46,12 +46,14 @@ axclrtMemcpy(devPtr, hostPtr, size, AXCL_MEMCPY_HOST_TO_DEVICE);
 ```
 
 ```{note}
-native SDK 接口（例如 `AX_XXX_YYYY` 类接口）通过 AXCL native RPC 暴露到 Host 侧时，对 Host 侧调用表现为同步语义：Host 侧调用会等待本次 AXCL RPC 请求完成并收到结果后返回。这里的同步语义只描述 RPC 接口的调用行为，和 native SDK 接口本身在 Device 侧采用同步还是异步实现没有关联。
+native SDK 接口（例如 `AX_XXX_YYYY` 类接口）由 AXCL 从 Host 转发到 Device。对 Host 调用方而言，这类接口是同步的：Device 执行完 native SDK 接口并返回结果后，调用才返回。该调用在调用线程当前 Context 的默认 Stream 上执行，因此调用线程必须已有当前 Context。这里只描述 Host 侧调用行为，不说明 native SDK 接口本身在 Device 侧是同步还是异步工作。
 ```
 
 ## 3. 异步执行：先提交，后等待
 
-异步接口返回成功时，只表示任务已经提交到 Stream，不表示 Device 侧任务已经执行完成。Host 在使用异步任务产生的输出前，需要通过 Stream、Event 或 Device 同步接口确认任务完成。
+异步接口返回成功时，任务只是已经提交到 Stream，Device 可能尚未接受或完成该任务。Host 在使用异步任务产生的输出前，需要通过 Stream、Event 或 Device 同步接口确认任务完成。
+
+异步任务的错误（包括 Stream 任务队列已满而被 Device 拒绝的任务）不由提交调用返回，而由该 Stream 的下一次同步（如 [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream)）返回第一个此类错误。在此之前，该 Stream 中尚未开始的任务都会被跳过，但 Event 的记录点和等待点仍会执行。务必检查 Stream 同步的结果。
 
 ```{image} ../../asserts/async_flow.svg
 :alt: 同步与异步返回边界示意图
@@ -165,9 +167,9 @@ Event 相关接口的 Host 返回语义如下：
 |---|---|---|
 | [axclrtCreateEvent](../c/event_api.md#axclrtCreateEvent) / [axclrtCreateEventWithFlags](../c/event_api.md#axclrtCreateEventWithFlags) | 创建 Event 对象 | Event 对象创建完成后返回；此时 Event 尚未记录到任何 Stream，也不表示任何任务完成 |
 | [axclrtRecordEvent](../c/event_api.md#axclrtRecordEvent) | 在指定 Stream 中记录 Event | Event record 节点提交到 Stream 后返回，不表示 Event 已经置位 |
-| [axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent) | 在指定 Stream 中等待 Event | Event wait 节点提交到 Stream 后返回，不阻塞 Host 等待 Event 置位；真正的等待发生在目标 Stream 的执行序列中 |
-| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | Host 等待 Event 置位 | 阻塞 Host 调用线程，直到 Event 置位、超时或返回错误 |
-| [axclrtDestroyEvent](../c/event_api.md#axclrtDestroyEvent) | 销毁 Event 对象 | Event 对象销毁完成后返回；销毁前应确认相关 Stream 不再记录或等待该 Event |
+| [axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent) | 在指定 Stream 中等待 Event | Event wait 节点提交到 Stream 后返回，不阻塞 Host 等待 Event 置位；真正的等待发生在目标 Stream 的执行序列中。等待针对的是提交时 Event 的最近一次记录，因此需先 record 该 Event，再提交 wait |
+| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | Host 等待 Event 置位 | 阻塞 Host 调用线程，直到 Event 的最近一次记录完成或返回错误；如果 Event 从未被记录，则立即返回。[axclrtSynchronizeEventWithTimeout](../c/event_api.md#axclrtSynchronizeEventWithTimeout) 在超时时也会返回 |
+| [axclrtDestroyEvent](../c/event_api.md#axclrtDestroyEvent) | 销毁 Event 对象 | 不等待即返回。已提交的 record 点和 wait 点仍照常完成。销毁后不得再使用该句柄 |
 
 ## 6. Synchronize：等待任务完成
 
@@ -177,18 +179,18 @@ Synchronize 类接口用于在 Host 侧等待任务或执行点完成。不同�
 |---|---|---|
 | 等待某条 Stream 的前序任务完成 | [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) | 单 Stream 异步流程结束后等待输出 |
 | 等待某个 Event 置位 | [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | Host 等待 Stream 中某个执行点 |
-| 等待 Device 上相关任务完成 | [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) | 简单程序整体同步或收尾 |
+| 等待本进程中当前 Device 的所有 Stream 完成 | [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) | 简单程序整体同步或收尾 |
 | 非阻塞查看 Stream 状态 | [axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) | 轮询 Stream 是否完成，不替代同步等待 |
 
 选择同步方式时，可以按等待范围理解：
 
 - 只关心某条 Stream 的前序任务时，使用 Stream 同步；
 - 只关心某个执行点时，使用 Event 同步；
-- 简单程序整体收尾或需要等待 Device 上相关任务完成时，使用 Device 同步；
+- 简单程序整体收尾，或需要等待 Device 上的全部工作（包括其他线程提交的工作）完成时，使用 Device 同步；
 - 只想查看当前状态且不希望阻塞 Host 时，使用 [axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery)。
 
 ```{note}
-[axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) 是非阻塞查询接口，只读取当前状态；如果返回未完成，Host 逻辑需要稍后再次查询或使用同步接口等待。
+[axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) 是非阻塞查询接口，只读取当前状态；如果报告未完成，需稍后再次查询或使用同步接口等待。它不报告异步任务错误，需同步该 Stream 才能获取这些错误。
 ```
 
 ## 7. 典型流程

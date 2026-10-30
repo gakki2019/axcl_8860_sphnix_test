@@ -28,15 +28,15 @@ In this flow, “submitting tasks” and “waiting for tasks to complete” are
 
 When a synchronous API returns success, the operation corresponding to that API has completed. Synchronous execution is straightforward and is suitable for getting started, debugging, and scenarios that do not require high concurrency.
 
-For APIs that submit work items to a Stream, such as data transfer, inference execution, and Event record/wait APIs, synchronous/asynchronous semantics can usually be understood by checking whether the API contains the `axclrtStream stream` parameter: APIs without the `axclrtStream stream` parameter are understood as synchronous APIs, and returning success means the corresponding operation has completed; APIs with the `axclrtStream stream` parameter are understood as asynchronous APIs, and returning success means the work has been submitted to the specified Stream, with completion confirmed by subsequent synchronization APIs. For control APIs such as Synchronize and Query, follow the semantics described by the API documentation.
+For APIs that submit work, such as data transfer, inference execution, and Event record/wait APIs, the `axclrtStream stream` parameter usually indicates the semantics: an API without it is synchronous, and a successful return means the operation has completed; an API with it is asynchronous, and a successful return means the work has been submitted to the specified Stream, with completion confirmed by a later synchronization API. For control APIs such as Synchronize and Query, see the API reference.
 
 | Example API | Return semantics |
 |---|---|
 | [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) | Returning success means this copy has completed |
 | [axclrtEngineExecute](../c/engine_api.md#axclrtEngineExecute) | Returning success means this Engine inference has completed |
-| [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) | Returning success means preceding tasks in the target Stream have completed; failures return an error |
-| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | Returning success means the Event has been set; timeout or failure returns an error |
-| [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) | Returning success means related tasks on the current Device have completed; failures return an error |
+| [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) | Returning success means preceding tasks in the target Stream have completed successfully; otherwise it returns the first asynchronous task error of the Stream |
+| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | Returning success means the Event's latest record has completed; [axclrtSynchronizeEventWithTimeout](../c/event_api.md#axclrtSynchronizeEventWithTimeout) also fails on timeout |
+| [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) | Returning success means all Streams of the current Device in the process have completed; otherwise it returns the first Stream error |
 
 Synchronous copy example:
 
@@ -46,12 +46,14 @@ axclrtMemcpy(devPtr, hostPtr, size, AXCL_MEMCPY_HOST_TO_DEVICE);
 ```
 
 ```{note}
-native SDK APIs, such as `AX_XXX_YYYY` APIs, are exposed to the Host side through AXCL native RPC. From the Host caller's perspective, they have synchronous semantics: the Host call waits for the current AXCL RPC request to complete and receive a result before returning. This synchronous semantics only describes the RPC call behavior, and is not related to whether the native SDK API itself uses a synchronous or asynchronous implementation on the Device side.
+native SDK APIs, such as `AX_XXX_YYYY` APIs, are forwarded from the Host to the Device by AXCL. For the Host caller they are synchronous: the call returns after the Device has run the native SDK API and returned its result. The call runs on the default Stream of the calling thread's current Context, so the thread must have a current Context. This describes only the Host call; it says nothing about whether the native SDK API itself works synchronously or asynchronously on the Device.
 ```
 
 ## 3. Asynchronous execution: submit first, wait later
 
-When an asynchronous API returns success, it only means the task has been submitted to the Stream; it does not mean the Device-side task has completed. Before the Host uses outputs produced by asynchronous tasks, it must confirm task completion through Stream, Event, or Device synchronization APIs.
+When an asynchronous API returns success, the task has only been submitted to the Stream; the Device may not have accepted or completed it yet. Before the Host uses outputs produced by asynchronous tasks, it must confirm completion through Stream, Event, or Device synchronization APIs.
+
+Errors of asynchronous tasks, including a task the Device rejects because the Stream task queue is full, are not returned by the submitting call. The next synchronization of the Stream, such as [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream), returns the first such error. Until it does, tasks in the Stream that have not started are skipped, while Event record and wait points still run. Always check the result of Stream synchronization.
 
 ```{image} ../../asserts/async_flow.svg
 :alt: Synchronous and asynchronous return boundary diagram
@@ -165,9 +167,9 @@ The Host return semantics of Event-related APIs are as follows:
 |---|---|---|
 | [axclrtCreateEvent](../c/event_api.md#axclrtCreateEvent) / [axclrtCreateEventWithFlags](../c/event_api.md#axclrtCreateEventWithFlags) | Create an Event object | Returns after the Event object is created. At this time, the Event has not been recorded into any Stream and does not indicate that any task has completed |
 | [axclrtRecordEvent](../c/event_api.md#axclrtRecordEvent) | Record an Event in the specified Stream | Returns after the Event record node is submitted to the Stream; it does not indicate that the Event has been set |
-| [axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent) | Wait for an Event in the specified Stream | Returns after the Event wait node is submitted to the Stream, and does not block the Host waiting for the Event to be set; the actual wait happens in the execution sequence of the target Stream |
-| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | Host waits for an Event to be set | Blocks the Host calling thread until the Event is set, timeout occurs, or an error is returned |
-| [axclrtDestroyEvent](../c/event_api.md#axclrtDestroyEvent) | Destroy an Event object | Returns after the Event object is destroyed. Before destroying it, confirm that related Streams no longer record or wait for this Event |
+| [axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent) | Wait for an Event in the specified Stream | Returns after the Event wait node is submitted to the Stream, and does not block the Host waiting for the Event to be set; the actual wait happens in the execution sequence of the target Stream. The wait refers to the Event's latest record at submission time, so record the Event before submitting the wait |
+| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | Host waits for an Event to be set | Blocks the Host calling thread until the Event's latest record has completed or an error is returned; returns immediately if the Event has never been recorded. [axclrtSynchronizeEventWithTimeout](../c/event_api.md#axclrtSynchronizeEventWithTimeout) also returns on timeout |
+| [axclrtDestroyEvent](../c/event_api.md#axclrtDestroyEvent) | Destroy an Event object | Returns without waiting. Record and wait points already submitted still complete as usual. Do not use the handle afterwards |
 
 ## 6. Synchronize: wait for tasks to complete
 
@@ -177,18 +179,18 @@ Synchronize APIs are used on the Host side to wait for tasks or execution points
 |---|---|---|
 | Wait for preceding tasks in a Stream to complete | [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) | Wait for output after a Single-Stream asynchronous flow |
 | Wait for an Event to be set | [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | Host waits for an execution point in a Stream |
-| Wait for related tasks on the Device to complete | [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) | Overall synchronization or shutdown in simple programs |
+| Wait for all Streams of the current Device in the process to complete | [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) | Overall synchronization or shutdown in simple programs |
 | Non-blocking query of Stream status | [axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) | Poll whether a Stream has completed; it does not replace synchronization wait |
 
 When choosing a synchronization method, consider the wait scope:
 
 - Use Stream synchronization when only preceding tasks in one Stream matter;
 - Use Event synchronization when only one execution point matters;
-- Use Device synchronization for overall shutdown in simple programs or when related tasks on the Device need to be completed;
+- Use Device synchronization for overall shutdown in simple programs, or when all work on the Device, including work submitted by other threads, must be complete;
 - Use [axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) when only checking the current status and Host blocking is not desired.
 
 ```{note}
-[axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) is a non-blocking query API that only reads the current status. If it returns not completed, Host logic needs to query again later or use a synchronization API to wait.
+[axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) is a non-blocking query API that only reads the current status. If it reports not completed, query again later or use a synchronization API to wait. It does not report asynchronous task errors; synchronize the Stream to get them.
 ```
 
 ## 7. Typical flows

@@ -1,6 +1,6 @@
 # 如何解析 minidump?
 
-本文说明 AXCL 用户态进程崩溃后，如何使用崩溃现场产生的 minidump 分析问题。
+本文说明如何使用 AXCL 用户态进程崩溃时生成的 minidump 分析崩溃问题。
 
 ## 1. 背景
 
@@ -12,13 +12,13 @@ minidump 与 Linux core dump 不同。core dump 通常包含更完整的进程�
 
 minidump 本身不包含完整调试信息。AXCL 的发布/安装产物通常经过 strip，崩溃栈中的地址依赖 Breakpad symbols 转换为函数名、源码文件和行号。`minidump_stackwalk` 负责读取 `.dmp`，再根据 symbol path 查找 `<module>/<breakpad-id>/<module>.sym`，最终输出可读调用栈。
 
-AXCL 是主从架构：host 侧进程运行在主控端，device 侧 `slave_worker` / `slave_daemon` 运行在设备端。二者都可能产生 Breakpad minidump，分析流程相同；区别只在于根据崩溃进程选择对应的 symbol path。
+使用 AXCL 的 host 进程和 device 侧 `slave_worker` / `slave_daemon` 进程都可能生成 minidump，分析流程相同；区别只在于根据崩溃进程选择对应的 symbol path。通过 [axclInitializeMinidump](../develop/c/minidump_api.md#axclInitializeMinidump) 启用 minidump 的 host 进程，按以下顺序确定 `.dmp` 的写入目录：[AXCL_DUMP_DIR](../appendix/environment_variables.md#AXCL_DUMP_DIR) 指定的目录、调用时传入的目录、Linux 下的 `/tmp`。
 
 ```{important}
 函数名、源码文件和行号依赖于匹配的 Breakpad symbols。symbols 应与崩溃二进制来自同一次构建；不同构建产出的 symbols 可能无法正确解析源码行号。
 ```
 
-symbols 获取方式见 [用户态构建文档的 Minidump 章节](../develop/build/usr.md#minidump)。该章节已经说明如何生成 `axcl-host-minidump-symbols.tar.gz`、`axcl-device-minidump-symbols.tar.gz`、`axcl-all-minidump-symbols.tar.gz`，本文不重复 symbols 生成步骤。
+symbols 获取方式见 [用户态构建文档的 Minidump 章节](../develop/build/usr.md#minidump-symbols)。该章节已经说明如何生成 `axcl-host-minidump-symbols.tar.gz`、`axcl-device-minidump-symbols.tar.gz`、`axcl-all-minidump-symbols.tar.gz`，本文不重复 symbols 生成步骤。
 
 ```{tip}
 推荐使用自动化脚本：AXCL 提供了自动化分析脚本 `analyze_minidump.sh`，可一键完成解包、路径匹配与调用栈解析，详见 [analyze_minidump.sh 工具说明](../develop/tools/analyze_minidump.md)。如需了解底层手工解析细节，请继续参考下文。
@@ -30,13 +30,13 @@ symbols 获取方式见 [用户态构建文档的 Minidump 章节](../develop/bu
 
 | 项目 | 说明 | 示例 |
 | --- | --- | --- |
-| minidump | 崩溃现场生成的 `.dmp` 文件 | `<process>_<pid>_<tid>_<YYYYmmdd_HHMMSS>.dmp` |
+| minidump | 崩溃现场生成的 `.dmp` 文件，文件名中的时间戳为 UTC 时间 | `<process>_<pid>_<tid>_<YYYYmmdd_HHMMSS>.dmp` |
 | symbols 归档 | 与崩溃二进制同一次构建生成的 symbols 包 | `axcl-all-minidump-symbols.tar.gz` |
 | Linux 分析机 | 能运行 symbols 包内 `minidump_stackwalk` 的机器 | x86 Linux 构建机或分析机 |
 
 ## 3. 解压 symbols 包
 
-如果只分析 host 进程 minidump，可以使用 `axcl-host-minidump-symbols.tar.gz`；如果不确定崩溃进程来源，或需要同时覆盖 host 和 device symbols，可以使用 `axcl-all-minidump-symbols.tar.gz`。
+分析 host 进程 minidump 时，使用 `axcl-host-minidump-symbols.tar.gz` 即可；如果不确定崩溃发生在哪一侧，或需要同时使用 host 和 device symbols，请使用 `axcl-all-minidump-symbols.tar.gz`。
 
 在 Linux 分析机上创建独立目录，并解压 symbols 归档：
 
@@ -192,7 +192,7 @@ axcl_sample_runtime!main [main.cpp : 25 + 0x0]
 只看到地址的示例：
 
 ```text
-libaxcl.so + 0x123456
+libaxcl_rt.so + 0x123456
 ```
 
 或者只有模块名、没有源码行号，通常与第 8 节中的符号检查项相关。
@@ -258,11 +258,11 @@ find /tmp/axcl-symbols/device/arm64_glibc/symbols/lib -maxdepth 3 -name '*.sym' 
 
 ## 附录 A：构建空指针 minidump 并分析的实例
 
-本附录给出一个从构造崩溃到解析 minidump 的完整实例。示例进程为 `axcl_sample_runtime`，崩溃类型为空指针访问。示例仅用于验证 minidump 生成和解析链路，验证结束后恢复临时代码。
+本附录通过一个完整实例演示从构造崩溃到解析 minidump 的过程。示例进程为 `axcl_sample_runtime`，崩溃类型为空指针访问。示例仅用于验证 minidump 生成和解析链路，验证结束后需恢复临时代码。
 
 ### A.1 构造空指针崩溃
 
-示例通过在 `axcl/host/sample/runtime/main.cpp` 中加入由环境变量控制的空指针访问来构造崩溃。默认运行不触发崩溃，设置 `AXCL_SAMPLE_RUNTIME_NULL_DEREF=1` 时触发崩溃。
+在 `axcl/host/sample/runtime/main.cpp` 中加入由环境变量控制的空指针访问。`AXCL_SAMPLE_RUNTIME_NULL_DEREF` 不属于 AXCL，仅存在于本示例的临时代码中。未设置该变量时示例正常运行；设置为任意值（例如 `1`）时，示例会在启用 minidump 后立即崩溃。崩溃发生在 `axclInit()` 之前，不涉及设备访问。
 
 头文件区域的临时改动：
 
@@ -315,7 +315,7 @@ axcl/out/axcl_linux_x64_gnu/bin/axcl_sample_runtime
 
 ### A.3 提取 symbols
 
-symbols 生成方式见 [用户态构建文档的 Minidump 章节](../develop/build/usr.md#minidump)。本实例使用 host symbols：
+symbols 生成方式见 [用户态构建文档的 Minidump 章节](../develop/build/usr.md#minidump-symbols)。本实例使用 host symbols：
 
 ```bash
 cd axcl
@@ -357,25 +357,23 @@ DUMP_DIR=/tmp/axcl-minidump-demo/dumps
 rm -rf "$DUMP_DIR"
 mkdir -p "$DUMP_DIR"
 
-set +e
 AXCL_DUMP_DIR="$DUMP_DIR" AXCL_SAMPLE_RUNTIME_NULL_DEREF=1 \
   ./out/axcl_linux_x64_gnu/bin/axcl_sample_runtime -d 0 \
   > /tmp/axcl-minidump-demo/run.log 2>&1
 rc=$?
-set -e
 
 echo "rc=$rc"
 find "$DUMP_DIR" -maxdepth 1 -type f -name '*.dmp' -print
 ```
 
-一次实际运行输出如下：
+输出示例：
 
 ```text
 rc=139
 /tmp/axcl-minidump-demo/dumps/axcl_sample_run_2029764_2029764_20260712_102015.dmp
 ```
 
-`rc=139` 表示进程因 `SIGSEGV` 退出。文件名前缀为 `axcl_sample_run`，这是 `axcl_sample_runtime` 进程名被 Linux `/proc/self/comm` 长度限制截断后的结果。
+`rc=139`（128 + 11）表示进程被 `SIGSEGV` 终止。文件名以 `axcl_sample_run` 开头，是因为 Linux 将 `/proc/self/comm` 中的进程名限制为 15 个字符。
 
 ### A.6 解析 minidump
 
@@ -403,7 +401,7 @@ grep -nE "Crash reason|Crash address|Thread [0-9]+ \(crashed\)|axcl_sample|main.
   /tmp/axcl-minidump-demo/stackwalk.txt | head -80
 ```
 
-一次实际解析输出中的关键行如下：
+关键行示例：
 
 ```text
 121:Crash reason:  SIGSEGV /SEGV_MAPERR
@@ -417,11 +415,11 @@ grep -nE "Crash reason|Crash address|Thread [0-9]+ \(crashed\)|axcl_sample|main.
 - `Crash reason: SIGSEGV /SEGV_MAPERR`：非法内存访问。
 - `Crash address: 0x0`：访问地址为空地址。
 - `Thread 0 (crashed)`：崩溃线程为线程 0。
-- `axcl_sample_runtime!main [main.cpp : 25 + 0x0]`：symbols 已经把崩溃地址解析到 `axcl_sample_runtime` 的 `main.cpp` 第 25 行，对应临时代码中的 `*null_ptr = 0;`。
+- `axcl_sample_runtime!main [main.cpp : 25 + 0x0]`：symbols 将崩溃地址解析到修改后的 `main.cpp` 第 25 行，即临时代码中的 `*null_ptr = 0;`。
 
 ### A.8 恢复临时代码
 
-实例验证结束后恢复 `axcl/host/sample/runtime/main.cpp` 中用于触发崩溃的临时代码。源码仓库中可以使用以下命令恢复单个文件：
+验证结束后，恢复 `axcl/host/sample/runtime/main.cpp` 中用于触发崩溃的临时代码。在源码仓库中使用以下命令恢复该文件：
 
 ```bash
 cd axcl

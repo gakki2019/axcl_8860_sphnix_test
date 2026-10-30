@@ -4,9 +4,9 @@ This document introduces the AXCL memory model in a Host-Device architecture, an
 
 In a single-SoC scenario, an application typically works with a local operating system, a local process address space, and local device memory. AXCL targets a Host-Device architecture: applications and AXCL runtime run on the Host side, while the Device side provides AI compute, media processing, and other hardware capabilities. The two sides use different address spaces, and cross-end data access is completed through AXCL runtime APIs.
 
-Compared with a single-SoC scenario, AXCL memory management places more emphasis on the boundary between Host and Device. Host virtual addresses, Host physical addresses, and Device addresses have different meanings. `devPtr` is a Device memory handle passed to AXCL APIs.
+Compared with a single-SoC scenario, AXCL memory management places more emphasis on the boundary between Host and Device. Host virtual addresses and Device addresses have different meanings. `devPtr` is an opaque Device memory handle passed to AXCL APIs; it is neither a Host pointer nor a Device address.
 
-AXCL provides both synchronous and asynchronous copy APIs for moving data between Host and Device. When a synchronous copy API returns, the copy has completed. When an asynchronous copy API returns, it only means that the copy request has been submitted; whether the data is available must be confirmed through the corresponding Stream, Event, or synchronization API.
+AXCL provides both synchronous and asynchronous copy APIs for moving data between Host and Device. When a synchronous copy API returns, the copy has completed. When an asynchronous copy API returns, the copy has only been submitted; confirm that the data is available through the corresponding Stream, Event, or Device synchronization API.
 
 ```{image} ../../asserts/memory.svg
 :alt: AXCL Host-Device memory boundary
@@ -22,17 +22,19 @@ The figure shows the basic memory access boundary in the AXCL Host-Device archit
 
 ### 1.1. Device Memory
 
-AXCL provides [axclrtMalloc](../c/memory_api.md#axclrtMalloc) and [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) to allocate memory on the Device side, and returns it to the Host as `devPtr`. The Host side passes `devPtr` as a Device memory handle to AXCL runtime APIs. The value of `devPtr` is not a Device physical address and must not be passed directly to native SDK APIs.
+AXCL provides [axclrtMalloc](../c/memory_api.md#axclrtMalloc) and [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) to allocate memory on the Device of the calling thread's current Context, and returns it to the Host as `devPtr`. The Host passes `devPtr` as a Device memory handle to AXCL runtime APIs. `devPtr` is not a Device physical address and must not be passed directly to native SDK APIs; see [External Device Memory Interoperability](memory.md#memory-external-device-memory) for conversion.
 
 | Operation | API | Description |
 |---|---|---|
-| Allocate Device memory | [axclrtMalloc](../c/memory_api.md#axclrtMalloc) | Allocates physically contiguous Device memory. |
-| Allocate cached Device memory | [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) | Allocates Device memory with the cached attribute. The cached attribute can be queried through `axclrtPointerGetAttributes`. |
-| Free Device memory | [axclrtFree](../c/memory_api.md#axclrtFree) | Frees memory allocated by `axclrtMalloc` / `axclrtMallocCached`. |
+| Allocate Device memory | [axclrtMalloc](../c/memory_api.md#axclrtMalloc) | Allocates physically contiguous Device memory. The memory is not initialized. |
+| Allocate cached Device memory | [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) | Allocates physically contiguous Device memory with the cached attribute, which [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes) reports. Use [axclrtMemFlush](../c/memory_api.md#axclrtMemFlush) and [axclrtMemInvalidate](../c/memory_api.md#axclrtMemInvalidate) to maintain cache coherency when required. |
+| Free Device memory | [axclrtFree](../c/memory_api.md#axclrtFree) | Frees memory allocated by `axclrtMalloc` / `axclrtMallocCached`, or releases a handle imported by `axclrtIpcMemImportByKey`. |
 
 ```{important}
-- `devPtr` is not a valid accessible address in the Host process and must not be directly dereferenced on the Host side.
-- [axclrtFree](../c/memory_api.md#axclrtFree) must be given the base address returned by [axclrtMalloc](../c/memory_api.md#axclrtMalloc) / [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached). An offset pointer is not accepted.
+- `devPtr` is not an accessible address in the Host process and must not be dereferenced on the Host.
+- [axclrtFree](../c/memory_api.md#axclrtFree) must be given the base handle returned by [axclrtMalloc](../c/memory_api.md#axclrtMalloc) / [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached). An offset pointer is rejected.
+- To free locally allocated memory, the calling thread's current Context must belong to the Device that owns the memory.
+- Frequent allocation and release can reduce performance. Preallocate memory where possible.
 ```
 
 ### 1.2. Host Memory
@@ -41,13 +43,13 @@ AXCL provides [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) to allocat
 
 | Operation | API | Description |
 |---|---|---|
-| Allocate Host virtual memory | [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) | Functionally similar to standard `malloc`. |
+| Allocate Host virtual memory | [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) | Allocates Host memory that is prepared for AXCL data transfer. The Host accesses it like memory from `malloc`. |
 | Free Host virtual memory | [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) | Frees memory allocated by `axclrtMallocHost`. |
 
 ```{note}
-1. Memory allocated by the standard library `malloc` can be used for Host ↔ Device copies, but [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) is recommended. Memory allocated by [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) is better suited for the AXCL data transfer path, and its attributes can be queried through [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes).
-2. Host memory must be released by the matching free API: memory allocated by [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) must be released by [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost); memory allocated by the standard library `malloc` must be released by the standard library `free`. These two allocation and free API pairs must not be mixed.
-3. Memory allocated by [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) belongs to the process-level DMA session. No current Context is required for allocation or release, but at least one opened and usable device must exist in the process. The memory can be used with any opened device in the process, and remains valid until it is freed or the last opened device in the process is reset.
+1. Memory allocated by the standard library `malloc` can be used for Host ↔ Device copies, but [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) is recommended: `malloc` memory is pinned and unpinned on every transfer, while [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) memory is already prepared for DMA. Its attributes can be queried through [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes).
+2. Host memory must be released by the matching free API: memory allocated by [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) must be released by [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost); memory allocated by the standard library `malloc` must be released by the standard library `free`. Do not mix the two pairs.
+3. Memory allocated by [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) belongs to the process, not to a Device or Context. Allocation and release need no current Context, but at least one usable active Device must exist in the process. The memory can be used with any active Device in the process, and stays valid until it is freed or the last active Device in the process is released.
 ```
 
 ```{important}
@@ -80,16 +82,17 @@ AXCL provides the following APIs to share the same Device memory among multiple 
 
 | Operation | API | Description |
 |---|---|---|
-| Export | [axclrtIpcMemGetExportKey](../c/memory_api.md#axclrtIpcMemGetExportKey) | The Producer exports the base address of Device memory allocated by the process and obtains an IPC Key. |
-| Set import whitelist | [axclrtIpcMemSetImportPid](../c/memory_api.md#axclrtIpcMemSetImportPid) | The Producer sets the processes (Host TGIDs) allowed to import the IPC Key. |
+| Export | [axclrtIpcMemGetExportKey](../c/memory_api.md#axclrtIpcMemGetExportKey) | The Producer exports the base handle of memory it allocated with `axclrtMalloc` / `axclrtMallocCached` and obtains an IPC Key. An allocation has at most one exported key at a time. Imported handles and handles registered by `axclrtMemMapDevAddr` cannot be exported. |
+| Set import whitelist | [axclrtIpcMemSetImportPid](../c/memory_api.md#axclrtIpcMemSetImportPid) | The Producer sets the processes (Host TGIDs) allowed to import the IPC Key. Each call replaces the previous whitelist. To skip whitelist checks, export with [AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION](../c/reference/macro.md#AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION) instead. |
 | Query Host TGID | [axclrtDeviceGetBareTgid](../c/device_api.md#axclrtDeviceGetBareTgid) | A Consumer queries its own TGID in the initial PID namespace, for the Producer to set the whitelist. |
-| Import | [axclrtIpcMemImportByKey](../c/memory_api.md#axclrtIpcMemImportByKey) | A Consumer imports by the IPC Key and obtains a `devPtr` handle in its own process. |
-| Close | [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) | The Producer and each Consumer release their own IPC references. |
+| Import | [axclrtIpcMemImportByKey](../c/memory_api.md#axclrtIpcMemImportByKey) | A Consumer imports by the IPC Key and obtains a `devPtr` handle in its own process. The Device that owns the memory must be active in the Consumer process. Each import takes one IPC reference and returns a new handle. |
+| Close | [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) | The Producer and each Consumer release their own IPC references, one call per export or import. After the Producer closes the key, new imports fail. |
 
 ```{important}
-- The lifetime of the shared memory is determined by the Producer. The Producer must ensure that the memory is not freed before all Consumers finish using it; otherwise the result of hardware access by the Consumers is undefined. Closing the IPC Key or freeing its own handle in a Consumer does not extend the lifetime of the Producer's memory.
+- The Producer determines the lifetime of the shared memory. It must not free the memory before all Consumers finish using it; otherwise Device access from the Consumers is undefined. Closing the IPC Key or freeing a handle in a Consumer does not extend the lifetime of the Producer's memory.
 - For the same IPC Key, all Consumers should call [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) before the Producer does.
-- Calling [axclrtFree](../c/memory_api.md#axclrtFree) in a Consumer only releases the mapping in that process and does not release the Device physical memory.
+- Calling [axclrtFree](../c/memory_api.md#axclrtFree) in a Consumer only releases the handle in that process and does not release the Device physical memory. Each import must be released with both [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) and [axclrtFree](../c/memory_api.md#axclrtFree).
+- A whitelisted TGID is accepted only for a process that was already running when it was added. Set the whitelist after the Consumer has started.
 - In containerized environments such as Docker and Kubernetes, the whitelist must use the Host TGID returned by [axclrtDeviceGetBareTgid](../c/device_api.md#axclrtDeviceGetBareTgid), not the in-container PID returned by `getpid`.
 ```
 
@@ -113,15 +116,17 @@ AXCL uses [axclrtMemcpyKind](../c/reference/enum.md#axclrtMemcpyKind) to describ
 | Copy kind | Direction |
 |---|---|
 | [AXCL_MEMCPY_HOST_TO_HOST](../c/reference/enum.md#AXCL_MEMCPY_HOST_TO_HOST) | Host virtual memory to Host virtual memory. |
-| [AXCL_MEMCPY_HOST_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) | Host virtual memory to Device physical memory. |
-| [AXCL_MEMCPY_DEVICE_TO_HOST](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST) | Device physical memory to Host virtual memory. |
-| [AXCL_MEMCPY_DEVICE_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE) | Device physical memory to Device physical memory. |
+| [AXCL_MEMCPY_HOST_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) | Host virtual memory to Device memory (`devPtr`). |
+| [AXCL_MEMCPY_DEVICE_TO_HOST](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST) | Device memory (`devPtr`) to Host virtual memory. |
+| [AXCL_MEMCPY_DEVICE_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE) | Device memory to Device memory, on the same Device or between two Devices. |
+
+Device memory in a copy must belong to the Device of the current Context (for [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy)) or of the Stream (for [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync)). The exception is a Device-to-Device copy between two Devices; see [Inter-Device Copy](memory.md#memory-inter-device-copy).
 
 <a id="memory-synchronous-copy"></a>
 
 ### 2.2. Synchronous Copy
 
-[axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) is a synchronous copy API. For Host ↔ Device copies, a successful return indicates that the current synchronous copy has completed.
+[axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) is a synchronous copy API that supports all copy directions. A successful return means the copy has completed. The calling thread must have a current Context.
 
 The following example shows the core call sequence. [axclInit](../c/system_api.md#axclInit) / [axclFinalize](../c/system_api.md#axclFinalize) and error-code checks are omitted.
 
@@ -147,7 +152,7 @@ axclrtResetDevice(0);
 
 ### 2.3. Asynchronous Copy
 
-[axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) associates a copy request with the specified [axclrtStream](../c/reference/struct.md#axclrtStream), so the copy and other Tasks in the same Stream are executed in submission order.
+[axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) submits a copy to the specified [axclrtStream](../c/reference/struct.md#axclrtStream). The copy runs in submission order with the other Tasks in that Stream, including Host-to-Host copies.
 
 ```c
 axclrtStream stream;
@@ -186,24 +191,30 @@ axclrtResetDevice(0);
 ```
 
 ```{important}
-When [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) returns successfully, the copy has only been submitted to the specified Stream. It does not mean that the data has already been copied. Completion of an asynchronous copy can be confirmed by synchronizing that Stream, waiting for an Event recorded on that Stream, or using a Device-level synchronization API.
+- When [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) returns successfully, the copy has only been submitted to the Stream; the data may not have been copied yet. Confirm completion by synchronizing the Stream, waiting for an Event recorded on the Stream after the copy, or synchronizing the Device.
+- Errors raised when the Device accepts or executes the copy are returned by the next [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) on the Stream.
+- Keep the source and destination memory valid until the copy completes. Do not read the destination or free either buffer before then.
 ```
 
 <a id="memory-inter-device-copy"></a>
 
 ### 2.4. Inter-Device Copy
 
-The following example copies memory from Device 0 to Device 1. The application first checks whether Peer Access is supported between the two devices, and then enables access in both directions. Error handling is omitted.
+A Device-to-Device copy between two Devices runs on the current Device (for [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy)) or on the Device of the Stream (for [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync)). That Device must own either the source or the destination, and peer access from it to the other Device must be enabled with [axclrtDeviceEnablePeerAccess](../c/device_api.md#axclrtDeviceEnablePeerAccess). Peer access is one-way, applies to the whole process, and stays enabled until [axclrtDeviceDisablePeerAccess](../c/device_api.md#axclrtDeviceDisablePeerAccess) is called. [axclrtDeviceCanAccessPeer](../c/device_api.md#axclrtDeviceCanAccessPeer) queries the capability and requires the source Device to be active.
+
+The following example copies memory from Device 0 to Device 1. The application activates Device 0, checks whether peer access is supported between the two Devices, and then enables access in both directions. Error handling is omitted.
 
 ```c
 axclInit(NULL);
+
+/* Activate Device 0 first; the capability query runs on an active Device. */
+axclrtSetDevice(0);
 
 int32_t canAccessPeer = 0;
 axclrtDeviceCanAccessPeer(&canAccessPeer, 0, 1);
 if (canAccessPeer == 1) {
     uint32_t reserved = 0U;
 
-    axclrtSetDevice(0);
     axclrtDeviceEnablePeerAccess(1, reserved);
 
     void *dev0Mem = NULL;
@@ -215,17 +226,21 @@ if (canAccessPeer == 1) {
     void *dev1Mem = NULL;
     axclrtMalloc(&dev1Mem, 10, AXCL_MEM_MALLOC_NORMAL_ONLY);
 
-    /* Copy data from Device 0 to Device 1. */
+    /* The copy runs on the current Device 1, which owns the destination and has peer access to Device 0. */
     axclrtMemcpy(dev1Mem, dev0Mem, 10, AXCL_MEMCPY_DEVICE_TO_DEVICE);
 
     axclrtDeviceDisablePeerAccess(0);
     axclrtFree(dev1Mem);
     axclrtResetDevice(1);
 
+    /* Switching back with axclrtSetDevice adds a second reference to Device 0, so reset it twice. */
     axclrtSetDevice(0);
     axclrtDeviceDisablePeerAccess(1);
     axclrtFree(dev0Mem);
-    axclrtResetDeviceForce(0);
+    axclrtResetDevice(0);
+    axclrtResetDevice(0);
+} else {
+    axclrtResetDevice(0);
 }
 
 axclFinalize();
@@ -360,8 +375,8 @@ AXCL also provides APIs for setting and comparing Device memory:
 
 | Operation | Synchronous API | Asynchronous API | Description |
 |---|---|---|---|
-| Set Device memory | [axclrtMemset](../c/memory_api.md#axclrtMemset) | [axclrtMemsetAsync](../c/memory_api.md#axclrtMemsetAsync) | `axclrtMemset` supports Device memory only. |
-| Compare Device memory | [axclrtMemcmp](../c/memory_api.md#axclrtMemcmp) | [axclrtMemcmpAsync](../c/memory_api.md#axclrtMemcmpAsync) | Compares two Device memory ranges. The synchronous API returns `AXCL_SUCC` when the content is identical. |
+| Set Device memory | [axclrtMemset](../c/memory_api.md#axclrtMemset) | [axclrtMemsetAsync](../c/memory_api.md#axclrtMemsetAsync) | Sets each byte of a Device memory range to a value. Both APIs support Device memory only. |
+| Compare Device memory | [axclrtMemcmp](../c/memory_api.md#axclrtMemcmp) | [axclrtMemcmpAsync](../c/memory_api.md#axclrtMemcmpAsync) | Compares two Device memory ranges on the same Device. The synchronous API returns `AXCL_SUCC` only when the contents are identical; a failure can mean either different contents or an execution error. The asynchronous API does not report whether the ranges are equal. |
 
 ## 4. Important APIs
 
@@ -369,8 +384,8 @@ AXCL also provides APIs for setting and comparing Device memory:
 |---|---|---|
 | [axclrtMalloc](../c/memory_api.md#axclrtMalloc) | Allocates Device memory. | Device memory |
 | [axclrtMallocCached](../c/memory_api.md#axclrtMallocCached) | Allocates Device memory with the cached attribute. | Device memory |
-| [axclrtFree](../c/memory_api.md#axclrtFree) | Frees memory allocated by `axclrtMalloc` / `axclrtMallocCached`. | Device memory |
-| [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) | Allocates Host virtual memory. | Host memory |
+| [axclrtFree](../c/memory_api.md#axclrtFree) | Frees memory allocated by `axclrtMalloc` / `axclrtMallocCached`, or releases a handle imported by `axclrtIpcMemImportByKey`. | Device memory |
+| [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) | Allocates Host virtual memory prepared for AXCL data transfer. | Host memory |
 | [axclrtFreeHost](../c/memory_api.md#axclrtFreeHost) | Frees memory allocated by `axclrtMallocHost`. | Host memory |
 | [axclrtMemGetAddressRange](../c/memory_api.md#axclrtMemGetAddressRange) | Queries the base handle and total size of the allocation or registration that `devPtr` belongs to. | Device memory |
 | [axclrtMemGetDevAddr](../c/memory_api.md#axclrtMemGetDevAddr) | Exports the Device physical and virtual addresses from `devPtr`. | Device memory |
@@ -386,5 +401,5 @@ AXCL also provides APIs for setting and comparing Device memory:
 | [axclrtMemsetAsync](../c/memory_api.md#axclrtMemsetAsync) | Submits an asynchronous Device memory set request to a Stream. | Device memory |
 | [axclrtMemcmp](../c/memory_api.md#axclrtMemcmp) | Compares two Device memory ranges synchronously. | Device memory |
 | [axclrtMemcmpAsync](../c/memory_api.md#axclrtMemcmpAsync) | Submits an asynchronous Device memory comparison request to a Stream. | Device memory |
-| [axclrtGetMemInfo](../c/memory_api.md#axclrtGetMemInfo) | Queries Device-side memory capacity information. | Device memory |
-| [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes) | Queries pointer location and flags. | Host memory, Device memory |
+| [axclrtGetMemInfo](../c/memory_api.md#axclrtGetMemInfo) | Queries a snapshot of the memory capacity of the current Device. | Device memory |
+| [axclrtPointerGetAttributes](../c/memory_api.md#axclrtPointerGetAttributes) | Queries the location and flags of memory tracked by AXCL runtime. | Host memory, Device memory |

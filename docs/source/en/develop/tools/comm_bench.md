@@ -61,8 +61,8 @@ axcl_comm_bench compare  [--device <id>] [--out-dir <dir>] [--config <json>]
 | `-d`, `--device` | `0` | Device index in the range `[0, device count - 1]`. |
 | `-o`, `--out-dir` | `./axcl_comm_bench_out` | Report output directory. It is created when it does not exist. |
 | `-c`, `--config` | Empty | Path of the JSON configuration file passed to [axclInit](../c/system_api.md#axclInit). |
-| `--host-alloc` | `malloc-host,glibc` | Host memory allocator, given as a comma-separated combination: `malloc-host` uses [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost), `glibc` uses the standard library `malloc`, and `both` tests both. It applies only to the H2D / D2H steps; `sweep`, `connect`, `message`, `--h2h`, and `--dtod` are not affected. |
-| `-h`, `--help` | -- | Prints the usage and exits. |
+| `--host-alloc` | `malloc-host,glibc` | Host memory allocator, given as a comma-separated combination: `malloc-host` uses [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost), `glibc` uses the standard library `malloc`, and `both` tests both. It applies to the H2D / D2H steps of the full automatic run and of `bandwidth`, and to `compare`; `sweep`, `connect`, `message`, `--h2h`, and `--dtod` are not affected. |
+| `-h`, `--help` | -- | Prints the usage and exits. Recognized only as the first argument. |
 
 ```{note}
 `--htod`, `--dtoh`, `--h2h`, and `--dtod` are direction options of the `bandwidth` subcommand and cannot be used with the full automatic run. The `bandwidth` subcommand requires at least one of them.
@@ -70,9 +70,7 @@ axcl_comm_bench compare  [--device <id>] [--out-dir <dir>] [--config <json>]
 
 ## 3. Typical Usage
 
-Without a subcommand, the tool performs the full automatic run: `connect`, H2D, D2H, D2D, `sweep`, and `message` (excluding `--h2h`):
-
-The full automatic run does not execute `compare`; data validation runs only when the `compare` subcommand is specified explicitly.
+Without a subcommand, the tool performs the full automatic run: `connect`, H2D, D2H, D2D, `sweep`, and `message`. `bandwidth --h2h` and `compare` are not included; run them explicitly when needed.
 
 ```bash
 axcl_comm_bench --device 0
@@ -135,9 +133,11 @@ AXCL runtime  (no bandwidth)  threads=1
   overall: PASS
 ```
 
-`overall` is determined by the H2D and D2H results only. When D2D or message loopback is unsupported, it shows `SKIP` and does not affect the overall verdict.
+`overall` is determined by memory allocation and the H2D and D2H copies only. The D2D and message loopback results are for reference and do not affect `overall`; when they are unsupported, they show `SKIP`.
 
 ### 4.2. Bandwidth Output
+
+One table is printed per direction and host allocator; with the default `--host-alloc`, each of H2D and D2H prints a table for `axclrtMallocHost` and another for the standard library `malloc`.
 
 ```text
 Host to Device Bandwidth, device 0
@@ -169,7 +169,7 @@ AXCL axclrtMemcpy  H2D/D2H/D2D   threads={1,2,4,8}  host_alloc=axclrtMallocHost
   peak D2D: xxx MB/s
 ```
 
-`sweep` splits the given total payload evenly across the threads, starts all transfers at the same time, and measures the total elapsed time from the first thread starting to the last thread finishing, so the result reflects the aggregated concurrent bandwidth.
+For each payload size, `sweep` splits the payload evenly across the threads, starts all transfers at the same time, and measures the elapsed time until the last thread finishes, so the result reflects the aggregated concurrent bandwidth.
 
 ```{note}
 `sweep` always prints one table per host allocator, first for `axclrtMallocHost` and then for the standard library `malloc`, and is not controlled by `--host-alloc`. D2D does not involve host memory, so it is measured only in the first table and the second table reuses that result.
@@ -199,19 +199,19 @@ Every result row carries a status:
 | Status | Meaning |
 | --- | --- |
 | `PASS` | The item succeeded and its bandwidth or latency data is valid. |
-| `FAIL` | The item failed. The `note` column records the failing stage and the error code. |
+| `FAIL` | The item failed. When available, the `note` column records the failing stage and the error code. |
 | `SKIP_UNSUPPORTED` | The current device or firmware does not support the capability. The console shows `SKIP`. |
 
 ```{note}
 `SKIP` means not tested; it is not equivalent to 0 MB/s. When comparing reports, keep `SKIP` distinct from `FAIL` and from low bandwidth.
 ```
 
-Process return value: `0` means no executed test item reported `FAIL`; `1` means there were failing items or initialization failed; `2` means the command line arguments were invalid.
+Process return value: `0` means no executed test item failed; `1` means a test item failed, or initialization or device selection failed; `2` means the command line arguments were invalid. In `connect`, only memory allocation and the H2D and D2H copies count as failures.
 
 ## 6. Notes
 
 - Bandwidth is reported in MB/s with 1 MB = 10^6 bytes, which is a different base from the `MiB` payload labels in the same report.
-- While running, the tool temporarily lowers the kernel console log level by writing `/proc/sys/kernel/printk` so that kernel prints do not disturb the timing, and restores the original value on exit. The step is skipped without permission and does not affect the test.
+- While running, the tool temporarily lowers the kernel console log level by writing `/proc/sys/kernel/printk` so that kernel prints do not disturb the timing, and restores the original value when it finishes. The step is skipped without permission and does not affect the test. If the tool is interrupted, for example with `Ctrl+C`, the original value is not restored; check `/proc/sys/kernel/printk` and restore it manually if needed.
 - A single run targets one device. For multi-card setups, run the tool per `--device` and use `--out-dir` to keep the reports separate.
-- The 100 MiB payload requires 100 MiB of memory on both the host and the device. Confirm that the device has enough free CMM beforehand, which can be checked with [axcl-smi](smi.md).
+- The 100 MiB payload requires 100 MiB of memory on the host and on the device; D2D needs a source and a destination buffer, so it requires 200 MiB on the device. Confirm that the device has enough free CMM beforehand, which can be checked with [axcl-smi](smi.md).
 - Avoid running other heavy workloads on the device during the test; otherwise the bandwidth numbers are not comparable.

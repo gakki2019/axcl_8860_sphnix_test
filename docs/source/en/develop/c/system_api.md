@@ -27,7 +27,7 @@ N/A
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
+- `AXCL_SUCC`: The runtime reference was released, or no reference was held.
 - `others`: Failure.
 
 #### Note
@@ -35,6 +35,7 @@ N/A
 - [axclFinalize](#axclFinalize) must be called explicitly before process exit. Every successful call to [axclInit](#axclInit) increments the internal reference count and must have a matching call to [axclFinalize](#axclFinalize). A failed [axclInit](#axclInit) does not require a matching call.
 - Do not call this function during C++ static or global object destruction, where AXCL runtime dependencies may already have been destroyed.
 - Serialize this call with [axclrtMallocHost](memory_api.md#axclrtMallocHost) and [axclrtFreeHost](memory_api.md#axclrtFreeHost) calls in the process.
+- Releasing the last reference fails if user-created Contexts or Streams remain, including those still held by CCL communicators that have not been finalized. On failure, the reference is kept; fix the cause, such as destroying the remaining objects, and call this function again.
 
 #### Remark
 
@@ -58,11 +59,11 @@ AXCL_EXPORT axclError axclInit(const char *json);
 
 | Name | Direction | Description |
 |---|---|---|
-| json | in | JSON configuration file path or JSON content string. NULL or an empty string uses the default configuration. |
+| json | in | JSON configuration file path or JSON content string. A value whose first non-whitespace character is `{` or `[` is parsed as JSON content; any other value must be the path of an existing regular file. NULL or an empty string uses the default configuration. |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
+- `AXCL_SUCC`: The runtime was initialized, or its reference count was incremented.
 - `others`: Failure.
 
 #### Example
@@ -101,11 +102,11 @@ AXCL_EXPORT axclError axclInit(const char *json);
       axclInit("config3.json") // Loads config3.json
       axclFinalize()
   ```
-- An invalid JSON string or an unreadable configuration path returns `AXCL_ERR_RT_FAIL`. Runtime initialization is not attempted, and the reference count remains zero.
+- An invalid JSON string or an unreadable configuration path makes this function fail. Runtime initialization is not attempted, and the reference count remains zero.
 
 #### JSON
 
-- `dma buf size`: DMA buffer size in bytes for the device connection.
+- `dma buf size`: DMA buffer size in bytes for the device connection, given as a number or a numeric string. The default is 4194304. Values smaller than 1048576 are ignored and the default is used.
 
   ```json
    {

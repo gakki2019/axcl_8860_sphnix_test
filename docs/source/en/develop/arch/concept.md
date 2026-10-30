@@ -17,10 +17,10 @@ AXCL runtime uses **Device, Context, Stream, Task, and Event** to organize the e
 
 | Object | Direct user handle | Ownership | Main purpose | Typical APIs |
 |---|---|---|---|---|
-| Device | Selected by `deviceId` | Process-visible device | Device activation, resource root, cross-end connection entry | [axclrtSetDevice](../c/device_api.md#axclrtSetDevice), [axclrtResetDevice](../c/device_api.md#axclrtResetDevice) |
-| Context | Yes, [axclrtContext](../c/reference/struct.md#axclrtContext) | Belongs to Device | Current thread execution environment; carries Stream, memory, inference, and other runtime resources | [axclrtCreateContext](../c/context_api.md#axclrtCreateContext), [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) |
-| Stream | Yes, [axclrtStream](../c/reference/struct.md#axclrtStream) | Belongs to Context | FIFO task queue; organizes asynchronous task ordering and concurrency | [axclrtCreateStream](../c/stream_api.md#axclrtCreateStream), [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) |
-| Task | No, internal object | Belongs to Stream | Minimum work unit tracked and scheduled by runtime internally | Managed by runtime internally |
+| Device | Selected by `deviceId` | Process-visible device | Device activation, resource root, connection to the Device | [axclrtSetDevice](../c/device_api.md#axclrtSetDevice), [axclrtResetDevice](../c/device_api.md#axclrtResetDevice) |
+| Context | Yes, [axclrtContext](../c/reference/struct.md#axclrtContext) | Belongs to Device | Execution environment of the current thread; owns Streams and scopes memory, inference, and other runtime resources | [axclrtCreateContext](../c/context_api.md#axclrtCreateContext), [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) |
+| Stream | Yes, [axclrtStream](../c/reference/struct.md#axclrtStream) | Belongs to Context | FIFO task queue; orders asynchronous tasks and separates independent work | [axclrtCreateStream](../c/stream_api.md#axclrtCreateStream), [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) |
+| Task | No, created implicitly | Belongs to Stream | Unit of work that an API call submits to a Stream | Created by the APIs that submit work |
 | Event | Yes, [axclrtEvent](../c/reference/struct.md#axclrtEvent) | Belongs to Device | Stream synchronization, Host waiting, elapsed-time measurement | [axclrtCreateEvent](../c/event_api.md#axclrtCreateEvent), [axclrtRecordEvent](../c/event_api.md#axclrtRecordEvent), [axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent) |
 
 <a id="DEVICE"></a>
@@ -29,13 +29,13 @@ AXCL runtime uses **Device, Context, Stream, Task, and Event** to organize the e
 
 A Device is an AXERA AI compute device managed by AXCL runtime. A Host process can see one or more Devices and selects the target device by logical `deviceId`.
 
-After a Device is activated, runtime establishes the runtime connection between Host and Device, and creates default execution resources for the Device:
+The first activation of a Device in a process, by [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) or [axclrtCreateContext](../c/context_api.md#axclrtCreateContext), connects the process to the Device and creates its default execution resources:
 
-1. Start the data channel for the Device.
-2. The Device-side daemon starts the corresponding worker process.
-3. Create the **default Context**.
-4. Create the **default Stream** under the default Context.
-5. Register the response, callback, and exception receive logic required by runtime internally.
+1. The Device-side daemon starts a worker process that serves this Host process.
+2. Runtime opens the communication channel between the Host process and that worker.
+3. Runtime creates the **default Context**.
+4. Runtime creates the **default Stream** under the default Context.
+5. Runtime starts monitoring the Device. If the Device or its worker becomes unavailable, runtime marks the Device offline, fails unfinished tasks, and notifies the callback registered by [axclrtRegDeviceStateCallback](../c/device_api.md#axclrtRegDeviceStateCallback).
 
 ```c
 axclInit(NULL);
@@ -49,7 +49,7 @@ axclrtSetDevice(0);
 
 ...
 
-/* Activate logical Device 1 and switch the main thread to the default Context of Device 1. */
+/* Activate logical Device 1 and bind the main thread to the default Context of Device 1 instead. */
 axclrtSetDevice(1);
 
 ...
@@ -65,17 +65,17 @@ axclFinalize();
 
 ### 2.1. Device ID
 
-AXCL exposes logical device IDs visible to the current process. Runtime maps each logical device ID to the physical device ID used by the driver and communication layer:
+All AXCL APIs take logical device IDs, which the API reference also calls virtual device IDs. Runtime maps each logical device ID to a physical device ID:
 
-- **Physical device ID** comes from device information probed by runtime, and is the ID used by the driver and communication layer to identify a device.
-- **Logical device ID** is the continuous ID exposed by AXCL to the current process, in the range `0` to `device count - 1`.
+- **Physical device ID** identifies a device detected by the driver. [axclrtGetDeviceInfo](../c/device_api.md#axclrtGetDeviceInfo) with `AXCL_DEVICE_ATTR_PHYSICAL_DEVICE_ID` returns the physical ID of a logical device.
+- **Logical device ID** is the contiguous ID that AXCL exposes to the current process, in the range `0` to `device count - 1`.
 - Use [axclrtGetDeviceCount](../c/device_api.md#axclrtGetDeviceCount) to query the number of logical devices visible to the current process.
 
 <a id="AXCL_VISIBLE_DEVICES"></a>
 
 #### 2.1.1. AXCL_VISIBLE_DEVICES
 
-AXCL uses the `AXCL_VISIBLE_DEVICES` environment variable to control the physical device set visible to the current process, and generates the mapping from logical device IDs to physical device IDs from that visible set. Set this environment variable before the application calls [axclInit](../c/system_api.md#axclInit). A common usage is:
+The `AXCL_VISIBLE_DEVICES` environment variable selects the physical devices visible to the current process and defines how logical device IDs map to them. It is read once per process, no later than [axclInit](../c/system_api.md#axclInit), so set it before the process starts or before that call. For example:
 
 ```bash
 # Let the current process see only physical devices 3 and 1
@@ -85,8 +85,10 @@ export AXCL_VISIBLE_DEVICES=3,1
 
 `AXCL_VISIBLE_DEVICES` is parsed as follows:
 
-- If `AXCL_VISIBLE_DEVICES` is not set, runtime maps all probed physical devices to logical devices in probe order.
-- If `AXCL_VISIBLE_DEVICES` is set to a comma-separated physical device ID list, runtime generates the logical device mapping in the list order.
+- If `AXCL_VISIBLE_DEVICES` is not set, all detected physical devices are visible, numbered in detection order.
+- If it is set to a comma-separated list of physical device IDs, logical IDs are assigned in list order.
+- If it is set to an empty string, no device is visible.
+- Invalid and duplicate entries are skipped. Parsing stops at the first ID that does not match a detected physical device, so the entries after it are ignored.
 
 Assume the system has 4 physical devices with physical device IDs `0`, `1`, `2`, and `3`. After setting `AXCL_VISIBLE_DEVICES=3,1`, the current process sees only two logical devices:
 
@@ -99,35 +101,36 @@ Assume the system has 4 physical devices with physical device IDs `0`, `1`, `2`,
 
 Device activation is managed by reference counting:
 
-- The first [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) call that activates a Device makes runtime establish the connection and create the default Context / default Stream.
-- Subsequent activations of the same Device only increase the Device reference count and bind the current thread to the Device's default Context.
-- [axclrtCreateContext](../c/context_api.md#axclrtCreateContext) creates an explicit Context on the specified Device and holds an activation reference to that Device; [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) destroys the explicit Context and releases the corresponding reference.
-- Every Device activation through [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) must be paired with one [axclrtResetDevice](../c/device_api.md#axclrtResetDevice) deactivation.
-- Only the final deactivation that drops the reference count to 0 releases the Device's default Context / default Stream and cross-end connection resources.
+- The first activation of a Device in the process connects to the Device and creates the default Context and default Stream.
+- Each later [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) call on the same Device increases its reference count and binds the calling thread to the Device's default Context.
+- [axclrtCreateContext](../c/context_api.md#axclrtCreateContext) also takes an activation reference on the specified Device; [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) releases it.
+- Pair every successful [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) with one [axclrtResetDevice](../c/device_api.md#axclrtResetDevice).
+- The reference count is per process, not per thread. Only the release that drops it to 0 waits for the default Stream to finish, then releases the default Context, the default Stream, and the connection to the Device.
+- [axclrtResetDeviceForce](../c/device_api.md#axclrtResetDeviceForce) releases the Device whatever its reference count. It still waits for the default Stream, and fails if explicit Contexts or Streams remain.
 
 Device and its child objects have lifecycle dependencies:
 
 - An explicit Stream depends on its owning Context.
 - An explicit Context depends on its owning Device.
 - The default Context and default Stream are created automatically when the Device is first activated, and are released when the Device is finally deactivated.
-- Before the Device is finally released, explicitly created Contexts / Streams must have been released; otherwise runtime rejects Device release.
+- Release explicitly created Contexts and Streams before the Device is finally released; otherwise the release fails.
 
 ```{important}
-- Before finally deactivating and releasing a Device, users must first release explicitly created Streams and Contexts in this order: [axclrtDestroyStream](../c/stream_api.md#axclrtDestroyStream) → [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) → [axclrtResetDevice](../c/device_api.md#axclrtResetDevice).
-- If any explicitly created Context or Stream is still alive, runtime rejects Device release.
+- Before the final release of a Device, release explicitly created Streams and Contexts in this order: [axclrtDestroyStream](../c/stream_api.md#axclrtDestroyStream) → [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) → [axclrtResetDevice](../c/device_api.md#axclrtResetDevice).
+- If an explicitly created Context, or an explicitly created Stream in any Context of the Device, is still alive, the final [axclrtResetDevice](../c/device_api.md#axclrtResetDevice), [axclrtResetDeviceForce](../c/device_api.md#axclrtResetDeviceForce), and [axclFinalize](../c/system_api.md#axclFinalize) fail.
 ```
 
 ### 2.3. Device Synchronization
 
-- [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) waits for related submitted tasks on the Device corresponding to the Context bound to the current thread.
-- [axclrtSynchronizeDeviceWithTimeout](../c/device_api.md#axclrtSynchronizeDeviceWithTimeout) supports timeout waiting. The `timeout` unit is milliseconds, and `-1` means waiting indefinitely.
+- [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice) waits for the Device that owns the calling thread's current Context. It synchronizes every Stream in every Context of that Device in the process, including Streams used by other threads, and stops at the first Stream that reports an error.
+- [axclrtSynchronizeDeviceWithTimeout](../c/device_api.md#axclrtSynchronizeDeviceWithTimeout) adds a timeout in milliseconds; a negative value such as `-1` waits indefinitely. The timeout applies to each Stream, so the total wait can be longer. A timeout does not cancel submitted work.
 
 <a id="CONTEXT"></a>
 
 ## 3. Context
 
-A Context is an execution environment and resource scope within a Device. Each Context belongs to exactly one Device and automatically owns one default Stream when it is created.
-Host threads determine the target Device and execution scope of subsequent runtime APIs by binding the current Context.
+A Context is an execution environment and resource scope within a Device. Each Context belongs to exactly one Device and owns one default Stream, created with the Context.
+The current Context of a Host thread determines the target Device and execution scope of the runtime APIs that the thread calls.
 
 ### 3.1. Default and Explicit Context
 
@@ -135,27 +138,30 @@ There are two types of Context:
 
 | Type | Creation | Destruction | Description |
 |---|---|---|---|
-| Default Context | Created automatically on the first [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) | Released when the Device is deactivated | Each activated Device has one default Context in the process, with fixed ID `0`; it cannot be explicitly destroyed by [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) |
+| Default Context | Created automatically on the first activation of the Device | Released on the final release of the Device | Each active Device has one default Context in the process, with ID `0`, shared by every thread that calls [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) for that Device; it cannot be destroyed by [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) |
 | Explicit Context | Created by [axclrtCreateContext](../c/context_api.md#axclrtCreateContext) | Destroyed by [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) | Suitable for independent execution scopes or multi-thread Context switching |
 
-If the user does not explicitly create a Context, [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) can be used to activate a Device and bind the current thread to the Device's default Context.
+An application that does not need explicit Contexts can call [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) to activate a Device and bind the current thread to the Device's default Context.
 
 ```{important}
-- The default Context is managed by runtime. Users cannot explicitly destroy it with [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext).
-- The default Context is automatically released by runtime when its Device is finally deactivated.
-- Before destroying an explicit Context, users need to destroy explicitly created Streams under that Context first.
+- The default Context is managed by runtime and cannot be destroyed with [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext).
+- Runtime releases the default Context on the final release of its Device.
+- Destroy the explicitly created Streams of an explicit Context before destroying the Context; otherwise [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) fails.
 ```
 
 ### 3.2. Context and Thread Binding
 
 Each Host thread has its own current Context binding:
 
-- A thread needs to bind a Context before using Device resources.
-- At most one Context is current in a thread at any time, and the Context already contains its owning Device information.
+- A thread must have a current Context before it calls APIs that use Device resources; otherwise those APIs fail.
+- At most one Context is current in a thread at any time. Its owning Device is the thread's current Device.
 - [axclrtCreateContext](../c/context_api.md#axclrtCreateContext) creates an explicit Context on the specified Device and binds the current thread to the new Context.
 - If the same thread creates multiple Contexts consecutively, the thread uses the most recently created Context by default.
 - [axclrtSetCurrentContext](../c/context_api.md#axclrtSetCurrentContext) can bind an existing Context as the current Context of the current thread.
-- [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) destroys an explicit Context and removes that Context from thread binding records.
+- [axclrtCreateContext](../c/context_api.md#axclrtCreateContext), [axclrtSetCurrentContext](../c/context_api.md#axclrtSetCurrentContext), and [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) replace each other: the Context set by the most recent successful call is current, and the runtime does not keep earlier bindings.
+- [axclrtDestroyContext](../c/context_api.md#axclrtDestroyContext) destroys an explicit Context and removes it from the bindings of all threads. A thread whose current Context is destroyed becomes unbound; it does not fall back to an earlier Context or the default Context.
+- The final release of a Device destroys its default Context, and threads bound to it become unbound.
+- Bindings are released when the thread exits, so a new thread that reuses the thread ID starts unbound.
 
 ```c
 void worker_thread(void) {
@@ -194,6 +200,7 @@ int main(void) {
 The same thread can hold multiple explicit Contexts, but only one Context is current at a time.
 When multiple Contexts are created, the current thread is bound to the most recently created Context by default.
 To switch the execution environment, call [axclrtSetCurrentContext](../c/context_api.md#axclrtSetCurrentContext) to bind a specified Context as the current Context of the current thread.
+Contexts are not stacked. To restore the previous Context after a temporary switch, save it with [axclrtGetCurrentContext](../c/context_api.md#axclrtGetCurrentContext) and set it again with [axclrtSetCurrentContext](../c/context_api.md#axclrtSetCurrentContext) afterwards.
 
 The following example creates two explicit Contexts on the same Device and switches between them:
 
@@ -242,11 +249,12 @@ A Stream is a logical task stream under a Context. It is used to organize task o
 
 Key Stream semantics:
 
-- Tasks in the same Stream enter the queue in submission order and are scheduled in FIFO order.
-- Different Streams have independent task queues and, by default, do not guarantee execution ordering between each other.
-- If different Streams need execution dependencies, use Event to insert record / wait nodes into Stream queues.
-- A Stream is a logical execution queue under a Context. It describes task ordering and synchronization boundaries, and is not the same as a low-level physical data channel.
-- A successful asynchronous API return usually means the request has been accepted by runtime or submitted to the corresponding Stream. It does not mean the task has completed. Task completion needs to be confirmed through Stream, Event, or Device synchronization APIs.
+- Tasks in the same Stream execute in submission order (FIFO).
+- Different Streams have independent task queues. By default, the execution order of tasks in different Streams is not guaranteed.
+- To create a dependency between Streams, use Event to insert record and wait points into the Streams.
+- A Stream is a logical queue under a Context that defines task ordering and synchronization boundaries. It does not correspond to a physical data channel.
+- A successful return from an asynchronous API means the task was submitted to the Stream, not that the Device accepted or completed it. Confirm completion with Stream, Event, or Device synchronization APIs.
+- Errors of asynchronous tasks, including a task the Device rejects because the Stream task queue is full, are returned by the next synchronization of the Stream (for example [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream), [axclrtSynchronizeDevice](../c/device_api.md#axclrtSynchronizeDevice), or [axclrtDestroyStream](../c/stream_api.md#axclrtDestroyStream)), not by the submitting call. After an error, tasks in the Stream that have not started are skipped until the error is returned; Event record and wait points still run. Errors detected while submitting, such as a failed [axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent), are returned by the submitting call.
 
 ### 4.1. Default and Explicit Stream
 
@@ -254,8 +262,8 @@ There are two types of Stream:
 
 | Type | Creation | Destruction | Description |
 |---|---|---|---|
-| Default Stream | Created automatically when the Context is created | Released with its owning Context | Each Context automatically owns one default Stream with ID `0`; the default Stream is managed by runtime and cannot be explicitly destroyed by users |
-| Explicit Stream | Created by [axclrtCreateStream](../c/stream_api.md#axclrtCreateStream) | Destroyed by [axclrtDestroyStream](../c/stream_api.md#axclrtDestroyStream) | Belongs to the Context bound to the current thread at creation time |
+| Default Stream | Created automatically when the Context is created | Released with its owning Context | Each Context owns one default Stream with ID `0`; it is managed by runtime and cannot be destroyed by users |
+| Explicit Stream | Created by [axclrtCreateStream](../c/stream_api.md#axclrtCreateStream) | Destroyed by [axclrtDestroyStream](../c/stream_api.md#axclrtDestroyStream), which waits for submitted tasks first, or by [axclrtDestroyStreamForce](../c/stream_api.md#axclrtDestroyStreamForce), which does not wait | Belongs to the current Context of the calling thread at creation time |
 
 ```c
 axclInit(NULL);
@@ -281,32 +289,33 @@ axclFinalize();
 
 ### 4.2. Stream Synchronization and Query
 
-- [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) waits for submitted tasks in the specified Stream to complete.
-- [axclrtSynchronizeStreamWithTimeout](../c/stream_api.md#axclrtSynchronizeStreamWithTimeout) supports timeout waiting. The `timeout` unit is milliseconds, and `-1` means waiting indefinitely.
+- [axclrtSynchronizeStream](../c/stream_api.md#axclrtSynchronizeStream) waits for the tasks submitted to the Stream before the call to complete, and returns the first asynchronous task error recorded on the Stream. The error is cleared once returned.
+- [axclrtSynchronizeStreamWithTimeout](../c/stream_api.md#axclrtSynchronizeStreamWithTimeout) adds a timeout in milliseconds; a negative value such as `-1` waits indefinitely. A timeout does not cancel submitted tasks.
 
-[axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) is a non-blocking status query API used to get a snapshot of the current task status of a specified Stream:
+[axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) returns a snapshot of the Stream's task status without blocking:
 
-- `AXCL_STREAM_STATUS_COMPLETE` means there is no unfinished task on the Stream at query time.
-- `AXCL_STREAM_STATUS_NOT_READY` means there are still unfinished tasks at query time.
+- `AXCL_STREAM_STATUS_COMPLETE` means all tasks submitted to the Stream had completed at query time.
+- `AXCL_STREAM_STATUS_NOT_READY` means at least one task had not completed at query time.
+
+[axclrtStreamQuery](../c/stream_api.md#axclrtStreamQuery) does not report asynchronous task errors; synchronize the Stream to get them.
 
 <a id="TASK"></a>
 
 ## 5. Task
 
-Task is the minimum runtime-internal scheduling unit that describes one task execution, for example:
+A Task is one unit of work that an API call submits to a Stream, for example:
 
-- Engine inference request.
-- NATIVE SDK RPC request, such as media processing, image processing, or DMA.
-- Asynchronous memory operation, such as asynchronous `memcpy`, `memset`, or `memcmp`.
-- Event record / Event wait.
-- Stream synchronization barrier.
+- An Engine inference request.
+- A NATIVE SDK call, such as media processing, image processing, or DMA. These calls run on the default Stream of the calling thread's current Context.
+- A memory operation, such as `memcpy`, `memset`, or `memcmp`.
+- An Event record point or wait point.
 
-A Task is submitted to a Stream for queued execution. Runtime uses tokens, response matching, and wait state tracking to track Task send, enqueue, and completion states.
+Tasks are created implicitly; there is no Task handle. Runtime tracks each Task from submission to completion.
 
 From the user point of view, Task mainly matters in two ways:
 
 1. **Ordering**: tasks in the same Stream execute in submission order.
-2. **Completion boundary**: after an asynchronous API returns, the Task may only have been enqueued; real completion needs to be confirmed through Stream, Event, or Device synchronization APIs.
+2. **Completion boundary**: when an asynchronous API returns, the Task has only been submitted; confirm completion, and get any execution error, through Stream, Event, or Device synchronization APIs.
 
 <a id="EVENT"></a>
 
@@ -314,7 +323,7 @@ From the user point of view, Task mainly matters in two ways:
 
 An Event is a Device-level synchronization object used to mark an execution point on a Stream and to synchronize tasks between different Streams on the same Device.
 
-Event does not belong to a Context or Stream. It is managed by the Event manager of its owning Device. It supports one task waiting for one event, or multiple tasks waiting for the same event.
+An Event belongs to its Device, not to a Context or Stream. One task can wait for one Event, and multiple tasks can wait for the same Event.
 
 The relationship where one task waits for one event is shown below:
 
@@ -334,22 +343,24 @@ The relationship where multiple tasks wait for the same event is shown below:
 
 | Operation | Description |
 |---|---|
-| [axclrtCreateEvent](../c/event_api.md#axclrtCreateEvent) | Create an Event on the Device bound to the current thread |
-| [axclrtDestroyEvent](../c/event_api.md#axclrtDestroyEvent) | Destroy an Event |
+| [axclrtCreateEvent](../c/event_api.md#axclrtCreateEvent) | Create a timing-enabled Event on the Device of the calling thread's current Context. [axclrtCreateEventWithFlags](../c/event_api.md#axclrtCreateEventWithFlags) selects the timing flag |
+| [axclrtDestroyEvent](../c/event_api.md#axclrtDestroyEvent) | Destroy an Event. It does not wait: record and wait points already submitted complete as usual |
 
 ```{important}
-An Event belongs to the Device on which it is created, and can be used only within the same Device. Streams from different Devices cannot share the same Event.
+- An Event belongs to the Device on which it is created and can be used only on that Device. Recording or waiting for it on a Stream of another Device fails.
+- A process can hold at most 1024 undestroyed Events per Device, counted across all Contexts of that Device.
+- Destroy Events before the final release of their Device. After the Device is released, all its Event handles are invalid.
 ```
 
 ### 6.2. Record, Wait, and Synchronize
 
-Common Event synchronization semantics include record, wait, and synchronize:
+Event synchronization uses three operations: record, wait, and synchronize. Each record point becomes the Event's latest record; wait and synchronize always refer to the latest record at the time they are called:
 
 | Operation | Semantics | Does Host wait for Event completion? |
 |---|---|---|
-| [axclrtRecordEvent](../c/event_api.md#axclrtRecordEvent) | Insert a record node into the specified Stream. When the Stream reaches this node, the Event becomes signaled | No. A successful return means the record request has been accepted |
-| [axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent) | Insert a wait barrier into the specified Stream. When the Stream reaches the barrier, it waits for the Event to become signaled, and then continues with subsequent tasks | No. A successful return means the wait request has been accepted |
-| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | The current Host thread waits for the Event to become signaled | Yes |
+| [axclrtRecordEvent](../c/event_api.md#axclrtRecordEvent) | Insert a record point into the specified Stream. It captures the tasks submitted to the Stream before it, and the Event becomes signaled when the Stream reaches it. Recording again replaces the latest record | No. A successful return means the record point was submitted |
+| [axclrtStreamWaitEvent](../c/event_api.md#axclrtStreamWaitEvent) | Insert a wait point into the specified Stream. When the Stream reaches it, the Stream waits until the Event's latest record at submission time is signaled, then continues with subsequent tasks. No wait point is inserted if the Event has never been recorded, its latest record has already completed, or that record is on the same Stream | No. A successful return means the wait point was submitted |
+| [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) | The calling Host thread waits until the Event's latest record is signaled. It returns immediately if the Event has never been recorded | Yes |
 
 The following example shows synchronization control where `stream2` waits for model inference in `stream1` to complete before performing memory copy:
 
@@ -396,8 +407,9 @@ Event can be used to measure the time difference between two execution points:
 
 - Events created by [axclrtCreateEvent](../c/event_api.md#axclrtCreateEvent), or by [axclrtCreateEventWithFlags](../c/event_api.md#axclrtCreateEventWithFlags) with [AXCL_EVENT_DEFAULT](../c/reference/macro.md#AXCL_EVENT_DEFAULT), support timing by default.
 - Events created with [AXCL_EVENT_DISABLE_TIMING](../c/reference/macro.md#AXCL_EVENT_DISABLE_TIMING) do not collect timestamps and cannot be used with [axclrtEventElapsedTime](../c/event_api.md#axclrtEventElapsedTime).
-- [axclrtEventElapsedTime](../c/event_api.md#axclrtEventElapsedTime) requires the two Events to belong to the same Device. AXCL implementation also checks on the Worker side whether the two Events have been recorded, whether they have been signaled, and whether the last record of both Events was on the same Stream.
-- The Event timestamp is captured when the Worker executes the record node, not when the Host calls [axclrtRecordEvent](../c/event_api.md#axclrtRecordEvent).
+- [axclrtEventElapsedTime](../c/event_api.md#axclrtEventElapsedTime) requires both Events to have timing enabled and to belong to the same Device. Their latest records must have completed; they may be on different Streams of that Device.
+- [axclrtEventElapsedTime](../c/event_api.md#axclrtEventElapsedTime) does not wait. If either latest record has not completed, it fails; synchronize the Events first, as in the example below. It also fails if either Event has never been recorded.
+- The timestamp is taken on the Device when the Stream executes the record point, not when the Host calls [axclrtRecordEvent](../c/event_api.md#axclrtRecordEvent). The result is the end timestamp minus the start timestamp, in milliseconds.
 
 ```c
 axclrtEvent start;
@@ -423,6 +435,7 @@ axclrtDestroyEvent(start);
 - Event is a Device-level object and does not belong to a Context or Stream.
 - Streams in different Contexts on the same Device can establish synchronization through Event.
 - Different Devices cannot establish synchronization through Event.
-- Event record and Stream wait are asynchronous nodes in Stream FIFO. A successful API return does not mean the Event has completed.
-- [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) is a Host-side blocking wait API used to wait for Event signaled.
-- Event state is managed by the Device-side Worker. The Host-side Event handle mainly stores Device ownership, event id, flags, and related information.
+- Event record and wait points are asynchronous tasks in the Stream FIFO. A successful API return does not mean the Event has been signaled.
+- [axclrtSynchronizeEvent](../c/event_api.md#axclrtSynchronizeEvent) blocks the calling Host thread until the Event is signaled; [axclrtEventQuery](../c/event_api.md#axclrtEventQuery) checks the status without blocking.
+- If the Device rejects a record point, for example because the Stream task queue is full, the record still ends and releases its waiters. The error is reported by the next synchronization of the recording Stream, not by the waiting Stream.
+- Event state is kept on the Device. The Host-side handle only identifies the Event.

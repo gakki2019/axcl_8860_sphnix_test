@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import ast
+import importlib
+import inspect
+import json
+import sys
 import os
 import re
 import shutil
@@ -154,6 +159,7 @@ class ParamDoc:
     name: str
     direction: str
     description: str
+    type_name: str = ""
 
 
 @dataclass
@@ -189,6 +195,8 @@ class FunctionDoc:
     paragraphs: dict[str, list[str]]
     section_order: list[str]
     refs: list[tuple[str, int]]
+    c_prototype: str = ""
+    python_call: str = ""
 
 
 @dataclass
@@ -280,7 +288,8 @@ class SourceCommentRecord:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate AXCL API Markdown docs from Doxygen XML.")
+    parser = argparse.ArgumentParser(description="Generate AXCL C or Python API Markdown documentation.")
+    parser.add_argument("--language", choices=("c", "python"), default="c", help="API source language (default: c).")
     parser.add_argument("--skip-doxygen", action="store_true", help="Reuse existing Doxygen XML.")
     parser.add_argument("--validate-only", action="store_true", help="Validate generated Markdown and reports only.")
     return parser.parse_args()
@@ -1291,14 +1300,19 @@ def render_parameters(params: list[ParamDoc]) -> str:
     return "\n".join(lines)
 
 
-def render_parameters_with_links(function: FunctionDoc, page_path: Path, symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook) -> str:
+def render_parameters_with_links(function: FunctionDoc, page_path: Path, symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook, language: str = "c", locale: str = "zh") -> str:
     if not function.params:
         return "N/A"
-    lines = ["| Name | Direction | Description |", "|---|---|---|"]
+    header = ("| 名称 | 类型 | 说明 |" if locale == "zh" else "| Name | Type | Description |") if language == "python" else "| Name | Direction | Description |"
+    lines = [header, "|---|---|---|"]
     refs = normalized_refs(function.refs)
     for param in function.params:
-        direction = param.direction or "-"
+        direction = (param.type_name if language == "python" else param.direction) or "-"
+        if language == "python":
+            direction = direction.replace("|", "&#124;")
         description = resolve_links(param.description or "-", refs, symbol_index, duplicates, report, page_path, function.symbol, function.line).replace("\n", "<br>")
+        if language == "python":
+            description = description.replace("|", "&#124;")
         lines.append(f"| {param.name} | {direction} | {description} |")
     return "\n".join(lines)
 
@@ -1326,7 +1340,7 @@ def render_returns_with_links(function: FunctionDoc, page_path: Path, symbol_ind
     return "N/A"
 
 
-def render_function_page(functions: list[FunctionDoc], page_path: Path, symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook, group_title: str) -> str:
+def render_function_page(functions: list[FunctionDoc], page_path: Path, symbol_index: dict[str, SymbolLocation], duplicates: set[str], report: ReportBook, group_title: str, language: str = "c", locale: str = "zh") -> str:
     resolved_briefs = {
         function.symbol: resolve_links(
             function.brief,
@@ -1361,7 +1375,15 @@ def render_function_page(functions: list[FunctionDoc], page_path: Path, symbol_i
         lines.append(resolved_briefs[function.symbol])
         if function.details:
             lines.extend(["", resolve_links(function.details, refs, symbol_index, duplicates, report, page_path, function.symbol, function.line)])
-        lines.extend(["", "#### Function", "", "```c", function.signature or "N/A", "```", "", "#### Parameters", "", render_parameters_with_links(function, page_path, symbol_index, duplicates, report), ""])
+        lines.extend(["", "#### Function", ""])
+        if language == "python":
+            if function.python_call:
+                lines.extend(["**Python 调用**" if locale == "zh" else "**Python Call**", "", "```python", function.python_call, "```", ""])
+            if function.c_prototype:
+                lines.extend(["**C++ 原型**" if locale == "zh" else "**C++ Prototype**", "", "```cpp", function.c_prototype, "```", ""])
+        else:
+            lines.extend([f"```{language}", function.signature or "N/A", "```", ""])
+        lines.extend(["#### Parameters", "", render_parameters_with_links(function, page_path, symbol_index, duplicates, report, language, locale), ""])
 
         sections = {
             "Example": function.examples,
@@ -1391,6 +1413,30 @@ def render_function_page(functions: list[FunctionDoc], page_path: Path, symbol_i
                 else:
                     lines.append(resolve_links(content, refs, symbol_index, duplicates, report, page_path, function.symbol, function.line))
                 lines.append("")
+    if language == "python":
+        lines = "\n".join(lines).splitlines()
+        labels = {"Index": "目录", "API": "API", "Function": "函数", "Parameters": "参数",
+                  "Returns": "返回值", "Note": "说明", "Example": "示例"} if locale == "zh" else {}
+        h2 = h3 = h4 = 0
+        in_code = False
+        for index, line in enumerate(lines):
+            if line.startswith("```"):
+                in_code = not in_code
+            if in_code:
+                continue
+            if line.startswith("## "):
+                h2 += 1
+                h3 = 0
+                lines[index] = f"## {h2}. {labels.get(line[3:], line[3:])}"
+            elif line.startswith("### "):
+                h3 += 1
+                h4 = 0
+                lines[index] = f"### {h2}.{h3}. {line[4:]}"
+            elif line.startswith("#### "):
+                h4 += 1
+                lines[index] = f"#### {h2}.{h3}.{h4}. {labels.get(line[5:], line[5:])}"
+            elif line == "N/A" and locale == "zh":
+                lines[index] = "不适用"
     return "\n".join(lines)
 
 
@@ -1706,12 +1752,12 @@ def collect_anchors(page: Path) -> set[str]:
     return anchors
 
 
-def validate_markdown(pages: list[Path], report: ReportBook) -> None:
+def validate_markdown(pages: list[Path], report: ReportBook, language: str = "c") -> None:
     anchor_index = {page: collect_anchors(page) for page in pages}
     for page in pages:
         lines = page.read_text(encoding="utf-8").splitlines()
         is_api_page = page.name.endswith("_api.md")
-        is_reference_page = "/reference/" in page.as_posix()
+        is_reference_page = language == "c" and "/reference/" in page.as_posix()
         is_index_page = page.name == "index.md"
         in_code_block = False
         previous_blank = False
@@ -1923,8 +1969,162 @@ def validate_markdown(pages: list[Path], report: ReportBook) -> None:
                     )
 
 
+PYTHON_DOC_MARKER = "<!-- Generated by docs/scripts/api/api_docgen.py --language python; do not edit. -->"
+
+
+def python_doc_text(text: str) -> str:
+    """Translate the inline RST literals used by the binding docstrings."""
+    return text.strip().replace("``", "`")
+
+
+def parse_python_function(function: object, public_name: str, group: str, issues: list[dict]) -> FunctionDoc:
+    signature = inspect.signature(function)
+    doc = inspect.getdoc(function) or ""
+    source = Path(inspect.getsourcefile(function)).relative_to(REPO_ROOT).as_posix()
+    line = inspect.getsourcelines(function)[1]
+    brief = python_doc_text(doc.split(".. table::", 1)[0])
+    prototypes = dict(re.findall(r"^\s*\*\*(C|python)\*\*\s+`([^`]+)`\s*$", doc, re.M))
+    python_call = prototypes.get("python", "")
+    python_call = re.sub(r"\baxcl(?:\.\w+)*\." + re.escape(function.__name__) + r"(?=\()", public_name, python_call)
+    for label in ("C", "python"):
+        if label not in prototypes:
+            issues.append({"symbol": public_name, "issue": "missing-prototype", "language": label})
+    parameter_docs = {}
+    # Field lists end at the next field or the Example section. Continuation
+    # lines belong to their field; union annotations contain spaces and pipes.
+    for match in re.finditer(r"^:param (.+?):\s*(.*?)(?=^:\w+|^\*\*Example\*\*|\Z)", doc, re.M | re.S):
+        parameter_docs[match.group(1).rsplit(" ", 1)[-1].lstrip("*")] = python_doc_text(match.group(2))
+    params = []
+    for name, parameter in signature.parameters.items():
+        annotation = inspect.formatannotation(parameter.annotation) if parameter.annotation is not inspect.Signature.empty else "Unannotated"
+        description = parameter_docs.get(name, "No parameter description in source.")
+        if parameter.default is not inspect.Signature.empty:
+            description += f" Default: `{parameter.default!r}`."
+        params.append(ParamDoc(name, "", description, annotation))
+        if name not in parameter_docs:
+            issues.append({"symbol": public_name, "issue": "missing-parameter-description", "parameter": name})
+    unexpected = set(parameter_docs) - set(signature.parameters)
+    if unexpected:
+        raise ValueError(f"{public_name}: docstring parameters not in signature: {sorted(unexpected)}")
+    result = re.search(r"^:returns:\s*(.*?)(?=^\*\*Example\*\*|\Z)", doc, re.M | re.S)
+    returns = []
+    return_texts = []
+    if result:
+        text = python_doc_text(result.group(1))
+        items = list(re.finditer(r"(?:^|\n)\s*(?:- )?\*\*(\w+)\*\*\s*\((.*?)\)\s*-\s*(.*?)(?=\n\s*- \*\*|\Z)", text, re.S))
+        if items:
+            returns = [ReturnDoc(m.group(1), f"{m.group(2)} — {m.group(3).strip()}") for m in items]
+        else:
+            return_texts = [text]
+    else:
+        issues.append({"symbol": public_name, "issue": "missing-return-description"})
+    example = re.search(r"\.\. code-block:: python\s*\n(.*)\Z", doc, re.S)
+    examples = []
+    if example:
+        code = textwrap.dedent(example.group(1)).strip()
+        # Source examples sometimes use an old re-export path (notably POOL).
+        code = re.sub(r"\baxcl(?:\.\w+)*\." + re.escape(function.__name__) + r"(?=\()", public_name, code)
+        examples = [f"```python\n{code}\n```"]
+    for text in [brief, *parameter_docs.values(), *(r.description for r in returns)]:
+        if re.search(r"(?:returned by|See|see|refer to|defined in)\s*$", text):
+            issues.append({"symbol": public_name, "issue": "truncated-source-description", "text": text})
+        if "Pointer to" in text or "Must not be NULL" in text:
+            issues.append({"symbol": public_name, "issue": "review-c-pointer-wording", "text": text})
+    return_type = inspect.formatannotation(signature.return_annotation) if signature.return_annotation is not inspect.Signature.empty else "Unannotated"
+    notes = [f"Return type: `{return_type}`."]
+    return FunctionDoc(
+        symbol=public_name, group_id=group, group_title=group, file=source, line=line,
+        brief=brief, details="", signature=f"{public_name}{signature}", params=params,
+        returns=returns, return_texts=return_texts, notes=notes, remarks=[], warnings=[],
+        restrictions=[], examples=examples, paragraphs={}, section_order=["Returns", "Note", "Example"], refs=[],
+        c_prototype=prototypes.get("C", ""), python_call=python_call,
+    )
+
+
+def collect_python_functions() -> tuple[dict[str, list[FunctionDoc]], list[dict]]:
+    """Discover real binding modules, excluding samples, loaders and helpers."""
+    python_root = REPO_ROOT / "python"
+    sys.path.insert(0, str(python_root))
+    groups: dict[str, list[FunctionDoc]] = {}
+    issues: list[dict] = []
+    for path in sorted((python_root / "axcl").rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        assignments = {target.id for node in tree.body if isinstance(node, ast.Assign)
+                       for target in node.targets if isinstance(target, ast.Name)}
+        if "_C_API_SIGNATURES" not in assignments:
+            continue
+        module_name = ".".join(path.relative_to(python_root).with_suffix("").parts)
+        module = importlib.import_module(module_name)
+        group = "axcl" if module_name == "axcl.rt.axcl" else module_name.rsplit(".", 1)[0]
+        public_module = importlib.import_module(group)
+        for name in module.__all__:
+            function = getattr(module, name)
+            if not inspect.isfunction(function) or function.__module__ != module_name:
+                raise ValueError(f"Unexpected public binding: {module_name}.{name}")
+            if getattr(public_module, name, None) is not function:
+                raise ValueError(f"Public export missing or shadowed: {group}.{name}")
+            groups.setdefault(group, []).append(parse_python_function(function, f"{group}.{name}", group, issues))
+    if not groups:
+        raise ValueError("No Python binding functions discovered")
+    return dict(sorted(groups.items())), issues
+
+
+def generate_python_docs(validate_only: bool) -> int:
+    groups, issues = collect_python_functions()
+    report = ReportBook()
+    outputs = {}
+    root = DOCS_ROOT / "source/en/develop/python/reference"
+    pages = {name: root / f"{name}.md" for name in groups}
+    symbols = {function.symbol: SymbolLocation(function.symbol, pages[group], function.symbol, "function")
+               for group, functions in groups.items() for function in functions}
+    for group, functions in groups.items():
+        body = render_function_page(functions, pages[group], symbols, set(), report, group,
+                                    language="python", locale="en")
+        outputs[pages[group]] = PYTHON_DOC_MARKER + "\n\n" + body
+    index = [PYTHON_DOC_MARKER, "", "# API", "",
+             "This section documents Python calls, C++ prototypes, parameters, return values, notes, and examples.",
+             "Constants, enums, and ctypes type definitions are not documented separately.", "",
+             "```{toctree}", ":maxdepth: 2", ""]
+    index.extend(group for group in groups)
+    index.extend(["```", ""])
+    outputs[root / "index.md"] = "\n".join(index)
+    # Validate complete output in memory before touching any files.
+    for path, content in outputs.items():
+        outputs[path] = normalize_markdown_spacing(content).rstrip() + "\n"
+        if path.exists() and not path.read_text(encoding="utf-8").startswith(PYTHON_DOC_MARKER):
+            raise ValueError(f"Refusing to overwrite hand-written page: {path}")
+    stale = [path for path in root.glob("*.md") if path not in outputs
+             and path.read_text(encoding="utf-8").startswith(PYTHON_DOC_MARKER)]
+    if validate_only:
+        mismatches = [str(path) for path, text in outputs.items()
+                      if not path.exists() or path.read_text(encoding="utf-8") != text]
+        if mismatches or stale:
+            print("Python API pages need regeneration:\n" + "\n".join(mismatches + [str(p) for p in stale]))
+            return 1
+    else:
+        for path, text in outputs.items():
+            write_text(path, text)
+        for path in stale:
+            path.unlink()  # Only remove obsolete pages marked as generated by this mode.
+    # Reuse the common Markdown table/link checks. Numbered Python pages have
+    # their own section schema, unlike the English C *_api.md pages.
+    validate_markdown(list(outputs), report, language="python")
+    errors = [row.values for rows in report.rows.values() for row in rows if row.values and row.values[0] == "ERROR"]
+    report_dir = BUILD_ROOT / "python"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    manifest = {"modules": {g: [f.symbol for f in fs] for g, fs in groups.items()},
+                "function_count": sum(map(len, groups.values())), "source_issues": issues, "errors": errors}
+    (report_dir / "summary.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"Python API: {len(groups)} modules, {manifest['function_count']} functions; "
+          f"{len(issues)} source descriptions require review; {len(errors)} Markdown errors.")
+    print(f"Report: {report_dir / 'summary.json'}")
+    return 1 if errors else 0
+
+
 def main() -> int:
     args = parse_args()
+    if args.language == "python":
+        return generate_python_docs(args.validate_only)
     ensure_directories()
     blacklist = load_blacklist(BLACKLIST_PATH)
     report = ReportBook()

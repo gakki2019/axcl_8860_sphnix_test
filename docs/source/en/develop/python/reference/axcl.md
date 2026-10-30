@@ -46,8 +46,6 @@ axclError axclInit(const char *json);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl.py:116`.
-
 #### 2.1.5. Example
 
 ```python
@@ -87,8 +85,6 @@ N/A
 #### 2.2.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl.py:147`.
 
 #### 2.2.5. Example
 
@@ -136,8 +132,6 @@ void axclAppLog(int32_t lv, const char *func, const char *file, uint32_t line, c
 #### 2.3.4. Note
 
 Return type: `None`.
-
-Source: `python/axcl/rt/axcl.py:175`.
 
 #### 2.3.5. Example
 

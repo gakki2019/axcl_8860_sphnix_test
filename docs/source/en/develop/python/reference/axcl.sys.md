@@ -79,8 +79,6 @@ N/A
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:1011`.
-
 #### 2.1.5. Example
 
 ```python
@@ -121,8 +119,6 @@ N/A
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:1039`.
-
 #### 2.2.5. Example
 
 ```python
@@ -148,14 +144,14 @@ phyaddr, pviraddr, ret = axcl.sys.mem_alloc(size, align, token)
 **C++ Prototype**
 
 ```cpp
-AX_S32 AX_SYS_MemAlloc(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U32 size, AX_U32 align, const AX_S8 *token);
+AX_S32 AX_SYS_MemAlloc(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U64 size, AX_U32 align, const AX_S8 *token);
 ```
 
 #### 2.3.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| size | int | Memory size in bytes. |
+| size | int | Memory size in bytes. The limit is kernel ax_max_malloc_size (1 GiB by default, raised to the largest CMM partition size). Requests above the limit return AX_ERR_CMM_NOMEM. |
 | align | int | Memory alignment in bytes. Currently ignored; the SDK always aligns to 4 KB. |
 | token | str &#124; bytes &#124; None | Allocation token. Use "PartitionName:BlockName" for a named partition, or "BlockName" for the anonymous partition. The token length must not exceed 30 bytes. |
 
@@ -168,8 +164,6 @@ AX_S32 AX_SYS_MemAlloc(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U32 size, AX_U32 
 #### 2.3.4. Note
 
 Return type: `tuple[int, int, int]`.
-
-Source: `python/axcl/sys/ax_sys.py:1067`.
 
 #### 2.3.5. Example
 
@@ -196,14 +190,14 @@ phyaddr, pviraddr, ret = axcl.sys.mem_alloc_cached(size, align, token)
 **C++ Prototype**
 
 ```cpp
-AX_S32 AX_SYS_MemAllocCached(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U32 size, AX_U32 align, const AX_S8 *token);
+AX_S32 AX_SYS_MemAllocCached(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U64 size, AX_U32 align, const AX_S8 *token);
 ```
 
 #### 2.4.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| size | int | Memory size in bytes. |
+| size | int | Memory size in bytes. The limit is kernel ax_max_malloc_size (1 GiB by default, raised to the largest CMM partition size). Requests above the limit return AX_ERR_CMM_NOMEM. |
 | align | int | Memory alignment in bytes. |
 | token | str &#124; bytes &#124; None | Allocation token. Use "PartitionName:BlockName" for a named partition, or "BlockName" for the anonymous partition. The token length must not exceed 30 bytes. |
 
@@ -216,8 +210,6 @@ AX_S32 AX_SYS_MemAllocCached(AX_U64 *phyaddr, AX_VOID **pviraddr, AX_U32 size, A
 #### 2.4.4. Note
 
 Return type: `tuple[int, int, int]`.
-
-Source: `python/axcl/sys/ax_sys.py:1107`.
 
 #### 2.4.5. Example
 
@@ -262,8 +254,6 @@ AX_S32 AX_SYS_MemFree(AX_U64 phyaddr, AX_VOID *pviraddr);
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:1147`.
-
 #### 2.5.5. Example
 
 ```python
@@ -289,7 +279,7 @@ ret = axcl.sys.mmap(phyaddr, size)
 **C++ Prototype**
 
 ```cpp
-AX_VOID * AX_SYS_Mmap(AX_U64 phyaddr, AX_U32 size);
+AX_VOID * AX_SYS_Mmap(AX_U64 phyaddr, AX_U64 size);
 ```
 
 #### 2.6.2. Parameters
@@ -306,8 +296,6 @@ AX_VOID * AX_SYS_Mmap(AX_U64 phyaddr, AX_U32 size);
 #### 2.6.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1180`.
 
 #### 2.6.5. Example
 
@@ -334,7 +322,7 @@ ret = axcl.sys.mmap_cache(phyaddr, size)
 **C++ Prototype**
 
 ```cpp
-AX_VOID * AX_SYS_MmapCache(AX_U64 phyaddr, AX_U32 size);
+AX_VOID * AX_SYS_MmapCache(AX_U64 phyaddr, AX_U64 size);
 ```
 
 #### 2.7.2. Parameters
@@ -351,8 +339,6 @@ AX_VOID * AX_SYS_MmapCache(AX_U64 phyaddr, AX_U32 size);
 #### 2.7.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1213`.
 
 #### 2.7.5. Example
 
@@ -379,7 +365,7 @@ ret = axcl.sys.mmap_fast(phyaddr, size)
 **C++ Prototype**
 
 ```cpp
-AX_VOID * AX_SYS_MmapFast(AX_U64 phyaddr, AX_U32 size);
+AX_VOID * AX_SYS_MmapFast(AX_U64 phyaddr, AX_U64 size);
 ```
 
 #### 2.8.2. Parameters
@@ -396,8 +382,6 @@ AX_VOID * AX_SYS_MmapFast(AX_U64 phyaddr, AX_U32 size);
 #### 2.8.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1246`.
 
 #### 2.8.5. Example
 
@@ -424,7 +408,7 @@ ret = axcl.sys.mmap_cache_fast(phyaddr, size)
 **C++ Prototype**
 
 ```cpp
-AX_VOID * AX_SYS_MmapCacheFast(AX_U64 phyaddr, AX_U32 size);
+AX_VOID * AX_SYS_MmapCacheFast(AX_U64 phyaddr, AX_U64 size);
 ```
 
 #### 2.9.2. Parameters
@@ -441,8 +425,6 @@ AX_VOID * AX_SYS_MmapCacheFast(AX_U64 phyaddr, AX_U32 size);
 #### 2.9.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1279`.
 
 #### 2.9.5. Example
 
@@ -469,7 +451,7 @@ ret = axcl.sys.munmap(pviraddr, size)
 **C++ Prototype**
 
 ```cpp
-AX_S32 AX_SYS_Munmap(AX_VOID *pviraddr, AX_U32 size);
+AX_S32 AX_SYS_Munmap(AX_VOID *pviraddr, AX_U64 size);
 ```
 
 #### 2.10.2. Parameters
@@ -486,8 +468,6 @@ AX_S32 AX_SYS_Munmap(AX_VOID *pviraddr, AX_U32 size);
 #### 2.10.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1312`.
 
 #### 2.10.5. Example
 
@@ -514,7 +494,7 @@ ret = axcl.sys.mflush_cache(phyaddr, pviraddr, size)
 **C++ Prototype**
 
 ```cpp
-AX_S32 AX_SYS_MflushCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U32 size);
+AX_S32 AX_SYS_MflushCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U64 size);
 ```
 
 #### 2.11.2. Parameters
@@ -532,8 +512,6 @@ AX_S32 AX_SYS_MflushCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U32 size);
 #### 2.11.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1345`.
 
 #### 2.11.5. Example
 
@@ -560,7 +538,7 @@ ret = axcl.sys.minvalidate_cache(phyaddr, pviraddr, size)
 **C++ Prototype**
 
 ```cpp
-AX_S32 AX_SYS_MinvalidateCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U32 size);
+AX_S32 AX_SYS_MinvalidateCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U64 size);
 ```
 
 #### 2.12.2. Parameters
@@ -578,8 +556,6 @@ AX_S32 AX_SYS_MinvalidateCache(AX_U64 phyaddr, AX_VOID *pviraddr, AX_U32 size);
 #### 2.12.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1380`.
 
 #### 2.12.5. Example
 
@@ -606,7 +582,7 @@ pmem_type, pviraddr, pblock_size, ret = axcl.sys.mem_get_block_info_by_phy(phyad
 **C++ Prototype**
 
 ```cpp
-AX_S32 AX_SYS_MemGetBlockInfoByPhy(AX_U64 phyaddr, AX_S32 *pmemType, AX_VOID **pviraddr, AX_U32 *pblockSize);
+AX_S32 AX_SYS_MemGetBlockInfoByPhy(AX_U64 phyaddr, AX_S32 *pmemType, AX_VOID **pviraddr, AX_U64 *pblockSize);
 ```
 
 #### 2.13.2. Parameters
@@ -625,8 +601,6 @@ AX_S32 AX_SYS_MemGetBlockInfoByPhy(AX_U64 phyaddr, AX_S32 *pmemType, AX_VOID **p
 #### 2.13.4. Note
 
 Return type: `tuple[int, int, int, int]`.
-
-Source: `python/axcl/sys/ax_sys.py:1415`.
 
 #### 2.13.5. Example
 
@@ -672,8 +646,6 @@ AX_S32 AX_SYS_MemGetBlockInfoByVirt(AX_VOID *pviraddr, AX_U64 *phyaddr, AX_S32 *
 
 Return type: `tuple[int, int, int]`.
 
-Source: `python/axcl/sys/ax_sys.py:1458`.
-
 #### 2.14.5. Example
 
 ```python
@@ -714,8 +686,6 @@ N/A
 #### 2.15.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/sys/ax_sys.py:1494`.
 
 #### 2.15.5. Example
 
@@ -760,8 +730,6 @@ AX_S32 AX_SYS_MemSetConfig(const AX_MOD_INFO_T *pModInfo, const AX_S8 *pPartitio
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:1525`.
-
 #### 2.16.5. Example
 
 ```python
@@ -804,8 +772,6 @@ AX_S32 AX_SYS_MemGetConfig(const AX_MOD_INFO_T *pModInfo, AX_S8 *pPartitionName)
 #### 2.17.4. Note
 
 Return type: `tuple[str, int]`.
-
-Source: `python/axcl/sys/ax_sys.py:1558`.
 
 #### 2.17.5. Example
 
@@ -851,8 +817,6 @@ AX_S32 AX_SYS_MemSetParam(const AX_MOD_INFO_T *pModInfo, const AX_S8 *pPartition
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:1593`.
-
 #### 2.18.5. Example
 
 ```python
@@ -897,8 +861,6 @@ AX_S32 AX_SYS_MemGetParam(const AX_MOD_INFO_T *pModInfo, AX_S8 *pPartitionName, 
 
 Return type: `tuple[str, int]`.
 
-Source: `python/axcl/sys/ax_sys.py:1628`.
-
 #### 2.19.5. Example
 
 ```python
@@ -940,8 +902,6 @@ N/A
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/sys/ax_sys.py:1665`.
-
 #### 2.20.5. Example
 
 ```python
@@ -967,7 +927,7 @@ phyaddr, size, ret = axcl.sys.mem_get_max_free_region_info()
 **C++ Prototype**
 
 ```cpp
-AX_S32 AX_SYS_MemGetMaxFreeRegionInfo(AX_U64 *pPhyaddr, AX_U32 *pSize);
+AX_S32 AX_SYS_MemGetMaxFreeRegionInfo(AX_U64 *pPhyaddr, AX_U64 *pSize);
 ```
 
 #### 2.21.2. Parameters
@@ -983,8 +943,6 @@ N/A
 #### 2.21.4. Note
 
 Return type: `tuple[int, int, int]`.
-
-Source: `python/axcl/sys/ax_sys.py:1696`.
 
 #### 2.21.5. Example
 
@@ -1029,8 +987,6 @@ AX_S32 AX_SYS_Link(const AX_MOD_INFO_T *pSrc, const AX_MOD_INFO_T *pDest);
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:1729`.
-
 #### 2.22.5. Example
 
 ```python
@@ -1073,8 +1029,6 @@ AX_S32 AX_SYS_UnLink(const AX_MOD_INFO_T *pSrc, const AX_MOD_INFO_T *pDest);
 #### 2.23.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1762`.
 
 #### 2.23.5. Example
 
@@ -1119,8 +1073,6 @@ AX_S32 AX_SYS_GetLinkByDest(const AX_MOD_INFO_T *pDest, AX_MOD_INFO_T *pSrc);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/sys/ax_sys.py:1795`.
-
 #### 2.24.5. Example
 
 ```python
@@ -1164,8 +1116,6 @@ AX_S32 AX_SYS_GetLinkBySrc(const AX_MOD_INFO_T *pSrc, AX_LINK_DEST_T *pLinkDest)
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/sys/ax_sys.py:1829`.
-
 #### 2.25.5. Example
 
 ```python
@@ -1206,8 +1156,6 @@ N/A
 #### 2.26.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/sys/ax_sys.py:1863`.
 
 #### 2.26.5. Example
 
@@ -1251,8 +1199,6 @@ AX_S32 AX_SYS_InitPTSBase(AX_U64 u64PTSBase);
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:1894`.
-
 #### 2.27.5. Example
 
 ```python
@@ -1294,8 +1240,6 @@ AX_S32 AX_SYS_SyncPTS(AX_U64 u64PTSBase);
 #### 2.28.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1925`.
 
 #### 2.28.5. Example
 
@@ -1339,8 +1283,6 @@ AX_S32 AX_SYS_SetLogLevel(AX_LOG_LEVEL_E level);
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:1956`.
-
 #### 2.29.5. Example
 
 ```python
@@ -1382,8 +1324,6 @@ AX_S32 AX_SYS_SetLogTarget(AX_LOG_TARGET_E target);
 #### 2.30.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:1987`.
 
 #### 2.30.5. Example
 
@@ -1427,8 +1367,6 @@ AX_S32 AX_SYS_EnableTimestamp(AX_BOOL enable);
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:2018`.
-
 #### 2.31.5. Example
 
 ```python
@@ -1469,8 +1407,6 @@ N/A
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:2049`.
-
 #### 2.32.5. Example
 
 ```python
@@ -1510,8 +1446,6 @@ N/A
 #### 2.33.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:2077`.
 
 #### 2.33.5. Example
 
@@ -1555,8 +1489,6 @@ AX_S32 AX_SYS_WakeLock(const AX_MOD_ID_E ModId);
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:2105`.
-
 #### 2.34.5. Example
 
 ```python
@@ -1598,8 +1530,6 @@ AX_S32 AX_SYS_WakeUnlock(const AX_MOD_ID_E ModId);
 #### 2.35.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:2136`.
 
 #### 2.35.5. Example
 
@@ -1645,8 +1575,6 @@ AX_S32 AX_SYS_RegisterEventCb(const AX_MOD_ID_E ModId, NotifyEventCallback pFunc
 
 Return type: `int`.
 
-Source: `python/axcl/sys/ax_sys.py:2167`.
-
 #### 2.36.5. Example
 
 ```python
@@ -1688,8 +1616,6 @@ AX_S32 AX_SYS_UnregisterEventCb(const AX_MOD_ID_E ModId);
 #### 2.37.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:2206`.
 
 #### 2.37.5. Example
 
@@ -1733,8 +1659,6 @@ AX_S32 AX_SYS_SleepTimeStamp(const AX_MOD_ID_E ModId, AX_U8 SubId);
 #### 2.38.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/sys/ax_sys.py:2242`.
 
 #### 2.38.5. Example
 

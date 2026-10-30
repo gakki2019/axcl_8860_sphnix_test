@@ -1,6 +1,6 @@
 # How to analyze minidumps?
 
-This document describes how to use a minidump generated at an AXCL userspace process crash site to analyze the crash.
+This document describes how to analyze a crash of an AXCL userspace process using the minidump it generates.
 
 ## 1. Background
 
@@ -12,13 +12,13 @@ A minidump is different from a Linux core dump. A core dump usually contains a m
 
 A minidump does not contain full debug information. AXCL release/install outputs are usually stripped, so addresses in the crash stack depend on Breakpad symbols to resolve function names, source files, and line numbers. `minidump_stackwalk` reads the `.dmp`, looks up `<module>/<breakpad-id>/<module>.sym` under the symbol paths, and generates a readable stack trace.
 
-AXCL uses a master-slave architecture: host-side processes run on the host, while device-side `slave_worker` / `slave_daemon` processes run on the device. Both may generate Breakpad minidumps. The analysis flow is the same; the only difference is selecting the corresponding symbol path according to the crashed process.
+Both host processes that use AXCL and the device-side `slave_worker` / `slave_daemon` processes can generate minidumps. The analysis flow is the same; only the symbol paths differ according to the crashed process. A host process that enables minidump with [axclInitializeMinidump](../develop/c/minidump_api.md#axclInitializeMinidump) writes its `.dmp` to the directory set by [AXCL_DUMP_DIR](../appendix/environment_variables.md#AXCL_DUMP_DIR), the directory given in the call, or `/tmp` on Linux, in that order.
 
 ```{important}
 Function names, source files, and line numbers depend on matching Breakpad symbols. The symbols should come from the same build as the crashed binaries; symbols from a different build may fail to resolve source line numbers correctly.
 ```
 
-The method for obtaining symbols is described in the [Minidump section of the userspace build document](../develop/build/usr.md#minidump). That section already explains how to generate `axcl-host-minidump-symbols.tar.gz`, `axcl-device-minidump-symbols.tar.gz`, and `axcl-all-minidump-symbols.tar.gz`; this document does not repeat the symbol generation steps.
+The method for obtaining symbols is described in the [Minidump section of the userspace build document](../develop/build/usr.md#minidump-symbols). That section already explains how to generate `axcl-host-minidump-symbols.tar.gz`, `axcl-device-minidump-symbols.tar.gz`, and `axcl-all-minidump-symbols.tar.gz`; this document does not repeat the symbol generation steps.
 
 ```{tip}
 Recommended automated script: AXCL provides an offline analysis script `analyze_minidump.sh` that automates archive extraction, symbol paths configuration, and stack unwinding in one command. For details, see [analyze_minidump.sh Tool Documentation](../develop/tools/analyze_minidump.md). Continue reading below for the manual step-by-step procedure.
@@ -30,13 +30,13 @@ The following files or directories are involved before analysis:
 
 | Item | Description | Example |
 | --- | --- | --- |
-| minidump | `.dmp` file generated at the crash site | `<process>_<pid>_<tid>_<YYYYmmdd_HHMMSS>.dmp` |
+| minidump | `.dmp` file generated at the crash site; the timestamp is in UTC | `<process>_<pid>_<tid>_<YYYYmmdd_HHMMSS>.dmp` |
 | symbols archive | symbols package generated from the same build as the crashed binary | `axcl-all-minidump-symbols.tar.gz` |
 | Linux analysis machine | machine that can run `minidump_stackwalk` from the symbols package | x86 Linux build or analysis machine |
 
 ## 3. Extract the symbols package
 
-For host-process minidumps only, `axcl-host-minidump-symbols.tar.gz` can be used. If the crashed process source is uncertain, or both host and device symbols need to be covered, `axcl-all-minidump-symbols.tar.gz` can be used.
+For a host-process minidump, `axcl-host-minidump-symbols.tar.gz` is enough. If you are not sure which side crashed, or need both host and device symbols, use `axcl-all-minidump-symbols.tar.gz`.
 
 Create an isolated directory on the Linux analysis machine and extract the symbols archive:
 
@@ -192,7 +192,7 @@ Seeing `function name + source file + line number` indicates that the `.dmp`, sy
 An address-only example is:
 
 ```text
-libaxcl.so + 0x123456
+libaxcl_rt.so + 0x123456
 ```
 
 If only module names are shown and source line numbers are missing, see the symbol checks in section 8.
@@ -258,11 +258,11 @@ find /tmp/axcl-symbols/device/arm64_glibc/symbols/lib -maxdepth 3 -name '*.sym' 
 
 ## Appendix A: Example for constructing and analyzing a null-pointer minidump
 
-This appendix gives a complete example from constructing a crash to analyzing the minidump. The sample process is `axcl_sample_runtime`, and the crash type is a null-pointer access. The example is only used to validate the minidump generation and analysis flow; the temporary code is restored after validation.
+This appendix walks through a complete example, from constructing a crash to analyzing the minidump. The sample process is `axcl_sample_runtime`, and the crash is a null-pointer access. The example only validates the minidump generation and analysis flow; the temporary code is reverted afterward.
 
 ### A.1 Construct a null-pointer crash
 
-The example constructs a crash by adding an environment-variable-controlled null-pointer access to `axcl/host/sample/runtime/main.cpp`. Default execution does not trigger the crash; setting `AXCL_SAMPLE_RUNTIME_NULL_DEREF=1` triggers it.
+Add a null-pointer access to `axcl/host/sample/runtime/main.cpp`, guarded by an environment variable. `AXCL_SAMPLE_RUNTIME_NULL_DEREF` is not part of AXCL; it exists only in this temporary code. The sample runs normally when the variable is not set, and crashes right after enabling minidump when it is set to any value, such as `1`. The crash happens before `axclInit()`, so no device access is involved.
 
 Temporary change in the include area:
 
@@ -315,7 +315,7 @@ axcl/out/axcl_linux_x64_gnu/bin/axcl_sample_runtime
 
 ### A.3 Collect symbols
 
-Symbol generation is described in the [Minidump section of the userspace build document](../develop/build/usr.md#minidump). This example uses host symbols:
+Symbol generation is described in the [Minidump section of the userspace build document](../develop/build/usr.md#minidump-symbols). This example uses host symbols:
 
 ```bash
 cd axcl
@@ -357,25 +357,23 @@ DUMP_DIR=/tmp/axcl-minidump-demo/dumps
 rm -rf "$DUMP_DIR"
 mkdir -p "$DUMP_DIR"
 
-set +e
 AXCL_DUMP_DIR="$DUMP_DIR" AXCL_SAMPLE_RUNTIME_NULL_DEREF=1 \
   ./out/axcl_linux_x64_gnu/bin/axcl_sample_runtime -d 0 \
   > /tmp/axcl-minidump-demo/run.log 2>&1
 rc=$?
-set -e
 
 echo "rc=$rc"
 find "$DUMP_DIR" -maxdepth 1 -type f -name '*.dmp' -print
 ```
 
-One actual run produced:
+Example output:
 
 ```text
 rc=139
 /tmp/axcl-minidump-demo/dumps/axcl_sample_run_2029764_2029764_20260712_102015.dmp
 ```
 
-`rc=139` means the process exited because of `SIGSEGV`. The file prefix is `axcl_sample_run` because Linux `/proc/self/comm` truncates the `axcl_sample_runtime` process name.
+`rc=139` (128 + 11) means the process was terminated by `SIGSEGV`. The file name starts with `axcl_sample_run` because Linux limits the process name in `/proc/self/comm` to 15 characters.
 
 ### A.6 Analyze the minidump
 
@@ -403,7 +401,7 @@ grep -nE "Crash reason|Crash address|Thread [0-9]+ \(crashed\)|axcl_sample|main.
   /tmp/axcl-minidump-demo/stackwalk.txt | head -80
 ```
 
-Key lines from one actual analysis:
+Example key lines:
 
 ```text
 121:Crash reason:  SIGSEGV /SEGV_MAPERR
@@ -417,11 +415,11 @@ The result means:
 - `Crash reason: SIGSEGV /SEGV_MAPERR`: invalid memory access.
 - `Crash address: 0x0`: the accessed address is null.
 - `Thread 0 (crashed)`: the crashed thread is thread 0.
-- `axcl_sample_runtime!main [main.cpp : 25 + 0x0]`: symbols resolved the crash address to line 25 of `main.cpp` in `axcl_sample_runtime`, corresponding to `*null_ptr = 0;` in the temporary code.
+- `axcl_sample_runtime!main [main.cpp : 25 + 0x0]`: the symbols resolve the crash address to line 25 of the modified `main.cpp`, which is `*null_ptr = 0;` in the temporary code.
 
 ### A.8 Restore the temporary code
 
-After the example validation, restore the temporary crash-triggering code in `axcl/host/sample/runtime/main.cpp`. In the source repository, the single file can be restored with:
+After the validation, revert the temporary crash code in `axcl/host/sample/runtime/main.cpp`. In the source repository, restore the file with:
 
 ```bash
 cd axcl

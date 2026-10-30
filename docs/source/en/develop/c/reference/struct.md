@@ -54,7 +54,7 @@ External hardware device memory descriptor for interoperability.
 
 ```c
 typedef struct axclrtDevMemDesc {
-    int32_t device_id;     /**< Logical device ID (0, 1, ...). */
+    int32_t device_id;     /**< Virtual device ID (0, 1, ...). */
     uint32_t flags;        /**< Reserved; must be 0 on input and is set to 0 on output. */
     uint64_t device_pa;    /**< Device PA of the described interval's first byte (must not be 0 or a device memory handle returned by AXCL). */
     uint64_t device_va;    /**< Corresponding Native Device VA, or 0 when no VA is available. Never a Host pointer or a device memory handle returned by AXCL. */
@@ -66,7 +66,7 @@ typedef struct axclrtDevMemDesc {
 
 | Name | Type | Description |
 |---|---|---|
-| device_id | int32_t | Logical device ID (0, 1, ...). |
+| device_id | int32_t | Virtual device ID (0, 1, ...). |
 | flags | uint32_t | Reserved; must be 0 on input and is set to 0 on output. |
 | device_pa | uint64_t | Device PA of the described interval's first byte (must not be 0 or a device memory handle returned by AXCL). |
 | device_va | uint64_t | Corresponding Native Device VA, or 0 when no VA is available. Never a Host pointer or a device memory handle returned by AXCL. |

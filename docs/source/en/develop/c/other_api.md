@@ -39,6 +39,10 @@ AXCL_EXPORT void axclAppLog(int32_t lv, const char *func, const char *file, uint
 | line | in | Line number. |
 | fmt | in | Non-NULL `printf`-style format string. The formatted message is stored in a 1024-byte internal buffer including the terminating NUL. Messages longer than 1023 bytes are truncated. Format specifiers must match the arguments. |
 
+#### Note
+
+- The message is written to the Host runtime file and console logs, filtered by the levels set with [axclrtSetLogLevel](#axclrtSetLogLevel). An empty formatted message is not logged.
+
 #### Example
 
 ```c
@@ -77,7 +81,7 @@ AXCL_EXPORT const char* axclrtGetErrorString(axclError error);
 
 #### Returns
 
-- Description string for the error. Unknown AXCL errors are formatted as `unknown error code 0xXXXXXXXX`. Errors owned by an external module include the raw error code and module ID.
+- Description string for the error. An AXCL error without a dedicated description, but with a known sub module and a generic error ID that has its own description, is formatted as `<Module>: <generic description>`, for example `Runtime: Native operation failed without detailed error information.` Remaining AXCL errors are formatted as `unknown error code 0xXXXXXXXX`. Errors owned by an external module include the raw error code and module ID. An AXCL error raised on the Device ([AXCL_ID_DEVICE](reference/macro.md#AXCL_ID_DEVICE) in bits [23:16]) returns the same description as the matching Host error code.
 
 #### Note
 
@@ -108,7 +112,8 @@ N/A
 
 #### Note
 
-Unlike [axclrtPeekAtLastError](#axclrtPeekAtLastError), this function resets the current thread's error code to `AXCL_SUCC` after reading it.
+- Unlike [axclrtPeekAtLastError](#axclrtPeekAtLastError), this function resets the current thread's error code to `AXCL_SUCC` after reading it.
+- Many AXCL APIs also record their own result, including `AXCL_SUCC`, so read the code immediately after the call of interest.
 
 #### Remark
 
@@ -132,12 +137,12 @@ AXCL_EXPORT axclError axclrtGetLogLevel(axclrtLogTarget target, int32_t *lv);
 
 | Name | Direction | Description |
 |---|---|---|
-| target | in | Log target. See [axclrtLogTarget](reference/enum.md#axclrtLogTarget). |
+| target | in | Log target. See [axclrtLogTarget](reference/enum.md#axclrtLogTarget). Must not be [AXCL_LOG_TARGET_BUTT](reference/enum.md#AXCL_LOG_TARGET_BUTT). |
 | lv | out | Non-NULL pointer that receives the log level. |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
+- `AXCL_SUCC`: The log level was returned successfully.
 - `others`: Failure.
 
 #### Remark
@@ -190,12 +195,12 @@ AXCL_EXPORT axclError axclrtGetVersion(int32_t *major, int32_t *minor, int32_t *
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
+- `AXCL_SUCC`: The version numbers were returned successfully.
 - `others`: Failure.
 
 #### Note
 
-If the build version cannot be parsed, all three output values are set to zero and the function returns `AXCL_SUCC`.
+If the build version cannot be parsed, all three output values are set to zero and the function returns `AXCL_SUCC`. Components missing from the build version, such as the patch number, are set to zero.
 
 <br>
 
@@ -215,13 +220,13 @@ AXCL_EXPORT axclError axclrtGetVersionStr(const char *name, char *buf, uint32_t 
 
 | Name | Direction | Description |
 |---|---|---|
-| name | in | Version source, supported values: `driver` and `firmware`. `driver` returns the SDK build version string. `firmware` returns the firmware version of the device associated with the current thread's bound runtime context. The thread must first bind a context to an active device, for example through [axclrtSetDevice](device_api.md#axclrtSetDevice) or [axclrtCreateContext](context_api.md#axclrtCreateContext). |
-| buf | out | Buffer used to store the version string. On success, the result is NUL-terminated. On failure, the buffer contents are unspecified. |
+| name | in | Non-NULL version source, supported values: `driver` and `firmware`. `driver` returns the SDK build version string. `firmware` returns the firmware version of the device associated with the current thread's bound runtime context. The thread must first bind a context to an active device, for example through [axclrtSetDevice](device_api.md#axclrtSetDevice) or [axclrtCreateContext](context_api.md#axclrtCreateContext). |
+| buf | out | Non-NULL buffer used to store the version string. On success, the result is NUL-terminated. On failure, the buffer contents are unspecified. |
 | size | in | Size of `buf` in bytes. Must be greater than zero. If the buffer is too small, a successful result is truncated to fit, including the terminating NUL. |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
+- `AXCL_SUCC`: The version string was written to `buf` successfully.
 - `others`: Failure.
 
 <br>
@@ -300,12 +305,12 @@ AXCL_EXPORT axclError axclrtSetLogLevel(axclrtLogTarget target, int32_t lv);
 
 | Name | Direction | Description |
 |---|---|---|
-| target | in | Log target. See [axclrtLogTarget](reference/enum.md#axclrtLogTarget). |
+| target | in | Log target. See [axclrtLogTarget](reference/enum.md#axclrtLogTarget). Must not be [AXCL_LOG_TARGET_BUTT](reference/enum.md#AXCL_LOG_TARGET_BUTT). |
 | lv | in | Log level: 0 trace, 1 debug, 2 info, 3 warning, 4 error, 5 critical, and 6 off. Values outside the range 0 to 6 are mapped to warning. |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
+- `AXCL_SUCC`: The log level was set successfully.
 - `others`: Failure.
 
 #### Example

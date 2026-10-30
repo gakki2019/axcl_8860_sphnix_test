@@ -1,4 +1,4 @@
-pyAXCL
+Python
 ======
 
 .. toctree::

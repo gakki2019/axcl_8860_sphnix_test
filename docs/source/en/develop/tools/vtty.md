@@ -31,7 +31,7 @@ picocom --help
 
 The loading behavior of `ax_vtty` depends on where it runs:
 
-- **Host:** The user must load `ax_vtty` manually.
+- **Host:** The AXCL host package installs `ax_vtty` but does not load it at boot; load it manually when needed.
 - **Device:** The system loads `ax_vtty` automatically during boot in the normal configuration.
 
 Use `axcl-smi sh` to check the module and device node on device 0:
@@ -70,7 +70,7 @@ The kernel log maps each node to a device ID, for example:
 vtty: /dev/ttyAXV0 devid 3 port 80 ready, rx_pkts 1024 payload 1024
 ```
 
-The host module normally needs to be loaded only once. If the device list or device IDs change, reload the host module to recreate the nodes.
+The host module normally needs to be loaded only once. A device that comes online after loading gets a new node automatically. If a device is removed or its device ID changes, reload the host module to recreate the nodes.
 
 ## 4. Connecting with `picocom`
 
@@ -141,7 +141,7 @@ cat /proc/ax_proc/version
 
 ## 6. Selecting a device and naming nodes
 
-By default, the host module creates nodes for all supported devices. To connect only to one device, pass its `devid` when loading the host module:
+By default, the host module creates a node for every online device, up to 32. To connect only to one device, pass its `devid` when loading the host module:
 
 ```bash
 sudo modprobe ax_vtty devid=3
@@ -158,8 +158,8 @@ Common module parameters:
 | `devid` | `-1` | `-1` selects all devices; a non-negative value selects one device ID. |
 | `port` | `80` | Virtual terminal communication port. Both sides must use the same port convention. |
 | `dev_name` | `ttyAXV` | Prefix for host-side TTY nodes. |
-| `payload_size` | `1024` | Maximum payload of one communication packet, limited to `256` through `1024` bytes. |
-| `rx_buf_size` | `1048576` | Receive buffer size, up to `16777216` bytes. |
+| `payload_size` | `1024` | Maximum payload of one communication packet, in bytes. Values outside `256` to `1024` are clamped to that range. |
+| `rx_buf_size` | `1048576` | Receive buffer size, in bytes. Values above `16777216` are clamped to `16777216`. |
 
 Parameters take effect only when the module is loaded. Exit `picocom` before changing them, then unload and reload the module:
 

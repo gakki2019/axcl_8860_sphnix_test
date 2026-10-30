@@ -130,7 +130,7 @@
 | Symbol | Host Hex | Host Int32 | Device Hex | Device Int32 | Description |
 |---|---|---|---|---|---|
 | <a id="AXCL_ERR_RT_BUSY"></a>AXCL_ERR_RT_BUSY | 0x80305206 | -2144316922 | 0x80315206 | -2144251386 | The module is busy. |
-| <a id="AXCL_ERR_RT_CONTEXT_NOT_DESTROYED"></a>AXCL_ERR_RT_CONTEXT_NOT_DESTROYED | 0x8030522C | -2144316884 | 0x8031522C | -2144251348 | context not destroyed |
+| <a id="AXCL_ERR_RT_CONTEXT_NOT_DESTROYED"></a>AXCL_ERR_RT_CONTEXT_NOT_DESTROYED | 0x8030522C | -2144316884 | 0x8031522C | -2144251348 | User-created Contexts on the device must be destroyed before the device is released. |
 | <a id="AXCL_ERR_RT_CONTEXT_NOT_EXIST"></a>AXCL_ERR_RT_CONTEXT_NOT_EXIST | 0x80305224 | -2144316892 | 0x80315224 | -2144251356 | The context was not found. |
 | <a id="AXCL_ERR_RT_CREATE_CONTEXT"></a>AXCL_ERR_RT_CREATE_CONTEXT | 0x80305225 | -2144316891 | 0x80315225 | -2144251355 | Context creation failed. |
 | <a id="AXCL_ERR_RT_CREATE_EVENT"></a>AXCL_ERR_RT_CREATE_EVENT | 0x8030522F | -2144316881 | 0x8031522F | -2144251345 | create event failed |
@@ -144,7 +144,7 @@
 | <a id="AXCL_ERR_RT_DEVICE_OFFLINE"></a>AXCL_ERR_RT_DEVICE_OFFLINE | 0x80305234 | -2144316876 | 0x80315234 | -2144251340 | The target device is offline; the operation was aborted. |
 | <a id="AXCL_ERR_RT_ENCODE"></a>AXCL_ERR_RT_ENCODE | 0x80305208 | -2144316920 | 0x80315208 | -2144251384 | Packet encoding failed. |
 | <a id="AXCL_ERR_RT_EVENT_NOT_EXIST"></a>AXCL_ERR_RT_EVENT_NOT_EXIST | 0x8030522E | -2144316882 | 0x8031522E | -2144251346 | event not exist |
-| <a id="AXCL_ERR_RT_EVENT_NOT_READY"></a>AXCL_ERR_RT_EVENT_NOT_READY | 0x80305233 | -2144316877 | 0x80315233 | -2144251341 | event is not ready (end event has not completed) |
+| <a id="AXCL_ERR_RT_EVENT_NOT_READY"></a>AXCL_ERR_RT_EVENT_NOT_READY | 0x80305233 | -2144316877 | 0x80315233 | -2144251341 | event is not ready (start or end event has been recorded but has not completed) |
 | <a id="AXCL_ERR_RT_EVENT_NOT_RECORDED"></a>AXCL_ERR_RT_EVENT_NOT_RECORDED | 0x80305232 | -2144316878 | 0x80315232 | -2144251342 | event has not been recorded |
 | <a id="AXCL_ERR_RT_EVENT_TIMING_DISABLED"></a>AXCL_ERR_RT_EVENT_TIMING_DISABLED | 0x80305231 | -2144316879 | 0x80315231 | -2144251343 | event timing is disabled |
 | <a id="AXCL_ERR_RT_FAIL"></a>AXCL_ERR_RT_FAIL | 0x80305220 | -2144316896 | 0x80315220 | -2144251360 | A generic failure occurred in the runtime module. |
@@ -155,7 +155,7 @@
 | <a id="AXCL_ERR_RT_NULL_POINTER"></a>AXCL_ERR_RT_NULL_POINTER | 0x80305202 | -2144316926 | 0x80315202 | -2144251390 | A null pointer was passed. |
 | <a id="AXCL_ERR_RT_PEER_ACCESS_NOT_ENABLED"></a>AXCL_ERR_RT_PEER_ACCESS_NOT_ENABLED | 0x80305237 | -2144316873 | 0x80315237 | -2144251337 | Peer access not enabled. |
 | <a id="AXCL_ERR_RT_SHELL_FAIL"></a>AXCL_ERR_RT_SHELL_FAIL | 0x80305236 | -2144316874 | 0x80315236 | -2144251338 | The device shell command could not be completed successfully. |
-| <a id="AXCL_ERR_RT_STREAM_NOT_DESTROYED"></a>AXCL_ERR_RT_STREAM_NOT_DESTROYED | 0x8030522D | -2144316883 | 0x8031522D | -2144251347 | stream not destroyed |
+| <a id="AXCL_ERR_RT_STREAM_NOT_DESTROYED"></a>AXCL_ERR_RT_STREAM_NOT_DESTROYED | 0x8030522D | -2144316883 | 0x8031522D | -2144251347 | User-created Streams in the Context must be destroyed before the Context is destroyed. |
 | <a id="AXCL_ERR_RT_STREAM_NOT_EXIST"></a>AXCL_ERR_RT_STREAM_NOT_EXIST | 0x80305223 | -2144316893 | 0x80315223 | -2144251357 | The stream was not found. |
 | <a id="AXCL_ERR_RT_SUBMIT_TASK"></a>AXCL_ERR_RT_SUBMIT_TASK | 0x8030522B | -2144316885 | 0x8031522B | -2144251349 | The task could not be submitted to the stream. |
 | <a id="AXCL_ERR_RT_THREAD_NOT_BIND_CONTEXT"></a>AXCL_ERR_RT_THREAD_NOT_BIND_CONTEXT | 0x80305227 | -2144316889 | 0x80315227 | -2144251353 | No context is bound to the current thread. |
@@ -177,11 +177,11 @@
 | <a id="AXCL_ERR_USRWORK_ILLEGAL_PARAM"></a>AXCL_ERR_USRWORK_ILLEGAL_PARAM | 0x80305A03 | -2144314877 | 0x80315A03 | -2144249341 | An invalid userworker parameter was passed. |
 | <a id="AXCL_ERR_USRWORK_INVALID_PATH"></a>AXCL_ERR_USRWORK_INVALID_PATH | 0x80305A24 | -2144314844 | 0x80315A24 | -2144249308 | A userworker path is invalid. |
 | <a id="AXCL_ERR_USRWORK_NULL_POINTER"></a>AXCL_ERR_USRWORK_NULL_POINTER | 0x80305A02 | -2144314878 | 0x80315A02 | -2144249342 | A null pointer was passed to a userworker API. |
-| <a id="AXCL_ERR_USRWORK_OPEN_CHANNEL"></a>AXCL_ERR_USRWORK_OPEN_CHANNEL | 0x80305A25 | -2144314843 | 0x80315A25 | -2144249307 | Opening a userworker communication channel failed. |
+| <a id="AXCL_ERR_USRWORK_OPEN_CHANNEL"></a>AXCL_ERR_USRWORK_OPEN_CHANNEL | 0x80305A25 | -2144314843 | 0x80315A25 | -2144249307 | The userworker communication channel could not be opened, is not open, or has been closed. |
 | <a id="AXCL_ERR_USRWORK_OPEN_FILE"></a>AXCL_ERR_USRWORK_OPEN_FILE | 0x80305A21 | -2144314847 | 0x80315A21 | -2144249311 | Opening a userworker executable failed. |
-| <a id="AXCL_ERR_USRWORK_PROCESS_NOT_FOUND"></a>AXCL_ERR_USRWORK_PROCESS_NOT_FOUND | 0x80305A23 | -2144314845 | 0x80315A23 | -2144249309 | The specified userworker process was not found. |
+| <a id="AXCL_ERR_USRWORK_PROCESS_NOT_FOUND"></a>AXCL_ERR_USRWORK_PROCESS_NOT_FOUND | 0x80305A23 | -2144314845 | 0x80315A23 | -2144249309 | The specified userworker process was not found, or it exited after communication was established. |
 | <a id="AXCL_ERR_USRWORK_SEND_DATA"></a>AXCL_ERR_USRWORK_SEND_DATA | 0x80305A26 | -2144314842 | 0x80315A26 | -2144249306 | Sending userworker data failed. |
-| <a id="AXCL_ERR_USRWORK_TIMEOUT"></a>AXCL_ERR_USRWORK_TIMEOUT | 0x80305A05 | -2144314875 | 0x80315A05 | -2144249339 | A userworker operation timed out. |
+| <a id="AXCL_ERR_USRWORK_TIMEOUT"></a>AXCL_ERR_USRWORK_TIMEOUT | 0x80305A05 | -2144314875 | 0x80315A05 | -2144249339 | A userworker operation timed out, or the userworker did not complete initialization in time. |
 | <a id="AXCL_ERR_USRWORK_UNEXPECT_RESPONSE"></a>AXCL_ERR_USRWORK_UNEXPECT_RESPONSE | 0x80305A0A | -2144314870 | 0x80315A0A | -2144249334 | An unexpected userworker response was received. |
 
 <br>
@@ -205,10 +205,11 @@
 | <a id="AXCL_ERR_WORKER_ENQUEUE"></a>AXCL_ERR_WORKER_ENQUEUE | 0x80305670 | -2144315792 | 0x80315670 | -2144250256 | Task enqueue failed. |
 | <a id="AXCL_ERR_WORKER_EVENT_ALREADY_RECORDING"></a>AXCL_ERR_WORKER_EVENT_ALREADY_RECORDING | 0x80305656 | -2144315818 | 0x80315656 | -2144250282 | An overlapping Record request was rejected. |
 | <a id="AXCL_ERR_WORKER_EVENT_CREATE"></a>AXCL_ERR_WORKER_EVENT_CREATE | 0x80305650 | -2144315824 | 0x80315650 | -2144250288 | Event creation failed. |
-| <a id="AXCL_ERR_WORKER_EVENT_DESTROYED"></a>AXCL_ERR_WORKER_EVENT_DESTROYED | 0x80305654 | -2144315820 | 0x80315654 | -2144250284 | The event was destroyed while waiting. |
+| <a id="AXCL_ERR_WORKER_EVENT_DESTROYED"></a>AXCL_ERR_WORKER_EVENT_DESTROYED | 0x80305654 | -2144315820 | 0x80315654 | -2144250284 | The event was destroyed while waiting. No longer returned: destroying an event does not release its waiters. |
 | <a id="AXCL_ERR_WORKER_EVENT_LIMIT"></a>AXCL_ERR_WORKER_EVENT_LIMIT | 0x80305652 | -2144315822 | 0x80315652 | -2144250286 | The event limit has been exceeded. |
 | <a id="AXCL_ERR_WORKER_EVENT_NOT_FOUND"></a>AXCL_ERR_WORKER_EVENT_NOT_FOUND | 0x80305651 | -2144315823 | 0x80315651 | -2144250287 | The event was not found. |
-| <a id="AXCL_ERR_WORKER_EVENT_SYNC_IN_PROGRESS"></a>AXCL_ERR_WORKER_EVENT_SYNC_IN_PROGRESS | 0x80305655 | -2144315819 | 0x80315655 | -2144250283 | A concurrent SyncEvent request was rejected. |
+| <a id="AXCL_ERR_WORKER_EVENT_RECORD_FAILED"></a>AXCL_ERR_WORKER_EVENT_RECORD_FAILED | 0x80305657 | -2144315817 | 0x80315657 | -2144250281 | The record point was rejected, because the stream queue was full or the event does not exist. |
+| <a id="AXCL_ERR_WORKER_EVENT_SYNC_IN_PROGRESS"></a>AXCL_ERR_WORKER_EVENT_SYNC_IN_PROGRESS | 0x80305655 | -2144315819 | 0x80315655 | -2144250283 | A concurrent SyncEvent request was rejected. No longer returned: concurrent SyncEvent requests are allowed. |
 | <a id="AXCL_ERR_WORKER_EVENT_WAIT_TIMEOUT"></a>AXCL_ERR_WORKER_EVENT_WAIT_TIMEOUT | 0x80305653 | -2144315821 | 0x80315653 | -2144250285 | Waiting for the event timed out. |
 | <a id="AXCL_ERR_WORKER_EXECUTE"></a>AXCL_ERR_WORKER_EXECUTE | 0x80305665 | -2144315803 | 0x80315665 | -2144250267 | Handler execution failed. |
 | <a id="AXCL_ERR_WORKER_ILLEGAL_PARAM"></a>AXCL_ERR_WORKER_ILLEGAL_PARAM | 0x80305603 | -2144315901 | 0x80315603 | -2144250365 | An invalid parameter was passed. |

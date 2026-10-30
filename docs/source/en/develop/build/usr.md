@@ -1,7 +1,7 @@
 # User Space
 
 This document describes how to build AXCL host-side components, sample programs, and deb/rpm packages.
-All paths below are relative to the AXCL root directory. The build entry is `build/Makefile`.
+Paths below are relative to the AXCL root directory. The build entry is `build/Makefile`, so run the `make` commands in `build/`.
 
 ```{note}
 The following host-side build environment uses `Ubuntu 22.04` as an example.
@@ -16,8 +16,9 @@ The following host-side build environment uses `Ubuntu 22.04` as an example.
 | ninja | >= 1.13.0 | Default generator |
 | zig | >= 0.15.2 | Used by `x86`, `arm64` |
 | GNU cross toolchain | arm-gnu-toolchain-13.3.rel1 | Used only by `host=ax8860`; fixed path, no zig |
-| deb | | Generate deb packages |
-| rpm | | Generate rpm packages |
+| python3 | | Validates the `pac=` file for `package` |
+| dpkg-dev | | Generates deb packages |
+| rpm | | Generates rpm packages |
 
 ### 1.1. Installation
 
@@ -25,12 +26,13 @@ The following host-side build environment uses `Ubuntu 22.04` as an example.
 
 ```bash
 sudo apt update
-sudo apt install -y cmake make dpkg-dev rpm
+sudo apt install -y cmake make python3 dpkg-dev rpm
 ```
 
 ```{note}
 - `dpkg-dev` provides tools for creating deb packages.
 - `rpm` provides tools for creating rpm packages.
+- The `cmake` package in the Ubuntu 22.04 archive is 3.22, which is older than the required 3.24, and CMake configuration fails with it. Install CMake 3.24 or later from another source, for example <https://cmake.org/download/>, and make sure it comes first in `PATH`.
 ```
 
 **Ninja**
@@ -45,13 +47,13 @@ sudo apt install -y cmake make dpkg-dev rpm
 4. Verify the installation with `zig version`.
 
 ```{note}
-`host=ax8860` does not use zig; it always uses the GNU cross toolchain (see [2.5. ax8860 target](#en-build-ax8860)). Other hosts still require zig; `host=all` does not include `ax8860`.
+`host=ax8860` does not use zig; it always uses the GNU cross toolchain (see [2.5. ax8860 target](#build-ax8860)). All other hosts, including `host=all`, require zig; if zig is not in `PATH`, `make` stops with `zig compiler not found in PATH`. `host=all` does not include `ax8860`.
 ```
 
 **GNU cross toolchain (only for `host=ax8860`)**
 1. Install arm-gnu-toolchain-13.3.rel1 to the fixed path `/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/`.
 2. Verify that `/usr/local/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc` is executable.
-3. The path is hard-coded in `build/cmake/toolchains/ax8860-linux-gnu-gcc.cmake`, so it does not need to be added to `PATH`.
+3. The build always uses this path, so it does not need to be added to `PATH`.
 
 ## 2. Build
 
@@ -83,20 +85,20 @@ Examples:
 
 | Parameter | Values | Default | Description |
 | --- | --- | --- | --- |
-| `host=` | `arm64`, `x86`, `ax8860`, `all` | `all` | Target host. `ax8860` is an aarch64 glibc target built with the fixed GNU cross toolchain (no zig) and can only be built on its own; see [2.5. ax8860 target](#en-build-ax8860). `all` enables the multi-host matrix (which does not include `ax8860`). |
-| `libc=` | `gnu` | Depends on the current default in `build/config.mk` | C library selection. Linux hosts default to `gnu`. Under `host=all`, this parameter is ignored, and the actual matrix comes from `build/config.mk`. |
+| `host=` | `arm64`, `x86`, `ax8860`, `all` | `all` | Target host. `ax8860` is an aarch64 glibc target built with the fixed GNU cross toolchain (no zig) and can only be built on its own; see [2.5. ax8860 target](#build-ax8860). `all` enables the multi-host matrix (which does not include `ax8860`). |
+| `libc=` | `gnu` | `gnu` | C library selection. Under `host=all`, this parameter is ignored with a warning, and the libc matrix comes from `AXCL_HOST_LIBC_<arch>` in `build/config.mk`. |
 | `debug=` | `yes`, `no` | `no` | `yes` sets `CMAKE_BUILD_TYPE=Debug`; `no` sets `CMAKE_BUILD_TYPE=Release`. |
-| `pac=` | PAC file path | None | Required for Linux `package`/`package-only`; relative paths, ordinary spaces, and non-ASCII characters are supported. The file must be a non-empty, readable regular `.pac` file, and its final path component must not be a symbolic link. |
+| `pac=` | PAC file path | None | Required by `package` and `package-only` on Linux; without it, `make` stops immediately. The file must be a non-empty, readable regular file whose name ends with `.pac` (case-sensitive). Relative paths, spaces, and non-ASCII characters are supported; `"`, `\`, `` ` ``, `$`, tabs, and line breaks are not. A symbolic link is resolved to its target, and the target name must also end with `.pac`. |
 
 ### 2.3. Advanced Parameters
 
 | Parameter | Purpose | Default | Description |
 | --- | --- | --- | --- |
-| `AXCL_BUILD_CPU_LIMIT_PERCENT` | Controls the internal build parallelism budget as a percentage of online CPU cores. | `80` | Keep the default for daily builds. On shared build machines or when reducing load, set it to `50` or lower. |
-| `AXCL_ALL_HOSTS` | Host list expanded when `host=all`. | `x86 arm64` | Modify `axcl/build/config.mk`. |
-| `AXCL_HOST_LIBC_<arch>` | libc build matrix for one arch under `host=all`, for example `AXCL_HOST_LIBC_x64` or `AXCL_HOST_LIBC_aarch64`. | `gnu` | Defaults to `gnu`. If the default libc matrix must be changed, modify `build/config.mk`; do not override it through an environment variable or a `make` parameter. |
-| `AXCL_GLIBC_VERSION` | Specifies the target gnu libc version and passes it to the Zig gnu toolchain. | Defined by `build/projects/axcl_linux_<arch>.mk` | Usually do not modify it. See [glibc / dynamic linker matrix](#en-build-glibc-dynamic-linker-matrix) for default versions. If it must be adjusted, modify the matching `build/projects/axcl_linux_<arch>.mk`; do not override it through an environment variable or a `make` parameter. It applies only to `libc=gnu`. |
-| `AXCL_PACKAGE_OUTPUT_DIR` | Overrides the final copy directory for `.deb` and `.rpm` files. | `out/axcl_linux_<host>_<libc>/package/` | Set it to a unified output directory for CI or release archiving. |
+| `AXCL_BUILD_CPU_LIMIT_PERCENT` | Sets the build parallelism as a percentage of online CPU cores. | `80` | Under `host=all`, the budget is split among the build tasks. Keep the default for daily builds; on shared build machines or to reduce load, set it to `50` or lower. |
+| `AXCL_ALL_HOSTS` | Host list built by `host=all`. | `x86 arm64` | Pass it on the `make` command line, for example `AXCL_ALL_HOSTS=x86`, or change the default in `build/config.mk`. `ax8860` is not accepted. |
+| `AXCL_HOST_LIBC_<arch>` | libc build matrix for one arch under `host=all`, for example `AXCL_HOST_LIBC_x64` or `AXCL_HOST_LIBC_aarch64`. | `gnu` | To change the matrix, modify `build/config.mk`; do not override it through an environment variable or a `make` parameter. |
+| `AXCL_GLIBC_VERSION` | Target glibc version for the Zig gnu toolchain. | Defined by `build/projects/axcl_linux_<arch>.mk` | Usually keep the default; see [glibc / dynamic linker matrix](#build-glibc-matrix). To change it, modify the matching `build/projects/axcl_linux_<arch>.mk`; do not override it through an environment variable or a `make` parameter. It applies only to `libc=gnu` and does not apply to `host=ax8860`. |
+| `AXCL_PACKAGE_OUTPUT_DIR` | Overrides the final copy directory for `.deb` and `.rpm` files. | `out/axcl_linux_<host>_<libc>/package/` | Use an absolute path; a relative path is resolved against `build/`. Useful as a unified output directory for CI or release archiving. |
 
 Generic format:
 
@@ -115,7 +117,7 @@ make host=x86 AXCL_PACKAGE_OUTPUT_DIR=/tmp/axcl-package clean all install packag
 ```
 
 ```{note}
-Under `host=all`, the `libc=` parameter is ignored. The actual host matrix is controlled by `AXCL_ALL_HOSTS`, and the actual libc matrix is controlled by `AXCL_HOST_LIBC_<arch>` in `build/config.mk`.
+Under `host=all`, the `libc=` parameter is ignored. The host matrix is controlled by `AXCL_ALL_HOSTS`, and the libc matrix by `AXCL_HOST_LIBC_<arch>` in `build/config.mk`.
 ```
 
 ### 2.4. Examples
@@ -124,14 +126,15 @@ Under `host=all`, the `libc=` parameter is ignored. The actual host matrix is co
 # Build all linux hosts (matrix)
 make clean all install
 
-# Build x86 only with the default libc set
+# Build and package x86 only with the default libc
 make host=x86 clean all install package pac=/absolute/path/to/firmware.pac
 
-# Build ax8860 (GNU cross toolchain, no zig)
+# Build and package ax8860 (GNU cross toolchain, no zig)
 make host=ax8860 clean all install package pac=/absolute/path/to/firmware.pac
 ```
 
-(en-build-ax8860)=
+<a id="build-ax8860"></a>
+
 ### 2.5. ax8860 Target
 
 `host=ax8860` always uses the following GNU cross toolchain:
@@ -142,12 +145,12 @@ make host=ax8860 clean all install package pac=/absolute/path/to/firmware.pac
 
 `make host=ax8860` does not require Zig. `ax8860` is not part of the `host=all` matrix and must be built on its own.
 
-The user-facing release is produced by the SDK: `make p=AX8860_emmc ROOTFS_FLAVOR=debian` invokes this target while building the Debian rootfs and bundles the user-space libraries, kernel modules and system configuration into the image, so the user only flashes the AXP and does not install the `axhelix` package. `make host=ax8860` is for standalone development builds and debugging.
+For release images, the SDK builds this target for you: when you build a Debian rootfs in the SDK `build/` directory, for example with `make p=AX8860_emmc ROOTFS_FLAVOR=debian` (`AX8860_ssd` and `AX8860_ssd_m2` are also supported), it builds the AXCL kernel modules and the `host=ax8860` user space, and bundles them with the system configuration into the image. You only flash the AXP and do not need to install the `axhelix-ax8860` package. Use `make host=ax8860` for standalone development builds and debugging.
 
 ### 2.6. Clean and Rebuild
 
-- `make clean`: removes the build and install directories for the current host/libc.
-- If the configuration is inconsistent or the CMake cache is stuck, run `rm -rf build/out` to force a rebuild.
+- `make clean`: removes the build and install directories for the current host/libc; with `host=all`, for every host/libc in the matrix.
+- If the configuration is inconsistent or the CMake cache is stale, run `rm -rf build/out` in the AXCL root directory to force a full rebuild.
 
 ## 3. Package Generation
 
@@ -155,34 +158,35 @@ The user-facing release is produced by the SDK: `make p=AX8860_emmc ROOTFS_FLAVO
 # Build, install, and package the current all-host matrix
 make host=all clean all install package pac=/absolute/path/to/firmware.pac
 
-# Build, install, and package the x86 entry through the top-level Makefile
+# Build, install, and package x86 only
 make host=x86 clean all install package pac=/absolute/path/to/firmware.pac
 ```
 
-Each Linux DEB/RPM contains exactly one PAC. The input file is renamed to the fixed payload path `/lib/firmware/axcl/ax8860_card.pac`. The PAC is not added to the normal `all/install` final install tree; it is added only to package staging during package generation.
+Each Linux DEB/RPM contains exactly one PAC, installed as `/lib/firmware/axcl/ax8860_card.pac` regardless of the input file name. The PAC goes only into the packages; `all` and `install` do not copy it into `out/`.
 
 Package output directory:
 - Default: `out/axcl_linux_<host>_<libc>/package/`
 - Override: set `AXCL_PACKAGE_OUTPUT_DIR=/absolute/path/to/output` to copy the final `.deb` and `.rpm` files to another directory.
 
-The package name and file name depend on the build target, and file names follow the Debian / RPM conventions:
+The package name depends on the build target. The version comes from the SDK version (`SDK_VERSION` in the SDK `build/version.mak`, for example `V0.5.0` → `0.5.0`), and file names follow the Debian / RPM conventions:
 
 | Build target | Package | DEB example | RPM example |
 | ---- | ---- | ---- | ---- |
-| `host=x86` / `arm64`, `libc=gnu` | `axhelix` | `axhelix_0.2.0-1_amd64.deb` | `axhelix-0.2.0-1.x86_64.rpm` |
-| `host=ax8860` | `axhelix-ax8860` | `axhelix-ax8860_0.2.0-1_arm64.deb` | `axhelix-ax8860-0.2.0-1.aarch64.rpm` |
-The two packages conflict with each other. Packages declare a minimum glibc version that follows the toolchain: zig builds use `AXCL_GLIBC_VERSION`, and `host=ax8860` uses 2.38.
+| `host=x86` / `arm64`, `libc=gnu` | `axhelix` | `axhelix_0.5.0-1_amd64.deb` | `axhelix-0.5.0-1.x86_64.rpm` |
+| `host=ax8860` | `axhelix-ax8860` | `axhelix-ax8860_0.5.0-1_arm64.deb` | `axhelix-ax8860-0.5.0-1.aarch64.rpm` |
+
+`axhelix` and `axhelix-ax8860` conflict with each other, so only one of them can be installed. At install time, `axhelix-ax8860` installs only on a kernel with `CONFIG_AXERA_LOCAL_DEVICE=y`, and `axhelix` only on a kernel without it; otherwise installation fails and names the package to use. Packages declare a minimum glibc version that follows the toolchain: zig builds use `AXCL_GLIBC_VERSION`, and `host=ax8860` uses 2.38.
 
 ## 4. Output Directory
 
 ```text
 out/axcl_linux_<host>_<libc>/
 ├── bin/        # Executables
-├── data/       # Package data payload, including foreign/<arch>/
-├── etc/        # Local install-tree configuration
-├── lib/        # AXCL runtime libraries
+├── data/       # Sample and test data (images, video)
+├── etc/        # Configuration
+├── lib/        # AXCL runtime libraries, CMake package (cmake/axcl) and pkg-config files (pkgconfig)
 ├── include/    # Public headers
-├── package/    # Final .deb/.rpm delivery directory
+├── package/    # .deb/.rpm files (when AXCL_PACKAGE_OUTPUT_DIR is not set)
 ├── test/       # gtest test programs
 └── unstripped/ # Pre-strip debug files used to generate Breakpad symbols
 ```
@@ -190,6 +194,9 @@ out/axcl_linux_<host>_<libc>/
 Path notes:
 - User-facing `host=arm64` maps to `out/axcl_linux_aarch64_<libc>/`.
 - User-facing `host=x86` maps to `out/axcl_linux_x64_<libc>/`.
+- `host=ax8860` maps to `out/axcl_linux_ax8860_gnu/`.
+
+<a id="minidump-symbols"></a>
 
 ## 5. Minidump
 
@@ -203,7 +210,7 @@ A minidump does not contain full debug symbols. AXCL release/install outputs are
 
 AXCL provides `scripts/minidump/collect_symbols.sh` to collect host/device Breakpad symbols and generate archives.
 
-Before running the script, complete the corresponding build and install first. `make install` installs stripped `bin`, `lib`, and `test` outputs, and keeps debug files under `unstripped/**/*.debug`. The collection script scans `.debug` files, runs `dump_syms` to generate `symbols/**`, and then creates an archive.
+Before running the script, complete the corresponding build and install. `make install` installs stripped `bin`, `lib`, and `test` outputs, and keeps debug files under `unstripped/**/*.debug`. The script scans the `.debug` files, runs `dump_syms` to generate `symbols/**`, and then creates an archive. `dump_syms` and `minidump_stackwalk` are built under `build/out/`, so do not delete `build/out` before collecting; if `dump_syms` is missing, the script prints a warning and skips symbol generation.
 
 ```bash
 # Collect host symbols only
@@ -246,7 +253,7 @@ The output directory preserves original variant directory names, for example:
 Notes:
 - Use a dedicated directory for `--output`. The script cleans existing output directories only when the `.axcl-symbols-output` marker is present.
 - Host symbols come from `axcl/out/axcl_linux_*`.
-- Device symbols come from `<manifest-dir>/msp/out/arm64_glibc`.
+- Device symbols come from `<manifest-dir>/msp/out/arm64_glibc`, which exists after the SDK `msp` build.
 
 ## 6. FAQ
 
@@ -255,16 +262,16 @@ Notes:
    [A] This is usually caused by stale CMake cache. Run `rm -rf build/out` first, then build again.
 2.
    [Q] How do I check or change the default glibc version for a host?<br>
-   [A] See [glibc / dynamic linker matrix](#en-build-glibc-dynamic-linker-matrix) for default versions. If you really need to change it, adjust `AXCL_GLIBC_VERSION` in `build/projects/axcl_linux_<arch>.mk`.
+   [A] See [glibc / dynamic linker matrix](#build-glibc-matrix) for default versions. If you really need to change it, adjust `AXCL_GLIBC_VERSION` in `build/projects/axcl_linux_<arch>.mk`.
 3.
    [Q] How do I add a new libc?<br>
    [A]
     - Add the new libc name to `AXCL_SUPPORTED_LIBCS` in `build/config.mk`.
-    - Add `build/cmake/toolchains/<host>-linux-<new-libc>-zig.cmake` for each host that should support it.
+    - Add `build/cmake/toolchains/<arch>-linux-<new-libc>-zig.cmake` (for example `x86_64` or `aarch64`) for each host that should support it, and select it in the matching `build/projects/axcl_linux_<arch>.mk`.
     - If it should be part of the default matrix, update the corresponding `AXCL_HOST_LIBC_<arch>` default.
 4.
    [Q] How do I clean up leftovers after a failed DEB installation?<br>
-   [A] Although a failed DEB installation attempts to roll back, side effects created during `postinst`, such as logs, CMake wrappers, DKMS state, or kernel modules, may remain if scripts are interrupted, downgrade succeeds, or the package manager stays in a half-configured state.
+   [A] A failed DEB installation attempts to roll back, but side effects created during `postinst`, such as logs, CMake wrappers, DKMS state, or kernel modules, may remain if a script is interrupted, a downgrade succeeds, or the package manager stays in a half-configured state.
 
     Run the following script as root to clean up these leftovers:
 
@@ -335,12 +342,13 @@ Notes:
     fi
     ```
 5.
-   [Q] Why does `apt install ./axhelix_0.2.0-1_amd64.deb` show an `_apt` sandbox fallback message?<br>
-   [A] This happens when the local `.deb` path cannot be traversed by the `_apt` user, for example when the home directory permission is `750`. Move the package to a path accessible by `_apt`, such as `/tmp/`, and install it from there. For example: `cp ~/Desktop/axhelix_0.2.0-1_amd64.deb /tmp/ && sudo apt install /tmp/axhelix_0.2.0-1_amd64.deb`.
+   [Q] Why does `apt install ./axhelix_0.5.0-1_amd64.deb` show an `_apt` sandbox fallback message?<br>
+   [A] This happens when the `_apt` user cannot traverse the local `.deb` path, for example when the home directory permission is `750`. Copy the package to a path that `_apt` can access, such as `/tmp/`, and install it from there. For example: `cp ~/Desktop/axhelix_0.5.0-1_amd64.deb /tmp/ && sudo apt install /tmp/axhelix_0.5.0-1_amd64.deb`.
 
 ## 7. Appendix
 
-(en-build-glibc-dynamic-linker-matrix)=
+<a id="build-glibc-matrix"></a>
+
 ### 7.1. glibc / dynamic linker matrix
 
 | host | glibc | `.interp` |
@@ -350,7 +358,7 @@ Notes:
 
 ### 7.2. Toolchain File Index
 
-This table lists officially supported Linux toolchain files. Every host except `ax8860` uses a Zig toolchain. It does not list Windows toolchains or other subdirectories under `build/cmake/toolchains/`.
+This table lists the officially supported Linux toolchain files. Every host except `ax8860` uses a Zig toolchain. Windows toolchains and other files under `build/cmake/toolchains/` are not listed.
 
 | host × libc | Toolchain file under `build/cmake/toolchains/` |
 | --- | --- |

@@ -59,7 +59,7 @@ AXCL 提供 Host 内存、Device 内存以及跨端拷贝相关接口，用于�
 - 分配和释放 Device 内存。
 - 分配和释放 Host 侧内存。
 - 查询内存余量和指针属性。
-- 支持 Host ↔ Device、Device ↔ Device、Host 物理地址 ↔ Device 等拷贝类型。
+- 支持 Host → Host、Host → Device、Device → Host 和 Device → Device 拷贝，包括在已启用 Peer Access 的两个设备之间拷贝。
 - 支持同步和异步的 `memcpy`、`memset`、`memcmp`。
 - 使用 stream 组织异步内存操作和后续计算任务。
 
@@ -83,7 +83,7 @@ AXCL Engine API 面向离线模型推理场景，提供模型加载、模型信�
 
 ### 3.5. 媒体处理
 
-除 AXCL Runtime API 外，AXCL Host 侧还集成了 NATIVE SDK 相关 SO，用于把图像处理、视频编解码和 DMA 等能力以 Host 侧接口形式暴露给应用：
+除 Runtime API 外，AXCL 还在 Host 侧提供 NATIVE API 库，用于把 Device 侧 NATIVE SDK 的图像处理、视频编解码和 DMA 等能力暴露给 Host 应用：
 
 - `sys`：系统初始化、内存、资源池等基础能力。
 - `ive` / `ivps`：图像处理、图像预处理和后处理能力。
@@ -94,9 +94,9 @@ AXCL Engine API 面向离线模型推理场景，提供模型加载、模型信�
 
 ### 3.6. 设备状态与辅助工具
 
-AXCL 提供 `axcl-smi` 命令行工具，用于查看设备和进程状态。用户可以通过它确认驱动、固件、设备枚举、温度、CPU/NPU 利用率、内存和 CMM 使用情况等信息，快速判断运行环境是否可用。
+AXCL 提供 `axcl-smi` 命令行工具，用于查看设备和进程状态。它可以显示驱动和固件版本、设备列表、温度、CPU/NPU 利用率、内存使用情况、CMM 使用情况以及各设备上的进程，便于快速确认运行环境是否可用。它还可以在主控和设备之间传输文件、在设备上执行 shell 命令，以及收集设备日志。
 
-此外，AXCL 还包含 minidump、日志、示例程序和测试程序，用于辅助开发、调试和问题定位。
+此外，AXCL 还提供 minidump、日志、示例程序和测试程序，用于开发、调试和问题定位。
 
 ## 4. 典型使用流程
 

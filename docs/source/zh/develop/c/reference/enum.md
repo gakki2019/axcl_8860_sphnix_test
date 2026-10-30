@@ -96,9 +96,112 @@ typedef enum {
 
 <br>
 
+<a id="axCclDataType"></a>
+
+## 2. axCclDataType
+
+集合通信数据类型。覆盖范围以各框架实际使用的类型为准。
+
+```c
+typedef enum axCclDataType {
+    AX_CCL_DT_INT8       = 0,
+    AX_CCL_DT_UINT8      = 1,
+    AX_CCL_DT_INT16      = 2,
+    AX_CCL_DT_UINT16     = 3,
+    AX_CCL_DT_INT32      = 4,
+    AX_CCL_DT_UINT32     = 5,
+    AX_CCL_DT_INT64      = 6,
+    AX_CCL_DT_UINT64     = 7,
+    AX_CCL_DT_FP16       = 8,
+    AX_CCL_DT_FP32       = 9,
+    AX_CCL_DT_FP64       = 10,
+    AX_CCL_DT_BF16       = 11,
+    AX_CCL_DT_FP8_E4M3   = 12,
+    AX_CCL_DT_FP8_E5M2   = 13,
+    AX_CCL_DT_BUTT
+} axCclDataType;
+```
+
+### 2.1. 取值
+
+| 符号 | 值 | 说明 |
+|---|---|---|
+| <a id="AX_CCL_DT_INT8"></a>AX_CCL_DT_INT8 | 0 | - |
+| <a id="AX_CCL_DT_UINT8"></a>AX_CCL_DT_UINT8 | 1 | - |
+| <a id="AX_CCL_DT_INT16"></a>AX_CCL_DT_INT16 | 2 | - |
+| <a id="AX_CCL_DT_UINT16"></a>AX_CCL_DT_UINT16 | 3 | - |
+| <a id="AX_CCL_DT_INT32"></a>AX_CCL_DT_INT32 | 4 | - |
+| <a id="AX_CCL_DT_UINT32"></a>AX_CCL_DT_UINT32 | 5 | - |
+| <a id="AX_CCL_DT_INT64"></a>AX_CCL_DT_INT64 | 6 | - |
+| <a id="AX_CCL_DT_UINT64"></a>AX_CCL_DT_UINT64 | 7 | - |
+| <a id="AX_CCL_DT_FP16"></a>AX_CCL_DT_FP16 | 8 | - |
+| <a id="AX_CCL_DT_FP32"></a>AX_CCL_DT_FP32 | 9 | - |
+| <a id="AX_CCL_DT_FP64"></a>AX_CCL_DT_FP64 | 10 | - |
+| <a id="AX_CCL_DT_BF16"></a>AX_CCL_DT_BF16 | 11 | - |
+| <a id="AX_CCL_DT_FP8_E4M3"></a>AX_CCL_DT_FP8_E4M3 | 12 | - |
+| <a id="AX_CCL_DT_FP8_E5M2"></a>AX_CCL_DT_FP8_E5M2 | 13 | - |
+| <a id="AX_CCL_DT_BUTT"></a>AX_CCL_DT_BUTT | - | - |
+
+<br>
+
+<a id="axCclRedOp"></a>
+
+## 3. axCclRedOp
+
+内置归约算子。
+
+```c
+typedef enum axCclRedOp {
+    AX_CCL_OP_SUM  = 0,
+    AX_CCL_OP_PROD = 1,
+    AX_CCL_OP_MIN  = 2,
+    AX_CCL_OP_MAX  = 3,
+    AX_CCL_OP_AVG  = 4,
+    AX_CCL_OP_BUTT,
+    /* Largest legal custom handle. Built-in numbers and BUTT remain unchanged. */
+    AX_CCL_OP_MAX_CUSTOM = 0x7fffffff
+} axCclRedOp;
+```
+
+### 3.1. 取值
+
+| 符号 | 值 | 说明 |
+|---|---|---|
+| <a id="AX_CCL_OP_SUM"></a>AX_CCL_OP_SUM | 0 | - |
+| <a id="AX_CCL_OP_PROD"></a>AX_CCL_OP_PROD | 1 | - |
+| <a id="AX_CCL_OP_MIN"></a>AX_CCL_OP_MIN | 2 | - |
+| <a id="AX_CCL_OP_MAX"></a>AX_CCL_OP_MAX | 3 | - |
+| <a id="AX_CCL_OP_AVG"></a>AX_CCL_OP_AVG | 4 | - |
+| <a id="AX_CCL_OP_BUTT"></a>AX_CCL_OP_BUTT | - | - |
+| <a id="AX_CCL_OP_MAX_CUSTOM"></a>AX_CCL_OP_MAX_CUSTOM | 0x7fffffff | - |
+
+<br>
+
+<a id="axCclScalarResidence"></a>
+
+## 4. axCclScalarResidence
+
+归约预乘标量所在的位置，用于 [axCclRedOpCreatePreMulSum](../axccl_api.md#axCclRedOpCreatePreMulSum)。
+
+```c
+typedef enum axCclScalarResidence {
+    AX_CCL_RES_HOST   = 0,  /*!< Scalar points to Host-accessible memory. */
+    AX_CCL_RES_DEVICE = 1,  /*!< Scalar points to Device memory. */
+} axCclScalarResidence;
+```
+
+### 4.1. 取值
+
+| 符号 | 值 | 说明 |
+|---|---|---|
+| <a id="AX_CCL_RES_HOST"></a>AX_CCL_RES_HOST | 0 | 标量指向 Host 可访问的内存。 |
+| <a id="AX_CCL_RES_DEVICE"></a>AX_CCL_RES_DEVICE | 1 | 标量指向 Device 内存。 |
+
+<br>
+
 <a id="axclrtDevAttr"></a>
 
-## 2. axclrtDevAttr
+## 5. axclrtDevAttr
 
 [axclrtGetDeviceInfo](../device_api.md#axclrtGetDeviceInfo) 使用的 Device 属性类型。
 
@@ -111,11 +214,19 @@ typedef enum axclrtDevAttr {
     AXCL_DEVICE_ATTR_PCIE_BUS,                /*!< PCIe bus number. */
     AXCL_DEVICE_ATTR_PCIE_DEV,                /*!< PCIe device number. */
     AXCL_DEVICE_ATTR_PCIE_FUNC,               /*!< PCIe function number. */
+    AXCL_DEVICE_ATTR_PCIE_VENDOR_ID,          /*!< PCIe Vendor ID. */
+    AXCL_DEVICE_ATTR_PCIE_DEVICE_ID,          /*!< PCIe Device ID. */
+    AXCL_DEVICE_ATTR_PCIE_SUB_VENDOR_ID,      /*!< PCIe Subsystem Vendor ID. */
+    AXCL_DEVICE_ATTR_PCIE_SUB_DEVICE_ID,      /*!< PCIe Subsystem Device ID. */
+    AXCL_DEVICE_ATTR_PCIE_MAX_SPEED,          /*!< PCIe maximum link speed in MT/s (e.g. 32000 for 32.0 GT/s). */
+    AXCL_DEVICE_ATTR_PCIE_MAX_WIDTH,          /*!< PCIe maximum link width (e.g. 8 for x8). */
+    AXCL_DEVICE_ATTR_PCIE_CUR_SPEED,          /*!< PCIe current link speed in MT/s (e.g. 8000 for 8.0 GT/s). */
+    AXCL_DEVICE_ATTR_PCIE_CUR_WIDTH,          /*!< PCIe current link width (e.g. 4 for x4). */
     AXCL_DEVICE_ATTR_BUTT                     /*!< Upper boundary of valid device attributes. */
 } axclrtDevAttr;
 ```
 
-### 3.1. 取值
+### 5.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -126,37 +237,45 @@ typedef enum axclrtDevAttr {
 | <a id="AXCL_DEVICE_ATTR_PCIE_BUS"></a>AXCL_DEVICE_ATTR_PCIE_BUS | - | PCIe bus 编号。 |
 | <a id="AXCL_DEVICE_ATTR_PCIE_DEV"></a>AXCL_DEVICE_ATTR_PCIE_DEV | - | PCIe device 编号。 |
 | <a id="AXCL_DEVICE_ATTR_PCIE_FUNC"></a>AXCL_DEVICE_ATTR_PCIE_FUNC | - | PCIe function 编号。 |
+| <a id="AXCL_DEVICE_ATTR_PCIE_VENDOR_ID"></a>AXCL_DEVICE_ATTR_PCIE_VENDOR_ID | - | PCIe Vendor ID。 |
+| <a id="AXCL_DEVICE_ATTR_PCIE_DEVICE_ID"></a>AXCL_DEVICE_ATTR_PCIE_DEVICE_ID | - | PCIe Device ID。 |
+| <a id="AXCL_DEVICE_ATTR_PCIE_SUB_VENDOR_ID"></a>AXCL_DEVICE_ATTR_PCIE_SUB_VENDOR_ID | - | PCIe Subsystem Vendor ID。 |
+| <a id="AXCL_DEVICE_ATTR_PCIE_SUB_DEVICE_ID"></a>AXCL_DEVICE_ATTR_PCIE_SUB_DEVICE_ID | - | PCIe Subsystem Device ID。 |
+| <a id="AXCL_DEVICE_ATTR_PCIE_MAX_SPEED"></a>AXCL_DEVICE_ATTR_PCIE_MAX_SPEED | - | PCIe 最大链路速率，单位为 MT/s（例如 32000 表示 32.0 GT/s）。 |
+| <a id="AXCL_DEVICE_ATTR_PCIE_MAX_WIDTH"></a>AXCL_DEVICE_ATTR_PCIE_MAX_WIDTH | - | PCIe 最大链路宽度（例如 8 表示 x8）。 |
+| <a id="AXCL_DEVICE_ATTR_PCIE_CUR_SPEED"></a>AXCL_DEVICE_ATTR_PCIE_CUR_SPEED | - | PCIe 当前链路速率，单位为 MT/s（例如 8000 表示 8.0 GT/s）。 |
+| <a id="AXCL_DEVICE_ATTR_PCIE_CUR_WIDTH"></a>AXCL_DEVICE_ATTR_PCIE_CUR_WIDTH | - | PCIe 当前链路宽度（例如 4 表示 x4）。 |
 | <a id="AXCL_DEVICE_ATTR_BUTT"></a>AXCL_DEVICE_ATTR_BUTT | - | 有效 Device 属性的上边界。 |
 
 <br>
 
 <a id="axclrtDeviceState"></a>
 
-## 3. axclrtDeviceState
+## 6. axclrtDeviceState
 
 [axclrtRegDeviceStateCallback](../device_api.md#axclrtRegDeviceStateCallback) 使用的 Device 状态。
 
 ```c
 typedef enum axclrtDeviceState {
     AXCL_RT_DEVICE_STATE_ONLINE = 0,   /*!< The device is online; currently not reported by the callback. */
-    AXCL_RT_DEVICE_STATE_OFFLINE = 1,  /*!< The device has been detected offline. */
+    AXCL_RT_DEVICE_STATE_OFFLINE = 1,  /*!< The device, or the worker process serving this process on it, has become unavailable. */
     AXCL_RT_DEVICE_STATE_BUTT          /*!< Upper boundary of valid device states. */
 } axclrtDeviceState;
 ```
 
-### 4.1. 取值
+### 6.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
 | <a id="AXCL_RT_DEVICE_STATE_ONLINE"></a>AXCL_RT_DEVICE_STATE_ONLINE | 0 | Device 在线；当前回调不会报告此状态。 |
-| <a id="AXCL_RT_DEVICE_STATE_OFFLINE"></a>AXCL_RT_DEVICE_STATE_OFFLINE | 1 | 检测到 Device 离线。 |
+| <a id="AXCL_RT_DEVICE_STATE_OFFLINE"></a>AXCL_RT_DEVICE_STATE_OFFLINE | 1 | Device 或在该 Device 上为本进程服务的 worker 进程已不可用。 |
 | <a id="AXCL_RT_DEVICE_STATE_BUTT"></a>AXCL_RT_DEVICE_STATE_BUTT | - | 有效 Device 状态的上边界。 |
 
 <br>
 
 <a id="axclrtDeviceStatus"></a>
 
-## 4. axclrtDeviceStatus
+## 7. axclrtDeviceStatus
 
 [axclrtQueryDeviceStatus](../device_api.md#axclrtQueryDeviceStatus) 使用的 Device 可用状态。
 
@@ -167,7 +286,7 @@ typedef enum axclrtDeviceStatus {
 } axclrtDeviceStatus;
 ```
 
-### 5.1. 取值
+### 7.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -178,7 +297,7 @@ typedef enum axclrtDeviceStatus {
 
 <a id="axclrtEngineDataLayout"></a>
 
-## 5. axclrtEngineDataLayout
+## 8. axclrtEngineDataLayout
 
 Tensor 布局定义。
 
@@ -190,7 +309,7 @@ typedef enum axclrtEngineDataLayout {
 } axclrtEngineDataLayout;
 ```
 
-### 6.1. 取值
+### 8.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -202,7 +321,7 @@ typedef enum axclrtEngineDataLayout {
 
 <a id="axclrtEngineDataType"></a>
 
-## 6. axclrtEngineDataType
+## 9. axclrtEngineDataType
 
 Tensor 数据类型定义。
 
@@ -228,7 +347,7 @@ typedef enum axclrtEngineDataType {
 } axclrtEngineDataType;
 ```
 
-### 7.1. 取值
+### 9.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -254,7 +373,7 @@ typedef enum axclrtEngineDataType {
 
 <a id="axclrtEngineModelKind"></a>
 
-## 7. axclrtEngineModelKind
+## 10. axclrtEngineModelKind
 
 模型 NPU core 数量分类。
 
@@ -266,7 +385,7 @@ typedef enum axclrtEngineModelKind {
 } axclrtEngineModelKind;
 ```
 
-### 8.1. 取值
+### 10.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -278,7 +397,7 @@ typedef enum axclrtEngineModelKind {
 
 <a id="axclrtEngineVNpuKind"></a>
 
-## 8. axclrtEngineVNpuKind
+## 11. axclrtEngineVNpuKind
 
 VNPU 调度模式。
 
@@ -291,7 +410,7 @@ typedef enum axclrtEngineVNpuKind {
 } axclrtEngineVNpuKind;
 ```
 
-### 9.1. 取值
+### 11.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -302,9 +421,33 @@ typedef enum axclrtEngineVNpuKind {
 
 <br>
 
+<a id="axclrtEventStatus"></a>
+
+## 12. axclrtEventStatus
+
+Event 状态枚举。
+
+```c
+typedef enum axclrtEventStatus {
+    AXCL_EVENT_STATUS_COMPLETE  = 0,       /*!< All tasks captured by the event have completed */
+    AXCL_EVENT_STATUS_NOT_READY = 1,       /*!< At least one task captured by the event has not completed */
+    AXCL_EVENT_STATUS_RESERVED  = 0xFFFF,  /*!< Reserved; set when the query call itself fails */
+} axclrtEventStatus;
+```
+
+### 12.1. 取值
+
+| 符号 | 值 | 说明 |
+|---|---|---|
+| <a id="AXCL_EVENT_STATUS_COMPLETE"></a>AXCL_EVENT_STATUS_COMPLETE | 0 | Event 捕获的所有 Task 均已完成。 |
+| <a id="AXCL_EVENT_STATUS_NOT_READY"></a>AXCL_EVENT_STATUS_NOT_READY | 1 | Event 捕获的 Task 中至少有一个尚未完成。 |
+| <a id="AXCL_EVENT_STATUS_RESERVED"></a>AXCL_EVENT_STATUS_RESERVED | 0xFFFF | 保留值；查询调用本身失败时设置。 |
+
+<br>
+
 <a id="axclrtFileTransferPolicy"></a>
 
-## 9. axclrtFileTransferPolicy
+## 13. axclrtFileTransferPolicy
 
 文件传输操作。
 
@@ -317,7 +460,7 @@ typedef enum axclrtFileTransferPolicy {
 } axclrtFileTransferPolicy;
 ```
 
-### 10.1. 取值
+### 13.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -328,9 +471,41 @@ typedef enum axclrtFileTransferPolicy {
 
 <br>
 
+<a id="axclrtLogTarget"></a>
+
+## 14. axclrtLogTarget
+
+[axclrtSetLogLevel](../other_api.md#axclrtSetLogLevel) 和 [axclrtGetLogLevel](../other_api.md#axclrtGetLogLevel) 的日志级别目标。
+
+```c
+typedef enum {
+    AXCL_LOG_TARGET_HOST_RUNTIME_FILE = 0,    /*!< Host runtime file logger (asynchronous). */
+    AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE,     /*!< Host runtime console logger (synchronous). */
+    AXCL_LOG_TARGET_DEVICE_WORKER_FILE,       /*!< Device worker file logger of the current thread's active Device.
+                                                   Requires an active Device on the current thread; call
+                                                   @ref axclrtSetDevice or @ref axclrtCreateContext first. */
+    AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE,    /*!< Device worker console logger of the current thread's active Device.
+                                                   Requires an active Device on the current thread; call
+                                                   @ref axclrtSetDevice or @ref axclrtCreateContext first. */
+    AXCL_LOG_TARGET_BUTT,                     /*!< Invalid target; boundary value only. */
+} axclrtLogTarget;
+```
+
+### 14.1. 取值
+
+| 符号 | 值 | 说明 |
+|---|---|---|
+| <a id="AXCL_LOG_TARGET_HOST_RUNTIME_FILE"></a>AXCL_LOG_TARGET_HOST_RUNTIME_FILE | 0 | Host 运行时文件日志（异步）。 |
+| <a id="AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE"></a>AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE | - | Host 运行时控制台日志（同步）。 |
+| <a id="AXCL_LOG_TARGET_DEVICE_WORKER_FILE"></a>AXCL_LOG_TARGET_DEVICE_WORKER_FILE | - | 当前线程已激活 Device 的 device worker 文件日志。需要当前线程已激活 Device；请先调用 [axclrtSetDevice](../device_api.md#axclrtSetDevice) 或 [axclrtCreateContext](../context_api.md#axclrtCreateContext)。 |
+| <a id="AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE"></a>AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE | - | 当前线程已激活 Device 的 device worker 控制台日志。需要当前线程已激活 Device；请先调用 [axclrtSetDevice](../device_api.md#axclrtSetDevice) 或 [axclrtCreateContext](../context_api.md#axclrtCreateContext)。 |
+| <a id="AXCL_LOG_TARGET_BUTT"></a>AXCL_LOG_TARGET_BUTT | - | 无效目标，仅作为边界值。 |
+
+<br>
+
 <a id="axclrtMemAttr"></a>
 
-## 10. axclrtMemAttr
+## 15. axclrtMemAttr
 
 [axclrtGetMemInfo](../memory_api.md#axclrtGetMemInfo) 使用的内存信息类型。
 
@@ -341,7 +516,7 @@ typedef enum axclrtMemAttr {
 } axclrtMemAttr;
 ```
 
-### 11.1. 取值
+### 15.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -352,7 +527,7 @@ typedef enum axclrtMemAttr {
 
 <a id="axclrtMemLocationType"></a>
 
-## 11. axclrtMemLocationType
+## 16. axclrtMemLocationType
 
 [axclrtPointerGetAttributes](../memory_api.md#axclrtPointerGetAttributes) 使用的内存位置类型。
 
@@ -364,7 +539,7 @@ typedef enum axclrtMemLocationType {
 } axclrtMemLocationType;
 ```
 
-### 12.1. 取值
+### 16.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -376,33 +551,31 @@ typedef enum axclrtMemLocationType {
 
 <a id="axclrtMemMallocPolicy"></a>
 
-## 12. axclrtMemMallocPolicy
+## 17. axclrtMemMallocPolicy
 
 内存分配策略枚举。
 
 ```c
 typedef enum axclrtMemMallocPolicy {
-    AXCL_MEM_MALLOC_HUGE_FIRST      = 0,  /*!< Huge first */
-    AXCL_MEM_MALLOC_HUGE_ONLY       = 1,  /*!< Huge only */
-    AXCL_MEM_MALLOC_NORMAL_ONLY     = 2,  /*!< Normal only */
-    AXCL_MEM_MALLOC_SIZE_ALIGN      = 3   /*!< Size aligned */
+    AXCL_MEM_MALLOC_HUGE_FIRST      = 0,  /*!< 128-byte aligned; currently the same as the other page policies */
+    AXCL_MEM_MALLOC_HUGE_ONLY       = 1,  /*!< 128-byte aligned; currently the same as the other page policies */
+    AXCL_MEM_MALLOC_NORMAL_ONLY     = 2   /*!< 128-byte aligned; currently the same as the other page policies */
 } axclrtMemMallocPolicy;
 ```
 
-### 13.1. 取值
+### 17.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
-| <a id="AXCL_MEM_MALLOC_HUGE_FIRST"></a>AXCL_MEM_MALLOC_HUGE_FIRST | 0 | 优先使用大页内存。 |
-| <a id="AXCL_MEM_MALLOC_HUGE_ONLY"></a>AXCL_MEM_MALLOC_HUGE_ONLY | 1 | 仅使用大页内存。 |
-| <a id="AXCL_MEM_MALLOC_NORMAL_ONLY"></a>AXCL_MEM_MALLOC_NORMAL_ONLY | 2 | 仅使用普通内存。 |
-| <a id="AXCL_MEM_MALLOC_SIZE_ALIGN"></a>AXCL_MEM_MALLOC_SIZE_ALIGN | 3 | 按大小对齐。 |
+| <a id="AXCL_MEM_MALLOC_HUGE_FIRST"></a>AXCL_MEM_MALLOC_HUGE_FIRST | 0 | 按 128 字节对齐；当前与其他页类型策略相同。 |
+| <a id="AXCL_MEM_MALLOC_HUGE_ONLY"></a>AXCL_MEM_MALLOC_HUGE_ONLY | 1 | 按 128 字节对齐；当前与其他页类型策略相同。 |
+| <a id="AXCL_MEM_MALLOC_NORMAL_ONLY"></a>AXCL_MEM_MALLOC_NORMAL_ONLY | 2 | 按 128 字节对齐；当前与其他页类型策略相同。 |
 
 <br>
 
 <a id="axclrtMemcpyKind"></a>
 
-## 13. axclrtMemcpyKind
+## 18. axclrtMemcpyKind
 
 Memcpy 类型枚举。
 
@@ -415,7 +588,7 @@ typedef enum axclrtMemcpyKind {
 } axclrtMemcpyKind;
 ```
 
-### 14.1. 取值
+### 18.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -428,18 +601,18 @@ typedef enum axclrtMemcpyKind {
 
 <a id="axclrtPointerAttributeFlag"></a>
 
-## 14. axclrtPointerAttributeFlag
+## 19. axclrtPointerAttributeFlag
 
 [axclrtPointerGetAttributes](../memory_api.md#axclrtPointerGetAttributes) 使用的指针属性标志。
 
 ```c
 typedef enum axclrtPointerAttributeFlag {
-    AXCL_POINTER_ATTRIBUTE_FLAG_NONE = 0,    /*!< No additional pointer attributes. */
-    AXCL_POINTER_ATTRIBUTE_FLAG_CACHED = 1,  /*!< Device memory is mapped as cached memory. */
+    AXCL_POINTER_ATTRIBUTE_FLAG_NONE = 0,      /*!< No additional pointer attributes. */
+    AXCL_POINTER_ATTRIBUTE_FLAG_CACHED = 1,    /*!< Device memory is mapped as cached memory. */
 } axclrtPointerAttributeFlag;
 ```
 
-### 15.1. 取值
+### 19.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
@@ -450,7 +623,7 @@ typedef enum axclrtPointerAttributeFlag {
 
 <a id="axclrtStreamStatus"></a>
 
-## 15. axclrtStreamStatus
+## 20. axclrtStreamStatus
 
 Stream 状态枚举。
 
@@ -462,42 +635,10 @@ typedef enum axclrtStreamStatus {
 } axclrtStreamStatus;
 ```
 
-### 16.1. 取值
+### 20.1. 取值
 
 | 符号 | 值 | 说明 |
 |---|---|---|
 | <a id="AXCL_STREAM_STATUS_COMPLETE"></a>AXCL_STREAM_STATUS_COMPLETE | 0 | Stream 上的所有 Task 均已完成。 |
 | <a id="AXCL_STREAM_STATUS_NOT_READY"></a>AXCL_STREAM_STATUS_NOT_READY | 1 | Stream 上至少有一个 Task 尚未完成。 |
 | <a id="AXCL_STREAM_STATUS_RESERVED"></a>AXCL_STREAM_STATUS_RESERVED | 0xFFFF | 保留值；查询调用本身失败时设置。 |
-
-<br>
-
-<a id="axclrtLogTarget"></a>
-
-## 16. axclrtLogTarget
-
-[axclrtSetLogLevel](../other_api.md#axclrtSetLogLevel) 和 [axclrtGetLogLevel](../other_api.md#axclrtGetLogLevel) 的日志级别目标。
-
-```c
-typedef enum {
-    AXCL_LOG_TARGET_HOST_RUNTIME_FILE = 0,    /*!< Host runtime file logger (asynchronous). */
-    AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE,     /*!< Host runtime console logger (synchronous). Off by default. */
-    AXCL_LOG_TARGET_DEVICE_WORKER_FILE,       /*!< Device worker file logger of the current thread's active Device.
-                                                   Requires an active Device on the current thread; call
-                                                   @ref axclrtSetDevice or @ref axclrtCreateContext first. */
-    AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE,    /*!< Device worker console logger of the current thread's active Device.
-                                                   Off by default. Requires an active Device on the current thread; call
-                                                   @ref axclrtSetDevice or @ref axclrtCreateContext first. */
-    AXCL_LOG_TARGET_BUTT,                     /*!< Invalid target; boundary value only. */
-} axclrtLogTarget;
-```
-
-### 16.1. 取值
-
-| 符号 | 值 | 说明 |
-|---|---|---|
-| <a id="AXCL_LOG_TARGET_HOST_RUNTIME_FILE"></a>AXCL_LOG_TARGET_HOST_RUNTIME_FILE | 0 | Host 运行时文件日志（异步）。 |
-| <a id="AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE"></a>AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE | 1 | Host 运行时控制台日志（同步）。默认关闭。 |
-| <a id="AXCL_LOG_TARGET_DEVICE_WORKER_FILE"></a>AXCL_LOG_TARGET_DEVICE_WORKER_FILE | 2 | 当前线程已激活 Device 的 device worker 文件日志。需要当前线程已激活 Device；请先调用 [axclrtSetDevice](../device_api.md#axclrtSetDevice) 或 [axclrtCreateContext](../context_api.md#axclrtCreateContext)。 |
-| <a id="AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE"></a>AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE | 3 | 当前线程已激活 Device 的 device worker 控制台日志（同步）。默认关闭。需要当前线程已激活 Device；请先调用 [axclrtSetDevice](../device_api.md#axclrtSetDevice) 或 [axclrtCreateContext](../context_api.md#axclrtCreateContext)。 |
-| <a id="AXCL_LOG_TARGET_BUTT"></a>AXCL_LOG_TARGET_BUTT | - | 无效目标，仅作为边界值。 |

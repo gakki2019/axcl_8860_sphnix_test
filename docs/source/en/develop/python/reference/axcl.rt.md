@@ -166,8 +166,6 @@ N/A
 
 Return type: `tuple[int, int, int, int]`.
 
-Source: `python/axcl/rt/axcl_rt.py:216`.
-
 #### 2.1.5. Example
 
 ```python
@@ -212,8 +210,6 @@ axclError axclrtGetVersionStr(const char *name, char *buf, uint32_t size);
 
 Return type: `tuple[str, int]`.
 
-Source: `python/axcl/rt/axcl_rt.py:251`.
-
 #### 2.2.5. Example
 
 ```python
@@ -253,8 +249,6 @@ N/A
 #### 2.3.4. Note
 
 Return type: `str`.
-
-Source: `python/axcl/rt/axcl_rt.py:288`.
 
 #### 2.3.5. Example
 
@@ -296,8 +290,6 @@ N/A
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt.py:316`.
-
 #### 2.4.5. Example
 
 ```python
@@ -337,8 +329,6 @@ N/A
 #### 2.5.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt.py:344`.
 
 #### 2.5.5. Example
 
@@ -382,8 +372,6 @@ void axclrtSetLastError(axclError error);
 
 Return type: `None`.
 
-Source: `python/axcl/rt/axcl_rt.py:372`.
-
 #### 2.6.5. Example
 
 ```python
@@ -420,13 +408,11 @@ const char * axclrtGetErrorString(axclError error);
 
 #### 2.7.3. Returns
 
-- `result`: *str* — Description string for the error. Unknown AXCL errors are formatted as `unknown error code 0xXXXXXXXX`. Errors owned by an external module include the raw error code and module ID.
+- `result`: *str* — Description string for the error. An AXCL error without a dedicated description, but with a known sub module and a generic error ID that has its own description, is formatted as `<Module>: <generic description>`, for example `Runtime: Native operation failed without detailed error information.` Remaining AXCL errors are formatted as `unknown error code 0xXXXXXXXX`. Errors owned by an external module include the raw error code and module ID.
 
 #### 2.7.4. Note
 
 Return type: `str`.
-
-Source: `python/axcl/rt/axcl_rt.py:403`.
 
 #### 2.7.5. Example
 
@@ -471,8 +457,6 @@ axclError axclrtSetLogLevel(axclrtLogTarget target, int32_t lv);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt.py:434`.
-
 #### 2.8.5. Example
 
 ```python
@@ -515,8 +499,6 @@ axclError axclrtGetLogLevel(axclrtLogTarget target, int32_t *lv);
 #### 2.9.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt.py:467`.
 
 #### 2.9.5. Example
 
@@ -561,8 +543,6 @@ axclError axclrtCreateContext(axclrtContext *context, int32_t deviceId);
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_context.py:114`.
-
 #### 2.10.5. Example
 
 ```python
@@ -604,8 +584,6 @@ axclError axclrtDestroyContext(axclrtContext context);
 #### 2.11.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_context.py:148`.
 
 #### 2.11.5. Example
 
@@ -649,8 +627,6 @@ axclError axclrtSetCurrentContext(axclrtContext context);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_context.py:179`.
-
 #### 2.12.5. Example
 
 ```python
@@ -691,8 +667,6 @@ N/A
 #### 2.13.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_context.py:210`.
 
 #### 2.13.5. Example
 
@@ -739,8 +713,6 @@ axclError axclrtControlExecuteShellCmd(const char *cmd, const char *const args[]
 
 Return type: `tuple[str, int]`.
 
-Source: `python/axcl/rt/axcl_rt_control.py:93`.
-
 #### 2.14.5. Example
 
 ```python
@@ -782,8 +754,6 @@ axclError axclrtSetDevice(int32_t deviceId);
 #### 2.15.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_device.py:373`.
 
 #### 2.15.5. Example
 
@@ -827,8 +797,6 @@ axclError axclrtResetDevice(int32_t deviceId);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_device.py:404`.
-
 #### 2.16.5. Example
 
 ```python
@@ -870,8 +838,6 @@ axclError axclrtResetDeviceForce(int32_t deviceId);
 #### 2.17.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_device.py:435`.
 
 #### 2.17.5. Example
 
@@ -916,8 +882,6 @@ axclError axclrtRegDeviceStateCallback(axclrtDeviceStateCallback callback, void 
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_device.py:466`.
-
 #### 2.18.5. Example
 
 ```python
@@ -960,8 +924,6 @@ axclError axclrtQueryDeviceStatus(int32_t deviceId, axclrtDeviceStatus *deviceSt
 #### 2.19.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_device.py:503`.
 
 #### 2.19.5. Example
 
@@ -1007,8 +969,6 @@ axclError axclrtGetDeviceInfo(int32_t deviceId, axclrtDevAttr attr, uint64_t *va
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_device.py:537`.
-
 #### 2.20.5. Example
 
 ```python
@@ -1050,8 +1010,6 @@ N/A
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_device.py:573`.
-
 #### 2.21.5. Example
 
 ```python
@@ -1092,8 +1050,6 @@ N/A
 #### 2.22.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_device.py:604`.
 
 #### 2.22.5. Example
 
@@ -1139,8 +1095,6 @@ axclError axclrtDeviceCanAccessPeer(int32_t *canAccessPeer, int32_t deviceId, in
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_device.py:635`.
-
 #### 2.23.5. Example
 
 ```python
@@ -1184,8 +1138,6 @@ axclError axclrtDeviceEnablePeerAccess(int32_t peerDeviceId, uint32_t flags);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_device.py:671`.
-
 #### 2.24.5. Example
 
 ```python
@@ -1227,8 +1179,6 @@ axclError axclrtDeviceDisablePeerAccess(int32_t peerDeviceId);
 #### 2.25.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_device.py:704`.
 
 #### 2.25.5. Example
 
@@ -1274,8 +1224,6 @@ axclError axclrtDevicePeerAccessStatus(int32_t deviceId, int32_t peerDeviceId, i
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_device.py:735`.
-
 #### 2.26.5. Example
 
 ```python
@@ -1315,8 +1263,6 @@ N/A
 #### 2.27.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_device.py:771`.
 
 #### 2.27.5. Example
 
@@ -1360,8 +1306,6 @@ axclError axclrtSynchronizeDeviceWithTimeout(int32_t timeout);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_device.py:799`.
-
 #### 2.28.5. Example
 
 ```python
@@ -1402,8 +1346,6 @@ N/A
 #### 2.29.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_device.py:830`.
 
 #### 2.29.5. Example
 
@@ -1447,8 +1389,6 @@ axclError axclrtEngineInit(axclrtEngineVNpuKind npuKind);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:1638`.
-
 #### 2.30.5. Example
 
 ```python
@@ -1490,8 +1430,6 @@ N/A
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:1669`.
-
 #### 2.31.5. Example
 
 ```python
@@ -1531,8 +1469,6 @@ N/A
 #### 2.32.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:1700`.
 
 #### 2.32.5. Example
 
@@ -1576,8 +1512,6 @@ axclError axclrtEngineLoadFromFile(const char *modelPath, uint64_t *modelId);
 #### 2.33.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:1728`.
 
 #### 2.33.5. Example
 
@@ -1623,8 +1557,6 @@ axclError axclrtEngineLoadFromMem(const void *model, uint64_t modelSize, uint64_
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:1762`.
-
 #### 2.34.5. Example
 
 ```python
@@ -1666,8 +1598,6 @@ axclError axclrtEngineUnload(uint64_t modelId);
 #### 2.35.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:1798`.
 
 #### 2.35.5. Example
 
@@ -1711,8 +1641,6 @@ const char * axclrtEngineGetModelCompilerVersion(uint64_t modelId);
 
 Return type: `str`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:1829`.
-
 #### 2.36.5. Example
 
 ```python
@@ -1746,7 +1674,7 @@ axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet set);
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
-| set | int | Nonzero affinity mask using bits 0 through 2; valid values are 0x1 through 0x7. |
+| set | int | Nonzero affinity mask using bits 0 through 7; valid values are 0x1 through 0xFF. The device may impose additional limits by chip mode or model type. |
 
 #### 2.37.3. Returns
 
@@ -1755,8 +1683,6 @@ axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet set);
 #### 2.37.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:1860`.
 
 #### 2.37.5. Example
 
@@ -1800,8 +1726,6 @@ axclError axclrtEngineGetAffinity(uint64_t modelId, axclrtEngineSet *set);
 #### 2.38.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:1893`.
 
 #### 2.38.5. Example
 
@@ -1847,8 +1771,6 @@ axclError axclrtEngineSetContextAffinity(uint64_t modelId, uint64_t contextId, a
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:1927`.
-
 #### 2.39.5. Example
 
 ```python
@@ -1893,8 +1815,6 @@ axclError axclrtEngineGetContextAffinity(uint64_t modelId, uint64_t contextId, a
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:1962`.
-
 #### 2.40.5. Example
 
 ```python
@@ -1938,8 +1858,6 @@ axclError axclrtEngineGetUsage(const char *modelPath, int64_t *sysSize, int64_t 
 #### 2.41.4. Note
 
 Return type: `tuple[int, int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:1998`.
 
 #### 2.41.5. Example
 
@@ -1986,8 +1904,6 @@ axclError axclrtEngineGetUsageFromMem(const void *model, uint64_t modelSize, int
 
 Return type: `tuple[int, int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2034`.
-
 #### 2.42.5. Example
 
 ```python
@@ -2032,8 +1948,6 @@ axclError axclrtEngineGetUsageFromModelId(uint64_t modelId, int64_t *sysSize, in
 
 Return type: `tuple[int, int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2072`.
-
 #### 2.43.5. Example
 
 ```python
@@ -2076,8 +1990,6 @@ axclError axclrtEngineGetModelType(const char *modelPath, axclrtEngineModelKind 
 #### 2.44.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2108`.
 
 #### 2.44.5. Example
 
@@ -2123,8 +2035,6 @@ axclError axclrtEngineGetModelTypeFromMem(const void *model, uint64_t modelSize,
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2142`.
-
 #### 2.45.5. Example
 
 ```python
@@ -2167,8 +2077,6 @@ axclError axclrtEngineGetModelTypeFromModelId(uint64_t modelId, axclrtEngineMode
 #### 2.46.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2178`.
 
 #### 2.46.5. Example
 
@@ -2213,8 +2121,6 @@ axclError axclrtEngineGetIOInfo(uint64_t modelId, axclrtEngineIOInfo *ioInfo);
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2212`.
-
 #### 2.47.5. Example
 
 ```python
@@ -2256,8 +2162,6 @@ axclError axclrtEngineDestroyIOInfo(axclrtEngineIOInfo ioInfo);
 #### 2.48.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2246`.
 
 #### 2.48.5. Example
 
@@ -2302,8 +2206,6 @@ axclError axclrtEngineGetShapeGroupsCount(axclrtEngineIOInfo ioInfo, int32_t *co
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2277`.
-
 #### 2.49.5. Example
 
 ```python
@@ -2346,8 +2248,6 @@ uint32_t axclrtEngineGetNumInputs(axclrtEngineIOInfo ioInfo);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2311`.
-
 #### 2.50.5. Example
 
 ```python
@@ -2389,8 +2289,6 @@ uint32_t axclrtEngineGetNumOutputs(axclrtEngineIOInfo ioInfo);
 #### 2.51.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2342`.
 
 #### 2.51.5. Example
 
@@ -2436,8 +2334,6 @@ uint64_t axclrtEngineGetInputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t gro
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2373`.
-
 #### 2.52.5. Example
 
 ```python
@@ -2482,8 +2378,6 @@ uint64_t axclrtEngineGetOutputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t gr
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2408`.
-
 #### 2.53.5. Example
 
 ```python
@@ -2526,8 +2420,6 @@ const char * axclrtEngineGetInputNameByIndex(axclrtEngineIOInfo ioInfo, uint32_t
 #### 2.54.4. Note
 
 Return type: `str`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2443`.
 
 #### 2.54.5. Example
 
@@ -2572,8 +2464,6 @@ const char * axclrtEngineGetOutputNameByIndex(axclrtEngineIOInfo ioInfo, uint32_
 
 Return type: `str`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2476`.
-
 #### 2.55.5. Example
 
 ```python
@@ -2617,8 +2507,6 @@ int32_t axclrtEngineGetInputIndexByName(axclrtEngineIOInfo ioInfo, const char *n
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2509`.
-
 #### 2.56.5. Example
 
 ```python
@@ -2661,8 +2549,6 @@ int32_t axclrtEngineGetOutputIndexByName(axclrtEngineIOInfo ioInfo, const char *
 #### 2.57.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2542`.
 
 #### 2.57.5. Example
 
@@ -2709,8 +2595,6 @@ axclError axclrtEngineGetInputDims(axclrtEngineIOInfo ioInfo, uint32_t group, ui
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2575`.
-
 #### 2.58.5. Example
 
 ```python
@@ -2754,8 +2638,6 @@ axclError axclrtEngineGetInputDataType(axclrtEngineIOInfo ioInfo, uint32_t index
 #### 2.59.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2613`.
 
 #### 2.59.5. Example
 
@@ -2801,8 +2683,6 @@ axclError axclrtEngineGetOutputDataType(axclrtEngineIOInfo ioInfo, uint32_t inde
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2649`.
-
 #### 2.60.5. Example
 
 ```python
@@ -2847,8 +2727,6 @@ axclError axclrtEngineGetInputDataLayout(axclrtEngineIOInfo ioInfo, uint32_t ind
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2685`.
-
 #### 2.61.5. Example
 
 ```python
@@ -2892,8 +2770,6 @@ axclError axclrtEngineGetOutputDataLayout(axclrtEngineIOInfo ioInfo, uint32_t in
 #### 2.62.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2721`.
 
 #### 2.62.5. Example
 
@@ -2940,8 +2816,6 @@ axclError axclrtEngineGetOutputDims(axclrtEngineIOInfo ioInfo, uint32_t group, u
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2757`.
-
 #### 2.63.5. Example
 
 ```python
@@ -2985,8 +2859,6 @@ axclError axclrtEngineCreateIO(axclrtEngineIOInfo ioInfo, axclrtEngineIO *io);
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2795`.
-
 #### 2.64.5. Example
 
 ```python
@@ -3028,8 +2900,6 @@ axclError axclrtEngineDestroyIO(axclrtEngineIO io);
 #### 2.65.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2829`.
 
 #### 2.65.5. Example
 
@@ -3076,8 +2946,6 @@ axclError axclrtEngineSetInputBufferByIndex(axclrtEngineIO io, uint32_t index, c
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2860`.
-
 #### 2.66.5. Example
 
 ```python
@@ -3122,8 +2990,6 @@ axclError axclrtEngineSetOutputBufferByIndex(axclrtEngineIO io, uint32_t index, 
 #### 2.67.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2904`.
 
 #### 2.67.5. Example
 
@@ -3170,8 +3036,6 @@ axclError axclrtEngineSetInputBufferByName(axclrtEngineIO io, const char *name, 
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:2948`.
-
 #### 2.68.5. Example
 
 ```python
@@ -3216,8 +3080,6 @@ axclError axclrtEngineSetOutputBufferByName(axclrtEngineIO io, const char *name,
 #### 2.69.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:2987`.
 
 #### 2.69.5. Example
 
@@ -3264,8 +3126,6 @@ axclError axclrtEngineGetInputBufferByIndex(axclrtEngineIO io, uint32_t index, v
 
 Return type: `tuple[int, int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:3026`.
-
 #### 2.70.5. Example
 
 ```python
@@ -3310,8 +3170,6 @@ axclError axclrtEngineGetOutputBufferByIndex(axclrtEngineIO io, uint32_t index, 
 #### 2.71.4. Note
 
 Return type: `tuple[int, int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:3064`.
 
 #### 2.71.5. Example
 
@@ -3358,8 +3216,6 @@ axclError axclrtEngineGetInputBufferByName(axclrtEngineIO io, const char *name, 
 
 Return type: `tuple[int, int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:3102`.
-
 #### 2.72.5. Example
 
 ```python
@@ -3405,8 +3261,6 @@ axclError axclrtEngineGetOutputBufferByName(axclrtEngineIO io, const char *name,
 
 Return type: `tuple[int, int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:3140`.
-
 #### 2.73.5. Example
 
 ```python
@@ -3450,8 +3304,6 @@ axclError axclrtEngineSetDynamicBatchSize(axclrtEngineIO io, uint32_t batchSize)
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:3178`.
-
 #### 2.74.5. Example
 
 ```python
@@ -3494,8 +3346,6 @@ axclError axclrtEngineCreateContext(uint64_t modelId, uint64_t *contextId);
 #### 2.75.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:3220`.
 
 #### 2.75.5. Example
 
@@ -3541,8 +3391,6 @@ axclError axclrtEngineExecute(uint64_t modelId, uint64_t contextId, uint32_t gro
 #### 2.76.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_engine.py:3254`.
 
 #### 2.76.5. Example
 
@@ -3590,8 +3438,6 @@ axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contextId, uint32_
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_engine.py:3308`.
-
 #### 2.77.5. Example
 
 ```python
@@ -3632,8 +3478,6 @@ N/A
 #### 2.78.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_event.py:313`.
 
 #### 2.78.5. Example
 
@@ -3676,8 +3520,6 @@ axclError axclrtDestroyEvent(axclrtEvent event);
 #### 2.79.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_event.py:344`.
 
 #### 2.79.5. Example
 
@@ -3722,8 +3564,6 @@ axclError axclrtRecordEvent(axclrtEvent event, axclrtStream stream);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_event.py:375`.
-
 #### 2.80.5. Example
 
 ```python
@@ -3766,8 +3606,6 @@ axclError axclrtStreamWaitEvent(axclrtStream stream, axclrtEvent event);
 #### 2.81.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_event.py:417`.
 
 #### 2.81.5. Example
 
@@ -3813,8 +3651,6 @@ axclError axclrtStreamWaitEventWithTimeout(axclrtStream stream, axclrtEvent even
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_event.py:459`.
-
 #### 2.82.5. Example
 
 ```python
@@ -3856,8 +3692,6 @@ axclError axclrtSynchronizeEvent(axclrtEvent event);
 #### 2.83.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_event.py:502`.
 
 #### 2.83.5. Example
 
@@ -3902,8 +3736,6 @@ axclError axclrtSynchronizeEventWithTimeout(axclrtEvent event, int32_t timeout);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_event.py:543`.
-
 #### 2.84.5. Example
 
 ```python
@@ -3946,8 +3778,6 @@ axclError axclrtCreateEventWithFlags(axclrtEvent *event, uint32_t flags);
 #### 2.85.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_event.py:585`.
 
 #### 2.85.5. Example
 
@@ -3993,8 +3823,6 @@ axclError axclrtEventElapsedTime(float *ms, axclrtEvent startEvent, axclrtEvent 
 
 Return type: `tuple[float, int]`.
 
-Source: `python/axcl/rt/axcl_rt_event.py:619`.
-
 #### 2.86.5. Example
 
 ```python
@@ -4037,8 +3865,6 @@ axclError axclrtEventQuery(axclrtEvent event, axclrtEventStatus *status);
 #### 2.87.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_event.py:655`.
 
 #### 2.87.5. Example
 
@@ -4084,8 +3910,6 @@ axclError axclrtTransferFile(const char *src_path, const char *dst_path, axclrtF
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_file.py:110`.
-
 #### 2.88.5. Example
 
 ```python
@@ -4129,8 +3953,6 @@ axclError axclrtTransferDirectory(const char *src_dir, const char *dst_dir, axcl
 #### 2.89.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_file.py:145`.
 
 #### 2.89.5. Example
 
@@ -4176,8 +3998,6 @@ axclError axclrtGetMemInfo(axclrtMemAttr attr, size_t *free, size_t *total);
 
 Return type: `tuple[int, int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:837`.
-
 #### 2.90.5. Example
 
 ```python
@@ -4221,8 +4041,6 @@ axclError axclrtPointerGetAttributes(const void *ptr, axclrtPtrAttributes *attri
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:873`.
-
 #### 2.91.5. Example
 
 ```python
@@ -4255,7 +4073,7 @@ axclError axclrtMalloc(void **devPtr, size_t size, axclrtMemMallocPolicy policy)
 
 | Name | Type | Description |
 |---|---|---|
-| size | int | Number of bytes to allocate. The supported range is 1 through UINT32_MAX. |
+| size | int | Number of bytes to allocate. It must be at least 1 and must not exceed the Device CMM single-allocation limit. |
 | policy | int | Device memory allocation policy. |
 
 #### 2.92.3. Returns
@@ -4266,8 +4084,6 @@ axclError axclrtMalloc(void **devPtr, size_t size, axclrtMemMallocPolicy policy)
 #### 2.92.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_memory.py:907`.
 
 #### 2.92.5. Example
 
@@ -4301,7 +4117,7 @@ axclError axclrtMallocCached(void **devPtr, size_t size, axclrtMemMallocPolicy p
 
 | Name | Type | Description |
 |---|---|---|
-| size | int | Number of bytes to allocate. The supported range is 1 through UINT32_MAX. |
+| size | int | Number of bytes to allocate. It must be at least 1 and must not exceed the Device CMM single-allocation limit. |
 | policy | int | Device memory allocation policy. |
 
 #### 2.93.3. Returns
@@ -4312,8 +4128,6 @@ axclError axclrtMallocCached(void **devPtr, size_t size, axclrtMemMallocPolicy p
 #### 2.93.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_memory.py:952`.
 
 #### 2.93.5. Example
 
@@ -4357,8 +4171,6 @@ axclError axclrtFree(void *devPtr);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:997`.
-
 #### 2.94.5. Example
 
 ```python
@@ -4392,7 +4204,7 @@ axclError axclrtMemFlush(void *devPtr, size_t size);
 | Name | Type | Description |
 |---|---|---|
 | dev_ptr | int &#124; None | Device memory address at which the range begins. |
-| size | int | Number of bytes to flush. The supported range is 1 through UINT32_MAX. |
+| size | int | Number of bytes to flush. It must be at least 1 and the range must lie within one allocated Device memory block. |
 
 #### 2.95.3. Returns
 
@@ -4401,8 +4213,6 @@ axclError axclrtMemFlush(void *devPtr, size_t size);
 #### 2.95.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_memory.py:1038`.
 
 #### 2.95.5. Example
 
@@ -4437,7 +4247,7 @@ axclError axclrtMemInvalidate(void *devPtr, size_t size);
 | Name | Type | Description |
 |---|---|---|
 | dev_ptr | int &#124; None | Device physical memory address at which the range to invalidate begins. |
-| size | int | Number of bytes to process. The supported range is 1 through UINT32_MAX. |
+| size | int | Number of bytes to process. It must be at least 1 and the range must lie within one allocated Device memory block. |
 
 #### 2.96.3. Returns
 
@@ -4446,8 +4256,6 @@ axclError axclrtMemInvalidate(void *devPtr, size_t size);
 #### 2.96.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_memory.py:1080`.
 
 #### 2.96.5. Example
 
@@ -4492,8 +4300,6 @@ axclError axclrtMallocHost(void **hostPtr, size_t size);
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1122`.
-
 #### 2.97.5. Example
 
 ```python
@@ -4536,8 +4342,6 @@ axclError axclrtFreeHost(void *hostPtr);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1166`.
-
 #### 2.98.5. Example
 
 ```python
@@ -4572,7 +4376,7 @@ axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 |---|---|---|
 | dev_ptr | int &#124; None | Device memory address at which to begin writing. |
 | value | int | Byte value to write. |
-| count | int | Number of bytes to set. The supported range is 1 through UINT32_MAX. |
+| count | int | Number of bytes to set. It must be at least 1 and the range must lie within one allocated Device memory block. |
 
 #### 2.99.3. Returns
 
@@ -4581,8 +4385,6 @@ axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 #### 2.99.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_memory.py:1207`.
 
 #### 2.99.5. Example
 
@@ -4629,8 +4431,6 @@ axclError axclrtMemcpy(void *dstPtr, const void *srcPtr, size_t count, axclrtMem
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1250`.
-
 #### 2.100.5. Example
 
 ```python
@@ -4665,7 +4465,7 @@ axclError axclrtMemcmp(const void *devPtr1, const void *devPtr2, size_t count);
 |---|---|---|
 | dev_ptr1 | int &#124; None | Address of the first Device memory range. |
 | dev_ptr2 | int &#124; None | Address of the second Device memory range. |
-| count | int | Number of bytes to compare. The supported range is 1 through UINT32_MAX. |
+| count | int | Number of bytes to compare. It must be at least 1 and each range must lie within one allocated Device memory block. |
 
 #### 2.101.3. Returns
 
@@ -4674,8 +4474,6 @@ axclError axclrtMemcmp(const void *devPtr1, const void *devPtr2, size_t count);
 #### 2.101.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_memory.py:1294`.
 
 #### 2.101.5. Example
 
@@ -4711,7 +4509,7 @@ axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t count, axclrtStr
 |---|---|---|
 | dev_ptr | int &#124; None | Device memory address at which to begin writing. |
 | value | int | Byte value to write. |
-| count | int | Number of bytes to set. The supported range is 1 through UINT32_MAX. |
+| count | int | Number of bytes to set. It must be at least 1 and the range must lie within one allocated Device memory block. |
 | stream | int &#124; None | Stream that receives the operation. |
 
 #### 2.102.3. Returns
@@ -4725,8 +4523,6 @@ axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t count, axclrtStr
 #### 2.102.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_memory.py:1337`.
 
 #### 2.102.5. Example
 
@@ -4779,8 +4575,6 @@ axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t count, axcl
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1385`.
-
 #### 2.103.5. Example
 
 ```python
@@ -4815,7 +4609,7 @@ axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2, size_t cou
 |---|---|---|
 | dev_ptr1 | int &#124; None | Address of the first Device memory range. |
 | dev_ptr2 | int &#124; None | Address of the second Device memory range. |
-| count | int | Number of bytes to compare. The supported range is 1 through UINT32_MAX. |
+| count | int | Number of bytes to compare. It must be at least 1 and each range must lie within one allocated Device memory block. |
 | stream | int &#124; None | Stream that receives the comparison operation. |
 
 #### 2.104.3. Returns
@@ -4829,8 +4623,6 @@ axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2, size_t cou
 #### 2.104.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_memory.py:1435`.
 
 #### 2.104.5. Example
 
@@ -4876,8 +4668,6 @@ axclError axclrtMemGetAddressRange(void *ptr, void **base, size_t *size);
 
 Return type: `tuple[int, int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1483`.
-
 #### 2.105.5. Example
 
 ```python
@@ -4922,8 +4712,6 @@ axclError axclrtMemGetDevAddr(const void *devPtr, uint64_t access_size, axclrtDe
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1519`.
-
 #### 2.106.5. Example
 
 ```python
@@ -4967,8 +4755,6 @@ axclError axclrtMemMapDevAddr(const axclrtDevMemDesc *desc, void **devPtr);
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1555`.
-
 #### 2.107.5. Example
 
 ```python
@@ -5010,8 +4796,6 @@ axclError axclrtMemUnmapDevAddr(void *devPtr);
 #### 2.108.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_memory.py:1589`.
 
 #### 2.108.5. Example
 
@@ -5058,8 +4842,6 @@ axclError axclrtIpcMemGetExportKey(void *devPtr, char *key, size_t len, uint32_t
 
 Return type: `tuple[str, int]`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1620`.
-
 #### 2.109.5. Example
 
 ```python
@@ -5104,8 +4886,6 @@ axclError axclrtIpcMemSetImportPid(const char *key, const int32_t *tgid_list, ui
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1659`.
-
 #### 2.110.5. Example
 
 ```python
@@ -5149,8 +4929,6 @@ axclError axclrtIpcMemImportByKey(void **devPtr, const char *key);
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1694`.
-
 #### 2.111.5. Example
 
 ```python
@@ -5193,8 +4971,6 @@ axclError axclrtIpcMemClose(const char *key);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_memory.py:1728`.
-
 #### 2.112.5. Example
 
 ```python
@@ -5235,8 +5011,6 @@ N/A
 #### 2.113.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_stream.py:171`.
 
 #### 2.113.5. Example
 
@@ -5280,8 +5054,6 @@ axclError axclrtDestroyStream(axclrtStream stream);
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_stream.py:202`.
-
 #### 2.114.5. Example
 
 ```python
@@ -5323,8 +5095,6 @@ axclError axclrtDestroyStreamForce(axclrtStream stream);
 #### 2.115.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_stream.py:233`.
 
 #### 2.115.5. Example
 
@@ -5369,8 +5139,6 @@ axclError axclrtStreamQuery(axclrtStream stream, axclrtStreamStatus *status);
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_stream.py:264`.
-
 #### 2.116.5. Example
 
 ```python
@@ -5412,8 +5180,6 @@ axclError axclrtSynchronizeStream(axclrtStream stream);
 #### 2.117.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_stream.py:308`.
 
 #### 2.117.5. Example
 
@@ -5457,8 +5223,6 @@ axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, int32_t timeou
 #### 2.118.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_stream.py:349`.
 
 #### 2.118.5. Example
 
@@ -5504,8 +5268,6 @@ axclError axclrtExecWorker(const char *path, const int32_t *argc, const char *ar
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/rt/axcl_rt_usrwork.py:204`.
-
 #### 2.119.5. Example
 
 ```python
@@ -5547,8 +5309,6 @@ axclError axclrtKillWorker(uint32_t pid);
 #### 2.120.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/rt/axcl_rt_usrwork.py:242`.
 
 #### 2.120.5. Example
 
@@ -5595,8 +5355,6 @@ axclError axclrtWorkerSend(uint32_t pid, const void *buf, uint32_t size, int32_t
 
 Return type: `int`.
 
-Source: `python/axcl/rt/axcl_rt_usrwork.py:273`.
-
 #### 2.121.5. Example
 
 ```python
@@ -5642,8 +5400,6 @@ axclError axclrtWorkerRecv(uint32_t pid, void *buf, uint32_t bufsize, uint32_t *
 #### 2.122.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/rt/axcl_rt_usrwork.py:310`.
 
 #### 2.122.5. Example
 

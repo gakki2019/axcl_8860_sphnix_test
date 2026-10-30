@@ -1,6 +1,6 @@
 # 快速开始
 
-本文说明在主控上完成驱动安装后，如何快速确认运行环境可用，执行模型跑分或基础示例验证。
+本文说明在主控上完成软件包安装后，如何确认运行环境可用、如何向设备传输文件，以及如何执行模型跑分。
 
 ## 1. 环境确认
 
@@ -15,10 +15,10 @@
 
 ## 2. 查询设备
 
-执行 `axcl-smi`，确认主控能够找到设备，并能正常读取设备信息：
+执行 `axcl-smi`，确认主控能够找到设备并读取设备信息。不带命令执行时，`axcl-smi` 会输出一次所有设备的状态：
 
 ```bash
-root:/# axcl-smi
+$ axcl-smi
 +------------------------------------------------------------------------------------------------+
 | AXCL-SMI  V1.0.0                                                              Driver  V1.0.0   |
 +-----------------------------------------+--------------+---------------------------------------+
@@ -37,14 +37,14 @@ root:/# axcl-smi
 
 ## 3. 使用 axcl-smi 传输文件
 
-`axcl-smi` 可以通过 Runtime 文件传输服务在主控和指定 Device 之间上传或下载文件：
+`axcl-smi` 可以向一个 Device 上传文件，或从该 Device 下载文件：
 
 ```bash
 axcl-smi push -d <device> <host_path> <device_path>
 axcl-smi pull -d <device> <device_path> <host_path>
 ```
 
-`-d` 必须指定唯一的 Device 编号。`push` 将主控文件上传到 Device，`pull` 将 Device 文件下载到主控：
+`-d` 用于选择 Device，且必须指定。`push` 从主控上传到 Device，`pull` 从 Device 下载到主控：
 
 ```bash
 # 将 Host 的模型上传到 0 号 Device。
@@ -54,21 +54,21 @@ axcl-smi push -d 0 ./model.axmodel /tmp/model.axmodel
 axcl-smi pull -d 0 /tmp/runtime.log ./runtime.log
 ```
 
-递归传输目录时必须显式添加 `-r` 或 `--recursive`：
+传输目录树时，请添加 `-r` 或 `--recursive`：
 
 ```bash
 axcl-smi push -d 0 -r ./assets /tmp/deploy
 axcl-smi pull -d 0 --recursive /tmp/deploy/assets ./download
 ```
 
-目录目标路径、单文件 4 GiB 上限、32 MiB 分片和错误处理遵循[文件接口](../develop/c/file_api.md)。`push` 未添加 `-r` 时只接受 Host 普通文件；`pull` 的源路径位于 Device，由 `-r` 明确选择文件或目录传输。该命令不启动 Userworker，要求 Host Runtime 与 Device `slave_worker` 使用配套版本。
+不加 `-r` 时，源路径必须是单个非空普通文件；加 `-r` 时，源路径必须是目录。`push` 会在传输前检查 Host 上的源路径；`pull` 无法预先检查 Device 上的源路径，因此 Device 上的源路径是目录时必须添加 `-r`。传输单个文件时，如果目标路径以 `/` 结尾或是已存在的目录，文件会以源文件名放入该目录。每个文件都不得超过 4 GiB。其他目标路径规则和错误码请参见[文件接口](../develop/c/file_api.md)。Host 与 Device 必须运行同一 AXCL 发布版本的软件。
 
 ## 4. 模型跑分
 
-`axcl_run_model` 可用于加载 `.axmodel` 模型并统计推理耗时，其中 `-m` 指定模型文件，`-r` 指定重复运行次数：
+`axcl_run_model` 用于加载 `.axmodel` 模型，重复运行并统计推理耗时。`-m` 指定模型文件，`-r` 指定运行次数（默认 `1`）。默认先执行一次预热运行，可通过 `-w` 修改：
 
 ```bash
-root:/# axcl_run_model -m yolov5s.axmodel -r 100
+$ axcl_run_model -m yolov5s.axmodel -r 100
    Run AxModel:
          model: yolov5s.axmodel
           type: 1 Core

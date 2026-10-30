@@ -15,7 +15,7 @@
 
 启用 minidump 功能。
 
-本函数返回成功后，进程崩溃时会生成 `.dmp` 文件。
+本函数返回 `true` 后，进程崩溃时会生成 `.dmp` 文件。
 
 #### 2.1.1. 函数
 
@@ -31,11 +31,11 @@ AXCL_EXPORT bool axclInitializeMinidump(const axclMinidumpConfig *config);
 
 #### 2.1.3. Dump 目录
 
-选定的目录必须可写。如果目录不存在，本函数会同时创建缺失的父目录。按以下顺序使用第一个非空值：
+选定的目录必须可写。如果目录不存在，本函数会创建该目录及缺失的父目录。按以下顺序使用第一个非空值：
 
 1. [AXCL_DUMP_DIR](../../appendix/environment_variables.md#AXCL_DUMP_DIR) 环境变量。
 2. `config->dump_dir`。
-3. 平台默认目录：Linux 上为 `/tmp`。
+3. 平台默认目录：Linux 上为 `/tmp`；Windows 上为用户临时目录下的 `axcl_dumps`。
 
 #### 2.1.4. 说明
 
@@ -59,6 +59,8 @@ AXCL_EXPORT bool axclInitializeMinidump(const axclMinidumpConfig *config);
 ### 2.2. axclUninitializeMinidump
 
 禁用 minidump 功能。
+
+本函数返回后，进程崩溃时不再生成 `.dmp` 文件。minidump 未启用时调用本函数不产生任何效果。
 
 #### 2.2.1. 函数
 

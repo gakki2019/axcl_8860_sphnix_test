@@ -72,7 +72,7 @@ AXCL_EXPORT axclError axclrtEngineCreateContext(uint64_t modelId, uint64_t *cont
 | Name | Direction | Description |
 |---|---|---|
 | modelId | in | Loaded model ID. |
-| contextId | out | Receives the created Engine Context ID. |
+| contextId | out | Receives the created Engine Context ID. Must not be NULL. |
 
 #### Returns
 
@@ -81,7 +81,7 @@ AXCL_EXPORT axclError axclrtEngineCreateContext(uint64_t modelId, uint64_t *cont
 
 #### Note
 
-A model can have multiple Engine Contexts, each with independent execution state. This API is unrelated to the runtime Context type used by [axclrtCreateContext](context_api.md#axclrtCreateContext).
+A model can have multiple Engine Contexts, each with independent execution state. There is no separate destroy function; Engine Context IDs become invalid when the model is unloaded with [axclrtEngineUnload](#axclrtEngineUnload). This API is unrelated to the runtime Context type used by [axclrtCreateContext](context_api.md#axclrtCreateContext).
 
 #### Remark
 
@@ -107,7 +107,7 @@ AXCL_EXPORT axclError axclrtEngineCreateIO(axclrtEngineIOInfo ioInfo, axclrtEngi
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| io | out | Receives the created IO binding handle. |
+| io | out | Receives the created IO binding handle. Must not be NULL. |
 
 #### Returns
 
@@ -136,7 +136,7 @@ AXCL_EXPORT axclError axclrtEngineDestroyIO(axclrtEngineIO io);
 
 | Name | Direction | Description |
 |---|---|---|
-| io | in | IO binding handle to destroy. |
+| io | in | IO binding handle to destroy. Must not be NULL. |
 
 #### Returns
 
@@ -165,7 +165,7 @@ AXCL_EXPORT axclError axclrtEngineDestroyIOInfo(axclrtEngineIOInfo ioInfo);
 
 | Name | Direction | Description |
 |---|---|---|
-| ioInfo | in | IO metadata handle to destroy. |
+| ioInfo | in | IO metadata handle to destroy. Must not be NULL. |
 
 #### Returns
 
@@ -196,8 +196,8 @@ AXCL_EXPORT axclError axclrtEngineExecute(uint64_t modelId, uint64_t contextId, 
 |---|---|---|
 | modelId | in | Loaded model ID. |
 | contextId | in | Engine Context ID created for `modelId`. |
-| group | in | Shape-group index, starting at 0. |
-| io | in | IO binding object containing all required Device buffers. |
+| group | in | Shape-group index, starting at 0. Currently ignored. |
+| io | in | IO binding object containing all required Device buffers. Must not be NULL. |
 
 #### Returns
 
@@ -206,7 +206,7 @@ AXCL_EXPORT axclError axclrtEngineExecute(uint64_t modelId, uint64_t contextId, 
 
 #### Note
 
-The caller must bind valid buffers of the required sizes and keep the model, Engine Context, IO object, and Device buffers valid until this function returns.
+The caller must bind valid buffers of the required sizes and keep the model, Engine Context, IO object, and Device buffers valid until this function returns. Every input and output in `io` must be bound to Device memory on the same device as the default Stream; otherwise the function fails without sending the request.
 
 <br>
 
@@ -228,8 +228,8 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contex
 |---|---|---|
 | modelId | in | Loaded model ID. |
 | contextId | in | Engine Context ID created for `modelId`. |
-| group | in | Shape-group index, starting at 0. |
-| io | in | IO binding object containing all required Device buffers. |
+| group | in | Shape-group index, starting at 0. Currently ignored. |
+| io | in | IO binding object containing all required Device buffers. Must not be NULL. |
 | stream | in | Stream that receives the inference request. Pass NULL to use the current runtime Context's default Stream. |
 
 #### Returns
@@ -240,7 +240,9 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contex
 #### Note
 
 - A successful return means the request was sent to the Device, not that inference has completed or that the Device has accepted it. Keep the model, Engine Context, and all bound Device buffers valid until the Stream completes.
-- Errors detected on the Device, including a rejection because the Stream task queue is full, are returned by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) or [axclrtSynchronizeStreamWithTimeout](stream_api.md#axclrtSynchronizeStreamWithTimeout) on the Stream.
+- The buffer bindings and batch size in `io` are captured when the request is submitted, so `io` can be modified or destroyed after this function returns without affecting the submitted request.
+- Every input and output in `io` must be bound to Device memory on the same device as `stream`; otherwise the function fails without sending the request.
+- Errors detected on the Device, including a rejection because the Stream task queue is full, are returned by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) or [axclrtSynchronizeStreamWithTimeout](stream_api.md#axclrtSynchronizeStreamWithTimeout) on the Stream. Tasks in the Stream that have not started yet, except Event record and wait points, are skipped until that synchronization returns the error.
 
 #### Remark
 
@@ -272,7 +274,9 @@ N/A
 
 #### Note
 
-Complete all asynchronous inference and unload all models before deinitializing Engine. After deinitialization, model and Engine Context IDs from this device must no longer be used. Host-side IO metadata and binding objects remain owned by the caller and must still be destroyed with their corresponding destroy functions.
+- Complete all asynchronous inference and unload all models before deinitializing Engine. The function fails if Engine is not initialized, or if models are still loaded when the last paired call is made.
+- Initialization is counted per device in each Host process. If [axclrtEngineInit](#axclrtEngineInit) succeeded more than once, Engine remains initialized until this function has been called the same number of times.
+- After deinitialization, model and Engine Context IDs from this device must no longer be used. Host-side IO metadata and binding objects remain owned by the caller and must still be destroyed with their corresponding destroy functions.
 
 <br>
 
@@ -293,7 +297,7 @@ AXCL_EXPORT axclError axclrtEngineGetAffinity(uint64_t modelId, axclrtEngineSet 
 | Name | Direction | Description |
 |---|---|---|
 | modelId | in | Loaded model ID. |
-| set | out | Receives the affinity mask. |
+| set | out | Receives the affinity mask. Must not be NULL. |
 
 #### Returns
 
@@ -325,7 +329,7 @@ AXCL_EXPORT axclError axclrtEngineGetContextAffinity(uint64_t modelId, uint64_t 
 |---|---|---|
 | modelId | in | Loaded model ID. |
 | contextId | in | Engine Context ID. |
-| set | out | Output affinity mask; no value is returned while the operation is unsupported. |
+| set | out | Output affinity mask; no value is returned while the operation is unsupported. Must not be NULL. |
 
 #### Returns
 
@@ -355,7 +359,7 @@ AXCL_EXPORT axclError axclrtEngineGetIOInfo(uint64_t modelId, axclrtEngineIOInfo
 | Name | Direction | Description |
 |---|---|---|
 | modelId | in | Loaded model ID. |
-| ioInfo | out | Receives the created IO metadata handle. |
+| ioInfo | out | Receives the created IO metadata handle. Must not be NULL. |
 
 #### Returns
 
@@ -390,9 +394,9 @@ AXCL_EXPORT axclError axclrtEngineGetInputBufferByIndex(axclrtEngineIO io, uint3
 | Name | Direction | Description |
 |---|---|---|
 | io | in | Valid IO binding handle. |
-| index | in | Input index, starting at 0. |
-| dataBuffer | out | Receives the stored Device memory handle. |
-| size | out | Receives the stored buffer size in bytes. |
+| index | in | Input index, starting at 0. Must be less than the number of inputs. |
+| dataBuffer | out | Receives the stored Device memory handle. Must not be NULL. |
+| size | out | Receives the stored buffer size in bytes. Must not be NULL. |
 
 #### Returns
 
@@ -422,9 +426,9 @@ AXCL_EXPORT axclError axclrtEngineGetInputBufferByName(axclrtEngineIO io, const 
 | Name | Direction | Description |
 |---|---|---|
 | io | in | Valid IO binding handle. |
-| name | in | Input tensor name. |
-| dataBuffer | out | Receives the stored Device memory handle. |
-| size | out | Receives the stored buffer size in bytes. |
+| name | in | Input tensor name. Must not be NULL and must match an input of `io`. |
+| dataBuffer | out | Receives the stored Device memory handle. Must not be NULL. |
+| size | out | Receives the stored buffer size in bytes. Must not be NULL. |
 
 #### Returns
 
@@ -450,8 +454,8 @@ AXCL_EXPORT axclError axclrtEngineGetInputDataLayout(axclrtEngineIOInfo ioInfo, 
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| index | in | Input index, starting at 0. |
-| layout | out | Receives the input data layout. |
+| index | in | Input index, starting at 0. Must be less than the number of inputs. |
+| layout | out | Receives the input data layout. Must not be NULL. |
 
 #### Returns
 
@@ -477,8 +481,8 @@ AXCL_EXPORT axclError axclrtEngineGetInputDataType(axclrtEngineIOInfo ioInfo, ui
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| index | in | Input index, starting at 0. |
-| type | out | Receives the input data type. |
+| index | in | Input index, starting at 0. Must be less than the number of inputs. |
+| type | out | Receives the input data type. Must not be NULL. |
 
 #### Returns
 
@@ -504,9 +508,9 @@ AXCL_EXPORT axclError axclrtEngineGetInputDims(axclrtEngineIOInfo ioInfo, uint32
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| group | in | Shape-group index, starting at 0. |
-| index | in | Input index, starting at 0. |
-| dims | out | Caller-provided structure that receives the dimensions. |
+| group | in | Shape-group index, starting at 0. Must be less than the selected tensor's shape-group count. |
+| index | in | Input index, starting at 0. Must be less than the number of inputs. |
+| dims | out | Caller-provided structure that receives the dimensions. Must not be NULL. |
 
 #### Returns
 
@@ -536,11 +540,11 @@ AXCL_EXPORT int32_t axclrtEngineGetInputIndexByName(axclrtEngineIOInfo ioInfo, c
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| name | in | Input tensor name. |
+| name | in | Input tensor name. Must not be NULL. |
 
 #### Returns
 
-- Nonnegative input index on success; an Engine error value on failure. Use [axclrtGetLastError](other_api.md#axclrtGetLastError) to distinguish failure from a valid index.
+- Nonnegative input index on success; a negative Engine error value on failure, including when no input matches `name`. [axclrtGetLastError](other_api.md#axclrtGetLastError) also reports the failure.
 
 <br>
 
@@ -561,7 +565,7 @@ AXCL_EXPORT const char* axclrtEngineGetInputNameByIndex(axclrtEngineIOInfo ioInf
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| index | in | Input index, starting at 0. |
+| index | in | Input index, starting at 0. Must be less than the number of inputs. |
 
 #### Returns
 
@@ -591,8 +595,8 @@ AXCL_EXPORT uint64_t axclrtEngineGetInputSizeByIndex(axclrtEngineIOInfo ioInfo, 
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| group | in | Shape-group index, starting at 0. |
-| index | in | Input index, starting at 0. |
+| group | in | Shape-group index, starting at 0. Must be less than the selected tensor's shape-group count. |
+| index | in | Input index, starting at 0. Must be less than the number of inputs. |
 
 #### Returns
 
@@ -640,8 +644,8 @@ AXCL_EXPORT axclError axclrtEngineGetModelType(const char *modelPath, axclrtEngi
 
 | Name | Direction | Description |
 |---|---|---|
-| modelPath | in | Path to a readable regular model file on the Host. |
-| modelType | out | Receives the model type. |
+| modelPath | in | Path to an existing, readable regular model file on the Host. Must not be NULL. |
+| modelType | out | Receives the model type. Must not be NULL. |
 
 #### Returns
 
@@ -670,9 +674,9 @@ AXCL_EXPORT axclError axclrtEngineGetModelTypeFromMem(const void *model, uint64_
 
 | Name | Direction | Description |
 |---|---|---|
-| model | in | Device memory handle containing model data. |
+| model | in | Device memory handle containing model data. Must not be NULL. |
 | modelSize | in | Model data size in bytes. Must be greater than 0. |
-| modelType | out | Receives the model type. |
+| modelType | out | Receives the model type. Must not be NULL. |
 
 #### Returns
 
@@ -702,7 +706,7 @@ AXCL_EXPORT axclError axclrtEngineGetModelTypeFromModelId(uint64_t modelId, axcl
 | Name | Direction | Description |
 |---|---|---|
 | modelId | in | Loaded model ID. |
-| modelType | out | Receives the model type. |
+| modelType | out | Receives the model type. Must not be NULL. |
 
 #### Returns
 
@@ -731,7 +735,7 @@ AXCL_EXPORT uint32_t axclrtEngineGetNumInputs(axclrtEngineIOInfo ioInfo);
 
 #### Returns
 
-- Number of inputs. If `ioInfo` is invalid, the return value is an encoded error value and [axclrtGetLastError](other_api.md#axclrtGetLastError) reports the failure.
+- Number of inputs. If `ioInfo` is NULL, the return value is an encoded error value and [axclrtGetLastError](other_api.md#axclrtGetLastError) reports the failure.
 
 <br>
 
@@ -755,7 +759,7 @@ AXCL_EXPORT uint32_t axclrtEngineGetNumOutputs(axclrtEngineIOInfo ioInfo);
 
 #### Returns
 
-- Number of outputs. If `ioInfo` is invalid, the return value is an encoded error value and [axclrtGetLastError](other_api.md#axclrtGetLastError) reports the failure.
+- Number of outputs. If `ioInfo` is NULL, the return value is an encoded error value and [axclrtGetLastError](other_api.md#axclrtGetLastError) reports the failure.
 
 <br>
 
@@ -776,9 +780,9 @@ AXCL_EXPORT axclError axclrtEngineGetOutputBufferByIndex(axclrtEngineIO io, uint
 | Name | Direction | Description |
 |---|---|---|
 | io | in | Valid IO binding handle. |
-| index | in | Output index, starting at 0. |
-| dataBuffer | out | Receives the stored Device memory handle. |
-| size | out | Receives the stored buffer size in bytes. |
+| index | in | Output index, starting at 0. Must be less than the number of outputs. |
+| dataBuffer | out | Receives the stored Device memory handle. Must not be NULL. |
+| size | out | Receives the stored buffer size in bytes. Must not be NULL. |
 
 #### Returns
 
@@ -808,9 +812,9 @@ AXCL_EXPORT axclError axclrtEngineGetOutputBufferByName(axclrtEngineIO io, const
 | Name | Direction | Description |
 |---|---|---|
 | io | in | Valid IO binding handle. |
-| name | in | Output tensor name. |
-| dataBuffer | out | Receives the stored Device memory handle. |
-| size | out | Receives the stored buffer size in bytes. |
+| name | in | Output tensor name. Must not be NULL and must match an output of `io`. |
+| dataBuffer | out | Receives the stored Device memory handle. Must not be NULL. |
+| size | out | Receives the stored buffer size in bytes. Must not be NULL. |
 
 #### Returns
 
@@ -836,8 +840,8 @@ AXCL_EXPORT axclError axclrtEngineGetOutputDataLayout(axclrtEngineIOInfo ioInfo,
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| index | in | Output index, starting at 0. |
-| layout | out | Receives the output data layout. |
+| index | in | Output index, starting at 0. Must be less than the number of outputs. |
+| layout | out | Receives the output data layout. Must not be NULL. |
 
 #### Returns
 
@@ -863,8 +867,8 @@ AXCL_EXPORT axclError axclrtEngineGetOutputDataType(axclrtEngineIOInfo ioInfo, u
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| index | in | Output index, starting at 0. |
-| type | out | Receives the output data type. |
+| index | in | Output index, starting at 0. Must be less than the number of outputs. |
+| type | out | Receives the output data type. Must not be NULL. |
 
 #### Returns
 
@@ -890,9 +894,9 @@ AXCL_EXPORT axclError axclrtEngineGetOutputDims(axclrtEngineIOInfo ioInfo, uint3
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| group | in | Shape-group index, starting at 0. |
-| index | in | Output index, starting at 0. |
-| dims | out | Caller-provided structure that receives the dimensions. |
+| group | in | Shape-group index, starting at 0. Must be less than the selected tensor's shape-group count. |
+| index | in | Output index, starting at 0. Must be less than the number of outputs. |
+| dims | out | Caller-provided structure that receives the dimensions. Must not be NULL. |
 
 #### Returns
 
@@ -922,11 +926,11 @@ AXCL_EXPORT int32_t axclrtEngineGetOutputIndexByName(axclrtEngineIOInfo ioInfo, 
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| name | in | Output tensor name. |
+| name | in | Output tensor name. Must not be NULL. |
 
 #### Returns
 
-- Nonnegative output index on success; an Engine error value on failure. Use [axclrtGetLastError](other_api.md#axclrtGetLastError) to distinguish failure from a valid index.
+- Nonnegative output index on success; a negative Engine error value on failure, including when no output matches `name`. [axclrtGetLastError](other_api.md#axclrtGetLastError) also reports the failure.
 
 <br>
 
@@ -947,7 +951,7 @@ AXCL_EXPORT const char* axclrtEngineGetOutputNameByIndex(axclrtEngineIOInfo ioIn
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| index | in | Output index, starting at 0. |
+| index | in | Output index, starting at 0. Must be less than the number of outputs. |
 
 #### Returns
 
@@ -977,8 +981,8 @@ AXCL_EXPORT uint64_t axclrtEngineGetOutputSizeByIndex(axclrtEngineIOInfo ioInfo,
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| group | in | Shape-group index, starting at 0. |
-| index | in | Output index, starting at 0. |
+| group | in | Shape-group index, starting at 0. Must be less than the selected tensor's shape-group count. |
+| index | in | Output index, starting at 0. Must be less than the number of outputs. |
 
 #### Returns
 
@@ -1003,7 +1007,7 @@ AXCL_EXPORT axclError axclrtEngineGetShapeGroupsCount(axclrtEngineIOInfo ioInfo,
 | Name | Direction | Description |
 |---|---|---|
 | ioInfo | in | Valid IO metadata handle. |
-| count | out | Receives the shape-group count; 0 if the model has no inputs. |
+| count | out | Receives the shape-group count; 0 if the model has no inputs. Must not be NULL. |
 
 #### Returns
 
@@ -1034,9 +1038,9 @@ AXCL_EXPORT axclError axclrtEngineGetUsage(const char *modelPath, int64_t *sysSi
 
 | Name | Direction | Description |
 |---|---|---|
-| modelPath | in | Path to a readable regular model file on the Host. |
-| sysSize | out | Receives system-memory usage in bytes. The current implementation returns 0. |
-| cmmSize | out | Receives CMM memory usage in bytes. |
+| modelPath | in | Path to an existing, readable regular model file on the Host. Must not be NULL. |
+| sysSize | out | Receives system-memory usage in bytes. The current implementation returns 0. Must not be NULL. |
+| cmmSize | out | Receives CMM memory usage in bytes. Must not be NULL. |
 
 #### Returns
 
@@ -1065,10 +1069,10 @@ AXCL_EXPORT axclError axclrtEngineGetUsageFromMem(const void *model, uint64_t mo
 
 | Name | Direction | Description |
 |---|---|---|
-| model | in | Device memory handle containing model data. |
+| model | in | Device memory handle containing model data. Must not be NULL. |
 | modelSize | in | Model data size in bytes. Must be greater than 0. |
-| sysSize | out | Receives system-memory usage in bytes. The current implementation returns 0. |
-| cmmSize | out | Receives CMM memory usage in bytes. |
+| sysSize | out | Receives system-memory usage in bytes. The current implementation returns 0. Must not be NULL. |
+| cmmSize | out | Receives CMM memory usage in bytes. Must not be NULL. |
 
 #### Returns
 
@@ -1098,8 +1102,8 @@ AXCL_EXPORT axclError axclrtEngineGetUsageFromModelId(uint64_t modelId, int64_t 
 | Name | Direction | Description |
 |---|---|---|
 | modelId | in | Loaded model ID. |
-| sysSize | out | Receives system-memory usage in bytes. The current implementation returns 0. |
-| cmmSize | out | Receives CMM memory usage in bytes. |
+| sysSize | out | Receives system-memory usage in bytes. The current implementation returns 0. Must not be NULL. |
+| cmmSize | out | Receives CMM memory usage in bytes. Must not be NULL. |
 
 #### Returns
 
@@ -1124,7 +1128,7 @@ AXCL_EXPORT axclError axclrtEngineGetVNpuKind(axclrtEngineVNpuKind *npuKind);
 
 | Name | Direction | Description |
 |---|---|---|
-| npuKind | out | Receives the initialized VNPU mode. |
+| npuKind | out | Receives the initialized VNPU mode. Must not be NULL. |
 
 #### Returns
 
@@ -1162,7 +1166,8 @@ AXCL_EXPORT axclError axclrtEngineInit(axclrtEngineVNpuKind npuKind);
 
 #### Note
 
-Call this function after establishing a current Context and before using other Engine APIs on that device. Pair a successful initialization with [axclrtEngineFinalize](#axclrtEngineFinalize) before releasing the device.
+- Call this function after establishing a current Context and before using other Engine APIs on that device. Pair each successful initialization with [axclrtEngineFinalize](#axclrtEngineFinalize) before releasing the device.
+- Calling this function again while Engine is initialized succeeds only if `npuKind` matches the active VNPU mode; a different mode fails. The supported VNPU modes depend on the device.
 
 <br>
 
@@ -1182,8 +1187,8 @@ AXCL_EXPORT axclError axclrtEngineLoadFromFile(const char *modelPath, uint64_t *
 
 | Name | Direction | Description |
 |---|---|---|
-| modelPath | in | Path to a readable regular model file on the Host. |
-| modelId | out | Receives the model ID used by subsequent Engine APIs. |
+| modelPath | in | Path to an existing, readable regular model file on the Host. Must not be NULL. |
+| modelId | out | Receives the model ID used by subsequent Engine APIs. Must not be NULL. |
 
 #### Returns
 
@@ -1212,9 +1217,9 @@ AXCL_EXPORT axclError axclrtEngineLoadFromMem(const void *model, uint64_t modelS
 
 | Name | Direction | Description |
 |---|---|---|
-| model | in | Device memory handle containing the model data. |
+| model | in | Device memory handle containing the model data. Must not be NULL. |
 | modelSize | in | Model data size in bytes. Must be greater than 0. |
-| modelId | out | Receives the model ID used by subsequent Engine APIs. |
+| modelId | out | Receives the model ID used by subsequent Engine APIs. Must not be NULL. |
 
 #### Returns
 
@@ -1244,7 +1249,7 @@ AXCL_EXPORT axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet 
 | Name | Direction | Description |
 |---|---|---|
 | modelId | in | Loaded model ID. |
-| set | in | Nonzero affinity mask using bits 0 through 2; valid values are 0x1 through 0x7. |
+| set | in | Nonzero affinity mask using bits 0 through 7; valid values are 0x1 through 0xFF. The mask replaces the previous affinity selection. The device may impose additional limits by chip mode or model type. |
 
 #### Returns
 
@@ -1315,7 +1320,7 @@ AXCL_EXPORT axclError axclrtEngineSetDynamicBatchSize(axclrtEngineIO io, uint32_
 
 #### Note
 
-This function only stores the value in `io`. Validation against the model occurs when inference is executed.
+This function only stores the value in `io` and does not validate it against the model. The stored value is sent to the Device with each later execution that uses `io`.
 
 <br>
 
@@ -1336,8 +1341,8 @@ AXCL_EXPORT axclError axclrtEngineSetInputBufferByIndex(axclrtEngineIO io, uint3
 | Name | Direction | Description |
 |---|---|---|
 | io | in | Valid IO binding handle. |
-| index | in | Input index, starting at 0. |
-| dataBuffer | in | Device memory handle to bind. |
+| index | in | Input index, starting at 0. Must be less than the number of inputs. |
+| dataBuffer | in | Device memory handle to bind. Must not be NULL. |
 | size | in | Bound buffer size in bytes. Must be greater than 0. |
 
 #### Returns
@@ -1368,8 +1373,8 @@ AXCL_EXPORT axclError axclrtEngineSetInputBufferByName(axclrtEngineIO io, const 
 | Name | Direction | Description |
 |---|---|---|
 | io | in | Valid IO binding handle. |
-| name | in | Input tensor name. |
-| dataBuffer | in | Device memory handle to bind. |
+| name | in | Input tensor name. Must not be NULL and must match an input of `io`. |
+| dataBuffer | in | Device memory handle to bind. Must not be NULL. |
 | size | in | Bound buffer size in bytes. Must be greater than 0. |
 
 #### Returns
@@ -1400,8 +1405,8 @@ AXCL_EXPORT axclError axclrtEngineSetOutputBufferByIndex(axclrtEngineIO io, uint
 | Name | Direction | Description |
 |---|---|---|
 | io | in | Valid IO binding handle. |
-| index | in | Output index, starting at 0. |
-| dataBuffer | in | Device memory handle to bind. |
+| index | in | Output index, starting at 0. Must be less than the number of outputs. |
+| dataBuffer | in | Device memory handle to bind. Must not be NULL. |
 | size | in | Bound buffer size in bytes. Must be greater than 0. |
 
 #### Returns
@@ -1432,8 +1437,8 @@ AXCL_EXPORT axclError axclrtEngineSetOutputBufferByName(axclrtEngineIO io, const
 | Name | Direction | Description |
 |---|---|---|
 | io | in | Valid IO binding handle. |
-| name | in | Output tensor name. |
-| dataBuffer | in | Device memory handle to bind. |
+| name | in | Output tensor name. Must not be NULL and must match an output of `io`. |
+| dataBuffer | in | Device memory handle to bind. Must not be NULL. |
 | size | in | Bound buffer size in bytes. Must be greater than 0. |
 
 #### Returns
@@ -1472,4 +1477,4 @@ AXCL_EXPORT axclError axclrtEngineUnload(uint64_t modelId);
 
 #### Note
 
-Ensure that no synchronous or asynchronous execution still uses the model or an Engine Context created from it. After this function succeeds, `modelId` is invalid.
+Ensure that no synchronous or asynchronous execution still uses the model or an Engine Context created from it. After this function succeeds, `modelId` and all Engine Context IDs created for the model are invalid and must no longer be used.

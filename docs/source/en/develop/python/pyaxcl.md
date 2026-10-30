@@ -80,7 +80,7 @@ pyAXCL provides Runtime and Native interfaces. The main modules and their purpos
 | `axcl` | AXCL initialization, deinitialization, application logging, and common types and constants. |
 | `axcl.rt` | Runtime interfaces, including device selection, thread contexts, Host/Device memory allocation and copying, C2C DMA, userworker, and NPU model loading and inference. |
 | `axcl.sys` | SYS interfaces, including memory allocation and release and module link/unlink operations. |
-| `axcl.sys.ax_pool` | POOL interfaces, including configuration, creation, block allocation, and block release for common and private pools. |
+| `axcl.pool` | POOL interfaces, including configuration, creation, block allocation, and block release for common and private pools. |
 | `axcl.engine` | Native ENGINE model inference interfaces, including model loading, input/output information queries, and inference execution. |
 | `axcl.vdec` | H.264/H.265 video decoding and JPEG decoding interfaces. |
 | `axcl.venc` | Interfaces for encoding NV12 images into H.264/H.265 or JPEG. |

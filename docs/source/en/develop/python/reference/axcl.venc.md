@@ -110,8 +110,6 @@ AX_S32 AX_VENC_Init(const AX_VENC_MOD_ATTR_T *pstModAttr);
 
 Return type: `int`.
 
-Source: `python/axcl/venc/ax_venc.py:1824`.
-
 #### 2.1.5. Example
 
 ```python
@@ -151,8 +149,6 @@ N/A
 #### 2.2.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:1855`.
 
 #### 2.2.5. Example
 
@@ -197,8 +193,6 @@ AX_S32 AX_VENC_CreateChn(VENC_CHN VeChn, const AX_VENC_CHN_ATTR_T *pstAttr);
 
 Return type: `int`.
 
-Source: `python/axcl/venc/ax_venc.py:1883`.
-
 #### 2.3.5. Example
 
 ```python
@@ -242,8 +236,6 @@ AX_S32 AX_VENC_CreateChnEx(VENC_CHN *pVeChn, const AX_VENC_CHN_ATTR_T *pstAttr);
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:1916`.
-
 #### 2.4.5. Example
 
 ```python
@@ -285,8 +277,6 @@ AX_S32 AX_VENC_DestroyChn(VENC_CHN VeChn);
 #### 2.5.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:1950`.
 
 #### 2.5.5. Example
 
@@ -332,8 +322,6 @@ AX_S32 AX_VENC_SendFrame(VENC_CHN VeChn, const AX_VIDEO_FRAME_INFO_T *pstFrame, 
 
 Return type: `int`.
 
-Source: `python/axcl/venc/ax_venc.py:1981`.
-
 #### 2.6.5. Example
 
 ```python
@@ -378,8 +366,6 @@ AX_S32 AX_VENC_SendFrameEx(VENC_CHN VeChn, const AX_USER_FRAME_INFO_T *pstFrame,
 
 Return type: `int`.
 
-Source: `python/axcl/venc/ax_venc.py:2016`.
-
 #### 2.7.5. Example
 
 ```python
@@ -423,8 +409,6 @@ AX_S32 AX_VENC_SetChnThreadBind(VENC_CHN VeChn, const AX_VENC_CHN_THREAD_BIND_T 
 
 Return type: `int`.
 
-Source: `python/axcl/venc/ax_venc.py:2051`.
-
 #### 2.8.5. Example
 
 ```python
@@ -467,8 +451,6 @@ AX_S32 AX_VENC_GetChnThreadBind(VENC_CHN VeChn, AX_VENC_CHN_THREAD_BIND_T *pstTh
 #### 2.9.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/venc/ax_venc.py:2084`.
 
 #### 2.9.5. Example
 
@@ -514,8 +496,6 @@ AX_S32 AX_VENC_SelectGrp(VENC_GRP grpId, AX_CHN_STREAM_STATUS_T *pstChnStrmState
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2118`.
-
 #### 2.10.5. Example
 
 ```python
@@ -557,8 +537,6 @@ AX_S32 AX_VENC_SelectClearGrp(VENC_GRP grpId);
 #### 2.11.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2154`.
 
 #### 2.11.5. Example
 
@@ -603,8 +581,6 @@ AX_S32 AX_VENC_SelectGrpAddChn(VENC_GRP grpId, VENC_CHN VeChn);
 
 Return type: `int`.
 
-Source: `python/axcl/venc/ax_venc.py:2185`.
-
 #### 2.12.5. Example
 
 ```python
@@ -647,8 +623,6 @@ AX_S32 AX_VENC_SelectGrpDeleteChn(VENC_GRP grpId, VENC_CHN VeChn);
 #### 2.13.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2218`.
 
 #### 2.13.5. Example
 
@@ -693,8 +667,6 @@ AX_S32 AX_VENC_SelectGrpQuery(VENC_GRP grpId, AX_VENC_SELECT_GRP_PARAM_T *pstGrp
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2251`.
-
 #### 2.14.5. Example
 
 ```python
@@ -736,8 +708,6 @@ AX_S32 AX_VENC_GetFd(VENC_CHN VeChn);
 #### 2.15.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2285`.
 
 #### 2.15.5. Example
 
@@ -783,8 +753,6 @@ AX_S32 AX_VENC_GetStream(VENC_CHN VeChn, AX_VENC_STREAM_T *pstStream, AX_S32 s32
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2316`.
-
 #### 2.16.5. Example
 
 ```python
@@ -827,8 +795,6 @@ AX_S32 AX_VENC_ReleaseStream(VENC_CHN VeChn, const AX_VENC_STREAM_T *pstStream);
 #### 2.17.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2352`.
 
 #### 2.17.5. Example
 
@@ -873,8 +839,6 @@ AX_S32 AX_VENC_GetStreamBufInfo(VENC_CHN VeChn, AX_VENC_STREAM_BUF_INFO_T *pstSt
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2385`.
-
 #### 2.18.5. Example
 
 ```python
@@ -918,8 +882,6 @@ AX_S32 AX_VENC_StartRecvFrame(VENC_CHN VeChn, const AX_VENC_RECV_PIC_PARAM_T *ps
 
 Return type: `int`.
 
-Source: `python/axcl/venc/ax_venc.py:2419`.
-
 #### 2.19.5. Example
 
 ```python
@@ -961,8 +923,6 @@ AX_S32 AX_VENC_StopRecvFrame(VENC_CHN VeChn);
 #### 2.20.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2452`.
 
 #### 2.20.5. Example
 
@@ -1006,8 +966,6 @@ AX_S32 AX_VENC_ResetChn(VENC_CHN VeChn);
 
 Return type: `int`.
 
-Source: `python/axcl/venc/ax_venc.py:2483`.
-
 #### 2.21.5. Example
 
 ```python
@@ -1050,8 +1008,6 @@ AX_S32 AX_VENC_SetRoiAttr(VENC_CHN VeChn, const AX_VENC_ROI_ATTR_T *pstRoiAttr);
 #### 2.22.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2514`.
 
 #### 2.22.5. Example
 
@@ -1097,8 +1053,6 @@ AX_S32 AX_VENC_GetRoiAttr(VENC_CHN VeChn, AX_U32 u32Index, AX_VENC_ROI_ATTR_T *p
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2547`.
-
 #### 2.23.5. Example
 
 ```python
@@ -1141,8 +1095,6 @@ AX_S32 AX_VENC_SetRcParam(VENC_CHN VeChn, const AX_VENC_RC_PARAM_T *pstRcParam);
 #### 2.24.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2583`.
 
 #### 2.24.5. Example
 
@@ -1187,8 +1139,6 @@ AX_S32 AX_VENC_GetRcParam(VENC_CHN VeChn, AX_VENC_RC_PARAM_T *pstRcParam);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2616`.
-
 #### 2.25.5. Example
 
 ```python
@@ -1231,8 +1181,6 @@ AX_S32 AX_VENC_SetModParam(AX_VENC_ENCODER_TYPE_E enVencType, const AX_VENC_MOD_
 #### 2.26.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2650`.
 
 #### 2.26.5. Example
 
@@ -1277,8 +1225,6 @@ AX_S32 AX_VENC_GetModParam(AX_VENC_ENCODER_TYPE_E enVencType, AX_VENC_MOD_PARAM_
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2683`.
-
 #### 2.27.5. Example
 
 ```python
@@ -1321,8 +1267,6 @@ AX_S32 AX_VENC_SetVuiParam(VENC_CHN VeChn, const AX_VENC_VUI_PARAM_T *pstVuiPara
 #### 2.28.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2717`.
 
 #### 2.28.5. Example
 
@@ -1367,8 +1311,6 @@ AX_S32 AX_VENC_GetVuiParam(VENC_CHN VeChn, AX_VENC_VUI_PARAM_T *pstVuiParam);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2750`.
-
 #### 2.29.5. Example
 
 ```python
@@ -1411,8 +1353,6 @@ AX_S32 AX_VENC_SetChnAttr(VENC_CHN VeChn, const AX_VENC_CHN_ATTR_T *pstChnAttr);
 #### 2.30.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2784`.
 
 #### 2.30.5. Example
 
@@ -1457,8 +1397,6 @@ AX_S32 AX_VENC_GetChnAttr(VENC_CHN VeChn, AX_VENC_CHN_ATTR_T *pstChnAttr);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2817`.
-
 #### 2.31.5. Example
 
 ```python
@@ -1501,8 +1439,6 @@ AX_S32 AX_VENC_SetRateJamStrategy(VENC_CHN VeChn, const AX_VENC_RATE_JAM_CFG_T *
 #### 2.32.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2851`.
 
 #### 2.32.5. Example
 
@@ -1547,8 +1483,6 @@ AX_S32 AX_VENC_GetRateJamStrategy(VENC_CHN VeChn, AX_VENC_RATE_JAM_CFG_T *pstRat
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2884`.
-
 #### 2.33.5. Example
 
 ```python
@@ -1591,8 +1525,6 @@ AX_S32 AX_VENC_SetSuperFrameStrategy(VENC_CHN VeChn, const AX_VENC_SUPERFRAME_CF
 #### 2.34.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2918`.
 
 #### 2.34.5. Example
 
@@ -1637,8 +1569,6 @@ AX_S32 AX_VENC_GetSuperFrameStrategy(VENC_CHN VeChn, AX_VENC_SUPERFRAME_CFG_T *p
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:2951`.
-
 #### 2.35.5. Example
 
 ```python
@@ -1681,8 +1611,6 @@ AX_S32 AX_VENC_SetIntraRefresh(VENC_CHN VeChn, const AX_VENC_INTRA_REFRESH_T *ps
 #### 2.36.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:2985`.
 
 #### 2.36.5. Example
 
@@ -1727,8 +1655,6 @@ AX_S32 AX_VENC_GetIntraRefresh(VENC_CHN VeChn, AX_VENC_INTRA_REFRESH_T *pstIntra
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3018`.
-
 #### 2.37.5. Example
 
 ```python
@@ -1771,8 +1697,6 @@ AX_S32 AX_VENC_SetUsrData(VENC_CHN VeChn, const AX_VENC_USR_DATA_T *pstUsrData);
 #### 2.38.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3052`.
 
 #### 2.38.5. Example
 
@@ -1818,8 +1742,6 @@ AX_S32 AX_VENC_GetUsrData(VENC_CHN VeChn, AX_VENC_USR_DATA_T *pstUsrData);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3085`.
-
 #### 2.39.5. Example
 
 ```python
@@ -1862,8 +1784,6 @@ AX_S32 AX_VENC_SetSliceSplit(VENC_CHN VeChn, const AX_VENC_SLICE_SPLIT_T *pstSli
 #### 2.40.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3121`.
 
 #### 2.40.5. Example
 
@@ -1908,8 +1828,6 @@ AX_S32 AX_VENC_GetSliceSplit(VENC_CHN VeChn, AX_VENC_SLICE_SPLIT_T *pstSliceSpli
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3154`.
-
 #### 2.41.5. Example
 
 ```python
@@ -1952,8 +1870,6 @@ AX_S32 AX_VENC_RequestIDR(VENC_CHN VeChn, AX_BOOL bInstant);
 #### 2.42.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3188`.
 
 #### 2.42.5. Example
 
@@ -1998,8 +1914,6 @@ AX_S32 AX_VENC_QueryStatus(VENC_CHN VeChn, AX_VENC_CHN_STATUS_T *pstStatus);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3221`.
-
 #### 2.43.5. Example
 
 ```python
@@ -2042,8 +1956,6 @@ AX_S32 AX_VENC_SetJpegParam(VENC_CHN VeChn, const AX_VENC_JPEG_PARAM_T *pstJpegP
 #### 2.44.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3255`.
 
 #### 2.44.5. Example
 
@@ -2088,8 +2000,6 @@ AX_S32 AX_VENC_GetJpegParam(VENC_CHN VeChn, AX_VENC_JPEG_PARAM_T *pstJpegParam);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3288`.
-
 #### 2.45.5. Example
 
 ```python
@@ -2132,8 +2042,6 @@ AX_S32 AX_VENC_JpegEncodeOneFrame(AX_JPEG_ENCODE_ONCE_PARAMS_T *pstJpegParam);
 #### 2.46.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/venc/ax_venc.py:3322`.
 
 #### 2.46.5. Example
 
@@ -2181,8 +2089,6 @@ AX_S32 AX_VENC_JpegGetThumbnail(const AX_VOID *pRawData, AX_U32 u32RawDataSize, 
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3355`.
-
 #### 2.47.5. Example
 
 ```python
@@ -2225,8 +2131,6 @@ AX_S32 AX_VENC_SetDblkAttr(VENC_CHN VeChn, const AX_VENC_DBLK_ATTR_T *pstDblkAtt
 #### 2.48.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3398`.
 
 #### 2.48.5. Example
 
@@ -2271,8 +2175,6 @@ AX_S32 AX_VENC_GetDblkAttr(VENC_CHN VeChn, AX_VENC_DBLK_ATTR_T *pstDblkAttr);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3431`.
-
 #### 2.49.5. Example
 
 ```python
@@ -2315,8 +2217,6 @@ AX_S32 AX_VENC_SetH265Sao(VENC_CHN VeChn, const AX_VENC_SAO_PARAM_T *pstSaoParam
 #### 2.50.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3465`.
 
 #### 2.50.5. Example
 
@@ -2361,8 +2261,6 @@ AX_S32 AX_VENC_GetH265Sao(VENC_CHN VeChn, AX_VENC_SAO_PARAM_T *pstSaoParam);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3498`.
-
 #### 2.51.5. Example
 
 ```python
@@ -2405,8 +2303,6 @@ AX_S32 AX_VENC_SetDeBreathEffect(VENC_CHN VeChn, const AX_VENC_DEBREATH_EFFECT_T
 #### 2.52.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3532`.
 
 #### 2.52.5. Example
 
@@ -2451,8 +2347,6 @@ AX_S32 AX_VENC_GetDeBreathEffect(VENC_CHN VeChn, AX_VENC_DEBREATH_EFFECT_T *pstD
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3565`.
-
 #### 2.53.5. Example
 
 ```python
@@ -2495,8 +2389,6 @@ AX_S32 AX_VENC_SetSkinDetectAttr(VENC_CHN VeChn, const AX_VENC_SKIN_DETECT_ATTR_
 #### 2.54.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3599`.
 
 #### 2.54.5. Example
 
@@ -2541,8 +2433,6 @@ AX_S32 AX_VENC_GetSkinDetectAttr(VENC_CHN VeChn, AX_VENC_SKIN_DETECT_ATTR_T *pst
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3632`.
-
 #### 2.55.5. Example
 
 ```python
@@ -2585,8 +2475,6 @@ AX_S32 AX_VENC_SetChromaProtectAttr(VENC_CHN VeChn, const AX_VENC_CHROMA_PROTECT
 #### 2.56.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3666`.
 
 #### 2.56.5. Example
 
@@ -2631,8 +2519,6 @@ AX_S32 AX_VENC_GetChromaProtectAttr(VENC_CHN VeChn, AX_VENC_CHROMA_PROTECT_ATTR_
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3699`.
-
 #### 2.57.5. Example
 
 ```python
@@ -2675,8 +2561,6 @@ AX_S32 AX_VENC_SetTrailDetectAttr(VENC_CHN VeChn, const AX_VENC_TRAIL_DETECT_ATT
 #### 2.58.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3733`.
 
 #### 2.58.5. Example
 
@@ -2721,8 +2605,6 @@ AX_S32 AX_VENC_GetTrailDetectAttr(VENC_CHN VeChn, AX_VENC_TRAIL_DETECT_ATTR_T *p
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3768`.
-
 #### 2.59.5. Example
 
 ```python
@@ -2765,8 +2647,6 @@ AX_S32 AX_VENC_SetSrdParam(VENC_CHN VeChn, const AX_VENC_SRD_PARAM_T *pstSrdPara
 #### 2.60.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3802`.
 
 #### 2.60.5. Example
 
@@ -2811,8 +2691,6 @@ AX_S32 AX_VENC_GetSrdParam(VENC_CHN VeChn, AX_VENC_SRD_PARAM_T *pstSrdParam);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3835`.
-
 #### 2.61.5. Example
 
 ```python
@@ -2855,8 +2733,6 @@ AX_S32 AX_VENC_SetAdvEncMapParam(VENC_CHN VeChn, const AX_VENC_ADV_ENC_MAP_PARAM
 #### 2.62.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3869`.
 
 #### 2.62.5. Example
 
@@ -2901,8 +2777,6 @@ AX_S32 AX_VENC_GetAdvEncMapParam(VENC_CHN VeChn, AX_VENC_ADV_ENC_MAP_PARAM_T *ps
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3904`.
-
 #### 2.63.5. Example
 
 ```python
@@ -2945,8 +2819,6 @@ AX_S32 AX_VENC_SetAdvParam(VENC_CHN VeChn, const AX_VENC_ADV_PARAM_T *pstAdvPara
 #### 2.64.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/venc/ax_venc.py:3938`.
 
 #### 2.64.5. Example
 
@@ -2991,8 +2863,6 @@ AX_S32 AX_VENC_GetAdvParam(VENC_CHN VeChn, AX_VENC_ADV_PARAM_T *pstAdvParam);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/venc/ax_venc.py:3971`.
-
 #### 2.65.5. Example
 
 ```python
@@ -3036,8 +2906,6 @@ AX_S32 AX_VENC_SetCirParam(VENC_CHN VeChn, const AX_VENC_CIR_PARAM_T *pstCirPara
 
 Return type: `int`.
 
-Source: `python/axcl/venc/ax_venc.py:4005`.
-
 #### 2.66.5. Example
 
 ```python
@@ -3080,8 +2948,6 @@ AX_S32 AX_VENC_GetCirParam(VENC_CHN VeChn, AX_VENC_CIR_PARAM_T *pstCirParam);
 #### 2.67.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/venc/ax_venc.py:4038`.
 
 #### 2.67.5. Example
 

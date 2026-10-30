@@ -29,7 +29,7 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 | Name | Direction | Description |
 |---|---|---|
-| stream | out | Receives the created Stream handle on success. |
+| stream | out | Receives the created Stream handle on success. Must not be NULL. |
 
 #### Returns
 
@@ -38,6 +38,7 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 #### Note
 
+- The Stream is created in the calling thread's current Context. If the calling thread has no current Context, this function fails.
 - Tasks in the same Stream execute in submission order. By default, the execution order of tasks in different Streams is not guaranteed.
 - To synchronize different Streams, use [Event semantics](../arch/concept.md#EVENT).
 - Before calling [axclrtDestroyContext](context_api.md#axclrtDestroyContext), destroy all explicitly created Streams in that Context.
@@ -78,6 +79,8 @@ AXCL_EXPORT axclError axclrtDestroyStream(axclrtStream stream);
 
 - This function can destroy only a Stream explicitly created by [axclrtCreateStream](#axclrtCreateStream); it cannot destroy a default Stream. The runtime destroys the default Stream with its owning Context.
 - Before destroying the Stream, this function waits for all tasks previously submitted to it to complete.
+- If the Stream holds an asynchronous task error that has not been returned yet (see [axclrtSynchronizeStream](#axclrtSynchronizeStream)), this function returns that error and does not destroy the Stream. The error is cleared once returned; call this function again to destroy the Stream.
+- If the device is offline, this function releases the Stream without waiting, because its unfinished tasks have already been aborted.
 
 #### Remark
 
@@ -138,12 +141,17 @@ AXCL_EXPORT axclError axclrtStreamQuery(axclrtStream stream, axclrtStreamStatus 
 | Name | Direction | Description |
 |---|---|---|
 | stream | in | Stream handle returned by [axclrtCreateStream](#axclrtCreateStream). |
-| status | out | Receives the task completion status of the Stream on success. |
+| status | out | Receives the task completion status of the Stream on success. Must not be NULL. |
 
 #### Returns
 
 - `AXCL_SUCC`: The task completion status of the Stream was returned successfully.
 - `others`: Failure.
+
+#### Note
+
+- This function does not block. [AXCL_STREAM_STATUS_COMPLETE](reference/enum.md#AXCL_STREAM_STATUS_COMPLETE) means all tasks submitted to the Stream have completed; [AXCL_STREAM_STATUS_NOT_READY](reference/enum.md#AXCL_STREAM_STATUS_NOT_READY) means at least one has not.
+- This function does not report errors of asynchronous tasks; use [axclrtSynchronizeStream](#axclrtSynchronizeStream) to get them.
 
 <br>
 
@@ -199,7 +207,7 @@ AXCL_EXPORT axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, in
 | Name | Direction | Description |
 |---|---|---|
 | stream | in | Stream handle returned by [axclrtCreateStream](#axclrtCreateStream). |
-| timeout | in | Timeout in milliseconds. `-1` waits indefinitely. |
+| timeout | in | Timeout in milliseconds. A negative value, such as `-1`, waits indefinitely. |
 
 #### Returns
 

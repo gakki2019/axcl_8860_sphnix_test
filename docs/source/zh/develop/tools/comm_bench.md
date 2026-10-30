@@ -61,8 +61,8 @@ axcl_comm_bench compare  [--device <id>] [--out-dir <dir>] [--config <json>]
 | `-d`、`--device` | `0` | 设备号，取值范围 `[0, 设备数 - 1]`。 |
 | `-o`、`--out-dir` | `./axcl_comm_bench_out` | 报告输出目录，不存在时自动创建。 |
 | `-c`、`--config` | 空 | 传给 [axclInit](../c/system_api.md#axclInit) 的 JSON 配置文件路径。 |
-| `--host-alloc` | `malloc-host,glibc` | 主控内存分配方式，支持逗号分隔组合：`malloc-host` 使用 [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost)，`glibc` 使用标准库 `malloc`，`both` 表示两者都测。仅对 H2D / D2H 环节生效，`sweep`、`connect`、`message`、`--h2h` 和 `--dtod` 不受该参数影响。 |
-| `-h`、`--help` | -- | 打印用法并退出。 |
+| `--host-alloc` | `malloc-host,glibc` | 主控内存分配方式，支持逗号分隔组合：`malloc-host` 使用 [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost)，`glibc` 使用标准库 `malloc`，`both` 表示两者都测。对全自动流程和 `bandwidth` 的 H2D / D2H 环节以及 `compare` 生效，`sweep`、`connect`、`message`、`--h2h` 和 `--dtod` 不受该参数影响。 |
+| `-h`、`--help` | -- | 打印用法并退出。仅作为第一个参数时识别。 |
 
 ```{note}
 `--htod`、`--dtoh`、`--h2h`、`--dtod` 是 `bandwidth` 子命令的方向选项，不能用于全自动流程；`bandwidth` 子命令则必须至少指定其中一个方向。
@@ -70,9 +70,7 @@ axcl_comm_bench compare  [--device <id>] [--out-dir <dir>] [--config <json>]
 
 ## 3. 典型用法
 
-不带子命令时执行全自动流程，依次运行 `connect`、H2D、D2H、D2D、`sweep`、`message`（不含 `--h2h`）：
-
-全自动流程不会执行 `compare`；只有显式指定 `compare` 子命令时才进行数据校验。
+不带子命令时执行全自动流程，依次运行 `connect`、H2D、D2H、D2D、`sweep`、`message`。`bandwidth --h2h` 和 `compare` 不在其中，需要时请显式执行。
 
 ```bash
 axcl_comm_bench --device 0
@@ -135,9 +133,11 @@ AXCL runtime  (no bandwidth)  threads=1
   overall: PASS
 ```
 
-`overall` 仅由 H2D 和 D2H 的结果决定；D2D 和消息回环不支持时显示 `SKIP`，不影响整体判定。
+`overall` 仅由内存分配以及 H2D、D2H 拷贝的结果决定。D2D 和消息回环的结果仅供参考，不影响 `overall`；不支持时显示 `SKIP`。
 
 ### 4.2. 带宽测试输出
+
+每个方向、每种主控内存分配方式各输出一张表；使用默认 `--host-alloc` 时，H2D 和 D2H 各输出两张表，分别对应 `axclrtMallocHost` 和标准库 `malloc`。
 
 ```text
 Host to Device Bandwidth, device 0
@@ -169,7 +169,7 @@ AXCL axclrtMemcpy  H2D/D2H/D2D   threads={1,2,4,8}  host_alloc=axclrtMallocHost
   peak D2D: xxx MB/s
 ```
 
-`sweep` 将给定的总数据量按线程数均分，各线程同时发起传输，统计从全部线程开始到全部完成的总耗时，因此结果反映的是并发聚合带宽。
+对每个数据量档位，`sweep` 将数据量按线程数均分，各线程同时发起传输，统计到最后一个线程完成为止的耗时，因此结果反映的是并发聚合带宽。
 
 ```{note}
 `sweep` 总是依次按 `axclrtMallocHost` 和标准库 `malloc` 两种主控内存分配方式各输出一段表格，不受 `--host-alloc` 控制。D2D 不涉及主控内存，仅在第一段实测，第二段直接复用该结果。
@@ -199,19 +199,19 @@ AXCL internal msg loopback  threads=1  count=1000
 | 状态 | 含义 |
 | --- | --- |
 | `PASS` | 该项执行成功，带宽或时延数据有效。 |
-| `FAIL` | 该项执行失败，`note` 列记录失败阶段和错误码。 |
+| `FAIL` | 该项执行失败，如有相关信息，`note` 列会记录失败阶段和错误码。 |
 | `SKIP_UNSUPPORTED` | 当前设备或固件不支持该能力，控制台显示为 `SKIP`。 |
 
 ```{note}
 `SKIP` 表示未测试，不等于 0 MB/s。比对报告时应把 `SKIP` 与 `FAIL`、低带宽区分开。
 ```
 
-进程返回值：`0` 表示所有执行的测试项均未出现 `FAIL`；`1` 表示存在失败项或初始化失败；`2` 表示命令行参数错误。
+进程返回值：`0` 表示所有执行的测试项均未失败；`1` 表示存在失败的测试项，或初始化、设备选择失败；`2` 表示命令行参数错误。`connect` 中仅内存分配以及 H2D、D2H 拷贝计入失败。
 
 ## 6. 注意事项
 
 - 带宽单位为 MB/s，按 1 MB = 10^6 字节换算，与报告中的 `MiB` 数据块标签不是同一进制。
-- 工具在运行期间会临时调低内核控制台日志级别（写入 `/proc/sys/kernel/printk`），避免内核打印干扰计时，退出时恢复原值。无权限时跳过该操作，不影响测试。
+- 工具在运行期间会临时调低内核控制台日志级别（写入 `/proc/sys/kernel/printk`），避免内核打印干扰计时，运行结束时恢复原值。无权限时跳过该操作，不影响测试。如果工具被中断（例如按下 `Ctrl+C`），原值不会恢复，必要时请检查 `/proc/sys/kernel/printk` 并手动恢复。
 - 单次运行只针对一个设备；多卡场景需要按 `--device` 分别执行，并用 `--out-dir` 区分报告目录。
-- 100 MiB 档位需要在主控和设备侧各分配 100 MiB 内存，运行前请确认设备 CMM 余量充足，可用 [axcl-smi](smi.md) 查看。
+- 100 MiB 档位需要在主控和设备侧各分配 100 MiB 内存；D2D 需要源和目的两块缓冲区，因此设备侧需要 200 MiB。运行前请确认设备 CMM 余量充足，可用 [axcl-smi](smi.md) 查看。
 - 测试过程中设备上不宜运行其他高负载业务，否则带宽数据不具备可比性。

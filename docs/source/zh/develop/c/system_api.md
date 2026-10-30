@@ -2,7 +2,7 @@
 
 ## 1. 目录
 
-- [axclFinalize](#axclFinalize)：去初始化运行时。
+- [axclFinalize](#axclFinalize)：去初始化 AXCL 运行时。
 - [axclInit](#axclInit)：初始化 AXCL 运行时。
 
 <br>
@@ -13,7 +13,7 @@
 
 ### 2.1. axclFinalize
 
-去初始化运行时。
+去初始化 AXCL 运行时。
 
 #### 2.1.1. 函数
 
@@ -27,13 +27,15 @@ AXCL_EXPORT axclError axclFinalize();
 
 #### 2.1.3. 返回值
 
-- `AXCL_SUCC`：成功。
+- `AXCL_SUCC`：已释放运行时引用，或当前未持有引用。
 - 其他错误：失败。
 
 #### 2.1.4. 说明
 
 - 必须在进程退出前显式调用 [axclFinalize](#axclFinalize)。每次成功调用 [axclInit](#axclInit) 都会增加内部引用计数，因此必须有一次对应的 [axclFinalize](#axclFinalize) 调用。失败的 [axclInit](#axclInit) 不需要配对调用。
 - 不要在 C++ 静态或全局对象析构期间调用本接口，此时 AXCL 运行时依赖项可能已经被销毁。
+- 本调用须与进程中的 [axclrtMallocHost](memory_api.md#axclrtMallocHost) 和 [axclrtFreeHost](memory_api.md#axclrtFreeHost) 调用串行执行。
+- 如果仍有用户创建的 Context 或 Stream 未销毁（包括尚未终结的 CCL communicator 所持有的），释放最后一个引用会失败。失败时引用保持不变；排除失败原因（例如销毁剩余对象）后，再次调用本接口。
 
 #### 2.1.5. 参考
 
@@ -57,11 +59,11 @@ AXCL_EXPORT axclError axclInit(const char *json);
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| json | in | JSON 配置文件路径或 JSON 内容字符串。NULL 或空字符串表示使用默认配置。 |
+| json | in | JSON 配置文件路径或 JSON 内容字符串。第一个非空白字符为 `{` 或 `[` 的值按 JSON 内容解析；其他值必须是已存在的普通文件路径。NULL 或空字符串表示使用默认配置。 |
 
 #### 2.2.3. 返回值
 
-- `AXCL_SUCC`：成功。
+- `AXCL_SUCC`：运行时已初始化，或其引用计数已加 1。
 - 其他错误：失败。
 
 #### 2.2.4. 示例
@@ -81,8 +83,9 @@ AXCL_EXPORT axclError axclInit(const char *json);
 
 - 使用其他 AXCL API 之前必须先调用本接口。
 - 运行时通过引用计数管理生命周期：每次成功调用 [axclInit](#axclInit) 都会使引用计数加 1，[axclFinalize](#axclFinalize) 使引用计数减 1。只有引用计数降到 0 时才会释放资源。
-- 失败的 [axclInit](#axclInit) 不会获取引用，也不需要与 [axclFinalize](#axclFinalize) 配对。
+- 失败的 [axclInit](#axclInit) 不会获取引用，不得与 [axclFinalize](#axclFinalize) 配对。
 - 一个进程可以多次调用 [axclInit](#axclInit)，但每次成功调用都必须与 [axclFinalize](#axclFinalize)() 配对。例如：
+
   ```c
       axclInit("") -> axclFinalize() -> axclInit("") -> axclFinalize()
       axclInit("") -> axclInit("") -> axclFinalize() -> axclFinalize()
@@ -99,14 +102,14 @@ AXCL_EXPORT axclError axclInit(const char *json);
       axclInit("config3.json") // 加载 config3.json
       axclFinalize()
   ```
-- JSON 字符串无效或配置文件路径不可读时返回 `AXCL_ERR_RT_FAIL`，不会尝试初始化运行时，引用计数保持为 0。
+- JSON 字符串无效或配置文件路径不可读会导致本函数失败，不会尝试初始化运行时，引用计数保持为 0。
 
 #### 2.2.6. JSON
 
-- `dma buf size`：设备连接的 DMA 缓冲区大小（字节）。
+- `dma buf size`：设备连接的 DMA 缓冲区大小（字节），可以是数字或数字字符串。默认值为 4194304。小于 1048576 的值会被忽略，此时使用默认值。
 
   ```json
-  {
+   {
     "dma buf size": 4194304
-  }
+   }
   ```

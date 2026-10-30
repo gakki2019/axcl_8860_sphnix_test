@@ -53,8 +53,6 @@ AX_S32 AX_DMA_MemCopy(AX_U64 u64PhyDst, AX_U64 u64PhySrc, AX_U64 u64Size);
 
 Return type: `int`.
 
-Source: `python/axcl/dmadim/ax_dmadim.py:312`.
-
 #### 2.1.5. Example
 
 ```python
@@ -99,8 +97,6 @@ AX_S32 AX_DMA_MemSet(AX_U64 u64PhyDst, AX_U8 u8InitVal, AX_U64 u64Size);
 
 Return type: `int`.
 
-Source: `python/axcl/dmadim/ax_dmadim.py:347`.
-
 #### 2.2.5. Example
 
 ```python
@@ -143,8 +139,6 @@ AX_S32 AX_DMA_MemCopyXD(AX_DMADIM_DESC_XD_T tDimDesc, AX_DMADIM_XFER_MODE_E eMod
 #### 2.3.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/dmadim/ax_dmadim.py:382`.
 
 #### 2.3.5. Example
 
@@ -190,8 +184,6 @@ AX_S32 AX_DMA_CheckSum(AX_U32 *pu32Result, AX_U64 u64PhySrc, AX_U64 u64Size);
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/dmadim/ax_dmadim.py:415`.
-
 #### 2.4.5. Example
 
 ```python
@@ -235,8 +227,6 @@ AX_S32 AX_DMA_MemCopyCoherent(AX_U64 u64PhyDst, AX_U64 u64PhySrc, AX_U64 u64Size
 #### 2.5.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/dmadim/ax_dmadim.py:451`.
 
 #### 2.5.5. Example
 
@@ -282,8 +272,6 @@ AX_S32 AX_DMA_MemSetCoherent(AX_U64 u64PhyDst, AX_U8 u8InitVal, AX_U64 u64Size);
 
 Return type: `int`.
 
-Source: `python/axcl/dmadim/ax_dmadim.py:486`.
-
 #### 2.6.5. Example
 
 ```python
@@ -326,8 +314,6 @@ AX_S32 AX_DMA_MemCopyXDCoherent(AX_DMADIM_DESC_XD_T tDimDesc, AX_DMADIM_XFER_MOD
 #### 2.7.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/dmadim/ax_dmadim.py:521`.
 
 #### 2.7.5. Example
 
@@ -372,8 +358,6 @@ AX_S32 AX_DMA_CheckSumCoherent(AX_U32 *pu32Result, AX_U64 u64PhySrc, AX_U64 u64S
 #### 2.8.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/dmadim/ax_dmadim.py:554`.
 
 #### 2.8.5. Example
 

@@ -84,21 +84,18 @@ AXCL_EXPORT axclError axclrtFreeHost(void *hostPtr);
 
 | Name | Direction | Description |
 |---|---|---|
-| hostPtr | in | Base Host virtual address returned by [axclrtMallocHost](#axclrtMallocHost). |
+| hostPtr | in | Base Host virtual address returned by [axclrtMallocHost](#axclrtMallocHost). Must not be NULL. |
 
 #### Returns
 
 - `AXCL_SUCC`: Host memory was freed successfully.
-- `AXCL_ERR_RT_NULL_POINTER`: `hostPtr` is NULL.
-- `AXCL_ERR_RT_CONTEXT_NOT_EXIST`: No usable device channel is available; the allocation record is preserved.
-- `AXCL_ERR_RT_ILLEGAL_PARAM`: `hostPtr` is not a base address returned by [axclrtMallocHost](#axclrtMallocHost), is a Device address, or has already been freed.
 - `others`: Failure.
 
 #### Note
 
-- This function can free only Host virtual memory allocated by [axclrtMallocHost](#axclrtMallocHost).
+- This function can free only Host virtual memory allocated by [axclrtMallocHost](#axclrtMallocHost). Interior pointers, Device addresses, and memory that has already been freed are rejected.
 - No current Context is required. The memory need not be freed under the device used to allocate it.
-- A usable active device channel is required. For a non-NULL pointer, this is checked before allocation validity.
+- At least one usable active device is required. For a non-NULL pointer, this is checked before allocation validity; if no such device is available, the call fails and the allocation remains valid.
 - The application must complete all asynchronous operations using `hostPtr` before calling this function.
 - Serialize this call with operations that close a device and with [axclFinalize](system_api.md#axclFinalize).
 - After this function succeeds, `hostPtr` is invalid and must not be used again.
@@ -158,18 +155,19 @@ AXCL_EXPORT axclError axclrtIpcMemClose(const char *key);
 
 | Name | Direction | Description |
 |---|---|---|
-| key | in | Null-terminated IPC key string. |
+| key | in | Null-terminated IPC key string. Must not be NULL. |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
-- `AXCL_ERR_RT_NULL_POINTER`: `key` is NULL.
-- `AXCL_ERR_RT_ILLEGAL_PARAM`: `key` is invalid or not recognized.
+- `AXCL_SUCC`: The IPC reference held by the calling process for `key` was released successfully.
 - `others`: Failure.
 
 #### Note
 
 - Both the producer process (which called [axclrtIpcMemGetExportKey](#axclrtIpcMemGetExportKey)) and consumer processes (which called [axclrtIpcMemImportByKey](#axclrtIpcMemImportByKey)) must invoke this function to release their IPC references.
+- Fails if the calling process holds no IPC reference for `key`.
+- Each call releases one IPC reference. A process that imported `key` several times must call this function once per import. If the process also exported `key`, its import references are released before its export reference.
+- After the producer process closes `key`, new imports of `key` fail.
 - For a given key, all consumer processes should invoke [axclrtIpcMemClose](#axclrtIpcMemClose) before the producer process invokes [axclrtIpcMemClose](#axclrtIpcMemClose).
 - This function releases the IPC reference in the driver, but does not release the local virtual address mapping. Use [axclrtFree](#axclrtFree) to release the memory pointer.
 
@@ -197,22 +195,21 @@ AXCL_EXPORT axclError axclrtIpcMemGetExportKey(void *devPtr, char *key, size_t l
 
 | Name | Direction | Description |
 |---|---|---|
-| devPtr | in | Base device memory address to export. |
-| key | out | Buffer to receive the null-terminated IPC key string. |
+| devPtr | in | Base device memory address to export. Must not be NULL. |
+| key | out | Buffer to receive the null-terminated IPC key string. Must not be NULL. |
 | len | in | Length of `key` in bytes, must be exactly [AXCL_IPC_KEY_MAX_LEN](reference/macro.md#AXCL_IPC_KEY_MAX_LEN). |
-| flags | in | Export flags ([AXCL_IPC_EXPORT_FLAG_DEFAULT](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DEFAULT) or [AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION)). |
+| flags | in | Export flags. Must be either [AXCL_IPC_EXPORT_FLAG_DEFAULT](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DEFAULT) or [AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION). |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
-- `AXCL_ERR_RT_NULL_POINTER`: `devPtr` or `key` is NULL.
-- `AXCL_ERR_RT_ILLEGAL_PARAM`: `len` != [AXCL_IPC_KEY_MAX_LEN](reference/macro.md#AXCL_IPC_KEY_MAX_LEN), `flags` is invalid, or `devPtr` is not an exportable base allocation.
+- `AXCL_SUCC`: The device memory was exported and its IPC key was written to `key`.
 - `others`: Failure.
 
 #### Note
 
-- `devPtr` must be the base address of a physical device memory allocation created by the calling process.
-- Interior offset pointers and imported memory cannot be exported.
+- `devPtr` must be the base address of an allocation created by [axclrtMalloc](#axclrtMalloc) or [axclrtMallocCached](#axclrtMallocCached) in the calling process.
+- Interior offset pointers, memory imported via [axclrtIpcMemImportByKey](#axclrtIpcMemImportByKey), and external memory registered via [axclrtMemMapDevAddr](#axclrtMemMapDevAddr) cannot be exported.
+- An allocation can have only one exported key at a time. Exporting it again fails until this process closes the existing key with [axclrtIpcMemClose](#axclrtIpcMemClose).
 
 #### Remark
 
@@ -238,20 +235,21 @@ AXCL_EXPORT axclError axclrtIpcMemImportByKey(void **devPtr, const char *key);
 
 | Name | Direction | Description |
 |---|---|---|
-| devPtr | out | Receives the imported device memory handle in the caller's address space. |
-| key | in | Null-terminated IPC key string. |
+| devPtr | out | Receives the imported device memory handle in the caller's address space. Must not be NULL. |
+| key | in | Null-terminated IPC key string returned by [axclrtIpcMemGetExportKey](#axclrtIpcMemGetExportKey). Must not be NULL. |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
-- `AXCL_ERR_RT_NULL_POINTER`: `devPtr` or `key` is NULL.
-- `AXCL_ERR_RT_ILLEGAL_PARAM`: `key` is invalid or not recognized.
+- `AXCL_SUCC`: The shared device memory was imported and its handle was written to `devPtr`.
 - `others`: Failure.
 
 #### Note
 
-- Each calling process may import an exported key once to establish a local virtual address mapping pointing to the shared physical device memory.
-- Callers must release both the IPC sharing reference via [axclrtIpcMemClose](#axclrtIpcMemClose) and the local virtual address mapping via [axclrtFree](#axclrtFree). Do not pass imported handles to [axclrtMemUnmapDevAddr](#axclrtMemUnmapDevAddr).
+- Each successful call creates a new local handle for the shared device memory and takes one IPC reference to `key`. Importing the same key again in a process returns a distinct handle.
+- The device that owns the shared memory must be active in the calling process.
+- Fails if `key` is not a currently exported key, or if the key was exported with [AXCL_IPC_EXPORT_FLAG_DEFAULT](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DEFAULT) and the calling process is not in its whitelist.
+- For each successful import, callers must release the IPC reference via [axclrtIpcMemClose](#axclrtIpcMemClose) and the local handle via [axclrtFree](#axclrtFree). Do not pass imported handles to [axclrtMemUnmapDevAddr](#axclrtMemUnmapDevAddr).
+- An imported handle has no Native Device VA; [axclrtMemGetDevAddr](#axclrtMemGetDevAddr) reports device_va as 0 for it.
 - Lifetime constraint: The producer process's allocation lifecycle must strictly encompass the consumer's usage duration. Closing the key or destroying consumer handles does not coordinate physical memory retention; freeing the memory prematurely in the producer results in undefined behavior (dangling hardware access).
 
 #### Remark
@@ -278,21 +276,21 @@ AXCL_EXPORT axclError axclrtIpcMemSetImportPid(const char *key, const int32_t *t
 
 | Name | Direction | Description |
 |---|---|---|
-| key | in | Null-terminated IPC key string. |
-| tgid_list | in | Array of target process Host TGIDs (bare TGIDs). |
+| key | in | Null-terminated IPC key string returned by [axclrtIpcMemGetExportKey](#axclrtIpcMemGetExportKey). Must not be NULL. |
+| tgid_list | in | Array of target process Host TGIDs (bare TGIDs). Must not be NULL. |
 | num | in | Number of target Host TGIDs in `tgid_list` (1 <= num <= [AXCL_IPC_MAX_TARGETS](reference/macro.md#AXCL_IPC_MAX_TARGETS)). |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
-- `AXCL_ERR_RT_NULL_POINTER`: `key` or `tgid_list` is NULL.
-- `AXCL_ERR_RT_ILLEGAL_PARAM`: `key` is invalid, `num` is 0, or `num` exceeds [AXCL_IPC_MAX_TARGETS](reference/macro.md#AXCL_IPC_MAX_TARGETS).
+- `AXCL_SUCC`: The import whitelist for `key` was set successfully.
 - `others`: Failure.
 
 #### Note
 
 - In containerized environments (such as Docker or Kubernetes), `tgid_list` must contain bare Host TGIDs obtained via [axclrtDeviceGetBareTgid](device_api.md#axclrtDeviceGetBareTgid) rather than container-local PIDs returned by getpid().
-- When exported with [AXCL_IPC_EXPORT_FLAG_DEFAULT](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DEFAULT), `num` must be at least 1. Passing `num` == 0 is rejected with [AXCL_ERR_RT_ILLEGAL_PARAM](reference/error.md#AXCL_ERR_RT_ILLEGAL_PARAM). To allow open access without whitelist restrictions, export with [AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION) instead of configuring a whitelist.
+- Only the process that exported `key` can set its whitelist. Each call replaces the previous whitelist.
+- A listed TGID is accepted only for a process that was already running when the TGID was added to the whitelist. Set the whitelist after the consumer process has started.
+- When exported with [AXCL_IPC_EXPORT_FLAG_DEFAULT](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DEFAULT), `num` must be at least 1. To allow open access without whitelist restrictions, export with [AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION) instead of configuring a whitelist. Setting a whitelist for a key exported with [AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION](reference/macro.md#AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION) fails.
 
 #### Remark
 
@@ -319,7 +317,7 @@ AXCL_EXPORT axclError axclrtMalloc(void **devPtr, size_t size, axclrtMemMallocPo
 | Name | Direction | Description |
 |---|---|---|
 | devPtr | out | Receives an opaque handle representing Device memory on success. |
-| size | in | Number of bytes to allocate. The supported range is 1 through UINT32_MAX. |
+| size | in | Number of bytes to allocate. It must be at least 1 and must not exceed the Device CMM single-allocation limit. |
 | policy | in | Device memory allocation policy. |
 
 #### Returns
@@ -372,7 +370,7 @@ AXCL_EXPORT axclError axclrtMallocCached(void **devPtr, size_t size, axclrtMemMa
 | Name | Direction | Description |
 |---|---|---|
 | devPtr | out | Receives an opaque handle representing cached Device memory on success. |
-| size | in | Number of bytes to allocate. The supported range is 1 through UINT32_MAX. |
+| size | in | Number of bytes to allocate. It must be at least 1 and must not exceed the Device CMM single-allocation limit. |
 | policy | in | Device memory allocation policy. |
 
 #### Returns
@@ -411,15 +409,12 @@ AXCL_EXPORT axclError axclrtMallocHost(void **hostPtr, size_t size);
 
 | Name | Direction | Description |
 |---|---|---|
-| hostPtr | out | Receives a Host-accessible virtual address on success. |
+| hostPtr | out | Receives a Host-accessible virtual address on success. Must not be NULL. |
 | size | in | Number of bytes to allocate. Must be greater than 0. |
 
 #### Returns
 
 - `AXCL_SUCC`: Host memory was allocated successfully.
-- `AXCL_ERR_RT_NULL_POINTER`: `hostPtr` is NULL or `size` is 0.
-- `AXCL_ERR_RT_CONTEXT_NOT_EXIST`: No usable device channel is available.
-- `AXCL_ERR_RT_NO_MEMORY`: The Host DMA memory or its allocation record could not be allocated.
 - `others`: Failure.
 
 #### Note
@@ -453,7 +448,7 @@ AXCL_EXPORT axclError axclrtMemFlush(void *devPtr, size_t size);
 | Name | Direction | Description |
 |---|---|---|
 | devPtr | in | Device memory handle at which the range begins. |
-| size | in | Number of bytes to flush. The supported range is 1 through UINT32_MAX. |
+| size | in | Number of bytes to flush. It must be at least 1 and the range must lie within one allocated Device memory block. |
 
 #### Returns
 
@@ -488,21 +483,20 @@ AXCL_EXPORT axclError axclrtMemGetAddressRange(void *ptr, void **base, size_t *s
 
 | Name | Direction | Description |
 |---|---|---|
-| ptr | in | Pointer to the beginning or an interior byte of an allocation or registration. |
-| base | out | Receives its base handle. |
-| size | out | Receives its total allocated or registered size in bytes. |
+| ptr | in | Pointer to the beginning or an interior byte of an allocation or registration. Must not be NULL. |
+| base | out | Receives its base handle. Must not be NULL. |
+| size | out | Receives its total allocated or registered size in bytes. Must not be NULL. |
 
 #### Returns
 
 - `AXCL_SUCC`: The base address and size were returned successfully.
-- `AXCL_ERR_RT_NULL_POINTER`: `base` or `size` is NULL.
-- `AXCL_ERR_RT_ILLEGAL_PARAM`: `ptr` is invalid, out of bounds, or not managed by runtime.
 - `others`: Failure.
 
 #### Note
 
 - Accepts both base address and interior slice pointers, returning the same base handle and total size.
-- For external memory registered by axclrtMemMapDevAddr, returns that registration's base handle and size, even if it describes only a subrange of a Native allocation. Does not recover the original Native allocation base.
+- Only Device memory handles managed by the AXCL runtime are accepted. Fails if `ptr` is not within a live Device allocation or registration, including Host memory allocated by [axclrtMallocHost](#axclrtMallocHost).
+- For external memory registered by [axclrtMemMapDevAddr](#axclrtMemMapDevAddr), returns that registration's base handle and size, even if it describes only a subrange of a Native allocation. Does not recover the original Native allocation base.
 
 <br>
 
@@ -522,20 +516,18 @@ AXCL_EXPORT axclError axclrtMemGetDevAddr(const void *devPtr, uint64_t access_si
 
 | Name | Direction | Description |
 |---|---|---|
-| devPtr | in | Valid device memory pointer (base pointer or interior slice). |
-| access_size | in | Expected byte span to access. If 0, remaining slice length is exported. |
-| desc | out | Receives physical/virtual address descriptor. |
+| devPtr | in | Valid device memory pointer (base pointer or interior slice) managed by the AXCL runtime. Must not be NULL. |
+| access_size | in | Expected byte span to access. If 0, remaining slice length is exported. Must not exceed the number of bytes from `devPtr` to the end of its allocation or registration. |
+| desc | out | Receives physical/virtual address descriptor. Must not be NULL. |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
-- `AXCL_ERR_RT_NULL_POINTER`: `devPtr` or `desc` is NULL.
-- `AXCL_ERR_RT_ILLEGAL_PARAM`: Address is out of bounds or not a valid device pointer.
+- `AXCL_SUCC`: The device addresses were returned successfully.
 - `others`: Failure.
 
 #### Note
 
-- An interior pointer advances both the Device PA and a nonzero Device VA by its offset within the registration. A missing Device VA remains 0. Returned addresses already include this offset; do not apply it again.
+- An interior pointer advances both the Device PA and a nonzero Device VA by its offset within its allocation or registration. A missing Device VA remains 0. Returned addresses already include this offset; do not apply it again.
 - Preserve the returned Device VA when a Native API requires it. The caller must ensure that the Native API executes in the device address space where that VA is valid and that the underlying memory remains alive.
 
 <br>
@@ -557,7 +549,7 @@ AXCL_EXPORT axclError axclrtMemInvalidate(void *devPtr, size_t size);
 | Name | Direction | Description |
 |---|---|---|
 | devPtr | in | Device memory handle at which the range to invalidate begins. |
-| size | in | Number of bytes to process. The supported range is 1 through UINT32_MAX. |
+| size | in | Number of bytes to process. It must be at least 1 and the range must lie within one allocated Device memory block. |
 
 #### Returns
 
@@ -592,15 +584,12 @@ AXCL_EXPORT axclError axclrtMemMapDevAddr(const axclrtDevMemDesc *desc, void **d
 
 | Name | Direction | Description |
 |---|---|---|
-| desc | in | Descriptor describing the interval's Device PA, optional Native Device VA, size, and device ID. |
-| devPtr | out | Receives the base handle of this registration, whose offset 0 corresponds to desc->device_pa. Pass this exact value to [axclrtMemUnmapDevAddr](#axclrtMemUnmapDevAddr). |
+| desc | in | Descriptor describing the interval's Device PA, optional Native Device VA, size, and device ID. Must not be NULL. desc->size and desc->device_pa must be nonzero, desc->flags must be 0, and desc->device_id must identify a device that is active in the calling process. |
+| devPtr | out | Receives the base handle of this registration, whose offset 0 corresponds to desc->device_pa. Pass this exact value to [axclrtMemUnmapDevAddr](#axclrtMemUnmapDevAddr). Must not be NULL. |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
-- `AXCL_ERR_RT_NULL_POINTER`: `desc` or `devPtr` is NULL.
-- `AXCL_ERR_RT_ILLEGAL_PARAM`: Parameters are invalid (e.g. size=0, device_pa=0, nonzero flags, or a device memory handle returned by AXCL passed as device_pa).
-- `AXCL_ERR_RT_DEVICE_NOT_EXIST`: Invalid device_id.
+- `AXCL_SUCC`: The external device memory was registered successfully.
 - `others`: Failure.
 
 #### Note
@@ -630,19 +619,17 @@ AXCL_EXPORT axclError axclrtMemUnmapDevAddr(void *devPtr);
 
 | Name | Direction | Description |
 |---|---|---|
-| devPtr | in | Base device pointer returned by [axclrtMemMapDevAddr](#axclrtMemMapDevAddr). |
+| devPtr | in | Base device pointer returned by [axclrtMemMapDevAddr](#axclrtMemMapDevAddr). Must not be NULL. |
 
 #### Returns
 
-- `AXCL_SUCC`: Success.
-- `AXCL_ERR_RT_NULL_POINTER`: `devPtr` is NULL.
-- `AXCL_ERR_RT_ILLEGAL_PARAM`: `devPtr` is invalid, not an external mapped device pointer, or not base address.
-- `AXCL_ERR_RT_BUSY`: `devPtr` is being released by another thread.
+- `AXCL_SUCC`: The external device memory was unregistered successfully.
 - `others`: Failure.
 
 #### Note
 
-- Pass the exact base handle returned by axclrtMemMapDevAddr, including for a registered subrange.
+- Pass the exact base handle returned by [axclrtMemMapDevAddr](#axclrtMemMapDevAddr), including for a registered subrange. Interior pointers and handles not created by [axclrtMemMapDevAddr](#axclrtMemMapDevAddr), such as those returned by [axclrtMalloc](#axclrtMalloc), are rejected.
+- Fails if the same handle is concurrently being released by another thread.
 - Removes only this registration. Does not free Native memory, unmap a Native VA, or remove other registrations. The caller must first complete operations using this handle, then release Native resources through their matching Native APIs with the original handles after all users of those resources have finished.
 - A device reset removes all registrations on that device. Discard handles obtained before the reset and do not pass them to this function; a later registration may receive a handle with the same value.
 
@@ -666,16 +653,16 @@ AXCL_EXPORT axclError axclrtMemcmp(const void *devPtr1, const void *devPtr2, siz
 |---|---|---|
 | devPtr1 | in | Address of the first Device memory range. |
 | devPtr2 | in | Address of the second Device memory range. |
-| count | in | Number of bytes to compare. The supported range is 1 through UINT32_MAX. |
+| count | in | Number of bytes to compare. It must be at least 1 and each range must lie within one allocated Device memory block. |
 
 #### Returns
 
 - `AXCL_SUCC`: The compared bytes are equal.
-- `others`: The bytes are different or the comparison failed.
+- `others`: Failure.
 
 #### Note
 
-- This function does not return a three-way comparison result. A non-success return cannot distinguish different contents from an execution failure.
+- This function does not return a three-way comparison result. A non-success return is also used when the bytes differ, so it cannot distinguish different contents from an execution failure.
 - The calling thread must set a Context for the device that owns both ranges as its current Context.
 
 #### Remark
@@ -702,7 +689,7 @@ AXCL_EXPORT axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2
 |---|---|---|
 | devPtr1 | in | Address of the first Device memory range. |
 | devPtr2 | in | Address of the second Device memory range. |
-| count | in | Number of bytes to compare. The supported range is 1 through UINT32_MAX. |
+| count | in | Number of bytes to compare. It must be at least 1 and each range must lie within one allocated Device memory block. |
 | stream | in | Stream that receives the comparison operation. |
 
 #### Returns
@@ -713,6 +700,7 @@ AXCL_EXPORT axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2
 #### Note
 
 - This function returns after submitting the comparison to the specified Stream. A successful return does not mean that the comparison has completed.
+- A successful return means the request was sent to the Device, not that the Device has accepted it. Errors raised when the Device accepts or executes the comparison are reported by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) on `stream`.
 - This asynchronous API does not return whether the two ranges are equal. Use synchronous [axclrtMemcmp](#axclrtMemcmp) when the comparison result is required.
 - Both ranges must belong to the device associated with `stream` and remain valid until the operation completes.
 
@@ -752,8 +740,8 @@ AXCL_EXPORT axclError axclrtMemcpy(void *dstPtr, const void *srcPtr, size_t coun
 #### Note
 
 - This is a synchronous function and returns after the copy completes.
-- This function supports all [axclrtMemcpyKind](reference/enum.md#axclrtMemcpyKind) values, including Device-to-Device copies within the same device.
-- The calling thread must have a current Context. All Device memory must belong to the device associated with that Context, and the source and destination ranges must remain valid until this function returns.
+- This function supports all [axclrtMemcpyKind](reference/enum.md#axclrtMemcpyKind) values, including Device-to-Device copies within the same device and between different devices.
+- The calling thread must have a current Context, and the source and destination ranges must remain valid until this function returns. All Device memory must belong to the device associated with that Context, except for a Device-to-Device copy between different devices: the current device must then own either the source or the destination, and peer access to the other device must have been enabled with [axclrtDeviceEnablePeerAccess](device_api.md#axclrtDeviceEnablePeerAccess).
 
 #### Example
 
@@ -815,8 +803,8 @@ AXCL_EXPORT axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t
 | dstPtr | in | Destination address interpreted according to `kind`. |
 | srcPtr | in | Source address interpreted according to `kind`. |
 | count | in | Number of bytes to copy. Must be greater than 0. |
-| kind | in | Copy direction and address types. [AXCL_MEMCPY_DEVICE_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE) is not supported. |
-| stream | in | Stream that receives the copy operation. |
+| kind | in | Copy direction and address types. [AXCL_MEMCPY_DEVICE_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE) is supported within the same device and between different devices. |
+| stream | in | Stream that receives the copy operation. Must not be NULL. |
 
 #### Returns
 
@@ -826,8 +814,10 @@ AXCL_EXPORT axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t
 #### Note
 
 - This is an asynchronous function. A successful return means only that the copy was submitted, not that it completed. Synchronize `stream` before using the destination or releasing either memory range, for example by calling [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream).
-- This function supports Host-to-Host, Host-to-Device, and Device-to-Host copies. Use synchronous [axclrtMemcpy](#axclrtMemcpy) for Device-to-Device copies.
-- Any Device memory must belong to the device associated with `stream`. All source and destination ranges must remain valid until the copy completes.
+- A successful return means the request was sent to the Device, not that the Device has accepted it. Errors raised when the Device accepts or executes the copy are reported by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) on `stream`.
+- This function supports Host-to-Host, Host-to-Device, Device-to-Host, and Device-to-Device copies, both within the same device and between different devices.
+- Copies run in submission order with other tasks on `stream`, including Host-to-Host copies.
+- Any Device memory must belong to the device associated with `stream`, except for a Device-to-Device copy between different devices: the device associated with `stream` must then own either the source or the destination, and peer access from that device to the other device must have been enabled with [axclrtDeviceEnablePeerAccess](device_api.md#axclrtDeviceEnablePeerAccess). All source and destination ranges must remain valid until the copy completes.
 
 #### Example
 
@@ -858,7 +848,7 @@ AXCL_EXPORT axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 |---|---|---|
 | devPtr | in | Device memory address at which to begin writing. |
 | value | in | Byte value to write. |
-| count | in | Number of bytes to set. The supported range is 1 through UINT32_MAX. |
+| count | in | Number of bytes to set. It must be at least 1 and the range must lie within one allocated Device memory block. |
 
 #### Returns
 
@@ -894,7 +884,7 @@ AXCL_EXPORT axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t coun
 |---|---|---|
 | devPtr | in | Device memory address at which to begin writing. |
 | value | in | Byte value to write. |
-| count | in | Number of bytes to set. The supported range is 1 through UINT32_MAX. |
+| count | in | Number of bytes to set. It must be at least 1 and the range must lie within one allocated Device memory block. |
 | stream | in | Stream that receives the operation. |
 
 #### Returns
@@ -905,6 +895,7 @@ AXCL_EXPORT axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t coun
 #### Note
 
 - This is an asynchronous function. A successful return does not mean that the memory has already been updated. Synchronize `stream` before reading or freeing the memory.
+- A successful return means the request was sent to the Device, not that the Device has accepted it. Errors raised when the Device accepts or executes the operation are reported by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) on `stream`.
 - `devPtr` must belong to the device associated with `stream` and must remain valid until the operation completes.
 
 #### Remark
@@ -930,8 +921,8 @@ AXCL_EXPORT axclError axclrtPointerGetAttributes(const void *ptr, axclrtPtrAttri
 
 | Name | Direction | Description |
 |---|---|---|
-| ptr | in | Pointer to the beginning or an interior byte of an allocation. |
-| attributes | out | Receives the pointer attributes. |
+| ptr | in | Pointer to the beginning or an interior byte of an allocation. Must not be NULL. |
+| attributes | out | Receives the pointer attributes. Must not be NULL. |
 
 #### Returns
 
@@ -940,6 +931,6 @@ AXCL_EXPORT axclError axclrtPointerGetAttributes(const void *ptr, axclrtPtrAttri
 
 #### Note
 
-- The runtime tracks allocations created in the current process by [axclrtMalloc](#axclrtMalloc), [axclrtMallocCached](#axclrtMallocCached), and [axclrtMallocHost](#axclrtMallocHost).
-- For a tracked allocation, this function returns whether the memory is located on the Host or a Device. The location ID is the virtual device ID recorded when Device memory was allocated, or -1 for Host memory. Memory allocated by [axclrtMallocCached](#axclrtMallocCached) also has the [AXCL_POINTER_ATTRIBUTE_FLAG_CACHED](reference/enum.md#AXCL_POINTER_ATTRIBUTE_FLAG_CACHED) flag.
+- The runtime tracks allocations created in the current process by [axclrtMalloc](#axclrtMalloc), [axclrtMallocCached](#axclrtMallocCached), and [axclrtMallocHost](#axclrtMallocHost), as well as Device memory handles created by [axclrtMemMapDevAddr](#axclrtMemMapDevAddr) and [axclrtIpcMemImportByKey](#axclrtIpcMemImportByKey).
+- For a tracked allocation, this function returns whether the memory is located on the Host or a Device. The location ID is the virtual device ID of the device that owns the Device memory, or -1 for Host memory. Memory allocated by [axclrtMallocCached](#axclrtMallocCached), or imported via [axclrtIpcMemImportByKey](#axclrtIpcMemImportByKey) from such memory, also has the [AXCL_POINTER_ATTRIBUTE_FLAG_CACHED](reference/enum.md#AXCL_POINTER_ATTRIBUTE_FLAG_CACHED) flag.
 - If `ptr` is not within a tracked allocation, this function still returns [AXCL_SUCC](reference/enum.md#AXCL_SUCC) with location type [AXCL_MEM_LOCATION_TYPE_UNREGISTERED](reference/enum.md#AXCL_MEM_LOCATION_TYPE_UNREGISTERED), location ID -1, and flags set to 0.

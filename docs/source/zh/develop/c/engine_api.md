@@ -72,7 +72,7 @@ AXCL_EXPORT axclError axclrtEngineCreateContext(uint64_t modelId, uint64_t *cont
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | modelId | in | 已加载的模型 ID。 |
-| contextId | out | 成功时返回创建的 Engine Context ID。 |
+| contextId | out | 成功时返回创建的 Engine Context ID。不能为 NULL。 |
 
 #### 2.1.3. 返回值
 
@@ -81,7 +81,7 @@ AXCL_EXPORT axclError axclrtEngineCreateContext(uint64_t modelId, uint64_t *cont
 
 #### 2.1.4. 说明
 
-一个模型可以创建多个 Engine Context，每个 Engine Context 具有独立的执行状态。本接口中的 Engine Context 与 [axclrtCreateContext](context_api.md#axclrtCreateContext) 创建的 Runtime Context 是两种不同的对象。
+一个模型可以创建多个 Engine Context，每个 Engine Context 具有独立的执行状态。Engine Context 没有单独的销毁接口；通过 [axclrtEngineUnload](#axclrtEngineUnload) 卸载模型后，其 Engine Context ID 失效。本接口中的 Engine Context 与 [axclrtCreateContext](context_api.md#axclrtCreateContext) 创建的 Runtime Context 是两种不同的对象。
 
 #### 2.1.5. 参考
 
@@ -107,7 +107,7 @@ AXCL_EXPORT axclError axclrtEngineCreateIO(axclrtEngineIOInfo ioInfo, axclrtEngi
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| io | out | 成功时返回创建的 IO 绑定句柄。 |
+| io | out | 成功时返回创建的 IO 绑定句柄。不能为 NULL。 |
 
 #### 2.2.3. 返回值
 
@@ -136,7 +136,7 @@ AXCL_EXPORT axclError axclrtEngineDestroyIO(axclrtEngineIO io);
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| io | in | 待销毁的 IO 绑定句柄。 |
+| io | in | 待销毁的 IO 绑定句柄。不能为 NULL。 |
 
 #### 2.3.3. 返回值
 
@@ -165,7 +165,7 @@ AXCL_EXPORT axclError axclrtEngineDestroyIOInfo(axclrtEngineIOInfo ioInfo);
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| ioInfo | in | 待销毁的 IO 元数据句柄。 |
+| ioInfo | in | 待销毁的 IO 元数据句柄。不能为 NULL。 |
 
 #### 2.4.3. 返回值
 
@@ -196,8 +196,8 @@ AXCL_EXPORT axclError axclrtEngineExecute(uint64_t modelId, uint64_t contextId, 
 |---|---|---|
 | modelId | in | 已加载的模型 ID。 |
 | contextId | in | 为 modelId 创建的 Engine Context ID。 |
-| group | in | Shape group 索引，从 0 开始。 |
-| io | in | 包含全部必需 Device 缓冲区的 IO 绑定对象。 |
+| group | in | Shape group 索引，从 0 开始。当前未使用。 |
+| io | in | 包含全部必需 Device 缓冲区的 IO 绑定对象。不能为 NULL。 |
 
 #### 2.5.3. 返回值
 
@@ -206,7 +206,7 @@ AXCL_EXPORT axclError axclrtEngineExecute(uint64_t modelId, uint64_t contextId, 
 
 #### 2.5.4. 说明
 
-调用者必须为全部输入和输出绑定满足大小要求的有效缓冲区，并确保模型、Engine Context、IO 对象和 Device 缓冲区在本函数返回前始终有效。
+调用者必须为全部输入和输出绑定满足大小要求的有效缓冲区，并确保模型、Engine Context、IO 对象和 Device 缓冲区在本函数返回前始终有效。`io` 中的每个输入和输出都必须绑定到与默认 Stream 位于同一设备的 Device 内存，否则本函数失败，且不会发送请求。
 
 <br>
 
@@ -228,8 +228,8 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contex
 |---|---|---|
 | modelId | in | 已加载的模型 ID。 |
 | contextId | in | 为 modelId 创建的 Engine Context ID。 |
-| group | in | Shape group 索引，从 0 开始。 |
-| io | in | 包含全部必需 Device 缓冲区的 IO 绑定对象。 |
+| group | in | Shape group 索引，从 0 开始。当前未使用。 |
+| io | in | 包含全部必需 Device 缓冲区的 IO 绑定对象。不能为 NULL。 |
 | stream | in | 接收推理任务的 Stream。传入 NULL 时使用当前 Runtime Context 的默认 Stream。 |
 
 #### 2.6.3. 返回值
@@ -240,7 +240,9 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contex
 #### 2.6.4. 说明
 
 - 成功返回仅表示请求已发送到 Device，不表示推理已经完成，也不表示 Device 已接受该请求。在 Stream 完成前，必须确保模型、Engine Context 和所有已绑定的 Device 缓冲区始终有效。
-- Device 侧检测到的错误（包括 Stream 任务队列已满导致请求被拒绝）由该 Stream 的下一次 [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) 或 [axclrtSynchronizeStreamWithTimeout](stream_api.md#axclrtSynchronizeStreamWithTimeout) 返回。
+- `io` 中的缓冲区绑定和 batch 大小在提交请求时即被记录，因此本函数返回后可以修改或销毁 `io`，不会影响已提交的请求。
+- `io` 中的每个输入和输出都必须绑定到与 `stream` 位于同一设备的 Device 内存，否则本函数失败，且不会发送请求。
+- Device 侧检测到的错误（包括 Stream 任务队列已满导致请求被拒绝）由该 Stream 的下一次 [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) 或 [axclrtSynchronizeStreamWithTimeout](stream_api.md#axclrtSynchronizeStreamWithTimeout) 返回。该 Stream 中尚未开始执行的任务（Event 的记录点和等待点除外）会被跳过，直到该次同步返回此错误。
 
 #### 2.6.5. 参考
 
@@ -272,7 +274,9 @@ AXCL_EXPORT axclError axclrtEngineFinalize();
 
 #### 2.7.4. 说明
 
-反初始化 Engine 前，应等待所有异步推理完成并卸载全部模型。反初始化后，不得继续使用该设备上的模型 ID 和 Engine Context ID。Host 侧 IO 元数据对象和 IO 绑定对象仍由调用者管理，仍需通过对应的销毁接口释放。
+- 反初始化 Engine 前，应等待所有异步推理完成并卸载全部模型。Engine 未初始化，或最后一次配对调用时仍有模型处于加载状态，本函数失败。
+- 初始化在每个 Host 进程中按设备分别计数。如果 [axclrtEngineInit](#axclrtEngineInit) 多次调用成功，则需调用本函数相同次数后，Engine 才会反初始化。
+- 反初始化后，不得继续使用该设备上的模型 ID 和 Engine Context ID。Host 侧 IO 元数据对象和 IO 绑定对象仍由调用者管理，仍需通过对应的销毁接口释放。
 
 <br>
 
@@ -293,7 +297,7 @@ AXCL_EXPORT axclError axclrtEngineGetAffinity(uint64_t modelId, axclrtEngineSet 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | modelId | in | 已加载的模型 ID。 |
-| set | out | 成功时返回亲和性掩码。 |
+| set | out | 成功时返回亲和性掩码。不能为 NULL。 |
 
 #### 2.8.3. 返回值
 
@@ -325,7 +329,7 @@ AXCL_EXPORT axclError axclrtEngineGetContextAffinity(uint64_t modelId, uint64_t 
 |---|---|---|
 | modelId | in | 已加载的模型 ID。 |
 | contextId | in | Engine Context ID。 |
-| set | out | 用于返回亲和性掩码；当前操作不受支持，因此不会返回有效值。 |
+| set | out | 用于返回亲和性掩码；当前操作不受支持，因此不会返回有效值。不能为 NULL。 |
 
 #### 2.9.3. 返回值
 
@@ -355,7 +359,7 @@ AXCL_EXPORT axclError axclrtEngineGetIOInfo(uint64_t modelId, axclrtEngineIOInfo
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | modelId | in | 已加载的模型 ID。 |
-| ioInfo | out | 成功时返回创建的 IO 元数据句柄。 |
+| ioInfo | out | 成功时返回创建的 IO 元数据句柄。不能为 NULL。 |
 
 #### 2.10.3. 返回值
 
@@ -390,9 +394,9 @@ AXCL_EXPORT axclError axclrtEngineGetInputBufferByIndex(axclrtEngineIO io, uint3
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | io | in | 有效的 IO 绑定句柄。 |
-| index | in | 输入索引，从 0 开始。 |
-| dataBuffer | out | 成功时返回已保存的 Device 内存句柄。 |
-| size | out | 成功时返回已保存的缓冲区大小，单位为字节。 |
+| index | in | 输入索引，从 0 开始。必须小于输入数量。 |
+| dataBuffer | out | 成功时返回已保存的 Device 内存句柄。不能为 NULL。 |
+| size | out | 成功时返回已保存的缓冲区大小，单位为字节。不能为 NULL。 |
 
 #### 2.11.3. 返回值
 
@@ -422,9 +426,9 @@ AXCL_EXPORT axclError axclrtEngineGetInputBufferByName(axclrtEngineIO io, const 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | io | in | 有效的 IO 绑定句柄。 |
-| name | in | 输入张量名称。 |
-| dataBuffer | out | 成功时返回已保存的 Device 内存句柄。 |
-| size | out | 成功时返回已保存的缓冲区大小，单位为字节。 |
+| name | in | 输入张量名称。不能为 NULL，且必须与 `io` 中的某个输入匹配。 |
+| dataBuffer | out | 成功时返回已保存的 Device 内存句柄。不能为 NULL。 |
+| size | out | 成功时返回已保存的缓冲区大小，单位为字节。不能为 NULL。 |
 
 #### 2.12.3. 返回值
 
@@ -450,8 +454,8 @@ AXCL_EXPORT axclError axclrtEngineGetInputDataLayout(axclrtEngineIOInfo ioInfo, 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| index | in | 输入索引，从 0 开始。 |
-| layout | out | 成功时返回输入张量的数据布局。 |
+| index | in | 输入索引，从 0 开始。必须小于输入数量。 |
+| layout | out | 成功时返回输入张量的数据布局。不能为 NULL。 |
 
 #### 2.13.3. 返回值
 
@@ -477,8 +481,8 @@ AXCL_EXPORT axclError axclrtEngineGetInputDataType(axclrtEngineIOInfo ioInfo, ui
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| index | in | 输入索引，从 0 开始。 |
-| type | out | 成功时返回输入张量的数据类型。 |
+| index | in | 输入索引，从 0 开始。必须小于输入数量。 |
+| type | out | 成功时返回输入张量的数据类型。不能为 NULL。 |
 
 #### 2.14.3. 返回值
 
@@ -504,9 +508,9 @@ AXCL_EXPORT axclError axclrtEngineGetInputDims(axclrtEngineIOInfo ioInfo, uint32
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| group | in | Shape group 索引，从 0 开始。 |
-| index | in | 输入索引，从 0 开始。 |
-| dims | out | 调用者提供的结构体，用于返回张量维度。 |
+| group | in | Shape group 索引，从 0 开始。必须小于所选张量的 shape group 数量。 |
+| index | in | 输入索引，从 0 开始。必须小于输入数量。 |
+| dims | out | 调用者提供的结构体，用于返回张量维度。不能为 NULL。 |
 
 #### 2.15.3. 返回值
 
@@ -536,11 +540,11 @@ AXCL_EXPORT int32_t axclrtEngineGetInputIndexByName(axclrtEngineIOInfo ioInfo, c
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| name | in | 输入张量名称。 |
+| name | in | 输入张量名称。不能为 NULL。 |
 
 #### 2.16.3. 返回值
 
-- 成功时返回非负的输入索引；失败时返回 Engine 错误值。使用 [axclrtGetLastError](other_api.md#axclrtGetLastError) 区分有效索引和错误。
+- 成功时返回非负的输入索引；失败时（包括没有与 `name` 匹配的输入）返回负的 Engine 错误值。[axclrtGetLastError](other_api.md#axclrtGetLastError) 也会报告该错误。
 
 <br>
 
@@ -561,7 +565,7 @@ AXCL_EXPORT const char* axclrtEngineGetInputNameByIndex(axclrtEngineIOInfo ioInf
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| index | in | 输入索引，从 0 开始。 |
+| index | in | 输入索引，从 0 开始。必须小于输入数量。 |
 
 #### 2.17.3. 返回值
 
@@ -591,8 +595,8 @@ AXCL_EXPORT uint64_t axclrtEngineGetInputSizeByIndex(axclrtEngineIOInfo ioInfo, 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| group | in | Shape group 索引，从 0 开始。 |
-| index | in | 输入索引，从 0 开始。 |
+| group | in | Shape group 索引，从 0 开始。必须小于所选张量的 shape group 数量。 |
+| index | in | 输入索引，从 0 开始。必须小于输入数量。 |
 
 #### 2.18.3. 返回值
 
@@ -640,8 +644,8 @@ AXCL_EXPORT axclError axclrtEngineGetModelType(const char *modelPath, axclrtEngi
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| modelPath | in | Host 上可读取的普通模型文件路径。 |
-| modelType | out | 成功时返回模型类型。 |
+| modelPath | in | Host 上已存在且可读取的普通模型文件路径。不能为 NULL。 |
+| modelType | out | 成功时返回模型类型。不能为 NULL。 |
 
 #### 2.20.3. 返回值
 
@@ -670,9 +674,9 @@ AXCL_EXPORT axclError axclrtEngineGetModelTypeFromMem(const void *model, uint64_
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| model | in | 保存模型数据的 Device 内存句柄。 |
+| model | in | 保存模型数据的 Device 内存句柄。不能为 NULL。 |
 | modelSize | in | 模型数据大小，单位为字节，必须大于 0。 |
-| modelType | out | 成功时返回模型类型。 |
+| modelType | out | 成功时返回模型类型。不能为 NULL。 |
 
 #### 2.21.3. 返回值
 
@@ -702,7 +706,7 @@ AXCL_EXPORT axclError axclrtEngineGetModelTypeFromModelId(uint64_t modelId, axcl
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | modelId | in | 已加载的模型 ID。 |
-| modelType | out | 成功时返回模型类型。 |
+| modelType | out | 成功时返回模型类型。不能为 NULL。 |
 
 #### 2.22.3. 返回值
 
@@ -731,7 +735,7 @@ AXCL_EXPORT uint32_t axclrtEngineGetNumInputs(axclrtEngineIOInfo ioInfo);
 
 #### 2.23.3. 返回值
 
-- 成功时返回输入数量。如果 `ioInfo` 无效，返回值为编码后的错误值，可通过 [axclrtGetLastError](other_api.md#axclrtGetLastError) 获取错误。
+- 成功时返回输入数量。如果 `ioInfo` 为 NULL，返回值为编码后的错误值，可通过 [axclrtGetLastError](other_api.md#axclrtGetLastError) 获取错误。
 
 <br>
 
@@ -755,7 +759,7 @@ AXCL_EXPORT uint32_t axclrtEngineGetNumOutputs(axclrtEngineIOInfo ioInfo);
 
 #### 2.24.3. 返回值
 
-- 成功时返回输出数量。如果 `ioInfo` 无效，返回值为编码后的错误值，可通过 [axclrtGetLastError](other_api.md#axclrtGetLastError) 获取错误。
+- 成功时返回输出数量。如果 `ioInfo` 为 NULL，返回值为编码后的错误值，可通过 [axclrtGetLastError](other_api.md#axclrtGetLastError) 获取错误。
 
 <br>
 
@@ -776,9 +780,9 @@ AXCL_EXPORT axclError axclrtEngineGetOutputBufferByIndex(axclrtEngineIO io, uint
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | io | in | 有效的 IO 绑定句柄。 |
-| index | in | 输出索引，从 0 开始。 |
-| dataBuffer | out | 成功时返回已保存的 Device 内存句柄。 |
-| size | out | 成功时返回已保存的缓冲区大小，单位为字节。 |
+| index | in | 输出索引，从 0 开始。必须小于输出数量。 |
+| dataBuffer | out | 成功时返回已保存的 Device 内存句柄。不能为 NULL。 |
+| size | out | 成功时返回已保存的缓冲区大小，单位为字节。不能为 NULL。 |
 
 #### 2.25.3. 返回值
 
@@ -808,9 +812,9 @@ AXCL_EXPORT axclError axclrtEngineGetOutputBufferByName(axclrtEngineIO io, const
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | io | in | 有效的 IO 绑定句柄。 |
-| name | in | 输出张量名称。 |
-| dataBuffer | out | 成功时返回已保存的 Device 内存句柄。 |
-| size | out | 成功时返回已保存的缓冲区大小，单位为字节。 |
+| name | in | 输出张量名称。不能为 NULL，且必须与 `io` 中的某个输出匹配。 |
+| dataBuffer | out | 成功时返回已保存的 Device 内存句柄。不能为 NULL。 |
+| size | out | 成功时返回已保存的缓冲区大小，单位为字节。不能为 NULL。 |
 
 #### 2.26.3. 返回值
 
@@ -836,8 +840,8 @@ AXCL_EXPORT axclError axclrtEngineGetOutputDataLayout(axclrtEngineIOInfo ioInfo,
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| index | in | 输出索引，从 0 开始。 |
-| layout | out | 成功时返回输出张量的数据布局。 |
+| index | in | 输出索引，从 0 开始。必须小于输出数量。 |
+| layout | out | 成功时返回输出张量的数据布局。不能为 NULL。 |
 
 #### 2.27.3. 返回值
 
@@ -863,8 +867,8 @@ AXCL_EXPORT axclError axclrtEngineGetOutputDataType(axclrtEngineIOInfo ioInfo, u
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| index | in | 输出索引，从 0 开始。 |
-| type | out | 成功时返回输出张量的数据类型。 |
+| index | in | 输出索引，从 0 开始。必须小于输出数量。 |
+| type | out | 成功时返回输出张量的数据类型。不能为 NULL。 |
 
 #### 2.28.3. 返回值
 
@@ -890,9 +894,9 @@ AXCL_EXPORT axclError axclrtEngineGetOutputDims(axclrtEngineIOInfo ioInfo, uint3
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| group | in | Shape group 索引，从 0 开始。 |
-| index | in | 输出索引，从 0 开始。 |
-| dims | out | 调用者提供的结构体，用于返回张量维度。 |
+| group | in | Shape group 索引，从 0 开始。必须小于所选张量的 shape group 数量。 |
+| index | in | 输出索引，从 0 开始。必须小于输出数量。 |
+| dims | out | 调用者提供的结构体，用于返回张量维度。不能为 NULL。 |
 
 #### 2.29.3. 返回值
 
@@ -922,11 +926,11 @@ AXCL_EXPORT int32_t axclrtEngineGetOutputIndexByName(axclrtEngineIOInfo ioInfo, 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| name | in | 输出张量名称。 |
+| name | in | 输出张量名称。不能为 NULL。 |
 
 #### 2.30.3. 返回值
 
-- 成功时返回非负的输出索引；失败时返回 Engine 错误值。使用 [axclrtGetLastError](other_api.md#axclrtGetLastError) 区分有效索引和错误。
+- 成功时返回非负的输出索引；失败时（包括没有与 `name` 匹配的输出）返回负的 Engine 错误值。[axclrtGetLastError](other_api.md#axclrtGetLastError) 也会报告该错误。
 
 <br>
 
@@ -947,7 +951,7 @@ AXCL_EXPORT const char* axclrtEngineGetOutputNameByIndex(axclrtEngineIOInfo ioIn
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| index | in | 输出索引，从 0 开始。 |
+| index | in | 输出索引，从 0 开始。必须小于输出数量。 |
 
 #### 2.31.3. 返回值
 
@@ -977,8 +981,8 @@ AXCL_EXPORT uint64_t axclrtEngineGetOutputSizeByIndex(axclrtEngineIOInfo ioInfo,
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| group | in | Shape group 索引，从 0 开始。 |
-| index | in | 输出索引，从 0 开始。 |
+| group | in | Shape group 索引，从 0 开始。必须小于所选张量的 shape group 数量。 |
+| index | in | 输出索引，从 0 开始。必须小于输出数量。 |
 
 #### 2.32.3. 返回值
 
@@ -1003,7 +1007,7 @@ AXCL_EXPORT axclError axclrtEngineGetShapeGroupsCount(axclrtEngineIOInfo ioInfo,
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ioInfo | in | 有效的 IO 元数据句柄。 |
-| count | out | 成功时返回 shape group 数量；模型没有输入时返回 0。 |
+| count | out | 成功时返回 shape group 数量；模型没有输入时返回 0。不能为 NULL。 |
 
 #### 2.33.3. 返回值
 
@@ -1034,9 +1038,9 @@ AXCL_EXPORT axclError axclrtEngineGetUsage(const char *modelPath, int64_t *sysSi
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| modelPath | in | Host 上可读取的普通模型文件路径。 |
-| sysSize | out | 成功时返回系统内存用量，单位为字节；当前实现返回 0。 |
-| cmmSize | out | 成功时返回 CMM 内存用量，单位为字节。 |
+| modelPath | in | Host 上已存在且可读取的普通模型文件路径。不能为 NULL。 |
+| sysSize | out | 成功时返回系统内存用量，单位为字节；当前实现返回 0。不能为 NULL。 |
+| cmmSize | out | 成功时返回 CMM 内存用量，单位为字节。不能为 NULL。 |
 
 #### 2.34.3. 返回值
 
@@ -1065,10 +1069,10 @@ AXCL_EXPORT axclError axclrtEngineGetUsageFromMem(const void *model, uint64_t mo
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| model | in | 保存模型数据的 Device 内存句柄。 |
+| model | in | 保存模型数据的 Device 内存句柄。不能为 NULL。 |
 | modelSize | in | 模型数据大小，单位为字节，必须大于 0。 |
-| sysSize | out | 成功时返回系统内存用量，单位为字节；当前实现返回 0。 |
-| cmmSize | out | 成功时返回 CMM 内存用量，单位为字节。 |
+| sysSize | out | 成功时返回系统内存用量，单位为字节；当前实现返回 0。不能为 NULL。 |
+| cmmSize | out | 成功时返回 CMM 内存用量，单位为字节。不能为 NULL。 |
 
 #### 2.35.3. 返回值
 
@@ -1098,8 +1102,8 @@ AXCL_EXPORT axclError axclrtEngineGetUsageFromModelId(uint64_t modelId, int64_t 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | modelId | in | 已加载的模型 ID。 |
-| sysSize | out | 成功时返回系统内存用量，单位为字节；当前实现返回 0。 |
-| cmmSize | out | 成功时返回 CMM 内存用量，单位为字节。 |
+| sysSize | out | 成功时返回系统内存用量，单位为字节；当前实现返回 0。不能为 NULL。 |
+| cmmSize | out | 成功时返回 CMM 内存用量，单位为字节。不能为 NULL。 |
 
 #### 2.36.3. 返回值
 
@@ -1124,7 +1128,7 @@ AXCL_EXPORT axclError axclrtEngineGetVNpuKind(axclrtEngineVNpuKind *npuKind);
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| npuKind | out | 成功时返回 Engine 初始化时使用的 VNPU 模式。 |
+| npuKind | out | 成功时返回 Engine 初始化时使用的 VNPU 模式。不能为 NULL。 |
 
 #### 2.37.3. 返回值
 
@@ -1162,7 +1166,8 @@ AXCL_EXPORT axclError axclrtEngineInit(axclrtEngineVNpuKind npuKind);
 
 #### 2.38.4. 说明
 
-建立当前 Context 后、使用该设备上的其他 Engine 接口前调用本函数。成功初始化后，应在释放设备前调用 [axclrtEngineFinalize](#axclrtEngineFinalize) 进行反初始化。
+- 建立当前 Context 后、使用该设备上的其他 Engine 接口前调用本函数。每次成功初始化后，都应在释放设备前调用 [axclrtEngineFinalize](#axclrtEngineFinalize) 进行反初始化。
+- Engine 已初始化时再次调用本函数，仅当 `npuKind` 与当前生效的 VNPU 模式一致时才成功；模式不同则失败。支持的 VNPU 模式取决于设备。
 
 <br>
 
@@ -1182,8 +1187,8 @@ AXCL_EXPORT axclError axclrtEngineLoadFromFile(const char *modelPath, uint64_t *
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| modelPath | in | Host 上可读取的普通模型文件路径。 |
-| modelId | out | 成功时返回供后续 Engine 接口使用的模型 ID。 |
+| modelPath | in | Host 上已存在且可读取的普通模型文件路径。不能为 NULL。 |
+| modelId | out | 成功时返回供后续 Engine 接口使用的模型 ID。不能为 NULL。 |
 
 #### 2.39.3. 返回值
 
@@ -1212,9 +1217,9 @@ AXCL_EXPORT axclError axclrtEngineLoadFromMem(const void *model, uint64_t modelS
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| model | in | 保存模型数据的 Device 内存句柄。 |
+| model | in | 保存模型数据的 Device 内存句柄。不能为 NULL。 |
 | modelSize | in | 模型数据大小，单位为字节，必须大于 0。 |
-| modelId | out | 成功时返回供后续 Engine 接口使用的模型 ID。 |
+| modelId | out | 成功时返回供后续 Engine 接口使用的模型 ID。不能为 NULL。 |
 
 #### 2.40.3. 返回值
 
@@ -1244,7 +1249,7 @@ AXCL_EXPORT axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | modelId | in | 已加载的模型 ID。 |
-| set | in | 使用 bit 0～2 的非零亲和性掩码，有效值为 0x1～0x7。 |
+| set | in | 使用 bit 0～7 的非零亲和性掩码，有效值为 0x1～0xFF。该掩码替换原有的亲和性设置。设备还可能根据芯片模式或模型类型施加额外限制。 |
 
 #### 2.41.3. 返回值
 
@@ -1315,7 +1320,7 @@ AXCL_EXPORT axclError axclrtEngineSetDynamicBatchSize(axclrtEngineIO io, uint32_
 
 #### 2.43.4. 说明
 
-本函数仅在 `io` 中保存该值，实际执行推理时才根据模型进行校验。
+本函数仅在 `io` 中保存该值，不会根据模型进行校验。后续每次使用 `io` 执行推理时，都会将保存的值发送到 Device。
 
 <br>
 
@@ -1336,8 +1341,8 @@ AXCL_EXPORT axclError axclrtEngineSetInputBufferByIndex(axclrtEngineIO io, uint3
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | io | in | 有效的 IO 绑定句柄。 |
-| index | in | 输入索引，从 0 开始。 |
-| dataBuffer | in | 待绑定的 Device 内存句柄。 |
+| index | in | 输入索引，从 0 开始。必须小于输入数量。 |
+| dataBuffer | in | 待绑定的 Device 内存句柄。不能为 NULL。 |
 | size | in | 绑定的缓冲区大小，单位为字节，必须大于 0。 |
 
 #### 2.44.3. 返回值
@@ -1368,8 +1373,8 @@ AXCL_EXPORT axclError axclrtEngineSetInputBufferByName(axclrtEngineIO io, const 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | io | in | 有效的 IO 绑定句柄。 |
-| name | in | 输入张量名称。 |
-| dataBuffer | in | 待绑定的 Device 内存句柄。 |
+| name | in | 输入张量名称。不能为 NULL，且必须与 `io` 中的某个输入匹配。 |
+| dataBuffer | in | 待绑定的 Device 内存句柄。不能为 NULL。 |
 | size | in | 绑定的缓冲区大小，单位为字节，必须大于 0。 |
 
 #### 2.45.3. 返回值
@@ -1400,8 +1405,8 @@ AXCL_EXPORT axclError axclrtEngineSetOutputBufferByIndex(axclrtEngineIO io, uint
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | io | in | 有效的 IO 绑定句柄。 |
-| index | in | 输出索引，从 0 开始。 |
-| dataBuffer | in | 待绑定的 Device 内存句柄。 |
+| index | in | 输出索引，从 0 开始。必须小于输出数量。 |
+| dataBuffer | in | 待绑定的 Device 内存句柄。不能为 NULL。 |
 | size | in | 绑定的缓冲区大小，单位为字节，必须大于 0。 |
 
 #### 2.46.3. 返回值
@@ -1432,8 +1437,8 @@ AXCL_EXPORT axclError axclrtEngineSetOutputBufferByName(axclrtEngineIO io, const
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | io | in | 有效的 IO 绑定句柄。 |
-| name | in | 输出张量名称。 |
-| dataBuffer | in | 待绑定的 Device 内存句柄。 |
+| name | in | 输出张量名称。不能为 NULL，且必须与 `io` 中的某个输出匹配。 |
+| dataBuffer | in | 待绑定的 Device 内存句柄。不能为 NULL。 |
 | size | in | 绑定的缓冲区大小，单位为字节，必须大于 0。 |
 
 #### 2.47.3. 返回值
@@ -1472,4 +1477,4 @@ AXCL_EXPORT axclError axclrtEngineUnload(uint64_t modelId);
 
 #### 2.48.4. 说明
 
-调用本函数前，必须确保没有同步或异步推理仍在使用该模型或由该模型创建的 Engine Context。本函数成功后，`modelId` 失效。
+调用本函数前，必须确保没有同步或异步推理仍在使用该模型或由该模型创建的 Engine Context。本函数成功后，`modelId` 以及为该模型创建的所有 Engine Context ID 均失效，不得再使用。

@@ -30,7 +30,7 @@ Host-Device 边界主要体现在以下方面：
 - Host 侧运行时库管理运行时对象和跨端通道；
 - Device 侧执行环境承接 Host 提交的请求，并调用本地 NATIVE SDK 访问硬件资源；
 - Host / Device 数据交换通过运行时库的数据搬运能力和通信通道完成；
-- 异步接口返回成功通常表示任务已提交到运行时或跨端通道，任务完成状态需通过运行时库提供的同步或状态查询机制确认。
+- 异步接口返回成功表示任务已提交，不表示任务已完成；任务完成状态和执行错误需通过运行时库提供的同步或状态查询接口获取。
 
 ## 2. HOST 侧组件
 
@@ -54,8 +54,8 @@ DEVICE 侧负责接收并处理来自 Host 的请求，通过本地 NATIVE SDK �
 
 | 组件 | 作用 |
 |---|---|
-| 设备控制驱动 | `axcl_dev.ko`，承接 Host 侧控制请求并上报 Device 状态。 |
-| 工作监控驱动 | `axcl_wk_monitor.ko`，监测 Worker 进程生命周期。 |
+| 设备控制驱动 | `axcl_dev.ko`，将 Host 侧控制请求转交守护进程，并向 Host 上报 Device 和 Worker 状态。 |
+| 工作监控驱动 | `axcl_wk_monitor.ko`，监测 Worker 进程生命周期并上报其退出状态。 |
 | 通信传输驱动 | `ax_comm.ko`，提供 Device 侧跨端消息和 DMA 通道。 |
 | 协议通信库 | `libax_protocol.so`、`libax_comm.so`，解析请求、封装响应并支撑跨端传输。 |
 | 守护进程 | `slave_daemon`，常驻 Device 侧，接收控制请求并管理 Worker 生命周期。 |
@@ -65,21 +65,23 @@ DEVICE 侧负责接收并处理来自 Host 的请求，通过本地 NATIVE SDK �
 
 ## 4. App 启动与退出
 
-Device 系统启动后会启动常驻守护进程 `slave_daemon`。Host 应用启动并首次激活某个 Device 时，AXCL 会在 Device 侧为该应用创建对应的 `slave_worker`；激活完成后，Host 应用与对应的 `slave_worker` 通过专属通信通道交互。
+Device 系统启动后会启动常驻守护进程 `slave_daemon`。[axclInit](../c/system_api.md#axclInit) 只检测 Device，此时尚未创建 worker。Host 进程通过 [axclrtSetDevice](../c/device_api.md#axclrtSetDevice) 或 [axclrtCreateContext](../c/context_api.md#axclrtCreateContext) 首次激活某个 Device 时，`slave_daemon` 会在该 Device 上为该进程启动一个 `slave_worker`；激活完成后，Host 进程与其 `slave_worker` 通过专属通信通道交互。
 
 ```{image} ../../asserts/app_start.svg
 :alt: App 启动过程时序图
 :align: center
 ```
 
-Host 应用正常释放 Device 或退出时，AXCL 会向 Device 侧发送释放请求；`slave_daemon` 终止对应的 `slave_worker`，并通过控制链路向 Host 侧反馈退出状态。
+Host 进程通过 [axclrtResetDevice](../c/device_api.md#axclrtResetDevice) 或 [axclrtResetDeviceForce](../c/device_api.md#axclrtResetDeviceForce) 最终释放 Device，或调用 [axclFinalize](../c/system_api.md#axclFinalize) 时，AXCL 会向 Device 发送释放请求，并等待 worker 退出；`slave_daemon` 终止对应的 `slave_worker`，Device 侧驱动向 Host 上报该 worker 的退出。如果 Host 进程未释放 Device 就退出，Host 驱动会关闭其通道，Device 以同样方式回收该 worker。
+
+如果 Device 仍在使用时 `slave_worker` 意外退出，AXCL 会针对该 Host 进程将该 Device 标记为离线，使其未完成的任务失败，并通知通过 [axclrtRegDeviceStateCallback](../c/device_api.md#axclrtRegDeviceStateCallback) 注册的回调。
 
 ```{image} ../../asserts/app_exit.svg
 :alt: App 退出过程时序图
 :align: center
 ```
 
-这两张图概括了 Host 应用激活 Device 时建立对应 Worker、释放 Device 时回收对应 Worker 的主要过程。
+这两张图概括了 Host 进程激活 Device 时启动 Worker、释放 Device 时回收 Worker 的过程。
 
 ## 5. 多进程支持
 

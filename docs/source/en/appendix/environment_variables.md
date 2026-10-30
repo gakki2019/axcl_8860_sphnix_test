@@ -1,6 +1,6 @@
 # Environment Variables
 
-This page summarizes the environment variables supported by the AXCL SDK and tools. AXCL captures these variables in a process-wide snapshot when an AXCL component first queries the environment. Set them before initializing any AXCL component; changes made afterward do not take effect.
+This page lists the environment variables supported by the AXCL SDK and tools. AXCL reads these variables once per process, the first time one of them is needed. Set them before the process starts, or at least before the first AXCL call; later changes do not take effect.
 
 ## Quick Reference
 
@@ -11,13 +11,13 @@ This page summarizes the environment variables supported by the AXCL SDK and too
 | [AXCL_DUMP_DIR](#AXCL_DUMP_DIR) | Minidump | Specifies the minidump output directory. |
 | [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL) | Host SDK | Sets the Host log file level. |
 | [AXCL_HOST_CONSOLE_LEVEL](#AXCL_HOST_CONSOLE_LEVEL) | Host SDK | Sets the Host console level. |
-| [AXCL_DEVICE_WORKER_LOGFILE_LEVEL](#AXCL_DEVICE_WORKER_LOGFILE_LEVEL) | Host SDK | Sets the Device worker log file level (passed to the worker). |
-| [AXCL_DEVICE_WORKER_CONSOLE_LEVEL](#AXCL_DEVICE_WORKER_CONSOLE_LEVEL) | Host SDK | Sets the Device worker console level (passed to the worker). |
-| [AXCL_HOST_TICK_MASK](#AXCL_HOST_TICK_MASK) | Host SDK | Sets the category mask of Host API latency ticks. |
-| [AXCL_DEVICE_WORKER_TICK_MASK](#AXCL_DEVICE_WORKER_TICK_MASK) | Host SDK | Sets the category mask of Device worker latency ticks (passed to the worker). |
-| [AXCL_DEVICE_DAEMON_LOG_LEVEL](#AXCL_DEVICE_DAEMON_LOG_LEVEL) | slave_daemon | Sets the slave_daemon log file level. |
-| [AXCL_SHELL_CMD_OUTPUT_LIMIT](#AXCL_SHELL_CMD_OUTPUT_LIMIT) | SDK | Sets the output limit for remote shell commands. |
-| [AXCL_SMI_SHELL_TIMEOUT](#AXCL_SMI_SHELL_TIMEOUT) | `axcl-smi` | Overrides the timeout for remote shell commands. |
+| [AXCL_DEVICE_WORKER_LOGFILE_LEVEL](#AXCL_DEVICE_WORKER_LOGFILE_LEVEL) | Host SDK | Sets the Device worker log file level. Set on the Host. |
+| [AXCL_DEVICE_WORKER_CONSOLE_LEVEL](#AXCL_DEVICE_WORKER_CONSOLE_LEVEL) | Host SDK | Sets the Device worker console level. Set on the Host. |
+| [AXCL_HOST_TICK_MASK](#AXCL_HOST_TICK_MASK) | Host SDK | Enables Host API latency ticks by category. Debugging only. |
+| [AXCL_DEVICE_WORKER_TICK_MASK](#AXCL_DEVICE_WORKER_TICK_MASK) | Host SDK | Enables Device worker latency ticks by category. Set on the Host. Debugging only. |
+| [AXCL_DEVICE_DAEMON_LOG_LEVEL](#AXCL_DEVICE_DAEMON_LOG_LEVEL) | slave_daemon | Sets the slave_daemon log file level. Set on the Device. |
+| [AXCL_SHELL_CMD_OUTPUT_LIMIT](#AXCL_SHELL_CMD_OUTPUT_LIMIT) | Host SDK | Sets the maximum output returned by a remote shell command. |
+| [AXCL_SMI_SHELL_TIMEOUT](#AXCL_SMI_SHELL_TIMEOUT) | `axcl-smi` | Sets the timeout of the shell commands that `axcl-smi` runs on a Device. |
 
 ## SDK Environment Variables
 
@@ -33,17 +33,17 @@ For the value syntax, mapping rules, and examples, see [AXCL_VISIBLE_DEVICES dev
 
 ### AXCL_HOST_LOG_DIR
 
-Specifies the Host log directory on all platforms. When set to a non-empty value, the Host SDK uses `${AXCL_HOST_LOG_DIR}/axcl_host.log` as its log file. When unset, it falls back to `/tmp/axcl/axcl_host.log` on Linux, or to `axcl_host.log` under the `log` directory next to the executable on Windows. The Device slave_daemon and workers use a fixed log directory and do not read this variable.
+Specifies the Host log directory. When set to a non-empty value, the Host SDK writes its log to `${AXCL_HOST_LOG_DIR}/axcl_host.log`. When unset or empty, the log file is `/tmp/axcl/axcl_host.log` on Linux, or `axcl_host.log` in the `log` directory next to the executable on Windows. When `axcl-smi` cannot read some device information, it prints this path. The Device slave_daemon and workers use a fixed log directory and ignore this variable.
 
-Set this variable before any AXCL component first queries the environment.
+Set this variable before the first AXCL call in the process, such as [axclInitializeMinidump](../develop/c/minidump_api.md#axclInitializeMinidump) or [axclInit](../develop/c/system_api.md#axclInit).
 
 <a id="AXCL_DUMP_DIR"></a>
 
 ### AXCL_DUMP_DIR
 
-Specifies the minidump output directory for Host processes and Device workers. A non-empty value takes precedence over the API configuration or platform fallback directory. The selected directory must be writable; AXCL creates missing parent directories when possible.
+Specifies the minidump output directory. A non-empty value takes precedence over the directory passed to [axclInitializeMinidump](../develop/c/minidump_api.md#axclInitializeMinidump) and over the default directory (`/tmp` on Linux). AXCL creates the directory, including missing parents, if it does not exist; if the directory cannot be created or is not writable, `axclInitializeMinidump` fails.
 
-Set this variable before calling [axclInitializeMinidump](../develop/c/minidump_api.md#axclInitializeMinidump).
+On the Host, set this variable in the application environment before the first AXCL call in the process. On the Device, slave_daemon and its workers read it from the slave_daemon service environment, not from the Host. The AX8860 Debian image sets it to `/opt/data/axclDump` and periodically removes dump files older than 7 days; if it is unset, a worker writes minidumps to a `minidump` directory next to its log file.
 
 <a id="AXCL_HOST_LOGFILE_LEVEL"></a>
 
@@ -61,31 +61,33 @@ Sets the minimum level of the Host log file. Set it to an integer from `0` throu
 | `5` | critical |
 | `6` | off |
 
-Set this variable before the AXCL logger is first created. Changing it does not reconfigure an existing logger. At runtime, use [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) with `AXCL_LOG_TARGET_HOST_RUNTIME_FILE`.
+The level is applied in [axclInit](../develop/c/system_api.md#axclInit). To change it after initialization, call [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) with `AXCL_LOG_TARGET_HOST_RUNTIME_FILE`.
 
 <a id="AXCL_HOST_CONSOLE_LEVEL"></a>
 
 ### AXCL_HOST_CONSOLE_LEVEL
 
-Sets the minimum level of the Host console output. Uses the same `0` through `6` scale and `warning` (`3`) default as [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL). Console output is not written to the log file. At runtime, use [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) with `AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE`.
+Sets the minimum level of the Host console output. Uses the same `0` through `6` scale and `warning` (`3`) default as [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL). The console level and the log file level are independent. `axcl-smi` sets this variable to `6` (off) for itself when it is unset, so SDK log messages do not mix with its output. To change the level after initialization, call [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) with `AXCL_LOG_TARGET_HOST_RUNTIME_CONSOLE`.
 
 <a id="AXCL_DEVICE_WORKER_LOGFILE_LEVEL"></a>
 
 ### AXCL_DEVICE_WORKER_LOGFILE_LEVEL
 
-Sets the minimum level of the Device worker log file. This variable is read by the Host and passed to each spawned worker; the worker does not read its own environment. Uses the same `0` through `6` scale and `warning` (`3`) default as [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL). At runtime, use [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) with `AXCL_LOG_TARGET_DEVICE_WORKER_FILE`.
+Sets the minimum level of the Device worker log file. Set it in the Host application environment: AXCL passes the value to each Device worker it starts, and setting it on the Device has no effect. Uses the same `0` through `6` scale and `warning` (`3`) default as [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL). To change the level after initialization, call [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) with `AXCL_LOG_TARGET_DEVICE_WORKER_FILE`.
 
 <a id="AXCL_DEVICE_WORKER_CONSOLE_LEVEL"></a>
 
 ### AXCL_DEVICE_WORKER_CONSOLE_LEVEL
 
-Sets the minimum level of the Device worker console output. This variable is read by the Host and passed to each spawned worker. Uses the same `0` through `6` scale and `warning` (`3`) default as [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL). Console output is not written to the log file. At runtime, use [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) with `AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE`.
+Sets the minimum level of the Device worker console output. Like [AXCL_DEVICE_WORKER_LOGFILE_LEVEL](#AXCL_DEVICE_WORKER_LOGFILE_LEVEL), set it in the Host application environment. Uses the same `0` through `6` scale and `warning` (`3`) default as [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL). The console level and the log file level are independent. To change the level after initialization, call [axclrtSetLogLevel](../develop/c/other_api.md#axclrtSetLogLevel) with `AXCL_LOG_TARGET_DEVICE_WORKER_CONSOLE`.
 
 <a id="AXCL_HOST_TICK_MASK"></a>
 
 ### AXCL_HOST_TICK_MASK
 
-Sets the category mask of Host API latency ticks, read in [axclInit](../develop/c/system_api.md#axclInit). Accepts a decimal or `0x`-prefixed hexadecimal integer from `0` through `0xFF`; unset, empty, invalid, or out-of-range values mean `0` (disabled).
+For debugging only. Use under the guidance of technical support.
+
+Enables per-call latency reports for the selected categories of Host APIs. The mask is applied in [axclInit](../develop/c/system_api.md#axclInit). Accepts a decimal or `0x`-prefixed hexadecimal integer from `0` through `0xFF`; unset, empty, invalid, or out-of-range values mean `0` (disabled).
 
 | Bit | Category | Covered APIs |
 |---|---|---|
@@ -94,32 +96,34 @@ Sets the category mask of Host API latency ticks, read in [axclInit](../develop/
 | bit2 | stream | `axclrtSynchronizeStream[WithTimeout]` |
 | bit3-7 | Reserved | - |
 
-Each call prints one stderr line in the form `[axcl][tick] <func> dur=<us>us enter=<tick> exit=<tick> freq=<Hz>Hz`. `enter`/`exit` are raw values of the local counter and cannot be compared with the Device side. An API without a timeout calls its timeout variant, so both print a line and the outer duration includes the inner one.
+Each covered call prints one line to stderr in the form `[axcl][tick] <func> dur=<us>us enter=<tick> exit=<tick> freq=<Hz>Hz`. `enter` and `exit` are raw counter values of the Host clock and cannot be compared with Device values. Calling an API without a timeout, such as `axclrtSynchronizeStream`, also reports its `WithTimeout` variant, so two lines are printed: the `WithTimeout` line comes first, and the second line's duration includes the first.
 
 <a id="AXCL_DEVICE_WORKER_TICK_MASK"></a>
 
 ### AXCL_DEVICE_WORKER_TICK_MASK
 
-Sets the category mask of Device worker latency ticks. This variable is read by the Host and passed to each spawned worker; the worker does not read its own environment, so no Device configuration change or slave_daemon restart is needed. Uses the same value rules as [AXCL_HOST_TICK_MASK](#AXCL_HOST_TICK_MASK); reserved bits are passed through as-is.
+For debugging only. Use under the guidance of technical support.
+
+Enables latency reports for the selected categories of Device worker processing. Set it in the Host application environment: AXCL passes the value to each Device worker it starts, so no Device configuration change or slave_daemon restart is needed. Uses the same value rules as [AXCL_HOST_TICK_MASK](#AXCL_HOST_TICK_MASK).
 
 | Bit | Category | Covered APIs |
 |---|---|---|
-| bit0 | engine | All worker handlers of `axclrtEngine*` requests, such as `handle_Run` |
+| bit0 | engine | Device-side processing of `axclrtEngine*` requests |
 | bit1-7 | Reserved | - |
 
-The worker inherits stderr from slave_daemon: under systemd it goes to the journal (`journalctl -u axcl-slave-daemon`); under inittab it goes to the console.
+Reports use the same line format, written to the stderr of slave_daemon on the Device: with systemd, read them with `journalctl -u axcl-slave-daemon`; otherwise they appear on the Device console.
 
 <a id="AXCL_DEVICE_DAEMON_LOG_LEVEL"></a>
 
 ### AXCL_DEVICE_DAEMON_LOG_LEVEL
 
-Sets the minimum level of the slave_daemon log file, read directly by the daemon on the Device. Uses the same `0` through `6` scale; if unset, empty, invalid, or out of range, the daemon defaults to `info` (`2`). The daemon console output is always disabled.
+Sets the minimum level of the slave_daemon log file. Set it in the slave_daemon environment on the Device; it takes effect when slave_daemon starts. Uses the same `0` through `6` scale as [AXCL_HOST_LOGFILE_LEVEL](#AXCL_HOST_LOGFILE_LEVEL). If unset or empty, the level is `info` (`2`); an invalid or out-of-range value also falls back to `info` and prints a warning to stderr. The log file is `slave_daemon.log` in `/opt/data/axclLog` by default. slave_daemon never writes log messages to the console.
 
 <a id="AXCL_SHELL_CMD_OUTPUT_LIMIT"></a>
 
 ### AXCL_SHELL_CMD_OUTPUT_LIMIT
 
-Sets the maximum output, in bytes, that a remote shell command can return when the Host calls [axclrtControlExecuteShellCmd](../develop/c/control_api.md#axclrtControlExecuteShellCmd) and requests `output`. The default is `1048576` (1 MiB), and the maximum is `16777216` (16 MiB). Invalid values use the default; values above the maximum are clamped to the maximum. Output that reaches the limit is truncated without changing the command execution result.
+Sets the maximum output, in bytes, that [axclrtControlExecuteShellCmd](../develop/c/control_api.md#axclrtControlExecuteShellCmd) returns when the caller requests `output`. Set it in the Host application environment. The value is a decimal integer; the default is `1048576` (1 MiB) and the maximum is `16777216` (16 MiB). Invalid values use the default; larger values are clamped to the maximum. Output beyond the limit is dropped and a warning is written to the Host log; the return code of the command is not affected.
 
 ## Tool Environment Variables
 
@@ -127,4 +131,4 @@ Sets the maximum output, in bytes, that a remote shell command can return when t
 
 ### AXCL_SMI_SHELL_TIMEOUT
 
-Overrides the timeout, in milliseconds, used by `axcl-smi` when executing remote shell commands on devices. The default is `10000` ms. Set it to a positive decimal integer, or `-1` to wait indefinitely. Invalid values, zero, values less than `-1`, or overflowing values use the default. This variable does not change the `timeout` argument explicitly passed by an application to [axclrtControlExecuteShellCmd](../develop/c/control_api.md#axclrtControlExecuteShellCmd).
+Sets the timeout, in milliseconds, of the shell commands that `axcl-smi` runs on a Device: the command of `axcl-smi sh`, the Device-side log packaging of `axcl-smi collect-log`, and the destination check of `axcl-smi push` without `-r`. The default is `10000` ms. Set it to a positive decimal integer, or `-1` to wait indefinitely. Zero, values less than `-1`, non-numeric values, and values that overflow use the default. This variable does not affect applications that call [axclrtControlExecuteShellCmd](../develop/c/control_api.md#axclrtControlExecuteShellCmd); they pass their own `timeout`.

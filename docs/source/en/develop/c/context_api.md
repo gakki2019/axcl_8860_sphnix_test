@@ -27,7 +27,7 @@ AXCL_EXPORT axclError axclrtCreateContext(axclrtContext *context, int32_t device
 
 | Name | Direction | Description |
 |---|---|---|
-| context | out | Receives the created Context handle on success. |
+| context | out | Receives the created Context handle on success. Must not be NULL. |
 | deviceId | in | Virtual device ID visible to the current process. Valid IDs are in the range [0, count - 1], where count is returned by [axclrtGetDeviceCount](device_api.md#axclrtGetDeviceCount). |
 
 #### Returns
@@ -38,6 +38,7 @@ AXCL_EXPORT axclError axclrtCreateContext(axclrtContext *context, int32_t device
 #### Note
 
 - If [axclrtSetDevice](device_api.md#axclrtSetDevice) has not been called to activate the specified device, this function activates the device before creating the Context.
+- The new Context replaces the calling thread's current Context, including the default Context bound by [axclrtSetDevice](device_api.md#axclrtSetDevice). If this function fails, the binding is unchanged.
 - Each explicitly created Context contains an implicitly created default Stream.
 - Every explicitly created Context must be explicitly destroyed with [axclrtDestroyContext](#axclrtDestroyContext).
 - Before destroying the Context, destroy all Streams explicitly created in it. [axclrtDestroyContext](#axclrtDestroyContext) destroys the default Stream.
@@ -98,7 +99,7 @@ AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
 
 | Name | Direction | Description |
 |---|---|---|
-| context | in | Context handle returned by [axclrtCreateContext](#axclrtCreateContext). |
+| context | in | Context handle returned by [axclrtCreateContext](#axclrtCreateContext). Must not be NULL and must refer to an existing Context; a Context that has already been destroyed does not exist. |
 
 #### Returns
 
@@ -107,11 +108,12 @@ AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
 
 #### Note
 
-- Before calling this function, destroy all Streams explicitly created in this Context.
+- Before calling this function, destroy all Streams explicitly created in this Context; otherwise, this function fails and the Context is not destroyed.
 - This function blocks until work in the Context's default Stream completes, and then destroys the default Stream automatically.
-- After the Context is destroyed successfully, the runtime removes all bindings to it from all threads.
+- After the Context is destroyed successfully, the runtime removes all bindings to it from all threads. A thread whose current Context is destroyed becomes unbound: neither an earlier Context nor the default Context becomes current again. Call [axclrtSetCurrentContext](#axclrtSetCurrentContext) or [axclrtSetDevice](device_api.md#axclrtSetDevice) before calling APIs that need a current Context.
 - This function releases the device activation reference held by the Context. If that is the final reference, the device is closed; serialize such a call with [axclrtMallocHost](memory_api.md#axclrtMallocHost) and [axclrtFreeHost](memory_api.md#axclrtFreeHost) calls in the process.
 - This function cannot destroy the default Context created by [axclrtSetDevice](device_api.md#axclrtSetDevice). The default Context is destroyed by [axclrtResetDevice](device_api.md#axclrtResetDevice).
+- If multiple threads destroy the same Context concurrently, exactly one call succeeds; the others fail and release no device activation reference.
 
 #### Remark
 
@@ -140,7 +142,7 @@ AXCL_EXPORT axclError axclrtGetCurrentContext(axclrtContext *context);
 
 | Name | Direction | Description |
 |---|---|---|
-| context | out | Receives the current Context handle on success. |
+| context | out | Receives the current Context handle on success. Must not be NULL. |
 
 #### Returns
 
@@ -149,8 +151,10 @@ AXCL_EXPORT axclError axclrtGetCurrentContext(axclrtContext *context);
 
 #### Note
 
-- The current Context is the most recently bound Context that has not been destroyed.
-- If [axclrtSetCurrentContext](#axclrtSetCurrentContext) is called multiple times, this function returns the Context set by the most recent call.
+- If the calling thread has no current Context, this function fails.
+- The current Context is the one set by the most recent successful [axclrtCreateContext](#axclrtCreateContext), [axclrtSetCurrentContext](#axclrtSetCurrentContext), or [axclrtSetDevice](device_api.md#axclrtSetDevice) call in the calling thread.
+- If that Context has been destroyed, or its device has been released, the thread has no current Context.
+- Bindings belong to the thread and are released when the thread exits.
 
 #### Remark
 
@@ -174,7 +178,7 @@ AXCL_EXPORT axclError axclrtSetCurrentContext(axclrtContext context);
 
 | Name | Direction | Description |
 |---|---|---|
-| context | in | Valid Context handle to bind. |
+| context | in | Context handle to bind. Must not be NULL and must refer to an existing Context. A destroyed Context, or the default Context of a device that has been released, does not exist. |
 
 #### Returns
 
@@ -183,9 +187,11 @@ AXCL_EXPORT axclError axclrtSetCurrentContext(axclrtContext context);
 
 #### Note
 
+- If this function fails, the calling thread's binding is unchanged.
 - The same Context can be current in multiple threads at the same time. The caller must ensure that the Context remains valid while it is in use; otherwise, the application will behave abnormally.
 - This function does not create a Context or increase the device activation reference count, so it does not extend the lifetime of the Context or device.
 - If this function is called multiple times for a thread, the Context set by the most recent call takes effect.
+- The Context replaces the calling thread's current Context, including the default Context bound by [axclrtSetDevice](device_api.md#axclrtSetDevice). Contexts are not stacked: an earlier Context is not restored when this one is destroyed. To switch temporarily, save the result of [axclrtGetCurrentContext](#axclrtGetCurrentContext) and set it again afterwards.
 
 #### Remark
 

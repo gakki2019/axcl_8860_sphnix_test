@@ -83,8 +83,6 @@ AX_S32 AX_VDEC_Init(const AX_VDEC_MOD_ATTR_T *pstModAttr);
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1125`.
-
 #### 2.1.5. Example
 
 ```python
@@ -124,8 +122,6 @@ N/A
 #### 2.2.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1156`.
 
 #### 2.2.5. Example
 
@@ -171,8 +167,6 @@ AX_S32 AX_VDEC_ExtractStreamHeaderInfo(const AX_VDEC_STREAM_T *pstStreamBuf, AX_
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1184`.
-
 #### 2.3.5. Example
 
 ```python
@@ -215,8 +209,6 @@ AX_S32 AX_VDEC_CreateGrp(AX_VDEC_GRP VdGrp, const AX_VDEC_GRP_ATTR_T *pstGrpAttr
 #### 2.4.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1220`.
 
 #### 2.4.5. Example
 
@@ -261,8 +253,6 @@ AX_S32 AX_VDEC_CreateGrpEx(AX_VDEC_GRP *VdGrp, const AX_VDEC_GRP_ATTR_T *pstGrpA
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1253`.
-
 #### 2.5.5. Example
 
 ```python
@@ -304,8 +294,6 @@ AX_S32 AX_VDEC_DestroyGrp(AX_VDEC_GRP VdGrp);
 #### 2.6.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1287`.
 
 #### 2.6.5. Example
 
@@ -350,8 +338,6 @@ AX_S32 AX_VDEC_GetGrpAttr(AX_VDEC_GRP VdGrp, AX_VDEC_GRP_ATTR_T *pstGrpAttr);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1318`.
-
 #### 2.7.5. Example
 
 ```python
@@ -394,8 +380,6 @@ AX_S32 AX_VDEC_SetGrpAttr(AX_VDEC_GRP VdGrp, const AX_VDEC_GRP_ATTR_T *pstGrpAtt
 #### 2.8.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1352`.
 
 #### 2.8.5. Example
 
@@ -440,8 +424,6 @@ AX_S32 AX_VDEC_StartRecvStream(AX_VDEC_GRP VdGrp, const AX_VDEC_RECV_PIC_PARAM_T
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1385`.
-
 #### 2.9.5. Example
 
 ```python
@@ -483,8 +465,6 @@ AX_S32 AX_VDEC_StopRecvStream(AX_VDEC_GRP VdGrp);
 #### 2.10.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1418`.
 
 #### 2.10.5. Example
 
@@ -529,8 +509,6 @@ AX_S32 AX_VDEC_QueryStatus(AX_VDEC_GRP VdGrp, AX_VDEC_GRP_STATUS_T *pstGrpStatus
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1449`.
-
 #### 2.11.5. Example
 
 ```python
@@ -572,8 +550,6 @@ AX_S32 AX_VDEC_ResetGrp(AX_VDEC_GRP VdGrp);
 #### 2.12.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1483`.
 
 #### 2.12.5. Example
 
@@ -618,8 +594,6 @@ AX_S32 AX_VDEC_SetGrpParam(AX_VDEC_GRP VdGrp, const AX_VDEC_GRP_PARAM_T* pstGrpP
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1514`.
-
 #### 2.13.5. Example
 
 ```python
@@ -662,8 +636,6 @@ AX_S32 AX_VDEC_GetGrpParam(AX_VDEC_GRP VdGrp, AX_VDEC_GRP_PARAM_T* pstGrpParam);
 #### 2.14.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1547`.
 
 #### 2.14.5. Example
 
@@ -708,8 +680,6 @@ AX_S32 AX_VDEC_SetGrpThreadBind(AX_VDEC_GRP VdGrp, const AX_VDEC_GRP_THREAD_BIND
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1581`.
-
 #### 2.15.5. Example
 
 ```python
@@ -752,8 +722,6 @@ AX_S32 AX_VDEC_GetGrpThreadBind(AX_VDEC_GRP VdGrp, AX_VDEC_GRP_THREAD_BIND_T *ps
 #### 2.16.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1614`.
 
 #### 2.16.5. Example
 
@@ -798,8 +766,6 @@ AX_S32 AX_VDEC_SelectGrp(AX_VDEC_GRP_SET_INFO_T *pstGrpSet, AX_S32 s32MilliSec);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1648`.
-
 #### 2.17.5. Example
 
 ```python
@@ -843,8 +809,6 @@ AX_S32 AX_VDEC_SendStream(AX_VDEC_GRP VdGrp, const AX_VDEC_STREAM_T *pstStream, 
 #### 2.18.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1682`.
 
 #### 2.18.5. Example
 
@@ -891,8 +855,6 @@ AX_S32 AX_VDEC_GetChnFrame(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, AX_VIDEO_FRAME_
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1717`.
-
 #### 2.19.5. Example
 
 ```python
@@ -937,8 +899,6 @@ AX_S32 AX_VDEC_ReleaseChnFrame(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, const AX_VI
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1755`.
-
 #### 2.20.5. Example
 
 ```python
@@ -981,8 +941,6 @@ AX_S32 AX_VDEC_GetUserData(AX_VDEC_GRP VdGrp, AX_VDEC_USERDATA_T *pstUserData);
 #### 2.21.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1790`.
 
 #### 2.21.5. Example
 
@@ -1027,8 +985,6 @@ AX_S32 AX_VDEC_ReleaseUserData(AX_VDEC_GRP VdGrp, const AX_VDEC_USERDATA_T * pst
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1824`.
-
 #### 2.22.5. Example
 
 ```python
@@ -1072,8 +1028,6 @@ AX_S32 AX_VDEC_SetUserPic(AX_VDEC_GRP VdGrp, const AX_VDEC_USRPIC_T *pstUsrPic);
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1857`.
-
 #### 2.23.5. Example
 
 ```python
@@ -1116,8 +1070,6 @@ AX_S32 AX_VDEC_EnableUserPic(AX_VDEC_GRP VdGrp);
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1890`.
-
 #### 2.24.5. Example
 
 ```python
@@ -1159,8 +1111,6 @@ AX_S32 AX_VDEC_DisableUserPic(AX_VDEC_GRP VdGrp);
 #### 2.25.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1921`.
 
 #### 2.25.5. Example
 
@@ -1205,8 +1155,6 @@ AX_S32 AX_VDEC_SetDisplayMode(AX_VDEC_GRP VdGrp, AX_VDEC_DISPLAY_MODE_E enDispla
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:1952`.
-
 #### 2.26.5. Example
 
 ```python
@@ -1249,8 +1197,6 @@ AX_S32 AX_VDEC_GetDisplayMode(AX_VDEC_GRP VdGrp, AX_VDEC_DISPLAY_MODE_E *penDisp
 #### 2.27.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/vdec/ax_vdec.py:1985`.
 
 #### 2.27.5. Example
 
@@ -1296,8 +1242,6 @@ AX_S32 AX_VDEC_AttachPool(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, AX_POOL PoolId);
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:2019`.
-
 #### 2.28.5. Example
 
 ```python
@@ -1340,8 +1284,6 @@ AX_S32 AX_VDEC_DetachPool(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn);
 #### 2.29.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:2054`.
 
 #### 2.29.5. Example
 
@@ -1386,8 +1328,6 @@ AX_S32 AX_VDEC_EnableChn(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn);
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:2087`.
-
 #### 2.30.5. Example
 
 ```python
@@ -1430,8 +1370,6 @@ AX_S32 AX_VDEC_DisableChn(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn);
 #### 2.31.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:2120`.
 
 #### 2.31.5. Example
 
@@ -1477,8 +1415,6 @@ AX_S32 AX_VDEC_SetChnAttr(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, const AX_VDEC_CH
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:2153`.
-
 #### 2.32.5. Example
 
 ```python
@@ -1523,8 +1459,6 @@ AX_S32 AX_VDEC_GetChnAttr(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, AX_VDEC_CHN_ATTR
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/vdec/ax_vdec.py:2188`.
-
 #### 2.33.5. Example
 
 ```python
@@ -1567,8 +1501,6 @@ AX_S32 AX_VDEC_JpegDecodeOneFrame(AX_VDEC_DEC_ONE_FRM_T *pstParam);
 #### 2.34.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/vdec/ax_vdec.py:2224`.
 
 #### 2.34.5. Example
 
@@ -1613,8 +1545,6 @@ AX_S32 AX_VDEC_JpegDecodeOneFrameEx(AX_VDEC_DEC_ONE_FRM_T *pstParam);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/vdec/ax_vdec.py:2257`.
-
 #### 2.35.5. Example
 
 ```python
@@ -1657,8 +1587,6 @@ AX_S32 AX_VDEC_JpegReleaseDecodeFrameEx(AX_VIDEO_FRAME_T *pstFrame);
 #### 2.36.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/vdec/ax_vdec.py:2290`.
 
 #### 2.36.5. Example
 
@@ -1703,8 +1631,6 @@ AX_S32 AX_VDEC_GetStreamBufInfo(AX_VDEC_GRP VdGrp, AX_VDEC_STREAM_BUF_INFO_T *ps
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/vdec/ax_vdec.py:2323`.
-
 #### 2.37.5. Example
 
 ```python
@@ -1747,8 +1673,6 @@ AX_S32 AX_VDEC_GetVuiParam(AX_VDEC_GRP VdGrp, AX_VDEC_VUI_PARAM_T *pstVuiParam);
 #### 2.38.4. Note
 
 Return type: `tuple[dict, int]`.
-
-Source: `python/axcl/vdec/ax_vdec.py:2357`.
 
 #### 2.38.5. Example
 
@@ -1796,8 +1720,6 @@ AX_U32 AX_VDEC_GetPicBufferSize(AX_U32 uWidth, AX_U32 uHeight, AX_IMG_FORMAT_E e
 
 Return type: `int`.
 
-Source: `python/axcl/vdec/ax_vdec.py:2391`.
-
 #### 2.39.5. Example
 
 ```python
@@ -1841,8 +1763,6 @@ AX_U32 AX_JDEC_GetYuvBufferSize(AX_U32 uWidth, AX_U32 uHeight, AX_IMG_FORMAT_E e
 #### 2.40.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/vdec/ax_vdec.py:2430`.
 
 #### 2.40.5. Example
 

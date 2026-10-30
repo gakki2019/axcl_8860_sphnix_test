@@ -63,8 +63,6 @@ N/A
 
 Return type: `str`.
 
-Source: `python/axcl/engine/ax_engine.py:607`.
-
 #### 2.1.5. Example
 
 ```python
@@ -104,8 +102,6 @@ N/A
 #### 2.2.4. Note
 
 Return type: `None`.
-
-Source: `python/axcl/engine/ax_engine.py:635`.
 
 #### 2.2.5. Example
 
@@ -149,8 +145,6 @@ AX_S32 AX_ENGINE_Init(AX_ENGINE_NPU_ATTR_T* pNpuAttr);
 
 Return type: `int`.
 
-Source: `python/axcl/engine/ax_engine.py:663`.
-
 #### 2.3.5. Example
 
 ```python
@@ -192,8 +186,6 @@ N/A
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/engine/ax_engine.py:694`.
-
 #### 2.4.5. Example
 
 ```python
@@ -233,8 +225,6 @@ N/A
 #### 2.5.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/engine/ax_engine.py:725`.
 
 #### 2.5.5. Example
 
@@ -280,8 +270,6 @@ AX_S32 AX_ENGINE_GetModelType(const AX_VOID* pData, AX_U32 nDataSize, AX_ENGINE_
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/engine/ax_engine.py:753`.
-
 #### 2.6.5. Example
 
 ```python
@@ -325,8 +313,6 @@ AX_S32 AX_ENGINE_CreateHandle(AX_ENGINE_HANDLE *pHandle, const AX_VOID *pData, A
 #### 2.7.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/engine/ax_engine.py:790`.
 
 #### 2.7.5. Example
 
@@ -373,8 +359,6 @@ AX_S32 AX_ENGINE_CreateHandleV2(AX_ENGINE_HANDLE* pHandle, const AX_VOID* pData,
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/engine/ax_engine.py:827`.
-
 #### 2.8.5. Example
 
 ```python
@@ -416,8 +400,6 @@ AX_S32 AX_ENGINE_DestroyHandle(AX_ENGINE_HANDLE nHandle);
 #### 2.9.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/engine/ax_engine.py:866`.
 
 #### 2.9.5. Example
 
@@ -462,8 +444,6 @@ AX_S32 AX_ENGINE_GetIOInfo(AX_ENGINE_HANDLE nHandle, AX_ENGINE_IO_INFO_T** pIO);
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/engine/ax_engine.py:897`.
-
 #### 2.10.5. Example
 
 ```python
@@ -506,8 +486,6 @@ AX_S32 AX_ENGINE_GetGroupIOInfoCount(AX_ENGINE_HANDLE nHandle, AX_U32* pCount);
 #### 2.11.4. Note
 
 Return type: `tuple[int, int]`.
-
-Source: `python/axcl/engine/ax_engine.py:931`.
 
 #### 2.11.5. Example
 
@@ -553,8 +531,6 @@ AX_S32 AX_ENGINE_GetGroupIOInfo(AX_ENGINE_HANDLE nHandle, AX_U32 nIndex, AX_ENGI
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/engine/ax_engine.py:965`.
-
 #### 2.12.5. Example
 
 ```python
@@ -598,8 +574,6 @@ AX_S32 AX_ENGINE_GetHandleModelType(AX_ENGINE_HANDLE nHandle, AX_ENGINE_MODEL_TY
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/engine/ax_engine.py:1001`.
-
 #### 2.13.5. Example
 
 ```python
@@ -641,8 +615,6 @@ AX_S32 AX_ENGINE_CreateContext(AX_ENGINE_HANDLE handle);
 #### 2.14.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/engine/ax_engine.py:1035`.
 
 #### 2.14.5. Example
 
@@ -687,8 +659,6 @@ AX_S32 AX_ENGINE_CreateContextV2(AX_ENGINE_HANDLE nHandle, AX_ENGINE_CONTEXT_T* 
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/engine/ax_engine.py:1066`.
-
 #### 2.15.5. Example
 
 ```python
@@ -731,8 +701,6 @@ AX_S32 AX_ENGINE_RunSync(AX_ENGINE_HANDLE handle, AX_ENGINE_IO_T* pIO);
 #### 2.16.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/engine/ax_engine.py:1100`.
 
 #### 2.16.5. Example
 
@@ -777,8 +745,6 @@ AX_S32 AX_ENGINE_RunSyncV2(AX_ENGINE_HANDLE handle, AX_ENGINE_CONTEXT_T context,
 #### 2.17.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/engine/ax_engine.py:1147`.
 
 #### 2.17.5. Example
 
@@ -825,8 +791,6 @@ AX_S32 AX_ENGINE_RunGroupIOSync(AX_ENGINE_HANDLE handle, AX_ENGINE_CONTEXT_T con
 
 Return type: `int`.
 
-Source: `python/axcl/engine/ax_engine.py:1195`.
-
 #### 2.18.5. Example
 
 ```python
@@ -869,8 +833,6 @@ AX_S32 AX_ENGINE_SetAffinity(AX_ENGINE_HANDLE nHandle, AX_ENGINE_NPU_SET_T nNpuS
 #### 2.19.4. Note
 
 Return type: `int`.
-
-Source: `python/axcl/engine/ax_engine.py:1244`.
 
 #### 2.19.5. Example
 
@@ -915,8 +877,6 @@ AX_S32 AX_ENGINE_GetAffinity(AX_ENGINE_HANDLE nHandle, AX_ENGINE_NPU_SET_T* pNpu
 
 Return type: `tuple[int, int]`.
 
-Source: `python/axcl/engine/ax_engine.py:1277`.
-
 #### 2.20.5. Example
 
 ```python
@@ -960,8 +920,6 @@ AX_S32 AX_ENGINE_GetCMMUsage(AX_ENGINE_HANDLE nHandle, AX_ENGINE_CMM_INFO_T* pCM
 
 Return type: `tuple[dict, int]`.
 
-Source: `python/axcl/engine/ax_engine.py:1311`.
-
 #### 2.21.5. Example
 
 ```python
@@ -1003,8 +961,6 @@ const AX_CHAR * AX_ENGINE_GetModelToolsVersion(AX_ENGINE_HANDLE nHandle);
 #### 2.22.4. Note
 
 Return type: `str`.
-
-Source: `python/axcl/engine/ax_engine.py:1345`.
 
 #### 2.22.5. Example
 

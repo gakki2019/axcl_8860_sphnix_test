@@ -2,7 +2,7 @@
 
 ## 1. Extract the SDK Package
 
-1. Extract the SDK `tar.gz` package with `tar -xzvf`.
+1. Extract the SDK package with `tar -xzvf`.
 
 ```bash
 root:~/sdk$ tar -xzvf ./AXHELIX_SDK_Vxxx.tar.gz
@@ -16,15 +16,16 @@ AXHELIX_SDK_Vxxx/package/build.tar.gz
 AXHELIX_SDK_Vxxx/package/axcl.tar.gz
 AXHELIX_SDK_Vxxx/package/app.tar.gz
 AXHELIX_SDK_Vxxx/package/kernel.tar.gz
+AXHELIX_SDK_Vxxx/package/knowledge-base.tar.gz
 AXHELIX_SDK_Vxxx/package/third-party.tar.gz
 AXHELIX_SDK_Vxxx/package/msp.tar.gz
 AXHELIX_SDK_Vxxx/package/tools.tar.gz
 ```
 
-2. Enter the extracted directory and run `./sdk_unpack.sh` to unpack the full SDK source tree.
+2. In the extracted directory, run `./sdk_unpack.sh` to unpack the full SDK source tree.
 
 ```{note}
-When unpacking the SDK package, the script fetches open-source components from the network, such as kernel, uboot, optee, and atf. Make sure the machine can access the Internet. For details, see the `./sdk_unpack.sh` script.
+`./sdk_unpack.sh` downloads the open-source kernel, U-Boot, OP-TEE, and ATF source archives and applies the SDK patches to them, so the machine needs Internet access. Without Internet access, download the archives in advance and pass their absolute paths with `-k` (kernel), `-u` (U-Boot), `-o` (OP-TEE), and `-a` (ATF). The file names must match the ones the script expects; run `./sdk_unpack.sh -h` to see them.
 ```
 
 ```bash
@@ -38,7 +39,7 @@ root:~/sdk/AXHELIX_SDK_Vxxx$ ./sdk_unpack.sh
 
 ## 2. SDK Directory
 
-Extracted SDK directory:
+SDK directory after `./sdk_unpack.sh` completes:
 
 ```bash
 AXHELIX_SDK_Vxxx/
@@ -47,6 +48,7 @@ AXHELIX_SDK_Vxxx/
 ├── boot/
 ├── build/
 ├── kernel/
+├── knowledge-base/
 ├── msp/
 ├── package/
 ├── rootfs/
@@ -64,6 +66,7 @@ axcl/
 ├── build/
 ├── component/
 ├── device/
+├── docs/
 ├── drv/
 ├── host/
 ├── include/
@@ -74,11 +77,12 @@ axcl/
 | Directory | Description |
 | --- | --- |
 | 3rdparty | Third-party components |
-| build | Build system |
-| component | Functional components |
+| build | Host-side build entry (`build/Makefile`) and CMake configuration |
+| component | Components shared by Host and device |
 | device | Device-side source code |
-| drv | Driver source code |
-| host | Host-side source code |
-| include | Headers |
-| python | Python source code |
-| scripts | Scripts |
+| drv | Kernel driver source code and build entry (`drv/build/Makefile`) |
+| docs | Documentation source |
+| host | Host-side source code, including runtime libraries, tools, samples, and tests |
+| include | Public and internal headers |
+| python | Python bindings (pyAXCL) |
+| scripts | Packaging, minidump symbol collection, and other helper scripts |

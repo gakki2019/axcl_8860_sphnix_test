@@ -59,7 +59,7 @@ Key capabilities include:
 - Allocating and freeing Device memory.
 - Allocating and freeing Host-side memory.
 - Querying memory capacity and pointer attributes.
-- Supporting Host ↔ Device, Device ↔ Device, and Host physical address ↔ Device copy types.
+- Copying Host → Host, Host → Device, Device → Host, and Device → Device, including between two devices with peer access enabled.
 - Supporting synchronous and asynchronous `memcpy`, `memset`, and `memcmp`.
 - Using streams to organize asynchronous memory operations and subsequent compute tasks.
 
@@ -83,7 +83,7 @@ For details, see [Engine API](../develop/c/engine_api.md). To quickly verify the
 
 ### 3.5. Media Processing
 
-In addition to the AXCL Runtime API, the AXCL Host side integrates NATIVE SDK related shared objects. These expose image processing, video encoding/decoding, and DMA capabilities to Host applications:
+In addition to the Runtime API, AXCL provides NATIVE API libraries on the Host. They expose the image processing, video encoding/decoding, and DMA capabilities of the Device-side NATIVE SDK to Host applications:
 
 - `sys`: system initialization, memory, resource pools, and other base capabilities.
 - `ive` / `ivps`: image processing, image preprocessing, and postprocessing.
@@ -94,9 +94,9 @@ These modules allow Host applications to use AXERA AI device capabilities in a w
 
 ### 3.6. Device Status and Auxiliary Tools
 
-AXCL provides the `axcl-smi` command-line tool for viewing device and process status. Users can use it to check driver and firmware versions, device enumeration, temperature, CPU/NPU utilization, memory usage, and CMM usage, and quickly determine whether the runtime environment is available.
+AXCL provides the `axcl-smi` command-line tool for viewing device and process status. It shows driver and firmware versions, the device list, temperature, CPU/NPU utilization, memory usage, CMM usage, and the processes using each device, so you can quickly check whether the runtime environment works. It can also transfer files to and from a device, run a shell command on a device, and collect device logs.
 
-AXCL also includes minidump support, logging, sample programs, and test programs to help with development, debugging, and issue diagnosis.
+AXCL also provides minidump support, logging, sample programs, and test programs for development, debugging, and issue diagnosis.
 
 ## 4. Typical Usage Flow
 

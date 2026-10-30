@@ -29,7 +29,7 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
-| stream | out | 成功时返回创建的 Stream 句柄。 |
+| stream | out | 成功时返回创建的 Stream 句柄。不能为 NULL。 |
 
 #### 2.1.3. 返回值
 
@@ -38,6 +38,7 @@ AXCL_EXPORT axclError axclrtCreateStream(axclrtStream *stream);
 
 #### 2.1.4. 说明
 
+- Stream 创建在调用线程的当前 Context 中。调用线程没有当前 Context 时，本函数失败。
 - 同一 Stream 中的任务按照提交顺序执行，不同 Stream 之间默认不保证任务的执行先后顺序。
 - 如需在不同 Stream 之间进行同步，请使用 [Event 语义](../arch/concept.md#EVENT)。
 - 调用 [axclrtDestroyContext](context_api.md#axclrtDestroyContext) 前，必须先销毁该 Context 中所有显式创建的 Stream。
@@ -76,8 +77,10 @@ AXCL_EXPORT axclError axclrtDestroyStream(axclrtStream stream);
 
 #### 2.2.4. 说明
 
-- 本函数只能销毁由 [axclrtCreateStream](#axclrtCreateStream) 显式创建的 Stream，不能销毁默认 Stream，默认 Stream 由随其所属 Context 一起销毁。
+- 本函数只能销毁由 [axclrtCreateStream](#axclrtCreateStream) 显式创建的 Stream，不能销毁默认 Stream，运行时会在销毁其所属 Context 时一并销毁默认 Stream。
 - 本函数在销毁 Stream 前，会阻塞等待此前提交到该 Stream 的任务全部完成。
+- 如果该 Stream 持有尚未返回的异步任务错误（参见 [axclrtSynchronizeStream](#axclrtSynchronizeStream)），本函数返回该错误，且不销毁 Stream。错误返回后即被清除，再次调用本函数即可销毁该 Stream。
+- 如果设备已离线，本函数不等待即释放 Stream，因为其未完成的任务已被中止。
 
 #### 2.2.5. 参考
 
@@ -138,12 +141,17 @@ AXCL_EXPORT axclError axclrtStreamQuery(axclrtStream stream, axclrtStreamStatus 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | stream | in | [axclrtCreateStream](#axclrtCreateStream) 返回的 Stream 句柄。 |
-| status | out | 成功时返回 Stream 的任务完成状态。 |
+| status | out | 成功时返回 Stream 的任务完成状态。不能为 NULL。 |
 
 #### 2.4.3. 返回值
 
 - `AXCL_SUCC`：成功返回 Stream 的任务完成状态。
 - 其他错误：失败。
+
+#### 2.4.4. 说明
+
+- 本函数不阻塞。[AXCL_STREAM_STATUS_COMPLETE](reference/enum.md#AXCL_STREAM_STATUS_COMPLETE) 表示提交到该 Stream 的所有任务均已完成；[AXCL_STREAM_STATUS_NOT_READY](reference/enum.md#AXCL_STREAM_STATUS_NOT_READY) 表示至少有一个任务尚未完成。
+- 本函数不报告异步任务错误；如需获取这些错误，请使用 [axclrtSynchronizeStream](#axclrtSynchronizeStream)。
 
 <br>
 
@@ -199,7 +207,7 @@ AXCL_EXPORT axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, in
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | stream | in | [axclrtCreateStream](#axclrtCreateStream) 返回的 Stream 句柄。 |
-| timeout | in | 超时时间，单位为毫秒。`-1` 表示无限期等待。 |
+| timeout | in | 超时时间，单位为毫秒。负数（如 `-1`）表示无限期等待。 |
 
 #### 2.6.3. 返回值
 
