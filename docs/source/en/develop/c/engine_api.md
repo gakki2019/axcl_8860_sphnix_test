@@ -8,6 +8,7 @@
 - [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo): Destroy an IO metadata object created by [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo).
 - [axclrtEngineExecute](#axclrtEngineExecute): Execute model inference synchronously on the current runtime Context's default Stream.
 - [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync): Submit a model inference task to a Stream.
+- [axclrtEngineExecuteAsyncV2](#axclrtEngineExecuteAsyncV2): Submit a model inference task to a Stream and run it on the Native asynchronous engine.
 - [axclrtEngineFinalize](#axclrtEngineFinalize): Deinitialize Engine on the device associated with the current Context.
 - [axclrtEngineGetAffinity](#axclrtEngineGetAffinity): Get the NPU-core affinity mask of a loaded model.
 - [axclrtEngineGetContextAffinity](#axclrtEngineGetContextAffinity): Get affinity for one Engine Context; this operation is currently unsupported.
@@ -247,6 +248,54 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contex
 #### Remark
 
 - [axclrtEngineExecute](#axclrtEngineExecute)
+- [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
+
+<br>
+
+<a id="axclrtEngineExecuteAsyncV2"></a>
+
+### axclrtEngineExecuteAsyncV2
+
+Submit a model inference task to a Stream and run it on the Native asynchronous engine.
+
+Unlike [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync), the Stream does not wait for the inference: once the Native engine accepts the task, the Stream goes on with its next commands while the inference runs.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtEngineExecuteAsyncV2(uint64_t modelId, uint64_t contextId, uint32_t group, axclrtEngineIO io, axclrtStream stream);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| modelId | in | Loaded model ID. |
+| contextId | in | Engine Context ID created for `modelId`. |
+| group | in | Shape-group index. Must be 0: only the default shape group is supported. |
+| io | in | IO binding object containing all required Device buffers. Must not be NULL. |
+| stream | in | Stream that receives the inference request. Pass NULL to use the current runtime Context's default Stream. |
+
+#### Returns
+
+- `AXCL_SUCC`: The inference request was submitted successfully.
+- `AXCL_ERR_ENGINE_ILLEGAL_PARAM`: `group` is not 0, or another argument is invalid.
+- `others`: Failure.
+
+#### Note
+
+- Models with more than one shape group are not supported; the Native engine rejects them, and the error is returned by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) on `stream`.
+- Later commands on `stream` do not wait for this inference. A command that reads its outputs must be ordered after it explicitly: record an Event after this call and make the reading Stream, which may be `stream` itself, wait for it with [axclrtStreamWaitEvent](event_api.md#axclrtStreamWaitEvent), or synchronize on the Host first.
+- An Event recorded on `stream` after this call completes only when this inference has finished, and [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) returns only when it has finished. Event completion does not mean the inference succeeded; its error is returned by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) or [axclrtSynchronizeStreamWithTimeout](stream_api.md#axclrtSynchronizeStreamWithTimeout) on `stream`, including a rejection by the Native engine.
+- Inferences on the same Stream and Engine Context run one after another. Using one Engine Context on several Streams at the same time requires the application to order them with Events.
+- Keep the model, Engine Context, and all bound Device buffers valid until the inference has finished. A timed-out wait does not cancel it.
+- Every input and output in `io` must be bound to Device memory on the same device as `stream`; otherwise the function fails without sending the request.
+
+#### Remark
+
+- [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync)
+- [axclrtRecordEvent](event_api.md#axclrtRecordEvent)
+- [axclrtStreamWaitEvent](event_api.md#axclrtStreamWaitEvent)
 - [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
 
 <br>

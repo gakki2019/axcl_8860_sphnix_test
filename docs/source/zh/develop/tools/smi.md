@@ -269,7 +269,7 @@ device0_log_20260923_101530_204.tar.gz
 - 设备上 `AXSyslog` 和 `axclLog` 都不存在时，收集失败。
 - 收集过程中的提示信息会打印到 stderr，并标明卡号。收集期间若有日志文件被轮转或删除，也会在这里提示，对应文件在归档中可能不完整。
 - 输出目录不能写入时直接报错。在没有写权限的目录（如 `/usr/local/axhelix/bin`）下执行时，请指定输出目录，如 `axcl-smi collect-log -d 0 /tmp`。
-- `--all` 逐张卡收集，不能与 `-d` 同时使用。某张卡失败不影响其他卡，结束时显示 `collect-log: <成功数>/<总数> devices succeeded`，有卡失败时返回非 `0`。收集中按 `Ctrl+C`，会在当前卡完成后停止；若还有未收集的卡，这些卡会被跳过，汇总行末尾带 `(interrupted)` 并返回非 `0`。
+- `--all` 逐张卡收集，不能与 `-d` 同时使用。某张卡失败不影响其他卡，结束时显示 `collect-log: <成功数>/<总数> devices succeeded`（无响应而被跳过的卡计入总数），有卡失败时返回非 `0`。收集中按 `Ctrl+C`，会在当前卡完成后停止；若还有未收集的卡，这些卡会被跳过，汇总行末尾带 `(interrupted)` 并返回非 `0`。
 - 日志较多时打包可能超时，可调大 [AXCL_SMI_SHELL_TIMEOUT](../../appendix/environment_variables.md#AXCL_SMI_SHELL_TIMEOUT)。
 - 无论下载是否成功，设备上的临时文件都会被清理。打包超时时，设备上 `/opt/data` 下可能留下 `.collect_*` 目录或未完成的 `device*_log_*.tar.gz`，确认没有其他收集任务在进行后，可用 `axcl-smi sh` 删除。
 
@@ -292,6 +292,10 @@ device0_log_20260923_101530_204.tar.gz
 | `no AXCL devices available`                                  | 没有找到可用的卡                           | 确认卡已正确安装并上电。                                        |
 | `invalid device index: N`                                    | `-d` 指定的卡号不存在                      | 先执行 `axcl-smi` 查看实际卡号。                                |
 | `failed to create context for card N` / `... for device N`   | 无法连接该卡                               | 查看提示中的 Runtime 日志。                                     |
+| `axcl-smi: card N: not responding (no reply within 1000 ms)` | 主控到设备的通路不通，或设备内核无响应 | 查看主控 `dmesg` 与 `/proc/ax_proc/comm/info`，必要时重启该卡。 |
+| `axcl-smi: card N: offline`                                  | 该卡已离线                                 | 查看主控 `dmesg`，确认卡状态后重启该卡。                         |
+| `axcl-smi: card N: slave_daemon not running`                 | 通路正常，但设备上的 `slave_daemon` 未运行（未启动、已退出或崩溃） | 检查设备上的 `slave_daemon` 进程及其日志。                       |
+| `axcl-smi: card N: status check failed, ret = 0x...`         | 检查设备状态失败                           | 用 `AXCL_HOST_CONSOLE_LEVEL=3` 重新执行，查看 Runtime 日志。    |
 | `axcl-smi: card N unavailable: ...`                          | 该卡的部分信息获取失败                     | 确认设备固件与主控软件包版本配套；仍有问题时用 `collect-log` 收集日志反馈。 |
 | `'<command>' requires -d <device>`                           | `sh`、`push`、`pull` 未指定卡号            | 加上 `-d <卡号>`。                                              |
 | `'collect-log' requires -d <device> or --all`                | `collect-log` 未指定 `-d` 或 `--all`       | 加上 `-d <卡号>` 或 `--all`。                                   |
