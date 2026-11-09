@@ -23,7 +23,7 @@
 - [axcl.vdec.select_grp](#axcl.vdec.select_grp): Checks which VDEC groups currently have output frames ready. This API takes a snapshot of the current VDEC group set and returns the groups and channels that have decoded frames available in their output queues. It supports blocking, non-blocking, and timeout modes.
 - [axcl.vdec.send_stream](#axcl.vdec.send_stream): Send stream data to the decoding channel group. This API submits a compressed stream packet to a VDEC group. The packet content and end flags must match the input mode configured in
 - [axcl.vdec.get_chn_frame](#axcl.vdec.get_chn_frame): Retrieve the decoded image from the output channel. This API obtains one decoded output frame from the specified VDEC group and channel. The returned frame must be released by
-- [axcl.vdec.release_chn_frame](#axcl.vdec.release_chn_frame): Release the decoded output channel image buffer. This API releases the frame buffer previously obtained from
+- [axcl.vdec.release_chn_frame](#axcl.vdec.release_chn_frame): Release the decoded output channel image buffer. This API releases the frame buffer previously obtained from AX_VDEC_GetChnFrame.
 - [axcl.vdec.get_user_data](#axcl.vdec.get_user_data): Retrieves user data (SEI/COM) from the decoded stream. This API extracts user data embedded in the compressed stream. For H.264/H.265, it retrieves SEI (Supplemental Enhancement Information) messages. For JPEG/MJPEG, it retrieves COM (Comment) markers.
 - [axcl.vdec.release_user_data](#axcl.vdec.release_user_data): Releases user data acquired from a VDEC group. This API is reserved for interface compatibility and performs no internal release operation. The SDK manages user data resources automatically, so applications do not need to call it.
 - [axcl.vdec.set_user_pic](#axcl.vdec.set_user_pic): Sets user picture insertion attributes for a VDEC group. This API configures the attributes of a user-supplied picture that can be inserted into the decoder output stream. The user picture is typically used as a placeholder or default image when decoding is interrupted or before the first valid frame arrives.
@@ -39,10 +39,10 @@
 - [axcl.vdec.get_chn_attr](#axcl.vdec.get_chn_attr): Retrieves attributes of a VDEC channel. This API queries the current configuration of a specific channel within a VDEC group, including output format, resolution, aspect ratio, and other display parameters. The returned attributes reflect the current runtime configuration of the channel.
 - [axcl.vdec.jpeg_decode_one_frame](#axcl.vdec.jpeg_decode_one_frame): Decodes a single JPEG frame synchronously from caller-provided physically contiguous buffers. This API performs synchronous decoding of a single JPEG image without requiring a VDEC group or channel. It is suitable for thumbnail generation, snapshot extraction, or one-time JPEG decoding tasks.
 - [axcl.vdec.jpeg_decode_one_frame_ex](#axcl.vdec.jpeg_decode_one_frame_ex): Decodes a JPEG image from an encoded JPEG buffer in ordinary process memory and allocates the output frame internally. This convenience API parses the JPEG resolution, allocates the required input and output buffers internally, and decodes the image synchronously.
-- [axcl.vdec.jpeg_release_decode_frame_ex](#axcl.vdec.jpeg_release_decode_frame_ex): Releases a frame returned by
+- [axcl.vdec.jpeg_release_decode_frame_ex](#axcl.vdec.jpeg_release_decode_frame_ex): Releases a frame returned by AX_VDEC_JpegDecodeOneFrameEx.
 - [axcl.vdec.get_stream_buf_info](#axcl.vdec.get_stream_buf_info): Retrieves input stream buffer information for a VDEC group. This API queries the current status and configuration of the input stream buffer for a specified VDEC group, including buffer size, usage statistics, and queue depth information.
 - [axcl.vdec.get_vui_param](#axcl.vdec.get_vui_param): Retrieves VUI (Video Usability Information) parameters from the decoded stream. This API extracts VUI parameters from the H.264/H.265 video stream being decoded by the specified VDEC group. VUI contains metadata about video characteristics such as aspect ratio, color primaries, transfer characteristics, and matrix coefficients.
-- [axcl.vdec.get_pic_buffer_size](#axcl.vdec.get_pic_buffer_size): Calculates the frame buffer size for a decoded picture. This API computes the number of bytes required to store one decoded frame for the given geometry, output pixel format, optional FBC compression configuration, and codec payload type. Use the returned value to set the u32FrameBufSize field of
+- [axcl.vdec.get_pic_buffer_size](#axcl.vdec.get_pic_buffer_size): Calculates the frame buffer size for a decoded picture. This API computes the number of bytes required to store one decoded frame for the given geometry, output pixel format, optional FBC compression configuration, and codec payload type. Use the returned value to set the u32FrameBufSize field of AX_VDEC_CHN_ATTR_T when configuring a decode channel.
 - [axcl.vdec.get_yuv_buffer_size](#axcl.vdec.get_yuv_buffer_size): Calculates the YUV buffer size for a JPEG decoded picture. This API computes the number of bytes required to store one JPEG-decoded frame for the given geometry and output format, with width and height aligned to 16.
 
 <br>
@@ -867,7 +867,7 @@ frame_info, ret = axcl.vdec.get_chn_frame(vd_grp, vd_chn, milli_sec)
 
 ### 2.20. axcl.vdec.release_chn_frame
 
-Release the decoded output channel image buffer. This API releases the frame buffer previously obtained from
+Release the decoded output channel image buffer. This API releases the frame buffer previously obtained from AX_VDEC_GetChnFrame.
 
 #### 2.20.1. Function
 
@@ -889,7 +889,7 @@ AX_S32 AX_VDEC_ReleaseChnFrame(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, const AX_VI
 |---|---|---|
 | vd_grp | int | VDEC group ID. Valid range: [0, |
 | vd_chn | int | VDEC channel ID. Valid range: [0, |
-| frame_info | dict &#124; None | Pointer to the frame information structure returned by |
+| frame_info | dict &#124; None | Pointer to the frame information structure returned by AX_VDEC_GetChnFrame. |
 
 #### 2.20.3. Returns
 
@@ -975,7 +975,7 @@ AX_S32 AX_VDEC_ReleaseUserData(AX_VDEC_GRP VdGrp, const AX_VDEC_USERDATA_T * pst
 | Name | Type | Description |
 |---|---|---|
 | vd_grp | int | VDEC group ID. Valid range: [0, |
-| user_data | dict &#124; None | Pointer to user data structure returned by |
+| user_data | dict &#124; None | Pointer to user data structure returned by AX_VDEC_GetUserData. |
 
 #### 2.22.3. Returns
 
@@ -1557,7 +1557,7 @@ param, ret = axcl.vdec.jpeg_decode_one_frame_ex(param)
 
 ### 2.36. axcl.vdec.jpeg_release_decode_frame_ex
 
-Releases a frame returned by
+Releases a frame returned by AX_VDEC_JpegDecodeOneFrameEx.
 
 #### 2.36.1. Function
 
@@ -1577,11 +1577,11 @@ AX_S32 AX_VDEC_JpegReleaseDecodeFrameEx(AX_VIDEO_FRAME_T *pstFrame);
 
 | Name | Type | Description |
 |---|---|---|
-| frame | dict &#124; None | Pointer to a frame returned by |
+| frame | dict &#124; None | Pointer to a frame returned by AX_VDEC_JpegDecodeOneFrameEx. |
 
 #### 2.36.3. Returns
 
-- `frame`: *dict* — Pointer to a frame returned by
+- `frame`: *dict* — Pointer to a frame returned by AX_VDEC_JpegDecodeOneFrameEx.
 - `ret`: *int* — Success. Failure. See VDEC error codes.
 
 #### 2.36.4. Note
@@ -1686,7 +1686,7 @@ vui_param, ret = axcl.vdec.get_vui_param(vd_grp)
 
 ### 2.39. axcl.vdec.get_pic_buffer_size
 
-Calculates the frame buffer size for a decoded picture. This API computes the number of bytes required to store one decoded frame for the given geometry, output pixel format, optional FBC compression configuration, and codec payload type. Use the returned value to set the u32FrameBufSize field of
+Calculates the frame buffer size for a decoded picture. This API computes the number of bytes required to store one decoded frame for the given geometry, output pixel format, optional FBC compression configuration, and codec payload type. Use the returned value to set the u32FrameBufSize field of AX_VDEC_CHN_ATTR_T when configuring a decode channel.
 
 #### 2.39.1. Function
 
@@ -1708,7 +1708,7 @@ AX_U32 AX_VDEC_GetPicBufferSize(AX_U32 uWidth, AX_U32 uHeight, AX_IMG_FORMAT_E e
 |---|---|---|
 | u_width | int | Picture width in pixels (or the configured frame stride in bytes when the caller pre-aligns the luma stride). |
 | u_height | int | Picture height in pixels. |
-| output_format | int | Output image format. See |
+| output_format | int | Output image format. See AX_IMG_FORMAT_E. |
 | compress_info | dict &#124; None | Optional pointer to FBC compression info. If NULL or |
 | type | int | Codec payload type. Only PT_H264, PT_H265, PT_JPEG, and PT_MJPEG are supported. |
 
@@ -1754,7 +1754,7 @@ AX_U32 AX_JDEC_GetYuvBufferSize(AX_U32 uWidth, AX_U32 uHeight, AX_IMG_FORMAT_E e
 |---|---|---|
 | u_width | int | Picture width in pixels. |
 | u_height | int | Picture height in pixels. |
-| output_format | int | Output image format. See |
+| output_format | int | Output image format. See AX_IMG_FORMAT_E. |
 
 #### 2.40.3. Returns
 

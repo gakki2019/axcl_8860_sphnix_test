@@ -2188,7 +2188,10 @@ def main() -> int:
         validate_markdown(pages, report)
 
     report.write()
-    return 0
+    errors = sum(1 for rows in report.rows.values() for row in rows if row.values and row.values[0] == "ERROR")
+    if errors:
+        print(f"C API: {errors} ERROR records; see {REPORT_DIR / 'summary.md'}")
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":

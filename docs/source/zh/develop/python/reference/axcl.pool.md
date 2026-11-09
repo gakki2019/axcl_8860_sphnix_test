@@ -61,8 +61,6 @@ AX_S32 AX_POOL_SetConfig(const AX_POOL_FLOORPLAN_T *pPoolFloorPlan);
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:363`。
-
 #### 2.1.5. 示例
 
 ```python
@@ -104,8 +102,6 @@ AX_S32 AX_POOL_GetConfig(AX_POOL_FLOORPLAN_T *pPoolFloorPlan);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/pool/axcl_pool.py:394`。
-
 #### 2.2.5. 示例
 
 ```python
@@ -146,8 +142,6 @@ AX_S32 AX_POOL_Init(void);
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:425`。
-
 #### 2.3.5. 示例
 
 ```python
@@ -187,8 +181,6 @@ AX_S32 AX_POOL_Exit(void);
 #### 2.4.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/pool/axcl_pool.py:453`。
 
 #### 2.4.5. 示例
 
@@ -232,8 +224,6 @@ AX_POOL AX_POOL_CreatePool(AX_POOL_CONFIG_T *pPoolConfig);
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:481`。
-
 #### 2.5.5. 示例
 
 ```python
@@ -275,8 +265,6 @@ AX_S32 AX_POOL_DestroyPool(AX_POOL PoolId);
 #### 2.6.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/pool/axcl_pool.py:512`。
 
 #### 2.6.5. 示例
 
@@ -322,8 +310,6 @@ AX_BLK AX_POOL_GetBlock(AX_POOL PoolId, AX_U64 BlkSize, const AX_S8 *pPartitionN
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:543`。
-
 #### 2.7.5. 示例
 
 ```python
@@ -365,8 +351,6 @@ AX_S32 AX_POOL_ReleaseBlock(AX_BLK BlockId);
 #### 2.8.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/pool/axcl_pool.py:578`。
 
 #### 2.8.5. 示例
 
@@ -410,8 +394,6 @@ AX_BLK AX_POOL_PhysAddr2Handle(AX_U64 PhysAddr);
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:609`。
-
 #### 2.9.5. 示例
 
 ```python
@@ -453,8 +435,6 @@ AX_U64 AX_POOL_Handle2PhysAddr(AX_BLK BlockId);
 #### 2.10.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/pool/axcl_pool.py:640`。
 
 #### 2.10.5. 示例
 
@@ -498,8 +478,6 @@ AX_U64 AX_POOL_Handle2MetaPhysAddr(AX_BLK BlockId);
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:671`。
-
 #### 2.11.5. 示例
 
 ```python
@@ -541,8 +519,6 @@ AX_POOL AX_POOL_Handle2PoolId(AX_BLK BlockId);
 #### 2.12.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/pool/axcl_pool.py:702`。
 
 #### 2.12.5. 示例
 
@@ -586,8 +562,6 @@ AX_U64 AX_POOL_Handle2BlkSize(AX_BLK BlockId);
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:733`。
-
 #### 2.13.5. 示例
 
 ```python
@@ -629,8 +603,6 @@ AX_S32 AX_POOL_MmapPool(AX_POOL PoolId);
 #### 2.14.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/pool/axcl_pool.py:764`。
 
 #### 2.14.5. 示例
 
@@ -674,8 +646,6 @@ AX_S32 AX_POOL_MunmapPool(AX_POOL PoolId);
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:795`。
-
 #### 2.15.5. 示例
 
 ```python
@@ -717,8 +687,6 @@ AX_VOID * AX_POOL_GetBlockVirAddr(AX_BLK BlockId);
 #### 2.16.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/pool/axcl_pool.py:826`。
 
 #### 2.16.5. 示例
 
@@ -762,8 +730,6 @@ AX_VOID * AX_POOL_GetMetaVirAddr(AX_BLK BlockId);
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:857`。
-
 #### 2.17.5. 示例
 
 ```python
@@ -805,8 +771,6 @@ AX_S32 AX_POOL_IncreaseRefCnt(AX_BLK BlockId);
 #### 2.18.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/pool/axcl_pool.py:888`。
 
 #### 2.18.5. 示例
 
@@ -850,8 +814,6 @@ AX_S32 AX_POOL_DecreaseRefCnt(AX_BLK BlockId);
 
 返回类型：`int`。
 
-源码：`python/axcl/pool/axcl_pool.py:919`。
-
 #### 2.19.5. 示例
 
 ```python
@@ -891,8 +853,6 @@ AX_S32 AX_POOL_FreeCommPool(void);
 #### 2.20.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/pool/axcl_pool.py:950`。
 
 #### 2.20.5. 示例
 

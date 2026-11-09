@@ -472,7 +472,7 @@ AX_CCL_EXPORT axclError axCclCommInitAll(axCclComm *comms, int32_t count, const 
 
 #### 2.14.4. 说明
 
-支持单个 Host 进程内 1 到 8 个不同的逻辑 Device ID。当前主要拓扑为四个设备；实现接受完整的协议范围。须先用 [axclrtSetDevice](device_api.md#axclrtSetDevice) 激活列出的每个 Device；每个 communicator 使用该 Device 的默认 Context。数组顺序只决定逻辑 rank，不声明环。对于 ring 集合操作，各 rank 按实际的本地 chip_id 升序排列，且每个 rank 到下一个 rank 的 C2C 链路必须在线，否则本调用失败。这是静态规则，不是硬件邻接发现。环在返回前已建立，因此单个 rank 的裸集合操作不会等待其他 rank 调用。如果调用线程已有当前 Context，返回前会恢复；否则返回后该线程可能绑定在某个列出 Device 的默认 Context 上。InitAll 始终使用单进程路径，即使诊断变量 AXCCL_MULTIPROCESS 覆盖为 "1" 也是如此。不能在 Group 内调用。
+支持单个 Host 进程内 1 到 8 个不同的逻辑 Device ID。当前主要拓扑为四个设备；实现接受完整的协议范围。须先用 [axclrtSetDevice](device_api.md#axclrtSetDevice) 激活列出的每个 Device；每个 communicator 使用该 Device 的默认 Context。数组顺序只决定逻辑 rank，不声明环。对于 ring 集合操作，各 rank 按每个 Device 拓扑报告的物理 C2C 链（其前一个和后一个相邻设备）排序，而不是按数组顺序或芯片 ID 排序。列出的 Device 必须都能在该链上找到，且每个 rank 到下一个 rank（包括从最后一个 rank 回到第一个 rank）的 C2C 链路必须在线，否则本调用失败。环在返回前已建立，因此单个 rank 的裸集合操作不会等待其他 rank 调用。如果调用线程已有当前 Context，返回前会恢复；否则返回后该线程可能绑定在某个列出 Device 的默认 Context 上。InitAll 始终使用单进程路径，即使诊断变量 AXCCL_MULTIPROCESS 覆盖为 "1" 也是如此。不能在 Group 内调用。
 
 <br>
 
@@ -1071,3 +1071,5 @@ AX_CCL_EXPORT axclError axCclSend(const void *sendbuff, size_t count, axCclDataT
 #### 2.33.4. 说明
 
 单进程通信域支持 1..8 个 rank、count 为零以及全部存储类型。`peer` 取值范围为 [0, worldSize - 1]。自收发（`peer` 等于本 rank）须在 Group 中配齐匹配的双方，并在 Device 上本地复制。缓冲区为按元素宽度对齐的设备地址；不支持 IN_PLACE。双方 peer 都必须已注册 communicator。只有这两个 peer 执行；其他 rank 无需提交操作。须使用 CommInitRootInfo 时捕获的 Context（CommInitAll 为默认 Context）。重新绑定到另一个或默认的应用 Stream 时，须使用同一 Context，并通过有界查询证明此前所有父级/配对工作均已完成。裸调用成功即表示本端已入队。调用方须在同步前按相同的逐对顺序提交相容的反向角色/count/类型；裸调用不会在 Host 上重排或暂存。P2P Group 必须包含每笔传输的双方；它可以重排任务，并支持使用独立缓冲区的双向传输。在同一设备上，任何接收范围都不得与该组中的任何发送或其他接收重叠。允许一次匹配自复制的精确别名。P2P/集合操作混合 Group 会在入队前校验完整的阶段和顺序。提交 P2P Group 前，须先完成此前尚未匹配的裸提交；本通信域仍有未匹配的裸 Send/Recv 时，提交 Group 或在其 Device 上切换 Stream 会返回 AXCL_ERR_CCL_INVALID_STATE，且不入队任何操作：先补齐缺失的 peer 调用再重试。若改为在存在未匹配提交时调用 Finalize，通信域将进入终止状态并保留资源。缓冲区、Stream 和 Context 须保持存活直到完成；共享这些设备的其他通信域须串行化。Linux 多进程模式下，裸调用会等待匹配 peer 的单笔调用提交且双方均已入队。纯 P2P Group 在同一通信域中每个进程最多收集 32 个调用，使用同一 Context/Stream。每对 peer 的调用数量须在进程间一致；反向角色/count/类型按各方向 FIFO 顺序匹配，本地交错顺序可以不同。P2P 提交时只有参与的配对（及与其相连的 rank）同步。自动初始化首先要求全部声明的 rank 完成初始化；之后不参与的 rank 可在 P2P 传输期间保持空闲。不支持裸自传输；支持 Group 内匹配的自复制。上述 Group 重叠规则同样适用。P2P 和集合操作须使用不同的多进程 Group。缓冲区必须是调用进程在 communicator 设备上通过 [axclrtMalloc](memory_api.md#axclrtMalloc) 分配的 Device 内存；整个范围须位于同一次分配内。Finalize 仍要求全部 rank 参与。
+
+实卡样例位于 `host/sample/ccl/comm_init_root_info.cpp`（由统一可执行文件 `axcl_sample_ccl` 作为首个用例运行，仅 Linux），在 `-d` 指定的设备（默认全部设备，至少 2 个）上各 fork 一个进程，使用自动选择；rank 0 通过 `axCclGetRootInfo` 生成 root info 并经 pipe 传给其他 rank，各 rank 调用 `axCclCommInitRootInfo` 后执行一次 AllReduce 并在 Host 侧校验结果。已实现的测试覆盖和既有验收不能代替本版本自动引导的实卡验证；本文不声明新 R9 硬件测试通过。

@@ -289,7 +289,7 @@ AXCL_EXPORT axclError axclrtStreamWaitEvent(axclrtStream stream, axclrtEvent eve
 
 - `stream` and `event` must belong to the same device; otherwise this function fails.
 - The wait point refers to the Event's latest record at the time of submission. A later record of the Event does not change it.
-- No wait point is inserted if the Event has never been recorded, if its latest record has already ended, or if that record is on `stream` itself.
+- No wait point is inserted if the Event has never been recorded or if its latest record has already ended. A record that has not ended yet is waited for even if it is on `stream` itself.
 - A successful return means only that the wait point was submitted. This function does not block the Host thread. After the specified Stream reaches the wait point, subsequent tasks cannot continue until the record ends.
 - A record that ends without executing, because it was rejected or its Stream was destroyed, also releases the wait point. The failure is reported by the recording Stream, not by `stream`.
 - Multiple Streams can wait on the same Event. See [Event semantics](../arch/concept.md#EVENT).

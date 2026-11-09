@@ -50,6 +50,7 @@ AXCL_EXPORT axclError axclrtDeviceCanAccessPeer(int32_t *canAccessPeer, int32_t 
 #### Note
 
 - The device `deviceId` must be active; the capability is queried on that device.
+- Devices on different accelerator cards do not support direct device-to-device copy; `canAccessPeer` receives 0 for such a pair.
 
 <br>
 
@@ -452,21 +453,16 @@ AXCL_EXPORT axclError axclrtSetDevice(int32_t deviceId);
 
 - The first call activates the device and implicitly creates a default Context containing a default Stream. Later calls for the same device reuse these default resources and bind the calling thread to the shared default Context.
 - The default Context replaces the calling thread's current Context, including one set by [axclrtCreateContext](context_api.md#axclrtCreateContext) or [axclrtSetCurrentContext](context_api.md#axclrtSetCurrentContext). It stays current until another Context is made current or the device is released. If this function fails, the binding is unchanged.
-- The runtime maintains a process-wide reference count for each device. Each successful call to [axclrtSetDevice](#axclrtSetDevice) should be paired with [axclrtResetDevice](#axclrtResetDevice). The device is released when the count reaches 0.
-- [axclrtCreateContext](context_api.md#axclrtCreateContext) also activates the specified device before creating an explicit Context.
+- The runtime maintains a process-wide reference count for each device. Each successful call to [axclrtSetDevice](#axclrtSetDevice) should be paired with [axclrtResetDevice](#axclrtResetDevice). The device is released when the count reaches 0. [axclrtCreateContext](context_api.md#axclrtCreateContext) and [axclrtDestroyContext](context_api.md#axclrtDestroyContext) also add and release references in this count, so [axclrtCreateContext](context_api.md#axclrtCreateContext) activates the specified device as well.
 
 #### Example
 
 ```c
- int main(int argc, char *argv[]) {
-     axclInit("");
-
-     axclrtSetDevice(0);
-     axclrtResetDevice(0);
-
-     axclFinalize();
-     return 0;
- }
+ axclInit("");
+ axclrtSetDevice(0);
+ // Submit tasks to device 0.
+ axclrtResetDevice(0);
+ axclFinalize();
 ```
 
 #### Remark
@@ -485,7 +481,7 @@ Block until all work submitted to the device associated with the calling thread 
 #### Function
 
 ```c
-AXCL_EXPORT axclError axclrtSynchronizeDevice();
+AXCL_EXPORT axclError axclrtSynchronizeDevice(void);
 ```
 
 #### Parameters

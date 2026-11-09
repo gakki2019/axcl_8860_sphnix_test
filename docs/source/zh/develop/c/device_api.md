@@ -50,6 +50,7 @@ AXCL_EXPORT axclError axclrtDeviceCanAccessPeer(int32_t *canAccessPeer, int32_t 
 #### 2.1.4. 说明
 
 - 设备 `deviceId` 必须已激活，访问能力在该设备上查询。
+- 不同加速卡上的设备之间不支持设备间直接拷贝，`canAccessPeer` 接收 0。
 
 <br>
 
@@ -452,21 +453,16 @@ AXCL_EXPORT axclError axclrtSetDevice(int32_t deviceId);
 
 - 首次调用将激活设备，并隐式创建一个包含默认 Stream 的默认 Context。之后对同一设备的调用会复用这些默认资源，并将当前调用线程绑定到共享的默认 Context。
 - 默认 Context 替换调用线程原来的当前 Context，包括通过 [axclrtCreateContext](context_api.md#axclrtCreateContext) 或 [axclrtSetCurrentContext](context_api.md#axclrtSetCurrentContext) 设置的 Context，直到设置其他 Context 或设备被释放。本函数失败时，线程绑定保持不变。
-- 为每个设备维护进程级引用计数。每次成功调用 [axclrtSetDevice](#axclrtSetDevice) 都应与 [axclrtResetDevice](#axclrtResetDevice) 成对使用。引用计数变为 0 时才会释放设备。
-- [axclrtCreateContext](context_api.md#axclrtCreateContext) 在创建显式 Context 前也会激活指定设备。
+- 为每个设备维护进程级引用计数。每次成功调用 [axclrtSetDevice](#axclrtSetDevice) 都应与 [axclrtResetDevice](#axclrtResetDevice) 成对使用。引用计数变为 0 时才会释放设备。[axclrtCreateContext](context_api.md#axclrtCreateContext) 和 [axclrtDestroyContext](context_api.md#axclrtDestroyContext) 也在这一计数上增加和释放引用，因此 [axclrtCreateContext](context_api.md#axclrtCreateContext) 同样会激活指定设备。
 
 #### 2.13.5. 示例
 
 ```c
- int main(int argc, char *argv[]) {
-     axclInit("");
-
-     axclrtSetDevice(0);
-     axclrtResetDevice(0);
-
-     axclFinalize();
-     return 0;
- }
+ axclInit("");
+ axclrtSetDevice(0);
+ // Submit tasks to device 0.
+ axclrtResetDevice(0);
+ axclFinalize();
 ```
 
 #### 2.13.6. 参考

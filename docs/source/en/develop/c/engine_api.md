@@ -6,13 +6,16 @@
 - [axclrtEngineCreateIO](#axclrtEngineCreateIO): Create a Host-side IO binding object from model IO metadata.
 - [axclrtEngineDestroyIO](#axclrtEngineDestroyIO): Destroy an IO binding object created by [axclrtEngineCreateIO](#axclrtEngineCreateIO).
 - [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo): Destroy an IO metadata object created by [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo).
+- [axclrtEngineDestroyIOInfoV2](#axclrtEngineDestroyIOInfoV2): Release metadata returned by axclrtEngineGetIOInfoV2, including all nested arrays and names.
 - [axclrtEngineExecute](#axclrtEngineExecute): Execute model inference synchronously on the current runtime Context's default Stream.
 - [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync): Submit a model inference task to a Stream.
 - [axclrtEngineExecuteAsyncV2](#axclrtEngineExecuteAsyncV2): Submit a model inference task to a Stream and run it on the Native asynchronous engine.
+- [axclrtEngineExecuteV2](#axclrtEngineExecuteV2): Submit complete IO bindings and execute synchronously on the default Stream.
 - [axclrtEngineFinalize](#axclrtEngineFinalize): Deinitialize Engine on the device associated with the current Context.
 - [axclrtEngineGetAffinity](#axclrtEngineGetAffinity): Get the NPU-core affinity mask of a loaded model.
 - [axclrtEngineGetContextAffinity](#axclrtEngineGetContextAffinity): Get affinity for one Engine Context; this operation is currently unsupported.
 - [axclrtEngineGetIOInfo](#axclrtEngineGetIOInfo): Create a Host-side metadata object describing a loaded model's inputs and outputs.
+- [axclrtEngineGetIOInfoV2](#axclrtEngineGetIOInfoV2): Get complete default-group tensor metadata using the existing Native structure.
 - [axclrtEngineGetInputBufferByIndex](#axclrtEngineGetInputBufferByIndex): Get the buffer binding stored for an input index.
 - [axclrtEngineGetInputBufferByName](#axclrtEngineGetInputBufferByName): Get the buffer binding stored for an input tensor name.
 - [axclrtEngineGetInputDataLayout](#axclrtEngineGetInputDataLayout): Get the data layout of an input tensor.
@@ -179,6 +182,34 @@ After this function succeeds, `ioInfo` and all names returned from it are invali
 
 <br>
 
+<a id="axclrtEngineDestroyIOInfoV2"></a>
+
+### axclrtEngineDestroyIOInfoV2
+
+Release metadata returned by axclrtEngineGetIOInfoV2, including all nested arrays and names.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtEngineDestroyIOInfoV2(AX_ENGINE_IO_INFO_T *ioInfo);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| ioInfo | in | Metadata returned by axclrtEngineGetIOInfoV2. Must not be NULL. |
+
+#### Returns
+
+- AXCL_SUCC on success; an error code otherwise.
+
+#### Note
+
+Release exactly once. Do not pass caller-owned objects or Native AX_ENGINE_GetIOInfo results. This call does not release tensor buffers. Metadata may be released once no descriptor references its storage.
+
+<br>
+
 <a id="axclrtEngineExecute"></a>
 
 ### axclrtEngineExecute
@@ -244,6 +275,7 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contex
 - The buffer bindings and batch size in `io` are captured when the request is submitted, so `io` can be modified or destroyed after this function returns without affecting the submitted request.
 - Every input and output in `io` must be bound to Device memory on the same device as `stream`; otherwise the function fails without sending the request.
 - Errors detected on the Device, including a rejection because the Stream task queue is full, are returned by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) or [axclrtSynchronizeStreamWithTimeout](stream_api.md#axclrtSynchronizeStreamWithTimeout) on the Stream. Tasks in the Stream that have not started yet, except Event record and wait points, are skipped until that synchronization returns the error.
+- Exception: if the Device cannot obtain its Context or Stream for the request, for example because it is out of resources, the request is discarded without running and no error is reported by the later synchronization.
 
 #### Remark
 
@@ -263,7 +295,7 @@ Unlike [axclrtEngineExecuteAsync](#axclrtEngineExecuteAsync), the Stream does no
 #### Function
 
 ```c
-AXCL_EXPORT axclError axclrtEngineExecuteAsyncV2(uint64_t modelId, uint64_t contextId, uint32_t group, axclrtEngineIO io, axclrtStream stream);
+AXCL_EXPORT axclError axclrtEngineExecuteAsyncV2(uint64_t modelId, uint64_t contextId, uint32_t group, const AX_ENGINE_IO_T *io, axclrtStream stream);
 ```
 
 #### Parameters
@@ -273,13 +305,12 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsyncV2(uint64_t modelId, uint64_t cont
 | modelId | in | Loaded model ID. |
 | contextId | in | Engine Context ID created for `modelId`. |
 | group | in | Shape-group index. Must be 0: only the default shape group is supported. |
-| io | in | IO binding object containing all required Device buffers. Must not be NULL. |
+| io | in | Caller-owned complete IO descriptor with RT Tokens. Must not be NULL. |
 | stream | in | Stream that receives the inference request. Pass NULL to use the current runtime Context's default Stream. |
 
 #### Returns
 
 - `AXCL_SUCC`: The inference request was submitted successfully.
-- `AXCL_ERR_ENGINE_ILLEGAL_PARAM`: `group` is not 0, or another argument is invalid.
 - `others`: Failure.
 
 #### Note
@@ -287,9 +318,15 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsyncV2(uint64_t modelId, uint64_t cont
 - Models with more than one shape group are not supported; the Native engine rejects them, and the error is returned by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) on `stream`.
 - Later commands on `stream` do not wait for this inference. A command that reads its outputs must be ordered after it explicitly: record an Event after this call and make the reading Stream, which may be `stream` itself, wait for it with [axclrtStreamWaitEvent](event_api.md#axclrtStreamWaitEvent), or synchronize on the Host first.
 - An Event recorded on `stream` after this call completes only when this inference has finished, and [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) returns only when it has finished. Event completion does not mean the inference succeeded; its error is returned by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) or [axclrtSynchronizeStreamWithTimeout](stream_api.md#axclrtSynchronizeStreamWithTimeout) on `stream`, including a rejection by the Native engine.
+- Exception: if the Device cannot obtain its Context or Stream for the request, for example because it is out of resources, the request is discarded without running and no error is reported by the later synchronization.
 - Inferences on the same Stream and Engine Context run one after another. Using one Engine Context on several Streams at the same time requires the application to order them with Events.
 - Keep the model, Engine Context, and all bound Device buffers valid until the inference has finished. A timed-out wait does not cancel it.
-- Every input and output in `io` must be bound to Device memory on the same device as `stream`; otherwise the function fails without sending the request.
+- IO fields follow axclrtEngineExecuteV2. Token bindings are resolved once on Host, including device and bounds checks. The caller remains responsible for all buffer lifetimes.
+- AX_ENGINE_IO_T carries no cache attributes. Runtime obtains cached flags from output Tokens. Worker selects Native SHARED_CACHED or SHARED_UNCACHED from these flags. Native validates output addresses and memory support; outputs without Device VA are rejected. Native errors appear on synchronization. Free RT-owned memory through RT.
+- Requires a matching Host Runtime and Worker supporting aggregate IO and output cache attributes.
+- This aggregate entry replaces the original axclrtEngineIO argument of ExecuteAsyncV2 with AX_ENGINE_IO_T; callers of the earlier V2 entry must rebuild and migrate their IO descriptors.
+- IO descriptors are serialized before return and may then be reused or released; tensor buffers must remain valid.
+- With stream=NULL, wait with axclrtSynchronizeDevice; axclrtSynchronizeStream does not accept NULL.
 
 #### Remark
 
@@ -297,6 +334,37 @@ AXCL_EXPORT axclError axclrtEngineExecuteAsyncV2(uint64_t modelId, uint64_t cont
 - [axclrtRecordEvent](event_api.md#axclrtRecordEvent)
 - [axclrtStreamWaitEvent](event_api.md#axclrtStreamWaitEvent)
 - [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
+
+<br>
+
+<a id="axclrtEngineExecuteV2"></a>
+
+### axclrtEngineExecuteV2
+
+Submit complete IO bindings and execute synchronously on the default Stream.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtEngineExecuteV2(uint64_t modelId, uint64_t contextId, uint32_t group, const AX_ENGINE_IO_T *io);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| modelId | in | Loaded model ID. |
+| contextId | in | Engine Context ID created for the model. |
+| group | in | Shape-group index. Currently ignored, as in axclrtEngineExecute. |
+| io | in | Caller-owned descriptor containing all inputs and outputs in model order. |
+
+#### Returns
+
+- AXCL_SUCC when inference completes; an error code otherwise.
+
+#### Note
+
+No CreateIO or SetBuffer calls are needed. Descriptor arrays and Device buffers must remain valid until return. Buffers must belong to the default Stream's device. This call does not allocate or copy tensor data and does not take ownership of any caller memory. Each buffer must use phyAddr=0 and a nonnull RT Token-VA in pVirAddr. Host resolves addresses, bounds and device ownership from the Token. Nonzero phyAddr and invalid Tokens return AXCL_ERR_ENGINE_ILLEGAL_PARAM. RT allocations and IPC imports are accepted; axclrtMemMapDevAddr Tokens are unsupported because their cache attributes are unknown. A Token with no Device VA requires model/Engine support for physical-only IO. Custom pStride/nStrideSize and pIoSetting are currently unsupported and must be NULL/0. nSize is a positive uint32 byte count. Retain RT handles for memory operations and buffer lifetime. Neither Token-VA nor Device VA may be dereferenced on Host. RT model/Context handles remain unchanged. This Token convention is specific to RT V2: do not pass Token descriptors directly to Native Engine. The axcl_test_rtengine cases axclrtEngineV2Test.* provide runnable examples and output comparisons. The optional DISABLED_LatencyComparison case compares fixed IO and repeated binding in C++.
 
 <br>
 
@@ -309,7 +377,7 @@ Deinitialize Engine on the device associated with the current Context.
 #### Function
 
 ```c
-AXCL_EXPORT axclError axclrtEngineFinalize();
+AXCL_EXPORT axclError axclrtEngineFinalize(void);
 ```
 
 #### Parameters
@@ -423,6 +491,35 @@ Destroy the returned handle with [axclrtEngineDestroyIOInfo](#axclrtEngineDestro
 
 - [axclrtEngineDestroyIOInfo](#axclrtEngineDestroyIOInfo)
 - [axclrtEngineCreateIO](#axclrtEngineCreateIO)
+
+<br>
+
+<a id="axclrtEngineGetIOInfoV2"></a>
+
+### axclrtEngineGetIOInfoV2
+
+Get complete default-group tensor metadata using the existing Native structure.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtEngineGetIOInfoV2(uint64_t modelId, AX_ENGINE_IO_INFO_T **ioInfo);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| modelId | in | Loaded model ID. |
+| ioInfo | out | Receives Runtime-owned, read-only metadata; NULL on failure. |
+
+#### Returns
+
+- AXCL_SUCC on success; an error code otherwise.
+
+#### Note
+
+Release with axclrtEngineDestroyIOInfoV2. All nested arrays and names remain valid until release. This object is independent of the legacy axclrtEngineIOInfo handle and Native AX_ENGINE_GetIOInfo allocations. Uses Native enum values. Shape and stride arrays have nShapeSize elements; pStride may be NULL. Uses the independent GET_INFOV2 protocol and requires a Worker that supports it. No automatic fallback to GET_INFO is provided; the legacy metadata descriptor is unchanged. The result includes pInputs/nInputSize, pOutputs/nOutputSize, nMaxBatchSize and bDynamicBatchSize. Tensor fields include pName, pShape/nShapeSize, pStride, eDataType, eLayout, eMemoryType and nSize. Optional pExtraMeta carries color information; it is NULL when absent. Current encoding supports up to eight shape/stride dimensions. Reserved and untransmitted quantization fields are zero. Do not modify or individually free nested fields, or release this object with the legacy destroy API.
 
 <br>
 

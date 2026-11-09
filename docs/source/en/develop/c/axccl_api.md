@@ -469,7 +469,7 @@ AX_CCL_EXPORT axclError axCclCommInitAll(axCclComm *comms, int32_t count, const 
 
 #### Note
 
-Supports 1 to 8 distinct logical Device IDs in one Host process. Four devices are the primary current topology; the implementation accepts the full protocol range. Activate every listed Device with [axclrtSetDevice](device_api.md#axclrtSetDevice) first; each communicator uses that Device's default Context. Array order assigns logical ranks only; it does not declare a ring. For ring collectives, ranks are ordered by their actual local chip_id ascending, and the C2C link from each rank to the next must be online; otherwise this call fails. This is a static rule, not hardware adjacency discovery. The ring is connected before return, so a bare collective of one rank does not wait for the other ranks to call. If the calling thread has a current Context, it is restored before return; otherwise the thread may be left bound to the default Context of a listed Device. InitAll always uses the single-process route, even when the diagnostic AXCCL_MULTIPROCESS override is "1". Cannot be called inside a group.
+Supports 1 to 8 distinct logical Device IDs in one Host process. Four devices are the primary current topology; the implementation accepts the full protocol range. Activate every listed Device with [axclrtSetDevice](device_api.md#axclrtSetDevice) first; each communicator uses that Device's default Context. Array order assigns logical ranks only; it does not declare a ring. For ring collectives, ranks are ordered along the physical C2C chain reported by each Device's topology (its previous and next neighbor), not by array order or chip ID. The listed Devices must all be found on that chain, and the C2C link from each rank to the next, including from the last rank back to the first, must be online; otherwise this call fails. The ring is connected before return, so a bare collective of one rank does not wait for the other ranks to call. If the calling thread has a current Context, it is restored before return; otherwise the thread may be left bound to the default Context of a listed Device. InitAll always uses the single-process route, even when the diagnostic AXCCL_MULTIPROCESS override is "1". Cannot be called inside a group.
 
 <br>
 
@@ -993,6 +993,8 @@ AX_CCL_EXPORT axclError axCclReduceScatter(const void *sendbuff, void *recvbuff,
 #### Note
 
 `op` may be a built-in operator or a handle from [axCclRedOpCreatePreMulSum](#axCclRedOpCreatePreMulSum).
+
+With AX_CCL_IN_PLACE, recvbuff is the base of the complete input allocation; this rank's result occupies elements [rank * recvcount, (rank + 1) * recvcount) of that allocation, interpreted as dtype.
 
 <br>
 

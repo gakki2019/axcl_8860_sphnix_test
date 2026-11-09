@@ -118,12 +118,12 @@ void axclAppLog(int32_t lv, const char *func, const char *file, uint32_t line, c
 
 | Name | Type | Description |
 |---|---|---|
-| lv | int | Log level. See |
+| lv | int | Log level. See axclrtSetLogLevel. |
 | func | str &#124; bytes &#124; None | Function name. If NULL, the function name is not printed. |
 | file | str &#124; bytes &#124; None | File name. If NULL, the file name is not printed. |
 | line | int | Line number. |
 | fmt | str &#124; bytes &#124; None | Non-NULL `printf`-style format string. The formatted message is stored in a 1024-byte internal buffer including the terminating NUL. Messages longer than 1023 bytes are truncated. Format specifiers must match the arguments. |
-| args | object | No parameter description in source. |
+| args | object | Arguments formatted by `fmt`. Integers are passed as C `int`, floats as `double`, and strings or bytes as `char *`; pass a ctypes instance when another C type is required. |
 
 #### 2.3.3. Returns
 

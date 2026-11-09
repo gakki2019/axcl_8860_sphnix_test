@@ -21,7 +21,7 @@
 - [axcl.vdec.select_grp](#axcl.vdec.select_grp): 检查哪些 VDEC 组当前有就绪的输出帧。本接口获取当前 VDEC 组集合的快照，返回输出队列中存在可用解码帧的组和通道。支持阻塞、非阻塞和超时模式。
 - [axcl.vdec.send_stream](#axcl.vdec.send_stream): 向解码通道组发送码流数据。本接口向 VDEC 组提交压缩码流包。数据包内容和结束标志必须与所配置的输入模式匹配（源码未提供配置引用）。
 - [axcl.vdec.get_chn_frame](#axcl.vdec.get_chn_frame): 从输出通道获取解码图像。本接口从指定 VDEC 组和通道获取一帧解码输出。返回的帧必须通过相应接口释放（源码未提供接口引用）。
-- [axcl.vdec.release_chn_frame](#axcl.vdec.release_chn_frame): 释放解码输出通道图像缓冲区。本接口释放此前获取的帧缓冲区（源码未提供获取接口引用）。
+- [axcl.vdec.release_chn_frame](#axcl.vdec.release_chn_frame): 释放解码输出通道图像缓冲区。本接口释放此前从 AX_VDEC_GetChnFrame 获取的帧缓冲区。
 - [axcl.vdec.get_user_data](#axcl.vdec.get_user_data): 从解码码流中获取用户数据（SEI/COM）。本接口提取压缩码流中嵌入的用户数据。对于 H.264/H.265，获取 SEI（补充增强信息）消息。对于 JPEG/MJPEG，获取 COM（注释）标记。
 - [axcl.vdec.release_user_data](#axcl.vdec.release_user_data): 释放从 VDEC 组获取的用户数据。本接口为兼容性保留，不执行内部释放操作。SDK 自动管理用户数据资源，应用无需调用本接口。
 - [axcl.vdec.set_user_pic](#axcl.vdec.set_user_pic): 设置 VDEC 组的用户图像插入属性。本接口配置用户提供的图像属性，该图像可插入解码器输出流。用户图像通常在解码中断或首个有效帧到达前用作占位图像或默认图像。
@@ -37,10 +37,10 @@
 - [axcl.vdec.get_chn_attr](#axcl.vdec.get_chn_attr): 获取 VDEC 通道属性。本接口查询 VDEC 组内指定通道的当前配置，包括输出格式、分辨率、宽高比及其他显示参数。返回的属性反映通道当前的运行时配置。
 - [axcl.vdec.jpeg_decode_one_frame](#axcl.vdec.jpeg_decode_one_frame): 从调用者提供的物理连续缓冲区同步解码单个 JPEG 帧。本接口同步解码单幅 JPEG 图像，无需 VDEC 组或通道。适用于缩略图生成、快照提取或单次 JPEG 解码任务。
 - [axcl.vdec.jpeg_decode_one_frame_ex](#axcl.vdec.jpeg_decode_one_frame_ex): 从普通进程内存中的已编码 JPEG 缓冲区解码 JPEG 图像，并在内部分配输出帧。本便捷接口解析 JPEG 分辨率，在内部分配所需输入和输出缓冲区，并同步解码图像。
-- [axcl.vdec.jpeg_release_decode_frame_ex](#axcl.vdec.jpeg_release_decode_frame_ex): 释放返回的帧（源码未提供接口引用）。
+- [axcl.vdec.jpeg_release_decode_frame_ex](#axcl.vdec.jpeg_release_decode_frame_ex): 释放 AX_VDEC_JpegDecodeOneFrameEx 返回的帧。
 - [axcl.vdec.get_stream_buf_info](#axcl.vdec.get_stream_buf_info): 获取 VDEC 组的输入码流缓冲区信息。本接口查询指定 VDEC 组输入码流缓冲区的当前状态和配置，包括缓冲区大小、使用统计和队列深度信息。
 - [axcl.vdec.get_vui_param](#axcl.vdec.get_vui_param): 从解码码流中获取 VUI（视频可用性信息）参数。本接口从指定 VDEC 组正在解码的 H.264/H.265 视频码流中提取 VUI 参数。VUI 包含视频特性的元数据，如宽高比、色彩原色、传递特性和矩阵系数。
-- [axcl.vdec.get_pic_buffer_size](#axcl.vdec.get_pic_buffer_size): 计算解码图像的帧缓冲区大小。本接口根据指定尺寸、输出像素格式、可选 FBC 压缩配置和编解码载荷类型，计算存储一帧解码图像所需的字节数。使用返回值设置 u32FrameBufSize 字段（源码未说明所属结构体）。
+- [axcl.vdec.get_pic_buffer_size](#axcl.vdec.get_pic_buffer_size): 计算解码图像的帧缓冲区大小。本接口根据指定尺寸、输出像素格式、可选 FBC 压缩配置和编解码载荷类型，计算存储一帧解码图像所需的字节数。配置解码通道时，使用返回值设置 AX_VDEC_CHN_ATTR_T 的 u32FrameBufSize 字段。
 - [axcl.vdec.get_yuv_buffer_size](#axcl.vdec.get_yuv_buffer_size): 计算 JPEG 解码图像的 YUV 缓冲区大小。本接口按指定尺寸和输出格式，计算存储一帧 JPEG 解码图像所需的字节数，宽度和高度均按 16 对齐。
 
 <br>
@@ -81,8 +81,6 @@ AX_S32 AX_VDEC_Init(const AX_VDEC_MOD_ATTR_T *pstModAttr);
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1125`。
-
 #### 2.1.5. 示例
 
 ```python
@@ -122,8 +120,6 @@ AX_S32 AX_VDEC_Deinit(void);
 #### 2.2.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1156`。
 
 #### 2.2.5. 示例
 
@@ -169,8 +165,6 @@ AX_S32 AX_VDEC_ExtractStreamHeaderInfo(const AX_VDEC_STREAM_T *pstStreamBuf, AX_
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1184`。
-
 #### 2.3.5. 示例
 
 ```python
@@ -213,8 +207,6 @@ AX_S32 AX_VDEC_CreateGrp(AX_VDEC_GRP VdGrp, const AX_VDEC_GRP_ATTR_T *pstGrpAttr
 #### 2.4.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1220`。
 
 #### 2.4.5. 示例
 
@@ -259,8 +251,6 @@ AX_S32 AX_VDEC_CreateGrpEx(AX_VDEC_GRP *VdGrp, const AX_VDEC_GRP_ATTR_T *pstGrpA
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1253`。
-
 #### 2.5.5. 示例
 
 ```python
@@ -302,8 +292,6 @@ AX_S32 AX_VDEC_DestroyGrp(AX_VDEC_GRP VdGrp);
 #### 2.6.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1287`。
 
 #### 2.6.5. 示例
 
@@ -348,8 +336,6 @@ AX_S32 AX_VDEC_GetGrpAttr(AX_VDEC_GRP VdGrp, AX_VDEC_GRP_ATTR_T *pstGrpAttr);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1318`。
-
 #### 2.7.5. 示例
 
 ```python
@@ -392,8 +378,6 @@ AX_S32 AX_VDEC_SetGrpAttr(AX_VDEC_GRP VdGrp, const AX_VDEC_GRP_ATTR_T *pstGrpAtt
 #### 2.8.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1352`。
 
 #### 2.8.5. 示例
 
@@ -438,8 +422,6 @@ AX_S32 AX_VDEC_StartRecvStream(AX_VDEC_GRP VdGrp, const AX_VDEC_RECV_PIC_PARAM_T
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1385`。
-
 #### 2.9.5. 示例
 
 ```python
@@ -481,8 +463,6 @@ AX_S32 AX_VDEC_StopRecvStream(AX_VDEC_GRP VdGrp);
 #### 2.10.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1418`。
 
 #### 2.10.5. 示例
 
@@ -527,8 +507,6 @@ AX_S32 AX_VDEC_QueryStatus(AX_VDEC_GRP VdGrp, AX_VDEC_GRP_STATUS_T *pstGrpStatus
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1449`。
-
 #### 2.11.5. 示例
 
 ```python
@@ -570,8 +548,6 @@ AX_S32 AX_VDEC_ResetGrp(AX_VDEC_GRP VdGrp);
 #### 2.12.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1483`。
 
 #### 2.12.5. 示例
 
@@ -616,8 +592,6 @@ AX_S32 AX_VDEC_SetGrpParam(AX_VDEC_GRP VdGrp, const AX_VDEC_GRP_PARAM_T* pstGrpP
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1514`。
-
 #### 2.13.5. 示例
 
 ```python
@@ -660,8 +634,6 @@ AX_S32 AX_VDEC_GetGrpParam(AX_VDEC_GRP VdGrp, AX_VDEC_GRP_PARAM_T* pstGrpParam);
 #### 2.14.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1547`。
 
 #### 2.14.5. 示例
 
@@ -706,8 +678,6 @@ AX_S32 AX_VDEC_SetGrpThreadBind(AX_VDEC_GRP VdGrp, const AX_VDEC_GRP_THREAD_BIND
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1581`。
-
 #### 2.15.5. 示例
 
 ```python
@@ -750,8 +720,6 @@ AX_S32 AX_VDEC_GetGrpThreadBind(AX_VDEC_GRP VdGrp, AX_VDEC_GRP_THREAD_BIND_T *ps
 #### 2.16.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1614`。
 
 #### 2.16.5. 示例
 
@@ -796,8 +764,6 @@ AX_S32 AX_VDEC_SelectGrp(AX_VDEC_GRP_SET_INFO_T *pstGrpSet, AX_S32 s32MilliSec);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1648`。
-
 #### 2.17.5. 示例
 
 ```python
@@ -841,8 +807,6 @@ AX_S32 AX_VDEC_SendStream(AX_VDEC_GRP VdGrp, const AX_VDEC_STREAM_T *pstStream, 
 #### 2.18.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1682`。
 
 #### 2.18.5. 示例
 
@@ -889,8 +853,6 @@ AX_S32 AX_VDEC_GetChnFrame(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, AX_VIDEO_FRAME_
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1717`。
-
 #### 2.19.5. 示例
 
 ```python
@@ -903,7 +865,7 @@ frame_info, ret = axcl.vdec.get_chn_frame(vd_grp, vd_chn, milli_sec)
 
 ### 2.20. axcl.vdec.release_chn_frame
 
-释放解码输出通道图像缓冲区。本接口释放此前获取的帧缓冲区（源码未提供获取接口引用）。
+释放解码输出通道图像缓冲区。本接口释放此前从 AX_VDEC_GetChnFrame 获取的帧缓冲区。
 
 #### 2.20.1. 函数
 
@@ -925,7 +887,7 @@ AX_S32 AX_VDEC_ReleaseChnFrame(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, const AX_VI
 |---|---|---|
 | vd_grp | int | VDEC 组 ID。有效范围：[0,（源码未提供上限）。 |
 | vd_chn | int | VDEC 通道 ID。有效范围：[0,（源码未提供上限）。 |
-| frame_info | dict &#124; None | 指向返回的帧信息结构体的指针（源码未提供接口引用）。 |
+| frame_info | dict &#124; None | 指向 AX_VDEC_GetChnFrame 返回的帧信息结构体的指针。 |
 
 #### 2.20.3. 返回值
 
@@ -934,8 +896,6 @@ AX_S32 AX_VDEC_ReleaseChnFrame(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, const AX_VI
 #### 2.20.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1755`。
 
 #### 2.20.5. 示例
 
@@ -980,8 +940,6 @@ AX_S32 AX_VDEC_GetUserData(AX_VDEC_GRP VdGrp, AX_VDEC_USERDATA_T *pstUserData);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1790`。
-
 #### 2.21.5. 示例
 
 ```python
@@ -1015,7 +973,7 @@ AX_S32 AX_VDEC_ReleaseUserData(AX_VDEC_GRP VdGrp, const AX_VDEC_USERDATA_T * pst
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | vd_grp | int | VDEC 组 ID。有效范围：[0,（源码未提供上限）。 |
-| user_data | dict &#124; None | 指向返回的用户数据结构体的指针（源码未提供接口引用）。 |
+| user_data | dict &#124; None | 指向 AX_VDEC_GetUserData 返回的用户数据结构体的指针。 |
 
 #### 2.22.3. 返回值
 
@@ -1024,8 +982,6 @@ AX_S32 AX_VDEC_ReleaseUserData(AX_VDEC_GRP VdGrp, const AX_VDEC_USERDATA_T * pst
 #### 2.22.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1824`。
 
 #### 2.22.5. 示例
 
@@ -1070,8 +1026,6 @@ AX_S32 AX_VDEC_SetUserPic(AX_VDEC_GRP VdGrp, const AX_VDEC_USRPIC_T *pstUsrPic);
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1857`。
-
 #### 2.23.5. 示例
 
 ```python
@@ -1114,8 +1068,6 @@ AX_S32 AX_VDEC_EnableUserPic(AX_VDEC_GRP VdGrp);
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1890`。
-
 #### 2.24.5. 示例
 
 ```python
@@ -1157,8 +1109,6 @@ AX_S32 AX_VDEC_DisableUserPic(AX_VDEC_GRP VdGrp);
 #### 2.25.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1921`。
 
 #### 2.25.5. 示例
 
@@ -1203,8 +1153,6 @@ AX_S32 AX_VDEC_SetDisplayMode(AX_VDEC_GRP VdGrp, AX_VDEC_DISPLAY_MODE_E enDispla
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:1952`。
-
 #### 2.26.5. 示例
 
 ```python
@@ -1247,8 +1195,6 @@ AX_S32 AX_VDEC_GetDisplayMode(AX_VDEC_GRP VdGrp, AX_VDEC_DISPLAY_MODE_E *penDisp
 #### 2.27.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/vdec/ax_vdec.py:1985`。
 
 #### 2.27.5. 示例
 
@@ -1294,8 +1240,6 @@ AX_S32 AX_VDEC_AttachPool(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, AX_POOL PoolId);
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:2019`。
-
 #### 2.28.5. 示例
 
 ```python
@@ -1338,8 +1282,6 @@ AX_S32 AX_VDEC_DetachPool(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn);
 #### 2.29.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:2054`。
 
 #### 2.29.5. 示例
 
@@ -1384,8 +1326,6 @@ AX_S32 AX_VDEC_EnableChn(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn);
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:2087`。
-
 #### 2.30.5. 示例
 
 ```python
@@ -1428,8 +1368,6 @@ AX_S32 AX_VDEC_DisableChn(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn);
 #### 2.31.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:2120`。
 
 #### 2.31.5. 示例
 
@@ -1475,8 +1413,6 @@ AX_S32 AX_VDEC_SetChnAttr(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, const AX_VDEC_CH
 
 返回类型：`int`。
 
-源码：`python/axcl/vdec/ax_vdec.py:2153`。
-
 #### 2.32.5. 示例
 
 ```python
@@ -1521,8 +1457,6 @@ AX_S32 AX_VDEC_GetChnAttr(AX_VDEC_GRP VdGrp, AX_VDEC_CHN VdChn, AX_VDEC_CHN_ATTR
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:2188`。
-
 #### 2.33.5. 示例
 
 ```python
@@ -1565,8 +1499,6 @@ AX_S32 AX_VDEC_JpegDecodeOneFrame(AX_VDEC_DEC_ONE_FRM_T *pstParam);
 #### 2.34.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/vdec/ax_vdec.py:2224`。
 
 #### 2.34.5. 示例
 
@@ -1611,8 +1543,6 @@ AX_S32 AX_VDEC_JpegDecodeOneFrameEx(AX_VDEC_DEC_ONE_FRM_T *pstParam);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:2257`。
-
 #### 2.35.5. 示例
 
 ```python
@@ -1625,7 +1555,7 @@ param, ret = axcl.vdec.jpeg_decode_one_frame_ex(param)
 
 ### 2.36. axcl.vdec.jpeg_release_decode_frame_ex
 
-释放返回的帧（源码未提供接口引用）。
+释放 AX_VDEC_JpegDecodeOneFrameEx 返回的帧。
 
 #### 2.36.1. 函数
 
@@ -1645,18 +1575,16 @@ AX_S32 AX_VDEC_JpegReleaseDecodeFrameEx(AX_VIDEO_FRAME_T *pstFrame);
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| frame | dict &#124; None | 指向返回帧的指针（源码未提供接口引用）。 |
+| frame | dict &#124; None | 指向 AX_VDEC_JpegDecodeOneFrameEx 返回帧的指针。 |
 
 #### 2.36.3. 返回值
 
-- `frame`: *dict* — 指向返回帧的指针（源码未提供接口引用）。
+- `frame`: *dict* — 指向 AX_VDEC_JpegDecodeOneFrameEx 返回帧的指针。
 - `ret`: *int* — 成功。失败。参见 VDEC 错误码。
 
 #### 2.36.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/vdec/ax_vdec.py:2290`。
 
 #### 2.36.5. 示例
 
@@ -1701,8 +1629,6 @@ AX_S32 AX_VDEC_GetStreamBufInfo(AX_VDEC_GRP VdGrp, AX_VDEC_STREAM_BUF_INFO_T *ps
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:2323`。
-
 #### 2.37.5. 示例
 
 ```python
@@ -1746,8 +1672,6 @@ AX_S32 AX_VDEC_GetVuiParam(AX_VDEC_GRP VdGrp, AX_VDEC_VUI_PARAM_T *pstVuiParam);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/vdec/ax_vdec.py:2357`。
-
 #### 2.38.5. 示例
 
 ```python
@@ -1760,7 +1684,7 @@ vui_param, ret = axcl.vdec.get_vui_param(vd_grp)
 
 ### 2.39. axcl.vdec.get_pic_buffer_size
 
-计算解码图像的帧缓冲区大小。本接口根据指定尺寸、输出像素格式、可选 FBC 压缩配置和编解码载荷类型，计算存储一帧解码图像所需的字节数。使用返回值设置 u32FrameBufSize 字段（源码未说明所属结构体）。
+计算解码图像的帧缓冲区大小。本接口根据指定尺寸、输出像素格式、可选 FBC 压缩配置和编解码载荷类型，计算存储一帧解码图像所需的字节数。配置解码通道时，使用返回值设置 AX_VDEC_CHN_ATTR_T 的 u32FrameBufSize 字段。
 
 #### 2.39.1. 函数
 
@@ -1782,7 +1706,7 @@ AX_U32 AX_VDEC_GetPicBufferSize(AX_U32 uWidth, AX_U32 uHeight, AX_IMG_FORMAT_E e
 |---|---|---|
 | u_width | int | 图像宽度，单位为像素；调用者预先对齐亮度跨度时，则为配置的帧跨度，单位为字节。 |
 | u_height | int | 图像高度，单位为像素。 |
-| output_format | int | 输出图像格式。参见（源码未提供引用目标）。 |
+| output_format | int | 输出图像格式。参见 AX_IMG_FORMAT_E。 |
 | compress_info | dict &#124; None | 指向 FBC 压缩信息的可选指针。为 NULL 或（源码条件不完整）。 |
 | type | int | 编解码载荷类型。仅支持 PT_H264、PT_H265、PT_JPEG 和 PT_MJPEG。 |
 
@@ -1793,8 +1717,6 @@ AX_U32 AX_VDEC_GetPicBufferSize(AX_U32 uWidth, AX_U32 uHeight, AX_IMG_FORMAT_E e
 #### 2.39.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:2391`。
 
 #### 2.39.5. 示例
 
@@ -1830,7 +1752,7 @@ AX_U32 AX_JDEC_GetYuvBufferSize(AX_U32 uWidth, AX_U32 uHeight, AX_IMG_FORMAT_E e
 |---|---|---|
 | u_width | int | 图像宽度，单位为像素。 |
 | u_height | int | 图像高度，单位为像素。 |
-| output_format | int | 输出图像格式。参见（源码未提供引用目标）。 |
+| output_format | int | 输出图像格式。参见 AX_IMG_FORMAT_E。 |
 
 #### 2.40.3. 返回值
 
@@ -1839,8 +1761,6 @@ AX_U32 AX_JDEC_GetYuvBufferSize(AX_U32 uWidth, AX_U32 uHeight, AX_IMG_FORMAT_E e
 #### 2.40.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/vdec/ax_vdec.py:2430`。
 
 #### 2.40.5. 示例
 

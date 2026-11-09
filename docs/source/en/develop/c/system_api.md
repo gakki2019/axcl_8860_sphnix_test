@@ -18,7 +18,7 @@ Deinitialize the AXCL runtime.
 #### Function
 
 ```c
-AXCL_EXPORT axclError axclFinalize();
+AXCL_EXPORT axclError axclFinalize(void);
 ```
 
 #### Parameters
@@ -69,14 +69,9 @@ AXCL_EXPORT axclError axclInit(const char *json);
 #### Example
 
 ```c
- int main(int argc, char *argv[]) {
-      axclInit("");
-
-      // TODO:
-
-      axclFinalize();
-      return 0;
- }
+ axclInit("");
+ // Call other AXCL APIs.
+ axclFinalize();
 ```
 
 #### Note

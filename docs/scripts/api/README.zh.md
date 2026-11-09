@@ -128,10 +128,13 @@ groups:
 
 1. 确认系统 Python 3、Doxygen 和编译器已安装。
 2. 如有需要，先检查并更新 `docs/scripts/api/config/blacklist.yaml`。
-3. 执行 `python3 docs/scripts/api/api_docgen.py`。
+3. 执行 `python3 docs/scripts/api/api_docgen.py`。任一报告存在 ERROR 记录时返回非零退出码。
 4. 优先查看 `docs/build/api/report/summary.md`。
 5. 如果 summary 不干净，再打开对应 TSV 明细定位问题。
 6. 最后检查 `docs/source/en/develop/c` 下的生成文档是否符合预期。
+7. 按重新生成的英文页面翻译 `docs/source/zh/develop/` 下对应的中文页面，与源码改动一起提交。
+
+维护规则（文档与代码一致、注释写法、错误码表述、示例、术语、中英文一致）见 `kwmex/wf/rule/axcl-doc-rule.md`。
 
 ## 6. 常见问题
 
@@ -190,5 +193,5 @@ make html        # 更新 C/Python Markdown，再构建 HTML
 ```
 
 Python HTML 入口为 `docs/build/html/{zh,en}/develop/python/reference/index.html`。
-英文生成的 Markdown 带来源标记，请修改 Python docstring 后重新生成，不要直接编辑英文产物；中文 Markdown 可直接维护。
+英文生成的 Markdown 带来源标记，请修改 Python docstring 后重新生成，不要直接编辑英文产物；中文 Markdown 按重新生成的英文页面翻译，与 docstring 改动一起提交（见 `kwmex/wf/rule/axcl-doc-rule.md`）。
 生成器拒绝覆盖无标记的同名手写页面，仅清理本模式标记的过期 Markdown。

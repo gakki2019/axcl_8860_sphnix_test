@@ -196,11 +196,31 @@ axclrtResetDevice(0);
 - Keep the source and destination memory valid until the copy completes. Do not read the destination or free either buffer before then.
 ```
 
+<a id="memory-2d-copy"></a>
+
+### 2.4. 2D Copy
+
+[axclrtMemcpy2d](../c/memory_api.md#axclrtMemcpy2d) and [axclrtMemcpy2dAsync](../c/memory_api.md#axclrtMemcpy2dAsync) copy a 2D rectangle between Host and Device memory: `height` rows of `width` bytes, where the source and destination advance to the next row by `spitch` and `dpitch` respectively. The bytes between rows (padding) are neither read nor written. Use them for row-aligned images or data stored at a fixed stride, so that one call replaces a copy per row.
+
+2D copies support only [AXCL_MEMCPY_HOST_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) and [AXCL_MEMCPY_DEVICE_TO_HOST](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST). Completion semantics and Device ownership rules of the synchronous and asynchronous functions are the same as for 1D copies.
+
+```c
+/* Copy a 1000 x 256 rectangle whose Host rows are 1024 bytes apart to Device rows 2048 bytes apart. */
+axclrtMemcpy2d(devMem, 2048, hostMem, 1024, 1000, 256, AXCL_MEMCPY_HOST_TO_DEVICE);
+```
+
+```{important}
+- Each side spans `(height - 1) * pitch + width` bytes. The Device span must lie in one Device allocation. The Host span, padding included, must be mapped, and writable for a Device-to-Host copy.
+- Until the copy completes, the CPU must not read or write any byte of the Host span, padding included.
+- On a device that is not DMA coherent, such as an AX8860 local device, the destination of a Device-to-Host 2D copy must come from [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost); plain `malloc` memory returns `AXCL_ERR_COMM_UNSUPPORT`. This does not apply when both pitches equal `width` or there is only one row.
+- Many short rows copy noticeably slower than one contiguous copy of the same size.
+```
+
 <a id="memory-inter-device-copy"></a>
 
-### 2.4. Inter-Device Copy
+### 2.5. Inter-Device Copy
 
-A Device-to-Device copy between two Devices runs on the current Device (for [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy)) or on the Device of the Stream (for [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync)). That Device must own either the source or the destination, and peer access from it to the other Device must be enabled with [axclrtDeviceEnablePeerAccess](../c/device_api.md#axclrtDeviceEnablePeerAccess). Peer access is one-way, applies to the whole process, and stays enabled until [axclrtDeviceDisablePeerAccess](../c/device_api.md#axclrtDeviceDisablePeerAccess) is called. [axclrtDeviceCanAccessPeer](../c/device_api.md#axclrtDeviceCanAccessPeer) queries the capability and requires the source Device to be active.
+A Device-to-Device copy between two Devices runs on the current Device (for [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy)) or on the Device of the Stream (for [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync)). That Device must own either the source or the destination, and peer access from it to the other Device must be enabled with [axclrtDeviceEnablePeerAccess](../c/device_api.md#axclrtDeviceEnablePeerAccess). Peer access is one-way, applies to the whole process, and stays enabled until [axclrtDeviceDisablePeerAccess](../c/device_api.md#axclrtDeviceDisablePeerAccess) is called. [axclrtDeviceCanAccessPeer](../c/device_api.md#axclrtDeviceCanAccessPeer) queries the capability and requires the source Device to be active. Direct Device-to-Device copy is supported only between Devices on the same accelerator card; a direct copy between Devices on different cards returns an error and must go through the Host.
 
 The following example copies memory from Device 0 to Device 1. The application activates Device 0, checks whether peer access is supported between the two Devices, and then enables access in both directions. Error handling is omitted.
 
@@ -248,7 +268,7 @@ axclFinalize();
 
 <a id="memory-external-device-memory"></a>
 
-### 2.5. External Device Memory Interoperability
+### 2.6. External Device Memory Interoperability
 
 The following examples show the two directions in which memory is passed between AXCL and native SDK APIs. `AX_XXX_YYYY` represents a native SDK API. Error-code checks are omitted.
 
@@ -307,7 +327,7 @@ axclrtResetDevice(0);
 
 <a id="memory-ipc-shared-memory"></a>
 
-### 2.6. Cross-Process Shared Memory
+### 2.7. Cross-Process Shared Memory
 
 The following examples show a Producer process allocating memory, and a Consumer process importing and reading it. The way the two processes exchange the TGID and the IPC Key is chosen by the application, and is represented by `send_to_xxx` / `receive_from_xxx` in the examples. Error-code checks are omitted.
 
@@ -397,6 +417,8 @@ AXCL also provides APIs for setting and comparing Device memory:
 | [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) | Closes an IPC Key and releases the IPC reference. | Device memory |
 | [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) | Copies Host / Device data synchronously. | Host memory, Device memory |
 | [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) | Submits an asynchronous copy request to a Stream. | Host memory, Device memory |
+| [axclrtMemcpy2d](../c/memory_api.md#axclrtMemcpy2d) | Synchronously copies a 2D rectangle between Host and Device. | Host memory, Device memory |
+| [axclrtMemcpy2dAsync](../c/memory_api.md#axclrtMemcpy2dAsync) | Submits an asynchronous 2D rectangle copy request to a Stream. | Host memory, Device memory |
 | [axclrtMemset](../c/memory_api.md#axclrtMemset) | Sets Device memory synchronously. | Device memory |
 | [axclrtMemsetAsync](../c/memory_api.md#axclrtMemsetAsync) | Submits an asynchronous Device memory set request to a Stream. | Device memory |
 | [axclrtMemcmp](../c/memory_api.md#axclrtMemcmp) | Compares two Device memory ranges synchronously. | Device memory |

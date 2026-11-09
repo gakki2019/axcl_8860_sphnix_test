@@ -69,14 +69,9 @@ AXCL_EXPORT axclError axclInit(const char *json);
 #### 2.2.4. 示例
 
 ```c
- int main(int argc, char *argv[]) {
-      axclInit("");
-
-      // TODO:
-
-      axclFinalize();
-      return 0;
- }
+ axclInit("");
+ // Call other AXCL APIs.
+ axclFinalize();
 ```
 
 #### 2.2.5. 说明

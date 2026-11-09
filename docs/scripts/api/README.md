@@ -122,10 +122,13 @@ Error probe outputs:
 
 1. Activate the Python environment.
 2. Check or update `docs/scripts/api/config/blacklist.yaml` if blacklist scope changed.
-3. Run `python3 docs/scripts/api/api_docgen.py`.
+3. Run `python3 docs/scripts/api/api_docgen.py`. It exits non-zero when any report contains ERROR records.
 4. Inspect `docs/build/api/report/summary.md` first.
 5. If summary is not clean, open the corresponding TSV report and fix either the source comments or the generator logic.
 6. Review generated Markdown under `docs/source/en/develop/c`.
+7. Translate the regenerated English pages into the matching Chinese pages under `docs/source/zh/develop/` and commit them together with the source changes.
+
+Maintenance rules (doc-code consistency, comment style, error-code wording, examples, terminology, Chinese/English consistency) are defined in `kwmex/wf/rule/axcl-doc-rule.md`.
 
 ## 6. Troubleshooting
 
@@ -156,7 +159,8 @@ C-pointer wording are reported for review, not silently repaired.
 
 From `docs/`, `make python-api` updates English Python pages and `make html` updates
 English C and Python pages before building both languages as HTML. Update source
-docstrings to regenerate English pages, and edit Chinese Markdown separately.
+docstrings to regenerate English pages, then translate the matching Chinese Markdown and
+commit it together with the docstring changes (see `kwmex/wf/rule/axcl-doc-rule.md`).
 `--validate-only` checks the English generated pages against the current source.
 Only obsolete English pages carrying the
 Python generator marker are removed. Hand-written pages are never overwritten.

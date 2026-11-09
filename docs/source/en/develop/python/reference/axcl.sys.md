@@ -458,7 +458,7 @@ AX_S32 AX_SYS_Munmap(AX_VOID *pviraddr, AX_U64 size);
 
 | Name | Type | Description |
 |---|---|---|
-| pviraddr | int &#124; None | Virtual address returned by |
+| pviraddr | int &#124; None | Virtual address returned by AX_SYS_Mmap, AX_SYS_MmapCache, AX_SYS_MmapFast, or AX_SYS_MmapCacheFast. |
 | size | int | Mapping size in bytes. It must not be 0. |
 
 #### 2.10.3. Returns

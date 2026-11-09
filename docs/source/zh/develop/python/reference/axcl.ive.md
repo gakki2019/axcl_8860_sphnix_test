@@ -65,8 +65,6 @@ AX_S32 AX_IVE_Init(void);
 
 返回类型：`int`。
 
-源码：`python/axcl/ive/ax_ive.py:1628`。
-
 #### 2.1.5. 示例
 
 ```python
@@ -106,8 +104,6 @@ AX_VOID AX_IVE_Exit(void);
 #### 2.2.4. 说明
 
 返回类型：`None`。
-
-源码：`python/axcl/ive/ax_ive.py:1656`。
 
 #### 2.2.5. 示例
 
@@ -152,8 +148,6 @@ AX_S32 AX_IVE_Query(AX_IVE_HANDLE IveHandle, AX_BOOL *pbFinish, AX_BOOL bBlock);
 #### 2.3.4. 说明
 
 返回类型：`tuple[bool, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:1684`。
 
 #### 2.3.5. 示例
 
@@ -200,8 +194,6 @@ AX_S32 AX_IVE_DMA(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_DATA_T *pstSrc, AX_IVE_D
 #### 2.4.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:1720`。
 
 #### 2.4.5. 示例
 
@@ -250,8 +242,6 @@ AX_S32 AX_IVE_Add(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc1, AX_IVE
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:1760`。
-
 #### 2.5.5. 示例
 
 ```python
@@ -299,8 +289,6 @@ AX_S32 AX_IVE_Sub(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc1, AX_IVE
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:1802`。
-
 #### 2.6.5. 示例
 
 ```python
@@ -346,8 +334,6 @@ AX_S32 AX_IVE_And(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc1, AX_IVE
 #### 2.7.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:1844`。
 
 #### 2.7.5. 示例
 
@@ -395,8 +381,6 @@ AX_S32 AX_IVE_Or(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc1, AX_IVE_
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:1884`。
-
 #### 2.8.5. 示例
 
 ```python
@@ -442,8 +426,6 @@ AX_S32 AX_IVE_Xor(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc1, AX_IVE
 #### 2.9.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:1924`。
 
 #### 2.9.5. 示例
 
@@ -492,8 +474,6 @@ AX_S32 AX_IVE_Mse(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc1, AX_IVE
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:1964`。
-
 #### 2.10.5. 示例
 
 ```python
@@ -541,8 +521,6 @@ AX_S32 AX_IVE_CannyHysEdge(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:2006`。
-
 #### 2.11.5. 示例
 
 ```python
@@ -588,8 +566,6 @@ AX_S32 AX_IVE_CannyEdge(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, A
 #### 2.12.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:2052`。
 
 #### 2.12.5. 示例
 
@@ -638,8 +614,6 @@ AX_S32 AX_IVE_CCL(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_IVE_
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:2092`。
-
 #### 2.13.5. 示例
 
 ```python
@@ -685,8 +659,6 @@ AX_S32 AX_IVE_Erode(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_IV
 #### 2.14.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:2135`。
 
 #### 2.14.5. 示例
 
@@ -734,8 +706,6 @@ AX_S32 AX_IVE_Dilate(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_I
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:2175`。
-
 #### 2.15.5. 示例
 
 ```python
@@ -782,8 +752,6 @@ AX_S32 AX_IVE_Filter(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_I
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:2215`。
-
 #### 2.16.5. 示例
 
 ```python
@@ -828,8 +796,6 @@ AX_S32 AX_IVE_Hist(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_IVE
 #### 2.17.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:2255`。
 
 #### 2.17.5. 示例
 
@@ -877,8 +843,6 @@ AX_S32 AX_IVE_EqualizeHist(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:2293`。
-
 #### 2.18.5. 示例
 
 ```python
@@ -924,8 +888,6 @@ AX_S32 AX_IVE_Integ(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_IV
 #### 2.19.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:2335`。
 
 #### 2.19.5. 示例
 
@@ -974,8 +936,6 @@ AX_S32 AX_IVE_MagAndAng(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc1, 
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:2375`。
-
 #### 2.20.5. 示例
 
 ```python
@@ -1021,8 +981,6 @@ AX_S32 AX_IVE_Sobel(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_IV
 #### 2.21.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:2420`。
 
 #### 2.21.5. 示例
 
@@ -1072,8 +1030,6 @@ AX_S32 AX_IVE_GMM(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_IVE_
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:2460`。
-
 #### 2.22.5. 示例
 
 ```python
@@ -1122,8 +1078,6 @@ AX_S32 AX_IVE_GMM2(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_IVE
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:2507`。
-
 #### 2.23.5. 示例
 
 ```python
@@ -1169,8 +1123,6 @@ AX_S32 AX_IVE_Thresh(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc, AX_I
 #### 2.24.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:2554`。
 
 #### 2.24.5. 示例
 
@@ -1218,8 +1170,6 @@ AX_S32 AX_IVE_16BitTo8Bit(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc,
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ive/ax_ive.py:2594`。
-
 #### 2.25.5. 示例
 
 ```python
@@ -1265,8 +1215,6 @@ AX_S32 AX_IVE_NCC(AX_IVE_HANDLE *pIveHandle, AX_IVE_SRC_IMAGE_T *pstSrc1, AX_IVE
 #### 2.26.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ive/ax_ive.py:2638`。
 
 #### 2.26.5. 示例
 

@@ -14,7 +14,7 @@
 - [axcl.rt.set_log_level](#axcl.rt.set_log_level): Set the log level of a target component at runtime.
 - [axcl.rt.get_log_level](#axcl.rt.get_log_level): Get the log level of a target component.
 - [axcl.rt.create_context](#axcl.rt.create_context): Explicitly create a Context and bind it to the calling thread.
-- [axcl.rt.destroy_context](#axcl.rt.destroy_context): Destroy a Context explicitly created by
+- [axcl.rt.destroy_context](#axcl.rt.destroy_context): Destroy a Context explicitly created by axclrtCreateContext.
 - [axcl.rt.set_current_context](#axcl.rt.set_current_context): Make a Context current for the calling thread.
 - [axcl.rt.get_current_context](#axcl.rt.get_current_context): Get the current Context of the calling thread.
 - [axcl.rt.control_execute_shell_cmd](#axcl.rt.control_execute_shell_cmd): Execute a shell command on the device associated with the calling thread's current Context.
@@ -27,12 +27,16 @@
 - [axcl.rt.get_device](#axcl.rt.get_device): Get the virtual device ID currently used by the calling thread.
 - [axcl.rt.get_device_count](#axcl.rt.get_device_count): Get the number of devices visible to the current process.
 - [axcl.rt.device_can_access_peer](#axcl.rt.device_can_access_peer): Query whether devices support data interaction.
-- [axcl.rt.device_enable_peer_access](#axcl.rt.device_enable_peer_access): Enable data interaction from the current device to the specified device. Data interaction enabled by this function is one-way. For example: - If the current device ID is 0 and
+- [axcl.rt.device_enable_peer_access](#axcl.rt.device_enable_peer_access): Enable data interaction from the current device to the specified device.
 - [axcl.rt.device_disable_peer_access](#axcl.rt.device_disable_peer_access): Disable data interaction from the current device to the specified device.
 - [axcl.rt.device_peer_access_status](#axcl.rt.device_peer_access_status): Query data interaction enable status from source device to the specified device.
 - [axcl.rt.synchronize_device](#axcl.rt.synchronize_device): Block until all work submitted to the device associated with the calling thread has completed.
 - [axcl.rt.synchronize_device_with_timeout](#axcl.rt.synchronize_device_with_timeout): Block until work submitted to the device associated with the calling thread completes or the timeout expires.
 - [axcl.rt.device_get_bare_tgid](#axcl.rt.device_get_bare_tgid): Get the bare Host TGID of the calling process in the initial PID namespace.
+- [axcl.rt.engine_get_io_info_v2](#axcl.rt.engine_get_io_info_v2): Return all IO metadata as an independent dictionary and automatically release C metadata.
+- [axcl.rt.engine_destroy_io_info_v2](#axcl.rt.engine_destroy_io_info_v2): Release a raw metadata pointer obtained directly from the C API.
+- [axcl.rt.engine_execute_v2](#axcl.rt.engine_execute_v2): Execute complete IO bindings in one C call, without CreateIO or per-buffer setters.
+- [axcl.rt.engine_execute_async_v2](#axcl.rt.engine_execute_async_v2): Submit complete IO bindings once; completion/errors are observed by Stream synchronization.
 - [axcl.rt.engine_init](#axcl.rt.engine_init): Initialize Engine on the device associated with the calling thread's current Context.
 - [axcl.rt.engine_get_vnpu_kind](#axcl.rt.engine_get_vnpu_kind): Get the VNPU mode of Engine on the current Context's device.
 - [axcl.rt.engine_finalize](#axcl.rt.engine_finalize): Deinitialize Engine on the device associated with the current Context.
@@ -51,7 +55,7 @@
 - [axcl.rt.engine_get_model_type_from_mem](#axcl.rt.engine_get_model_type_from_mem): Get the core-count classification of model data stored in Device memory.
 - [axcl.rt.engine_get_model_type_from_model_id](#axcl.rt.engine_get_model_type_from_model_id): Get the core-count classification of a loaded model.
 - [axcl.rt.engine_get_io_info](#axcl.rt.engine_get_io_info): Create a Host-side metadata object describing a loaded model's inputs and outputs.
-- [axcl.rt.engine_destroy_io_info](#axcl.rt.engine_destroy_io_info): Destroy an IO metadata object created by
+- [axcl.rt.engine_destroy_io_info](#axcl.rt.engine_destroy_io_info): Destroy an IO metadata object created by axclrtEngineGetIOInfo.
 - [axcl.rt.engine_get_shape_groups_count](#axcl.rt.engine_get_shape_groups_count): Get the number of shape groups described by an IO metadata object.
 - [axcl.rt.engine_get_num_inputs](#axcl.rt.engine_get_num_inputs): Get the number of model inputs in an IO metadata object.
 - [axcl.rt.engine_get_num_outputs](#axcl.rt.engine_get_num_outputs): Get the number of model outputs in an IO metadata object.
@@ -68,7 +72,7 @@
 - [axcl.rt.engine_get_output_data_layout](#axcl.rt.engine_get_output_data_layout): Get the data layout of an output tensor.
 - [axcl.rt.engine_get_output_dims](#axcl.rt.engine_get_output_dims): Get the dimensions of an output tensor in the specified shape group.
 - [axcl.rt.engine_create_io](#axcl.rt.engine_create_io): Create a Host-side IO binding object from model IO metadata.
-- [axcl.rt.engine_destroy_io](#axcl.rt.engine_destroy_io): Destroy an IO binding object created by
+- [axcl.rt.engine_destroy_io](#axcl.rt.engine_destroy_io): Destroy an IO binding object created by axclrtEngineCreateIO.
 - [axcl.rt.engine_set_input_buffer_by_index](#axcl.rt.engine_set_input_buffer_by_index): Bind a Device buffer to an input by index.
 - [axcl.rt.engine_set_output_buffer_by_index](#axcl.rt.engine_set_output_buffer_by_index): Bind a Device buffer to an output by index.
 - [axcl.rt.engine_set_input_buffer_by_name](#axcl.rt.engine_set_input_buffer_by_name): Bind a Device buffer to an input by tensor name.
@@ -82,7 +86,7 @@
 - [axcl.rt.engine_execute](#axcl.rt.engine_execute): Execute model inference synchronously on the current runtime Context's default Stream.
 - [axcl.rt.engine_execute_async](#axcl.rt.engine_execute_async): Submit a model inference task to a Stream.
 - [axcl.rt.create_event](#axcl.rt.create_event): Create an Event with timing enabled on the device associated with the current Context.
-- [axcl.rt.destroy_event](#axcl.rt.destroy_event): Destroy an Event created by
+- [axcl.rt.destroy_event](#axcl.rt.destroy_event): Destroy an Event created by axclrtCreateEvent or axclrtCreateEventWithFlags.
 - [axcl.rt.record_event](#axcl.rt.record_event): Asynchronously submit an Event record point to the specified Stream.
 - [axcl.rt.stream_wait_event](#axcl.rt.stream_wait_event): Asynchronously submit an Event wait point to the specified Stream so that the Stream continues only after the Event is signaled.
 - [axcl.rt.stream_wait_event_with_timeout](#axcl.rt.stream_wait_event_with_timeout): Asynchronously submit an Event wait point with a timeout to the specified Stream.
@@ -101,15 +105,17 @@
 - [axcl.rt.mem_flush](#axcl.rt.mem_flush): Write cached data for a Device memory range back to DDR.
 - [axcl.rt.mem_invalidate](#axcl.rt.mem_invalidate): Invalidate cached data for a Device memory range.
 - [axcl.rt.malloc_host](#axcl.rt.malloc_host): Allocate Host virtual memory.
-- [axcl.rt.free_host](#axcl.rt.free_host): Free Host virtual memory allocated by
+- [axcl.rt.free_host](#axcl.rt.free_host): Free Host virtual memory allocated by axclrtMallocHost.
 - [axcl.rt.memset](#axcl.rt.memset): Synchronously set bytes in Device memory to a value.
 - [axcl.rt.memcpy](#axcl.rt.memcpy): Synchronously copy bytes between Host or Device memory.
 - [axcl.rt.memcmp](#axcl.rt.memcmp): Synchronously determine whether two Device memory ranges contain identical bytes.
 - [axcl.rt.memset_async](#axcl.rt.memset_async): Asynchronously submit a Device memory set operation to a specified Stream.
 - [axcl.rt.memcpy_async](#axcl.rt.memcpy_async): Asynchronously submit a Host or Device memory copy to a specified Stream.
 - [axcl.rt.memcmp_async](#axcl.rt.memcmp_async): Asynchronously submit a comparison of two Device memory ranges to a specified Stream.
-- [axcl.rt.mem_get_address_range](#axcl.rt.mem_get_address_range): Get base address and allocation size for a pointer managed by AXCL runtime.
-- [axcl.rt.mem_get_dev_addr](#axcl.rt.mem_get_dev_addr): Export underlying device physical and virtual addresses from a device pointer.
+- [axcl.rt.memcpy2d](#axcl.rt.memcpy2d): Synchronously copy a 2D rectangle between Host and Device memory.
+- [axcl.rt.memcpy2d_async](#axcl.rt.memcpy2d_async): Asynchronously submit a 2D rectangle copy between Host and Device memory to a specified Stream.
+- [axcl.rt.mem_get_address_range](#axcl.rt.mem_get_address_range): Get the base handle and size of an allocation or external registration managed by AXCL runtime.
+- [axcl.rt.mem_get_dev_addr](#axcl.rt.mem_get_dev_addr): Export underlying device physical and virtual addresses from a device memory handle.
 - [axcl.rt.mem_map_dev_addr](#axcl.rt.mem_map_dev_addr): Register external device memory as a temporary mapped device pointer.
 - [axcl.rt.mem_unmap_dev_addr](#axcl.rt.mem_unmap_dev_addr): Unregister an external device memory registered via axclrtMemMapDevAddr.
 - [axcl.rt.ipc_mem_get_export_key](#axcl.rt.ipc_mem_get_export_key): Export an IPC memory sharing key for a device memory allocation.
@@ -117,7 +123,7 @@
 - [axcl.rt.ipc_mem_import_by_key](#axcl.rt.ipc_mem_import_by_key): Import an IPC memory handle into the calling process by key.
 - [axcl.rt.ipc_mem_close](#axcl.rt.ipc_mem_close): Close an inter-process shared memory key.
 - [axcl.rt.create_stream](#axcl.rt.create_stream): Create a Stream.
-- [axcl.rt.destroy_stream](#axcl.rt.destroy_stream): Destroy a Stream created by
+- [axcl.rt.destroy_stream](#axcl.rt.destroy_stream): Destroy a Stream created by axclrtCreateStream.
 - [axcl.rt.destroy_stream_force](#axcl.rt.destroy_stream_force): Destroy a Stream immediately without waiting for submitted tasks to complete.
 - [axcl.rt.stream_query](#axcl.rt.stream_query): Query whether a specified Stream has unfinished tasks.
 - [axcl.rt.synchronize_stream](#axcl.rt.synchronize_stream): Block until all tasks submitted to a Stream before this call have completed.
@@ -198,8 +204,8 @@ axclError axclrtGetVersionStr(const char *name, char *buf, uint32_t size);
 
 | Name | Type | Description |
 |---|---|---|
-| name | str &#124; bytes &#124; None | Version source, supported values: `driver` and `firmware`. `driver` returns the SDK build version string. `firmware` returns the firmware version of the device associated with the current thread's bound runtime context. The thread must first bind a context to an active device, for example through |
-| size | int | Size of |
+| name | str &#124; bytes &#124; None | Version source, supported values: `driver` and `firmware`. `driver` returns the SDK build version string. `firmware` returns the firmware version of the device associated with the current thread's bound runtime context. The thread must first bind a context to an active device, for example through axclrtSetDevice or axclrtCreateContext. |
+| size | int | Size of `buf` in bytes. Must be greater than zero. If the buffer is too small, a successful result is truncated to fit, including the terminating NUL. |
 
 #### 2.2.3. Returns
 
@@ -446,7 +452,7 @@ axclError axclrtSetLogLevel(axclrtLogTarget target, int32_t lv);
 
 | Name | Type | Description |
 |---|---|---|
-| target | int | Log target. See |
+| target | int | Log target. See axclrtLogTarget. Must not be AXCL_LOG_TARGET_BUTT. |
 | lv | int | Log level: 0 trace, 1 debug, 2 info, 3 warning, 4 error, 5 critical, and 6 off. Values outside the range 0 to 6 are mapped to warning. |
 
 #### 2.8.3. Returns
@@ -489,7 +495,7 @@ axclError axclrtGetLogLevel(axclrtLogTarget target, int32_t *lv);
 
 | Name | Type | Description |
 |---|---|---|
-| target | int | Log target. See |
+| target | int | Log target. See axclrtLogTarget. Must not be AXCL_LOG_TARGET_BUTT. |
 
 #### 2.9.3. Returns
 
@@ -532,7 +538,7 @@ axclError axclrtCreateContext(axclrtContext *context, int32_t deviceId);
 
 | Name | Type | Description |
 |---|---|---|
-| device_id | int | Virtual device ID visible to the current process. Valid IDs are in the range [0, count - 1], where count is returned by |
+| device_id | int | Virtual device ID visible to the current process. Valid IDs are in the range [0, count - 1], where count is returned by axclrtGetDeviceCount. |
 
 #### 2.10.3. Returns
 
@@ -555,7 +561,7 @@ context, ret = axcl.rt.create_context(device_id)
 
 ### 2.11. axcl.rt.destroy_context
 
-Destroy a Context explicitly created by
+Destroy a Context explicitly created by axclrtCreateContext.
 
 #### 2.11.1. Function
 
@@ -575,7 +581,7 @@ axclError axclrtDestroyContext(axclrtContext context);
 
 | Name | Type | Description |
 |---|---|---|
-| context | int &#124; None | Context handle returned by |
+| context | int &#124; None | Context handle returned by axclrtCreateContext. It must not be None and must refer to an existing Context; a Context that has already been destroyed does not exist. |
 
 #### 2.11.3. Returns
 
@@ -706,8 +712,8 @@ axclError axclrtControlExecuteShellCmd(const char *cmd, const char *const args[]
 
 #### 2.14.3. Returns
 
-- `output`: *str* — Optional pointer that receives combined standard output and standard error as a C string. Output is limited by AXCL_SHELL_CMD_OUTPUT_LIMIT (1 MiB by default, 16 MiB maximum).
-- `ret`: *int* — The command completed with exit status 0. The shell exited unsuccessfully, was terminated by a signal, could not be started, or could not be monitored. The command timed out on the device or the Host RPC wait timed out. Failure.
+- `output`: *str* — Combined standard output and standard error. Output is limited by AXCL_SHELL_CMD_OUTPUT_LIMIT (1 MiB by default, 16 MiB maximum). An empty string if the call fails before any text is available.
+- `ret`: *int* — The command completed with exit status 0. Failure. Returns AXCL_ERR_RT_SHELL_FAIL if the shell exits with a non-zero status, is terminated by a signal, cannot be started, or cannot be monitored, and `output` receives the captured output or a failure description; returns AXCL_ERR_RT_TIMEOUT if the command times out on the device or the Host RPC wait times out, and `output` receives a timeout message appended to any captured output. After a Host RPC wait timeout, the device command state is unknown.
 
 #### 2.14.4. Note
 
@@ -745,7 +751,7 @@ axclError axclrtSetDevice(int32_t deviceId);
 
 | Name | Type | Description |
 |---|---|---|
-| device_id | int | Virtual device ID visible to the current process. Valid IDs are in the range [0, count - 1], where count is returned by |
+| device_id | int | Virtual device ID visible to the current process. Valid IDs are in the range [0, count - 1], where count is returned by axclrtGetDeviceCount. |
 
 #### 2.15.3. Returns
 
@@ -872,7 +878,7 @@ axclError axclrtRegDeviceStateCallback(axclrtDeviceStateCallback callback, void 
 | Name | Type | Description |
 |---|---|---|
 | callback | object | Callback function. Pass NULL to unregister the current callback. |
-| args | int &#124; None | User data passed to |
+| args | int &#124; None | User data passed to `callback`. Ignored when `callback` is None. |
 
 #### 2.18.3. Returns
 
@@ -1107,7 +1113,12 @@ can_access_peer, ret = axcl.rt.device_can_access_peer(device_id, peer_device_id)
 
 ### 2.24. axcl.rt.device_enable_peer_access
 
-Enable data interaction from the current device to the specified device. Data interaction enabled by this function is one-way. For example: - If the current device ID is 0 and
+Enable data interaction from the current device to the specified device.
+
+Data interaction enabled by this function is one-way. For example, if the current device ID is 0 and
+`peer_device_id` is 1, device 0 can access data on device 1, but device 1 cannot access data on device 0.
+To allow device 1 to access data on device 0, switch to device 1 and call this function with
+`peer_device_id` set to 0.
 
 #### 2.24.1. Function
 
@@ -1127,12 +1138,12 @@ axclError axclrtDeviceEnablePeerAccess(int32_t peerDeviceId, uint32_t flags);
 
 | Name | Type | Description |
 |---|---|---|
-| peer_device_id | int | destination virtual device id. |
-| flags | int | reserved, must be 0. |
+| peer_device_id | int | Destination virtual device ID visible to the current process. Must differ from the current device. |
+| flags | int | Reserved; must be 0. |
 
 #### 2.24.3. Returns
 
-- `ret`: *int* — success. failure.
+- `ret`: *int* — Data interaction from the current device to `peer_device_id` was enabled successfully. Failure.
 
 #### 2.24.4. Note
 
@@ -1341,7 +1352,7 @@ N/A
 #### 2.29.3. Returns
 
 - `bare_tgid`: *int* — Receives the Host-level bare TGID.
-- `ret`: *int* — 0 on success, failure code otherwise.
+- `ret`: *int* — The bare TGID was returned successfully. Failure.
 
 #### 2.29.4. Note
 
@@ -1355,13 +1366,219 @@ bare_tgid, ret = axcl.rt.device_get_bare_tgid()
 
 <br>
 
+<a id="axcl.rt.engine_get_io_info_v2"></a>
+
+### 2.30. axcl.rt.engine_get_io_info_v2
+
+Return all IO metadata as an independent dictionary and automatically release C metadata.
+
+Uses AX_ENGINE_IO_INFO_T aliases, including input_size/output_size and
+dynamic_batch_size. Tensors contain name, size, shape, stride, data_type,
+layout, memory_type and extra_meta. Enum values are Native Engine values.
+No per-tensor getter calls are made. The dictionary requires no explicit release.
+Requires a Device Worker supporting the independent GET_INFOV2 protocol.
+
+#### 2.30.1. Function
+
+**Python Call**
+
+```python
+io_info, ret = axcl.rt.engine_get_io_info_v2(model_id)
+```
+
+**C++ Prototype**
+
+```cpp
+axclError axclrtEngineGetIOInfoV2(uint64_t modelId, AX_ENGINE_IO_INFO_T **ioInfo);
+```
+
+#### 2.30.2. Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| model_id | int | Loaded model ID. |
+
+#### 2.30.3. Returns
+
+- `io_info`: *dict* — Complete default-group tensor metadata on success; an empty dictionary on failure.
+- `ret`: *int* — The metadata was returned successfully. Failure.
+
+#### 2.30.4. Note
+
+Return type: `tuple[dict, int]`.
+
+#### 2.30.5. Example
+
+```python
+io_info, ret = axcl.rt.engine_get_io_info_v2(model_id)
+```
+
+<br>
+
+<a id="axcl.rt.engine_destroy_io_info_v2"></a>
+
+### 2.31. axcl.rt.engine_destroy_io_info_v2
+
+Release a raw metadata pointer obtained directly from the C API.
+
+Do not pass the dictionary returned by engine_get_io_info_v2: it is already
+copied and released. Only the raw Runtime allocation may be released here.
+
+#### 2.31.1. Function
+
+**Python Call**
+
+```python
+ret = axcl.rt.engine_destroy_io_info_v2(io_info)
+```
+
+**C++ Prototype**
+
+```cpp
+axclError axclrtEngineDestroyIOInfoV2(AX_ENGINE_IO_INFO_T *ioInfo);
+```
+
+#### 2.31.2. Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| io_info | Unannotated | Runtime-owned `POINTER(AX_ENGINE_IO_INFO_T)` returned by axclrtEngineGetIOInfoV2. Release it exactly once. Other types raise `TypeError`. |
+
+#### 2.31.3. Returns
+
+- `ret`: *int* — The metadata was released successfully. Failure.
+
+#### 2.31.4. Note
+
+Return type: `int`.
+
+#### 2.31.5. Example
+
+```python
+ret = axcl.rt.engine_destroy_io_info_v2(io_info)
+```
+
+<br>
+
+<a id="axcl.rt.engine_execute_v2"></a>
+
+### 2.32. axcl.rt.engine_execute_v2
+
+Execute complete IO bindings in one C call, without CreateIO or per-buffer setters.
+
+phy_addr must be zero (or omitted); vir_addr holds a nonnull RT Token VA.
+Host resolves addresses, bounds and device ownership from the Token.
+Supports RT allocations and IPC imports; mem_map_dev_addr Tokens are unsupported.
+Retain RT handles for memory operations. Do not pass Token IO directly to Native Engine.
+Custom strides and IO settings must be zero/NULL. Keep buffers alive until return.
+The caller must ensure that all addresses belong to the default Stream's device and valid allocations.
+
+#### 2.32.1. Function
+
+**Python Call**
+
+```python
+ret = axcl.rt.engine_execute_v2(model_id, context_id, group, io)
+```
+
+**C++ Prototype**
+
+```cpp
+axclError axclrtEngineExecuteV2(uint64_t modelId, uint64_t contextId, uint32_t group, const AX_ENGINE_IO_T *io);
+```
+
+#### 2.32.2. Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| model_id | int | Loaded model ID. |
+| context_id | int | Engine Context ID created for the model. |
+| group | int | Shape-group index. Currently ignored, as in axclrtEngineExecute. |
+| io | Unannotated | Descriptor containing all inputs and outputs in model order: a dictionary, AX_ENGINE_IO_T, or a pointer to that structure. Dictionary keys: inputs/outputs (lists of phy_addr/vir_addr/size dictionaries), optional input_size/output_size (inferred from lists), and batch_size. |
+
+#### 2.32.3. Returns
+
+- `ret`: *int* — Inference completed successfully. Failure.
+
+#### 2.32.4. Note
+
+Return type: `int`.
+
+#### 2.32.5. Example
+
+```python
+ret = axcl.rt.engine_execute_v2(model_id, context_id, group, io)
+```
+
+<br>
+
+<a id="axcl.rt.engine_execute_async_v2"></a>
+
+### 2.33. axcl.rt.engine_execute_async_v2
+
+Submit complete IO bindings once; completion/errors are observed by Stream synchronization.
+
+Descriptor arrays are consumed before return; Device buffers, model and Engine Context
+must remain alive until the inference has finished.
+Output Tokens supply cached flags during address resolution. Free RT-owned memory
+through RT. Native rejects output Tokens without Device VA; the error is reported
+on synchronization.
+Requires the matching aggregate-aware Worker.
+Native RunAsync supports only single-group models. Later Stream commands may run
+before inference finishes: use record_event + stream_wait_event before dependent
+copies, or synchronize on Host. Event completion does not imply inference success;
+check synchronize_stream (or synchronize_device for the default Stream).
+If the Device cannot obtain its Context or Stream for the request, for example because
+it is out of resources, the request is discarded without running and no error is
+reported by the later synchronization.
+
+#### 2.33.1. Function
+
+**Python Call**
+
+```python
+ret = axcl.rt.engine_execute_async_v2(model_id, context_id, group, io, stream)
+```
+
+**C++ Prototype**
+
+```cpp
+axclError axclrtEngineExecuteAsyncV2(uint64_t modelId, uint64_t contextId, uint32_t group, const AX_ENGINE_IO_T *io, axclrtStream stream);
+```
+
+#### 2.33.2. Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| model_id | int | Loaded model ID. |
+| context_id | int | Engine Context ID created for `model_id`. |
+| group | int | Shape-group index. Must be 0: only the default shape group is supported. |
+| io | Unannotated | Complete IO descriptor with RT Tokens, in the same format as engine_execute_v2. |
+| stream | int &#124; None | Stream that receives the inference request. Pass None to use the current runtime Context's default Stream, and then wait with synchronize_device; synchronize_stream does not accept None. |
+
+#### 2.33.3. Returns
+
+- `ret`: *int* — The inference request was submitted successfully. Failure.
+
+#### 2.33.4. Note
+
+Return type: `int`.
+
+#### 2.33.5. Example
+
+```python
+ret = axcl.rt.engine_execute_async_v2(model_id, context_id, group, io, stream)
+```
+
+<br>
+
 <a id="axcl.rt.engine_init"></a>
 
-### 2.30. axcl.rt.engine_init
+### 2.34. axcl.rt.engine_init
 
 Initialize Engine on the device associated with the calling thread's current Context.
 
-#### 2.30.1. Function
+#### 2.34.1. Function
 
 **Python Call**
 
@@ -1375,21 +1592,21 @@ ret = axcl.rt.engine_init(npu_kind)
 axclError axclrtEngineInit(axclrtEngineVNpuKind npuKind);
 ```
 
-#### 2.30.2. Parameters
+#### 2.34.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | npu_kind | int | VNPU mode used to initialize the device Engine. |
 
-#### 2.30.3. Returns
+#### 2.34.3. Returns
 
 - `ret`: *int* — Engine was initialized successfully. Failure.
 
-#### 2.30.4. Note
+#### 2.34.4. Note
 
 Return type: `int`.
 
-#### 2.30.5. Example
+#### 2.34.5. Example
 
 ```python
 ret = axcl.rt.engine_init(npu_kind)
@@ -1399,11 +1616,11 @@ ret = axcl.rt.engine_init(npu_kind)
 
 <a id="axcl.rt.engine_get_vnpu_kind"></a>
 
-### 2.31. axcl.rt.engine_get_vnpu_kind
+### 2.35. axcl.rt.engine_get_vnpu_kind
 
 Get the VNPU mode of Engine on the current Context's device.
 
-#### 2.31.1. Function
+#### 2.35.1. Function
 
 **Python Call**
 
@@ -1417,20 +1634,20 @@ npu_kind, ret = axcl.rt.engine_get_vnpu_kind()
 axclError axclrtEngineGetVNpuKind(axclrtEngineVNpuKind *npuKind);
 ```
 
-#### 2.31.2. Parameters
+#### 2.35.2. Parameters
 
 N/A
 
-#### 2.31.3. Returns
+#### 2.35.3. Returns
 
 - `npu_kind`: *int* — Receives the initialized VNPU mode.
 - `ret`: *int* — The VNPU mode was returned successfully. Failure.
 
-#### 2.31.4. Note
+#### 2.35.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.31.5. Example
+#### 2.35.5. Example
 
 ```python
 npu_kind, ret = axcl.rt.engine_get_vnpu_kind()
@@ -1440,11 +1657,11 @@ npu_kind, ret = axcl.rt.engine_get_vnpu_kind()
 
 <a id="axcl.rt.engine_finalize"></a>
 
-### 2.32. axcl.rt.engine_finalize
+### 2.36. axcl.rt.engine_finalize
 
 Deinitialize Engine on the device associated with the current Context.
 
-#### 2.32.1. Function
+#### 2.36.1. Function
 
 **Python Call**
 
@@ -1458,19 +1675,19 @@ ret = axcl.rt.engine_finalize()
 axclError axclrtEngineFinalize(void);
 ```
 
-#### 2.32.2. Parameters
+#### 2.36.2. Parameters
 
 N/A
 
-#### 2.32.3. Returns
+#### 2.36.3. Returns
 
 - `ret`: *int* — Engine was deinitialized successfully. Failure.
 
-#### 2.32.4. Note
+#### 2.36.4. Note
 
 Return type: `int`.
 
-#### 2.32.5. Example
+#### 2.36.5. Example
 
 ```python
 ret = axcl.rt.engine_finalize()
@@ -1480,11 +1697,11 @@ ret = axcl.rt.engine_finalize()
 
 <a id="axcl.rt.engine_load_from_file"></a>
 
-### 2.33. axcl.rt.engine_load_from_file
+### 2.37. axcl.rt.engine_load_from_file
 
 Load an offline model from a Host file into Engine on the current device.
 
-#### 2.33.1. Function
+#### 2.37.1. Function
 
 **Python Call**
 
@@ -1498,22 +1715,22 @@ model_id, ret = axcl.rt.engine_load_from_file(model_path)
 axclError axclrtEngineLoadFromFile(const char *modelPath, uint64_t *modelId);
 ```
 
-#### 2.33.2. Parameters
+#### 2.37.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_path | str &#124; bytes &#124; None | Path to a readable regular model file on the Host. |
 
-#### 2.33.3. Returns
+#### 2.37.3. Returns
 
 - `model_id`: *int* — Receives the model ID used by subsequent Engine APIs.
 - `ret`: *int* — The model was loaded successfully. Failure.
 
-#### 2.33.4. Note
+#### 2.37.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.33.5. Example
+#### 2.37.5. Example
 
 ```python
 model_id, ret = axcl.rt.engine_load_from_file(model_path)
@@ -1523,11 +1740,11 @@ model_id, ret = axcl.rt.engine_load_from_file(model_path)
 
 <a id="axcl.rt.engine_load_from_mem"></a>
 
-### 2.34. axcl.rt.engine_load_from_mem
+### 2.38. axcl.rt.engine_load_from_mem
 
 Load an offline model from Device memory into Engine on the current device.
 
-#### 2.34.1. Function
+#### 2.38.1. Function
 
 **Python Call**
 
@@ -1541,23 +1758,23 @@ model_id, ret = axcl.rt.engine_load_from_mem(model, model_size)
 axclError axclrtEngineLoadFromMem(const void *model, uint64_t modelSize, uint64_t *modelId);
 ```
 
-#### 2.34.2. Parameters
+#### 2.38.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model | int &#124; None | Device memory handle containing the model data. |
 | model_size | int | Model data size in bytes. Must be greater than 0. |
 
-#### 2.34.3. Returns
+#### 2.38.3. Returns
 
 - `model_id`: *int* — Receives the model ID used by subsequent Engine APIs.
 - `ret`: *int* — The model was loaded successfully. Failure.
 
-#### 2.34.4. Note
+#### 2.38.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.34.5. Example
+#### 2.38.5. Example
 
 ```python
 model_id, ret = axcl.rt.engine_load_from_mem(model, model_size)
@@ -1567,11 +1784,11 @@ model_id, ret = axcl.rt.engine_load_from_mem(model, model_size)
 
 <a id="axcl.rt.engine_unload"></a>
 
-### 2.35. axcl.rt.engine_unload
+### 2.39. axcl.rt.engine_unload
 
 Unload a model from Engine on the current device.
 
-#### 2.35.1. Function
+#### 2.39.1. Function
 
 **Python Call**
 
@@ -1585,21 +1802,21 @@ ret = axcl.rt.engine_unload(model_id)
 axclError axclrtEngineUnload(uint64_t modelId);
 ```
 
-#### 2.35.2. Parameters
+#### 2.39.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Model ID returned by a load function. |
 
-#### 2.35.3. Returns
+#### 2.39.3. Returns
 
 - `ret`: *int* — The model was unloaded successfully. Failure.
 
-#### 2.35.4. Note
+#### 2.39.4. Note
 
 Return type: `int`.
 
-#### 2.35.5. Example
+#### 2.39.5. Example
 
 ```python
 ret = axcl.rt.engine_unload(model_id)
@@ -1609,11 +1826,11 @@ ret = axcl.rt.engine_unload(model_id)
 
 <a id="axcl.rt.engine_get_model_compiler_version"></a>
 
-### 2.36. axcl.rt.engine_get_model_compiler_version
+### 2.40. axcl.rt.engine_get_model_compiler_version
 
 Get the compiler toolchain version stored in a loaded model.
 
-#### 2.36.1. Function
+#### 2.40.1. Function
 
 **Python Call**
 
@@ -1627,21 +1844,21 @@ result = axcl.rt.engine_get_model_compiler_version(model_id)
 const char * axclrtEngineGetModelCompilerVersion(uint64_t modelId);
 ```
 
-#### 2.36.2. Parameters
+#### 2.40.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
 
-#### 2.36.3. Returns
+#### 2.40.3. Returns
 
 - `result`: *str* — A thread-local, null-terminated version string on success; NULL on failure. The pointer may be overwritten by a later call in the same thread and must not be freed by the caller.
 
-#### 2.36.4. Note
+#### 2.40.4. Note
 
 Return type: `str`.
 
-#### 2.36.5. Example
+#### 2.40.5. Example
 
 ```python
 result = axcl.rt.engine_get_model_compiler_version(model_id)
@@ -1651,11 +1868,11 @@ result = axcl.rt.engine_get_model_compiler_version(model_id)
 
 <a id="axcl.rt.engine_set_affinity"></a>
 
-### 2.37. axcl.rt.engine_set_affinity
+### 2.41. axcl.rt.engine_set_affinity
 
 Set the NPU-core affinity mask of a loaded model.
 
-#### 2.37.1. Function
+#### 2.41.1. Function
 
 **Python Call**
 
@@ -1669,22 +1886,22 @@ ret = axcl.rt.engine_set_affinity(model_id, set)
 axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet set);
 ```
 
-#### 2.37.2. Parameters
+#### 2.41.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
 | set | int | Nonzero affinity mask using bits 0 through 7; valid values are 0x1 through 0xFF. The device may impose additional limits by chip mode or model type. |
 
-#### 2.37.3. Returns
+#### 2.41.3. Returns
 
 - `ret`: *int* — The affinity was set successfully. Failure.
 
-#### 2.37.4. Note
+#### 2.41.4. Note
 
 Return type: `int`.
 
-#### 2.37.5. Example
+#### 2.41.5. Example
 
 ```python
 ret = axcl.rt.engine_set_affinity(model_id, set)
@@ -1694,11 +1911,11 @@ ret = axcl.rt.engine_set_affinity(model_id, set)
 
 <a id="axcl.rt.engine_get_affinity"></a>
 
-### 2.38. axcl.rt.engine_get_affinity
+### 2.42. axcl.rt.engine_get_affinity
 
 Get the NPU-core affinity mask of a loaded model.
 
-#### 2.38.1. Function
+#### 2.42.1. Function
 
 **Python Call**
 
@@ -1712,22 +1929,22 @@ set, ret = axcl.rt.engine_get_affinity(model_id)
 axclError axclrtEngineGetAffinity(uint64_t modelId, axclrtEngineSet *set);
 ```
 
-#### 2.38.2. Parameters
+#### 2.42.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
 
-#### 2.38.3. Returns
+#### 2.42.3. Returns
 
 - `set`: *int* — Receives the affinity mask.
 - `ret`: *int* — The affinity was returned successfully. Failure.
 
-#### 2.38.4. Note
+#### 2.42.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.38.5. Example
+#### 2.42.5. Example
 
 ```python
 set, ret = axcl.rt.engine_get_affinity(model_id)
@@ -1737,11 +1954,11 @@ set, ret = axcl.rt.engine_get_affinity(model_id)
 
 <a id="axcl.rt.engine_set_context_affinity"></a>
 
-### 2.39. axcl.rt.engine_set_context_affinity
+### 2.43. axcl.rt.engine_set_context_affinity
 
 Set affinity for one Engine Context; this operation is currently unsupported.
 
-#### 2.39.1. Function
+#### 2.43.1. Function
 
 **Python Call**
 
@@ -1755,7 +1972,7 @@ ret = axcl.rt.engine_set_context_affinity(model_id, context_id, set)
 axclError axclrtEngineSetContextAffinity(uint64_t modelId, uint64_t contextId, axclrtEngineSet set);
 ```
 
-#### 2.39.2. Parameters
+#### 2.43.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -1763,15 +1980,15 @@ axclError axclrtEngineSetContextAffinity(uint64_t modelId, uint64_t contextId, a
 | context_id | int | Engine Context ID. |
 | set | int | Nonzero affinity mask from 0x1 through 0x7. |
 
-#### 2.39.3. Returns
+#### 2.43.3. Returns
 
 - `ret`: *int* — The operation is currently unsupported, or an argument is invalid.
 
-#### 2.39.4. Note
+#### 2.43.4. Note
 
 Return type: `int`.
 
-#### 2.39.5. Example
+#### 2.43.5. Example
 
 ```python
 ret = axcl.rt.engine_set_context_affinity(model_id, context_id, set)
@@ -1781,11 +1998,11 @@ ret = axcl.rt.engine_set_context_affinity(model_id, context_id, set)
 
 <a id="axcl.rt.engine_get_context_affinity"></a>
 
-### 2.40. axcl.rt.engine_get_context_affinity
+### 2.44. axcl.rt.engine_get_context_affinity
 
 Get affinity for one Engine Context; this operation is currently unsupported.
 
-#### 2.40.1. Function
+#### 2.44.1. Function
 
 **Python Call**
 
@@ -1799,23 +2016,23 @@ set, ret = axcl.rt.engine_get_context_affinity(model_id, context_id)
 axclError axclrtEngineGetContextAffinity(uint64_t modelId, uint64_t contextId, axclrtEngineSet *set);
 ```
 
-#### 2.40.2. Parameters
+#### 2.44.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
 | context_id | int | Engine Context ID. |
 
-#### 2.40.3. Returns
+#### 2.44.3. Returns
 
 - `set`: *int* — Output affinity mask; no value is returned while the operation is unsupported.
 - `ret`: *int* — The operation is currently unsupported, or an argument is invalid.
 
-#### 2.40.4. Note
+#### 2.44.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.40.5. Example
+#### 2.44.5. Example
 
 ```python
 set, ret = axcl.rt.engine_get_context_affinity(model_id, context_id)
@@ -1825,11 +2042,11 @@ set, ret = axcl.rt.engine_get_context_affinity(model_id, context_id)
 
 <a id="axcl.rt.engine_get_usage"></a>
 
-### 2.41. axcl.rt.engine_get_usage
+### 2.45. axcl.rt.engine_get_usage
 
 Get Engine memory usage for a model file.
 
-#### 2.41.1. Function
+#### 2.45.1. Function
 
 **Python Call**
 
@@ -1843,23 +2060,23 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage(model_path)
 axclError axclrtEngineGetUsage(const char *modelPath, int64_t *sysSize, int64_t *cmmSize);
 ```
 
-#### 2.41.2. Parameters
+#### 2.45.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_path | str &#124; bytes &#124; None | Path to a readable regular model file on the Host. |
 
-#### 2.41.3. Returns
+#### 2.45.3. Returns
 
 - `sys_size`: *int* — Receives system-memory usage in bytes. The current implementation returns 0.
 - `cmm_size`: *int* — Receives CMM memory usage in bytes.
 - `ret`: *int* — The usage values were returned successfully. Failure.
 
-#### 2.41.4. Note
+#### 2.45.4. Note
 
 Return type: `tuple[int, int, int]`.
 
-#### 2.41.5. Example
+#### 2.45.5. Example
 
 ```python
 sys_size, cmm_size, ret = axcl.rt.engine_get_usage(model_path)
@@ -1869,11 +2086,11 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage(model_path)
 
 <a id="axcl.rt.engine_get_usage_from_mem"></a>
 
-### 2.42. axcl.rt.engine_get_usage_from_mem
+### 2.46. axcl.rt.engine_get_usage_from_mem
 
 Get Engine memory usage for model data stored in Device memory.
 
-#### 2.42.1. Function
+#### 2.46.1. Function
 
 **Python Call**
 
@@ -1887,24 +2104,24 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_mem(model, model_size)
 axclError axclrtEngineGetUsageFromMem(const void *model, uint64_t modelSize, int64_t *sysSize, int64_t *cmmSize);
 ```
 
-#### 2.42.2. Parameters
+#### 2.46.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model | int &#124; None | Device memory handle containing model data. |
 | model_size | int | Model data size in bytes. Must be greater than 0. |
 
-#### 2.42.3. Returns
+#### 2.46.3. Returns
 
 - `sys_size`: *int* — Receives system-memory usage in bytes. The current implementation returns 0.
 - `cmm_size`: *int* — Receives CMM memory usage in bytes.
 - `ret`: *int* — The usage values were returned successfully. Failure.
 
-#### 2.42.4. Note
+#### 2.46.4. Note
 
 Return type: `tuple[int, int, int]`.
 
-#### 2.42.5. Example
+#### 2.46.5. Example
 
 ```python
 sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_mem(model, model_size)
@@ -1914,11 +2131,11 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_mem(model, model_size)
 
 <a id="axcl.rt.engine_get_usage_from_model_id"></a>
 
-### 2.43. axcl.rt.engine_get_usage_from_model_id
+### 2.47. axcl.rt.engine_get_usage_from_model_id
 
 Get Engine memory usage for a loaded model.
 
-#### 2.43.1. Function
+#### 2.47.1. Function
 
 **Python Call**
 
@@ -1932,23 +2149,23 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_model_id(model_id)
 axclError axclrtEngineGetUsageFromModelId(uint64_t modelId, int64_t *sysSize, int64_t *cmmSize);
 ```
 
-#### 2.43.2. Parameters
+#### 2.47.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
 
-#### 2.43.3. Returns
+#### 2.47.3. Returns
 
 - `sys_size`: *int* — Receives system-memory usage in bytes. The current implementation returns 0.
 - `cmm_size`: *int* — Receives CMM memory usage in bytes.
 - `ret`: *int* — The usage values were returned successfully. Failure.
 
-#### 2.43.4. Note
+#### 2.47.4. Note
 
 Return type: `tuple[int, int, int]`.
 
-#### 2.43.5. Example
+#### 2.47.5. Example
 
 ```python
 sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_model_id(model_id)
@@ -1958,11 +2175,11 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_model_id(model_id)
 
 <a id="axcl.rt.engine_get_model_type"></a>
 
-### 2.44. axcl.rt.engine_get_model_type
+### 2.48. axcl.rt.engine_get_model_type
 
 Get the core-count classification of a model file.
 
-#### 2.44.1. Function
+#### 2.48.1. Function
 
 **Python Call**
 
@@ -1976,22 +2193,22 @@ model_type, ret = axcl.rt.engine_get_model_type(model_path)
 axclError axclrtEngineGetModelType(const char *modelPath, axclrtEngineModelKind *modelType);
 ```
 
-#### 2.44.2. Parameters
+#### 2.48.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_path | str &#124; bytes &#124; None | Path to a readable regular model file on the Host. |
 
-#### 2.44.3. Returns
+#### 2.48.3. Returns
 
 - `model_type`: *int* — Receives the model type.
 - `ret`: *int* — The model type was returned successfully. Failure.
 
-#### 2.44.4. Note
+#### 2.48.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.44.5. Example
+#### 2.48.5. Example
 
 ```python
 model_type, ret = axcl.rt.engine_get_model_type(model_path)
@@ -2001,11 +2218,11 @@ model_type, ret = axcl.rt.engine_get_model_type(model_path)
 
 <a id="axcl.rt.engine_get_model_type_from_mem"></a>
 
-### 2.45. axcl.rt.engine_get_model_type_from_mem
+### 2.49. axcl.rt.engine_get_model_type_from_mem
 
 Get the core-count classification of model data stored in Device memory.
 
-#### 2.45.1. Function
+#### 2.49.1. Function
 
 **Python Call**
 
@@ -2019,23 +2236,23 @@ model_type, ret = axcl.rt.engine_get_model_type_from_mem(model, model_size)
 axclError axclrtEngineGetModelTypeFromMem(const void *model, uint64_t modelSize, axclrtEngineModelKind *modelType);
 ```
 
-#### 2.45.2. Parameters
+#### 2.49.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model | int &#124; None | Device memory handle containing model data. |
 | model_size | int | Model data size in bytes. Must be greater than 0. |
 
-#### 2.45.3. Returns
+#### 2.49.3. Returns
 
 - `model_type`: *int* — Receives the model type.
 - `ret`: *int* — The model type was returned successfully. Failure.
 
-#### 2.45.4. Note
+#### 2.49.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.45.5. Example
+#### 2.49.5. Example
 
 ```python
 model_type, ret = axcl.rt.engine_get_model_type_from_mem(model, model_size)
@@ -2045,11 +2262,11 @@ model_type, ret = axcl.rt.engine_get_model_type_from_mem(model, model_size)
 
 <a id="axcl.rt.engine_get_model_type_from_model_id"></a>
 
-### 2.46. axcl.rt.engine_get_model_type_from_model_id
+### 2.50. axcl.rt.engine_get_model_type_from_model_id
 
 Get the core-count classification of a loaded model.
 
-#### 2.46.1. Function
+#### 2.50.1. Function
 
 **Python Call**
 
@@ -2063,22 +2280,22 @@ model_type, ret = axcl.rt.engine_get_model_type_from_model_id(model_id)
 axclError axclrtEngineGetModelTypeFromModelId(uint64_t modelId, axclrtEngineModelKind *modelType);
 ```
 
-#### 2.46.2. Parameters
+#### 2.50.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
 
-#### 2.46.3. Returns
+#### 2.50.3. Returns
 
 - `model_type`: *int* — Receives the model type.
 - `ret`: *int* — The model type was returned successfully. Failure.
 
-#### 2.46.4. Note
+#### 2.50.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.46.5. Example
+#### 2.50.5. Example
 
 ```python
 model_type, ret = axcl.rt.engine_get_model_type_from_model_id(model_id)
@@ -2088,11 +2305,11 @@ model_type, ret = axcl.rt.engine_get_model_type_from_model_id(model_id)
 
 <a id="axcl.rt.engine_get_io_info"></a>
 
-### 2.47. axcl.rt.engine_get_io_info
+### 2.51. axcl.rt.engine_get_io_info
 
 Create a Host-side metadata object describing a loaded model's inputs and outputs.
 
-#### 2.47.1. Function
+#### 2.51.1. Function
 
 **Python Call**
 
@@ -2106,22 +2323,22 @@ io_info, ret = axcl.rt.engine_get_io_info(model_id)
 axclError axclrtEngineGetIOInfo(uint64_t modelId, axclrtEngineIOInfo *ioInfo);
 ```
 
-#### 2.47.2. Parameters
+#### 2.51.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
 
-#### 2.47.3. Returns
+#### 2.51.3. Returns
 
 - `io_info`: *int* — Receives the created IO metadata handle.
 - `ret`: *int* — IO metadata was created successfully. Failure.
 
-#### 2.47.4. Note
+#### 2.51.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.47.5. Example
+#### 2.51.5. Example
 
 ```python
 io_info, ret = axcl.rt.engine_get_io_info(model_id)
@@ -2131,11 +2348,11 @@ io_info, ret = axcl.rt.engine_get_io_info(model_id)
 
 <a id="axcl.rt.engine_destroy_io_info"></a>
 
-### 2.48. axcl.rt.engine_destroy_io_info
+### 2.52. axcl.rt.engine_destroy_io_info
 
-Destroy an IO metadata object created by
+Destroy an IO metadata object created by axclrtEngineGetIOInfo.
 
-#### 2.48.1. Function
+#### 2.52.1. Function
 
 **Python Call**
 
@@ -2149,21 +2366,21 @@ ret = axcl.rt.engine_destroy_io_info(io_info)
 axclError axclrtEngineDestroyIOInfo(axclrtEngineIOInfo ioInfo);
 ```
 
-#### 2.48.2. Parameters
+#### 2.52.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | IO metadata handle to destroy. |
 
-#### 2.48.3. Returns
+#### 2.52.3. Returns
 
 - `ret`: *int* — The IO metadata was destroyed successfully. Failure.
 
-#### 2.48.4. Note
+#### 2.52.4. Note
 
 Return type: `int`.
 
-#### 2.48.5. Example
+#### 2.52.5. Example
 
 ```python
 ret = axcl.rt.engine_destroy_io_info(io_info)
@@ -2173,11 +2390,11 @@ ret = axcl.rt.engine_destroy_io_info(io_info)
 
 <a id="axcl.rt.engine_get_shape_groups_count"></a>
 
-### 2.49. axcl.rt.engine_get_shape_groups_count
+### 2.53. axcl.rt.engine_get_shape_groups_count
 
 Get the number of shape groups described by an IO metadata object.
 
-#### 2.49.1. Function
+#### 2.53.1. Function
 
 **Python Call**
 
@@ -2191,22 +2408,22 @@ count, ret = axcl.rt.engine_get_shape_groups_count(io_info)
 axclError axclrtEngineGetShapeGroupsCount(axclrtEngineIOInfo ioInfo, int32_t *count);
 ```
 
-#### 2.49.2. Parameters
+#### 2.53.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 
-#### 2.49.3. Returns
+#### 2.53.3. Returns
 
 - `count`: *int* — Receives the shape-group count; 0 if the model has no inputs.
 - `ret`: *int* — The count was returned successfully. Failure.
 
-#### 2.49.4. Note
+#### 2.53.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.49.5. Example
+#### 2.53.5. Example
 
 ```python
 count, ret = axcl.rt.engine_get_shape_groups_count(io_info)
@@ -2216,11 +2433,11 @@ count, ret = axcl.rt.engine_get_shape_groups_count(io_info)
 
 <a id="axcl.rt.engine_get_num_inputs"></a>
 
-### 2.50. axcl.rt.engine_get_num_inputs
+### 2.54. axcl.rt.engine_get_num_inputs
 
 Get the number of model inputs in an IO metadata object.
 
-#### 2.50.1. Function
+#### 2.54.1. Function
 
 **Python Call**
 
@@ -2234,21 +2451,21 @@ ret = axcl.rt.engine_get_num_inputs(io_info)
 uint32_t axclrtEngineGetNumInputs(axclrtEngineIOInfo ioInfo);
 ```
 
-#### 2.50.2. Parameters
+#### 2.54.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 
-#### 2.50.3. Returns
+#### 2.54.3. Returns
 
-- `ret`: *int* — Number of inputs. If
+- `ret`: *int* — Number of inputs. If `io_info` is None, the return value is an encoded error value and axclrtGetLastError reports the failure.
 
-#### 2.50.4. Note
+#### 2.54.4. Note
 
 Return type: `int`.
 
-#### 2.50.5. Example
+#### 2.54.5. Example
 
 ```python
 ret = axcl.rt.engine_get_num_inputs(io_info)
@@ -2258,11 +2475,11 @@ ret = axcl.rt.engine_get_num_inputs(io_info)
 
 <a id="axcl.rt.engine_get_num_outputs"></a>
 
-### 2.51. axcl.rt.engine_get_num_outputs
+### 2.55. axcl.rt.engine_get_num_outputs
 
 Get the number of model outputs in an IO metadata object.
 
-#### 2.51.1. Function
+#### 2.55.1. Function
 
 **Python Call**
 
@@ -2276,21 +2493,21 @@ ret = axcl.rt.engine_get_num_outputs(io_info)
 uint32_t axclrtEngineGetNumOutputs(axclrtEngineIOInfo ioInfo);
 ```
 
-#### 2.51.2. Parameters
+#### 2.55.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 
-#### 2.51.3. Returns
+#### 2.55.3. Returns
 
-- `ret`: *int* — Number of outputs. If
+- `ret`: *int* — Number of outputs. If `io_info` is None, the return value is an encoded error value and axclrtGetLastError reports the failure.
 
-#### 2.51.4. Note
+#### 2.55.4. Note
 
 Return type: `int`.
 
-#### 2.51.5. Example
+#### 2.55.5. Example
 
 ```python
 ret = axcl.rt.engine_get_num_outputs(io_info)
@@ -2300,11 +2517,11 @@ ret = axcl.rt.engine_get_num_outputs(io_info)
 
 <a id="axcl.rt.engine_get_input_size_by_index"></a>
 
-### 2.52. axcl.rt.engine_get_input_size_by_index
+### 2.56. axcl.rt.engine_get_input_size_by_index
 
 Get the required buffer size for a model input in the specified shape group.
 
-#### 2.52.1. Function
+#### 2.56.1. Function
 
 **Python Call**
 
@@ -2318,7 +2535,7 @@ ret = axcl.rt.engine_get_input_size_by_index(io_info, group, index)
 uint64_t axclrtEngineGetInputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t group, uint32_t index);
 ```
 
-#### 2.52.2. Parameters
+#### 2.56.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -2326,15 +2543,15 @@ uint64_t axclrtEngineGetInputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t gro
 | group | int | Shape-group index, starting at 0. |
 | index | int | Input index, starting at 0. |
 
-#### 2.52.3. Returns
+#### 2.56.3. Returns
 
 - `ret`: *int* — Required size in bytes. On failure, returns an encoded error value and sets the last error.
 
-#### 2.52.4. Note
+#### 2.56.4. Note
 
 Return type: `int`.
 
-#### 2.52.5. Example
+#### 2.56.5. Example
 
 ```python
 ret = axcl.rt.engine_get_input_size_by_index(io_info, group, index)
@@ -2344,11 +2561,11 @@ ret = axcl.rt.engine_get_input_size_by_index(io_info, group, index)
 
 <a id="axcl.rt.engine_get_output_size_by_index"></a>
 
-### 2.53. axcl.rt.engine_get_output_size_by_index
+### 2.57. axcl.rt.engine_get_output_size_by_index
 
 Get the required buffer size for a model output in the specified shape group.
 
-#### 2.53.1. Function
+#### 2.57.1. Function
 
 **Python Call**
 
@@ -2362,7 +2579,7 @@ ret = axcl.rt.engine_get_output_size_by_index(io_info, group, index)
 uint64_t axclrtEngineGetOutputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t group, uint32_t index);
 ```
 
-#### 2.53.2. Parameters
+#### 2.57.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -2370,15 +2587,15 @@ uint64_t axclrtEngineGetOutputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t gr
 | group | int | Shape-group index, starting at 0. |
 | index | int | Output index, starting at 0. |
 
-#### 2.53.3. Returns
+#### 2.57.3. Returns
 
 - `ret`: *int* — Required size in bytes. On failure, returns an encoded error value and sets the last error.
 
-#### 2.53.4. Note
+#### 2.57.4. Note
 
 Return type: `int`.
 
-#### 2.53.5. Example
+#### 2.57.5. Example
 
 ```python
 ret = axcl.rt.engine_get_output_size_by_index(io_info, group, index)
@@ -2388,11 +2605,11 @@ ret = axcl.rt.engine_get_output_size_by_index(io_info, group, index)
 
 <a id="axcl.rt.engine_get_input_name_by_index"></a>
 
-### 2.54. axcl.rt.engine_get_input_name_by_index
+### 2.58. axcl.rt.engine_get_input_name_by_index
 
 Get an input tensor name by index.
 
-#### 2.54.1. Function
+#### 2.58.1. Function
 
 **Python Call**
 
@@ -2406,22 +2623,22 @@ result = axcl.rt.engine_get_input_name_by_index(io_info, index)
 const char * axclrtEngineGetInputNameByIndex(axclrtEngineIOInfo ioInfo, uint32_t index);
 ```
 
-#### 2.54.2. Parameters
+#### 2.58.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 | index | int | Input index, starting at 0. |
 
-#### 2.54.3. Returns
+#### 2.58.3. Returns
 
-- `result`: *str* — Tensor name on success; NULL on failure. The returned pointer is owned by
+- `result`: *str* — Tensor name on success; an empty string on failure.
 
-#### 2.54.4. Note
+#### 2.58.4. Note
 
 Return type: `str`.
 
-#### 2.54.5. Example
+#### 2.58.5. Example
 
 ```python
 result = axcl.rt.engine_get_input_name_by_index(io_info, index)
@@ -2431,11 +2648,11 @@ result = axcl.rt.engine_get_input_name_by_index(io_info, index)
 
 <a id="axcl.rt.engine_get_output_name_by_index"></a>
 
-### 2.55. axcl.rt.engine_get_output_name_by_index
+### 2.59. axcl.rt.engine_get_output_name_by_index
 
 Get an output tensor name by index.
 
-#### 2.55.1. Function
+#### 2.59.1. Function
 
 **Python Call**
 
@@ -2449,22 +2666,22 @@ result = axcl.rt.engine_get_output_name_by_index(io_info, index)
 const char * axclrtEngineGetOutputNameByIndex(axclrtEngineIOInfo ioInfo, uint32_t index);
 ```
 
-#### 2.55.2. Parameters
+#### 2.59.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 | index | int | Output index, starting at 0. |
 
-#### 2.55.3. Returns
+#### 2.59.3. Returns
 
-- `result`: *str* — Tensor name on success; NULL on failure. The returned pointer is owned by
+- `result`: *str* — Tensor name on success; an empty string on failure.
 
-#### 2.55.4. Note
+#### 2.59.4. Note
 
 Return type: `str`.
 
-#### 2.55.5. Example
+#### 2.59.5. Example
 
 ```python
 result = axcl.rt.engine_get_output_name_by_index(io_info, index)
@@ -2474,11 +2691,11 @@ result = axcl.rt.engine_get_output_name_by_index(io_info, index)
 
 <a id="axcl.rt.engine_get_input_index_by_name"></a>
 
-### 2.56. axcl.rt.engine_get_input_index_by_name
+### 2.60. axcl.rt.engine_get_input_index_by_name
 
 Find an input tensor index by name.
 
-#### 2.56.1. Function
+#### 2.60.1. Function
 
 **Python Call**
 
@@ -2492,22 +2709,22 @@ ret = axcl.rt.engine_get_input_index_by_name(io_info, name)
 int32_t axclrtEngineGetInputIndexByName(axclrtEngineIOInfo ioInfo, const char *name);
 ```
 
-#### 2.56.2. Parameters
+#### 2.60.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 | name | str &#124; bytes &#124; None | Input tensor name. |
 
-#### 2.56.3. Returns
+#### 2.60.3. Returns
 
-- `ret`: *int* — Nonnegative input index on success; an Engine error value on failure. Use
+- `ret`: *int* — Nonnegative input index on success; a negative Engine error value on failure, including when no input matches `name`. axclrtGetLastError also reports the failure.
 
-#### 2.56.4. Note
+#### 2.60.4. Note
 
 Return type: `int`.
 
-#### 2.56.5. Example
+#### 2.60.5. Example
 
 ```python
 ret = axcl.rt.engine_get_input_index_by_name(io_info, name)
@@ -2517,11 +2734,11 @@ ret = axcl.rt.engine_get_input_index_by_name(io_info, name)
 
 <a id="axcl.rt.engine_get_output_index_by_name"></a>
 
-### 2.57. axcl.rt.engine_get_output_index_by_name
+### 2.61. axcl.rt.engine_get_output_index_by_name
 
 Find an output tensor index by name.
 
-#### 2.57.1. Function
+#### 2.61.1. Function
 
 **Python Call**
 
@@ -2535,22 +2752,22 @@ ret = axcl.rt.engine_get_output_index_by_name(io_info, name)
 int32_t axclrtEngineGetOutputIndexByName(axclrtEngineIOInfo ioInfo, const char *name);
 ```
 
-#### 2.57.2. Parameters
+#### 2.61.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 | name | str &#124; bytes &#124; None | Output tensor name. |
 
-#### 2.57.3. Returns
+#### 2.61.3. Returns
 
-- `ret`: *int* — Nonnegative output index on success; an Engine error value on failure. Use
+- `ret`: *int* — Nonnegative output index on success; a negative Engine error value on failure, including when no output matches `name`. axclrtGetLastError also reports the failure.
 
-#### 2.57.4. Note
+#### 2.61.4. Note
 
 Return type: `int`.
 
-#### 2.57.5. Example
+#### 2.61.5. Example
 
 ```python
 ret = axcl.rt.engine_get_output_index_by_name(io_info, name)
@@ -2560,11 +2777,11 @@ ret = axcl.rt.engine_get_output_index_by_name(io_info, name)
 
 <a id="axcl.rt.engine_get_input_dims"></a>
 
-### 2.58. axcl.rt.engine_get_input_dims
+### 2.62. axcl.rt.engine_get_input_dims
 
 Get the dimensions of an input tensor in the specified shape group.
 
-#### 2.58.1. Function
+#### 2.62.1. Function
 
 **Python Call**
 
@@ -2578,7 +2795,7 @@ dims, ret = axcl.rt.engine_get_input_dims(io_info, group, index)
 axclError axclrtEngineGetInputDims(axclrtEngineIOInfo ioInfo, uint32_t group, uint32_t index, axclrtEngineIODims *dims);
 ```
 
-#### 2.58.2. Parameters
+#### 2.62.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -2586,16 +2803,16 @@ axclError axclrtEngineGetInputDims(axclrtEngineIOInfo ioInfo, uint32_t group, ui
 | group | int | Shape-group index, starting at 0. |
 | index | int | Input index, starting at 0. |
 
-#### 2.58.3. Returns
+#### 2.62.3. Returns
 
 - `dims`: *dict* — Caller-provided structure that receives the dimensions.
 - `ret`: *int* — The dimensions were returned successfully. Failure.
 
-#### 2.58.4. Note
+#### 2.62.4. Note
 
 Return type: `tuple[dict, int]`.
 
-#### 2.58.5. Example
+#### 2.62.5. Example
 
 ```python
 dims, ret = axcl.rt.engine_get_input_dims(io_info, group, index)
@@ -2605,11 +2822,11 @@ dims, ret = axcl.rt.engine_get_input_dims(io_info, group, index)
 
 <a id="axcl.rt.engine_get_input_data_type"></a>
 
-### 2.59. axcl.rt.engine_get_input_data_type
+### 2.63. axcl.rt.engine_get_input_data_type
 
 Get the data type of an input tensor.
 
-#### 2.59.1. Function
+#### 2.63.1. Function
 
 **Python Call**
 
@@ -2623,23 +2840,23 @@ type, ret = axcl.rt.engine_get_input_data_type(io_info, index)
 axclError axclrtEngineGetInputDataType(axclrtEngineIOInfo ioInfo, uint32_t index, axclrtEngineDataType *type);
 ```
 
-#### 2.59.2. Parameters
+#### 2.63.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 | index | int | Input index, starting at 0. |
 
-#### 2.59.3. Returns
+#### 2.63.3. Returns
 
 - `type`: *int* — Receives the input data type.
 - `ret`: *int* — The data type was returned successfully. Failure.
 
-#### 2.59.4. Note
+#### 2.63.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.59.5. Example
+#### 2.63.5. Example
 
 ```python
 type, ret = axcl.rt.engine_get_input_data_type(io_info, index)
@@ -2649,11 +2866,11 @@ type, ret = axcl.rt.engine_get_input_data_type(io_info, index)
 
 <a id="axcl.rt.engine_get_output_data_type"></a>
 
-### 2.60. axcl.rt.engine_get_output_data_type
+### 2.64. axcl.rt.engine_get_output_data_type
 
 Get the data type of an output tensor.
 
-#### 2.60.1. Function
+#### 2.64.1. Function
 
 **Python Call**
 
@@ -2667,23 +2884,23 @@ type, ret = axcl.rt.engine_get_output_data_type(io_info, index)
 axclError axclrtEngineGetOutputDataType(axclrtEngineIOInfo ioInfo, uint32_t index, axclrtEngineDataType *type);
 ```
 
-#### 2.60.2. Parameters
+#### 2.64.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 | index | int | Output index, starting at 0. |
 
-#### 2.60.3. Returns
+#### 2.64.3. Returns
 
 - `type`: *int* — Receives the output data type.
 - `ret`: *int* — The data type was returned successfully. Failure.
 
-#### 2.60.4. Note
+#### 2.64.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.60.5. Example
+#### 2.64.5. Example
 
 ```python
 type, ret = axcl.rt.engine_get_output_data_type(io_info, index)
@@ -2693,11 +2910,11 @@ type, ret = axcl.rt.engine_get_output_data_type(io_info, index)
 
 <a id="axcl.rt.engine_get_input_data_layout"></a>
 
-### 2.61. axcl.rt.engine_get_input_data_layout
+### 2.65. axcl.rt.engine_get_input_data_layout
 
 Get the data layout of an input tensor.
 
-#### 2.61.1. Function
+#### 2.65.1. Function
 
 **Python Call**
 
@@ -2711,23 +2928,23 @@ layout, ret = axcl.rt.engine_get_input_data_layout(io_info, index)
 axclError axclrtEngineGetInputDataLayout(axclrtEngineIOInfo ioInfo, uint32_t index, axclrtEngineDataLayout *layout);
 ```
 
-#### 2.61.2. Parameters
+#### 2.65.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 | index | int | Input index, starting at 0. |
 
-#### 2.61.3. Returns
+#### 2.65.3. Returns
 
 - `layout`: *int* — Receives the input data layout.
 - `ret`: *int* — The data layout was returned successfully. Failure.
 
-#### 2.61.4. Note
+#### 2.65.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.61.5. Example
+#### 2.65.5. Example
 
 ```python
 layout, ret = axcl.rt.engine_get_input_data_layout(io_info, index)
@@ -2737,11 +2954,11 @@ layout, ret = axcl.rt.engine_get_input_data_layout(io_info, index)
 
 <a id="axcl.rt.engine_get_output_data_layout"></a>
 
-### 2.62. axcl.rt.engine_get_output_data_layout
+### 2.66. axcl.rt.engine_get_output_data_layout
 
 Get the data layout of an output tensor.
 
-#### 2.62.1. Function
+#### 2.66.1. Function
 
 **Python Call**
 
@@ -2755,23 +2972,23 @@ layout, ret = axcl.rt.engine_get_output_data_layout(io_info, index)
 axclError axclrtEngineGetOutputDataLayout(axclrtEngineIOInfo ioInfo, uint32_t index, axclrtEngineDataLayout *layout);
 ```
 
-#### 2.62.2. Parameters
+#### 2.66.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 | index | int | Output index, starting at 0. |
 
-#### 2.62.3. Returns
+#### 2.66.3. Returns
 
 - `layout`: *int* — Receives the output data layout.
 - `ret`: *int* — The data layout was returned successfully. Failure.
 
-#### 2.62.4. Note
+#### 2.66.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.62.5. Example
+#### 2.66.5. Example
 
 ```python
 layout, ret = axcl.rt.engine_get_output_data_layout(io_info, index)
@@ -2781,11 +2998,11 @@ layout, ret = axcl.rt.engine_get_output_data_layout(io_info, index)
 
 <a id="axcl.rt.engine_get_output_dims"></a>
 
-### 2.63. axcl.rt.engine_get_output_dims
+### 2.67. axcl.rt.engine_get_output_dims
 
 Get the dimensions of an output tensor in the specified shape group.
 
-#### 2.63.1. Function
+#### 2.67.1. Function
 
 **Python Call**
 
@@ -2799,7 +3016,7 @@ dims, ret = axcl.rt.engine_get_output_dims(io_info, group, index)
 axclError axclrtEngineGetOutputDims(axclrtEngineIOInfo ioInfo, uint32_t group, uint32_t index, axclrtEngineIODims *dims);
 ```
 
-#### 2.63.2. Parameters
+#### 2.67.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -2807,16 +3024,16 @@ axclError axclrtEngineGetOutputDims(axclrtEngineIOInfo ioInfo, uint32_t group, u
 | group | int | Shape-group index, starting at 0. |
 | index | int | Output index, starting at 0. |
 
-#### 2.63.3. Returns
+#### 2.67.3. Returns
 
 - `dims`: *dict* — Caller-provided structure that receives the dimensions.
 - `ret`: *int* — The dimensions were returned successfully. Failure.
 
-#### 2.63.4. Note
+#### 2.67.4. Note
 
 Return type: `tuple[dict, int]`.
 
-#### 2.63.5. Example
+#### 2.67.5. Example
 
 ```python
 dims, ret = axcl.rt.engine_get_output_dims(io_info, group, index)
@@ -2826,11 +3043,11 @@ dims, ret = axcl.rt.engine_get_output_dims(io_info, group, index)
 
 <a id="axcl.rt.engine_create_io"></a>
 
-### 2.64. axcl.rt.engine_create_io
+### 2.68. axcl.rt.engine_create_io
 
 Create a Host-side IO binding object from model IO metadata.
 
-#### 2.64.1. Function
+#### 2.68.1. Function
 
 **Python Call**
 
@@ -2844,22 +3061,22 @@ io, ret = axcl.rt.engine_create_io(io_info)
 axclError axclrtEngineCreateIO(axclrtEngineIOInfo ioInfo, axclrtEngineIO *io);
 ```
 
-#### 2.64.2. Parameters
+#### 2.68.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io_info | int &#124; None | Valid IO metadata handle. |
 
-#### 2.64.3. Returns
+#### 2.68.3. Returns
 
 - `io`: *int* — Receives the created IO binding handle.
 - `ret`: *int* — The IO binding object was created successfully. Failure.
 
-#### 2.64.4. Note
+#### 2.68.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.64.5. Example
+#### 2.68.5. Example
 
 ```python
 io, ret = axcl.rt.engine_create_io(io_info)
@@ -2869,11 +3086,11 @@ io, ret = axcl.rt.engine_create_io(io_info)
 
 <a id="axcl.rt.engine_destroy_io"></a>
 
-### 2.65. axcl.rt.engine_destroy_io
+### 2.69. axcl.rt.engine_destroy_io
 
-Destroy an IO binding object created by
+Destroy an IO binding object created by axclrtEngineCreateIO.
 
-#### 2.65.1. Function
+#### 2.69.1. Function
 
 **Python Call**
 
@@ -2887,21 +3104,21 @@ ret = axcl.rt.engine_destroy_io(io)
 axclError axclrtEngineDestroyIO(axclrtEngineIO io);
 ```
 
-#### 2.65.2. Parameters
+#### 2.69.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io | int &#124; None | IO binding handle to destroy. |
 
-#### 2.65.3. Returns
+#### 2.69.3. Returns
 
 - `ret`: *int* — The IO binding object was destroyed successfully. Failure.
 
-#### 2.65.4. Note
+#### 2.69.4. Note
 
 Return type: `int`.
 
-#### 2.65.5. Example
+#### 2.69.5. Example
 
 ```python
 ret = axcl.rt.engine_destroy_io(io)
@@ -2911,11 +3128,11 @@ ret = axcl.rt.engine_destroy_io(io)
 
 <a id="axcl.rt.engine_set_input_buffer_by_index"></a>
 
-### 2.66. axcl.rt.engine_set_input_buffer_by_index
+### 2.70. axcl.rt.engine_set_input_buffer_by_index
 
 Bind a Device buffer to an input by index.
 
-#### 2.66.1. Function
+#### 2.70.1. Function
 
 **Python Call**
 
@@ -2929,7 +3146,7 @@ ret = axcl.rt.engine_set_input_buffer_by_index(io, index, data_buffer, size)
 axclError axclrtEngineSetInputBufferByIndex(axclrtEngineIO io, uint32_t index, const void *dataBuffer, uint64_t size);
 ```
 
-#### 2.66.2. Parameters
+#### 2.70.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -2938,15 +3155,15 @@ axclError axclrtEngineSetInputBufferByIndex(axclrtEngineIO io, uint32_t index, c
 | data_buffer | int &#124; None | Device memory handle to bind. |
 | size | int | Bound buffer size in bytes. Must be greater than 0. |
 
-#### 2.66.3. Returns
+#### 2.70.3. Returns
 
 - `ret`: *int* — The buffer binding was stored successfully. Failure.
 
-#### 2.66.4. Note
+#### 2.70.4. Note
 
 Return type: `int`.
 
-#### 2.66.5. Example
+#### 2.70.5. Example
 
 ```python
 ret = axcl.rt.engine_set_input_buffer_by_index(io, index, data_buffer, size)
@@ -2956,11 +3173,11 @@ ret = axcl.rt.engine_set_input_buffer_by_index(io, index, data_buffer, size)
 
 <a id="axcl.rt.engine_set_output_buffer_by_index"></a>
 
-### 2.67. axcl.rt.engine_set_output_buffer_by_index
+### 2.71. axcl.rt.engine_set_output_buffer_by_index
 
 Bind a Device buffer to an output by index.
 
-#### 2.67.1. Function
+#### 2.71.1. Function
 
 **Python Call**
 
@@ -2974,7 +3191,7 @@ ret = axcl.rt.engine_set_output_buffer_by_index(io, index, data_buffer, size)
 axclError axclrtEngineSetOutputBufferByIndex(axclrtEngineIO io, uint32_t index, const void *dataBuffer, uint64_t size);
 ```
 
-#### 2.67.2. Parameters
+#### 2.71.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -2983,15 +3200,15 @@ axclError axclrtEngineSetOutputBufferByIndex(axclrtEngineIO io, uint32_t index, 
 | data_buffer | int &#124; None | Device memory handle to bind. |
 | size | int | Bound buffer size in bytes. Must be greater than 0. |
 
-#### 2.67.3. Returns
+#### 2.71.3. Returns
 
 - `ret`: *int* — The buffer binding was stored successfully. Failure.
 
-#### 2.67.4. Note
+#### 2.71.4. Note
 
 Return type: `int`.
 
-#### 2.67.5. Example
+#### 2.71.5. Example
 
 ```python
 ret = axcl.rt.engine_set_output_buffer_by_index(io, index, data_buffer, size)
@@ -3001,11 +3218,11 @@ ret = axcl.rt.engine_set_output_buffer_by_index(io, index, data_buffer, size)
 
 <a id="axcl.rt.engine_set_input_buffer_by_name"></a>
 
-### 2.68. axcl.rt.engine_set_input_buffer_by_name
+### 2.72. axcl.rt.engine_set_input_buffer_by_name
 
 Bind a Device buffer to an input by tensor name.
 
-#### 2.68.1. Function
+#### 2.72.1. Function
 
 **Python Call**
 
@@ -3019,7 +3236,7 @@ ret = axcl.rt.engine_set_input_buffer_by_name(io, name, data_buffer, size)
 axclError axclrtEngineSetInputBufferByName(axclrtEngineIO io, const char *name, const void *dataBuffer, uint64_t size);
 ```
 
-#### 2.68.2. Parameters
+#### 2.72.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -3028,15 +3245,15 @@ axclError axclrtEngineSetInputBufferByName(axclrtEngineIO io, const char *name, 
 | data_buffer | int &#124; None | Device memory handle to bind. |
 | size | int | Bound buffer size in bytes. Must be greater than 0. |
 
-#### 2.68.3. Returns
+#### 2.72.3. Returns
 
 - `ret`: *int* — The buffer binding was stored successfully. Failure.
 
-#### 2.68.4. Note
+#### 2.72.4. Note
 
 Return type: `int`.
 
-#### 2.68.5. Example
+#### 2.72.5. Example
 
 ```python
 ret = axcl.rt.engine_set_input_buffer_by_name(io, name, data_buffer, size)
@@ -3046,11 +3263,11 @@ ret = axcl.rt.engine_set_input_buffer_by_name(io, name, data_buffer, size)
 
 <a id="axcl.rt.engine_set_output_buffer_by_name"></a>
 
-### 2.69. axcl.rt.engine_set_output_buffer_by_name
+### 2.73. axcl.rt.engine_set_output_buffer_by_name
 
 Bind a Device buffer to an output by tensor name.
 
-#### 2.69.1. Function
+#### 2.73.1. Function
 
 **Python Call**
 
@@ -3064,7 +3281,7 @@ ret = axcl.rt.engine_set_output_buffer_by_name(io, name, data_buffer, size)
 axclError axclrtEngineSetOutputBufferByName(axclrtEngineIO io, const char *name, const void *dataBuffer, uint64_t size);
 ```
 
-#### 2.69.2. Parameters
+#### 2.73.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -3073,15 +3290,15 @@ axclError axclrtEngineSetOutputBufferByName(axclrtEngineIO io, const char *name,
 | data_buffer | int &#124; None | Device memory handle to bind. |
 | size | int | Bound buffer size in bytes. Must be greater than 0. |
 
-#### 2.69.3. Returns
+#### 2.73.3. Returns
 
 - `ret`: *int* — The buffer binding was stored successfully. Failure.
 
-#### 2.69.4. Note
+#### 2.73.4. Note
 
 Return type: `int`.
 
-#### 2.69.5. Example
+#### 2.73.5. Example
 
 ```python
 ret = axcl.rt.engine_set_output_buffer_by_name(io, name, data_buffer, size)
@@ -3091,11 +3308,11 @@ ret = axcl.rt.engine_set_output_buffer_by_name(io, name, data_buffer, size)
 
 <a id="axcl.rt.engine_get_input_buffer_by_index"></a>
 
-### 2.70. axcl.rt.engine_get_input_buffer_by_index
+### 2.74. axcl.rt.engine_get_input_buffer_by_index
 
 Get the buffer binding stored for an input index.
 
-#### 2.70.1. Function
+#### 2.74.1. Function
 
 **Python Call**
 
@@ -3109,24 +3326,24 @@ data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_index(io, index)
 axclError axclrtEngineGetInputBufferByIndex(axclrtEngineIO io, uint32_t index, void **dataBuffer, uint64_t *size);
 ```
 
-#### 2.70.2. Parameters
+#### 2.74.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io | int &#124; None | Valid IO binding handle. |
 | index | int | Input index, starting at 0. |
 
-#### 2.70.3. Returns
+#### 2.74.3. Returns
 
 - `data_buffer`: *int* — Receives the stored Device memory handle.
 - `size`: *int* — Receives the stored buffer size in bytes.
 - `ret`: *int* — The stored binding was returned successfully. Failure.
 
-#### 2.70.4. Note
+#### 2.74.4. Note
 
 Return type: `tuple[int, int, int]`.
 
-#### 2.70.5. Example
+#### 2.74.5. Example
 
 ```python
 data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_index(io, index)
@@ -3136,11 +3353,11 @@ data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_index(io, index)
 
 <a id="axcl.rt.engine_get_output_buffer_by_index"></a>
 
-### 2.71. axcl.rt.engine_get_output_buffer_by_index
+### 2.75. axcl.rt.engine_get_output_buffer_by_index
 
 Get the buffer binding stored for an output index.
 
-#### 2.71.1. Function
+#### 2.75.1. Function
 
 **Python Call**
 
@@ -3154,24 +3371,24 @@ data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_index(io, index)
 axclError axclrtEngineGetOutputBufferByIndex(axclrtEngineIO io, uint32_t index, void **dataBuffer, uint64_t *size);
 ```
 
-#### 2.71.2. Parameters
+#### 2.75.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io | int &#124; None | Valid IO binding handle. |
 | index | int | Output index, starting at 0. |
 
-#### 2.71.3. Returns
+#### 2.75.3. Returns
 
 - `data_buffer`: *int* — Receives the stored Device memory handle.
 - `size`: *int* — Receives the stored buffer size in bytes.
 - `ret`: *int* — The stored binding was returned successfully. Failure.
 
-#### 2.71.4. Note
+#### 2.75.4. Note
 
 Return type: `tuple[int, int, int]`.
 
-#### 2.71.5. Example
+#### 2.75.5. Example
 
 ```python
 data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_index(io, index)
@@ -3181,11 +3398,11 @@ data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_index(io, index)
 
 <a id="axcl.rt.engine_get_input_buffer_by_name"></a>
 
-### 2.72. axcl.rt.engine_get_input_buffer_by_name
+### 2.76. axcl.rt.engine_get_input_buffer_by_name
 
 Get the buffer binding stored for an input tensor name.
 
-#### 2.72.1. Function
+#### 2.76.1. Function
 
 **Python Call**
 
@@ -3199,24 +3416,24 @@ data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_name(io, name)
 axclError axclrtEngineGetInputBufferByName(axclrtEngineIO io, const char *name, void **dataBuffer, uint64_t *size);
 ```
 
-#### 2.72.2. Parameters
+#### 2.76.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io | int &#124; None | Valid IO binding handle. |
 | name | str &#124; bytes &#124; None | Input tensor name. |
 
-#### 2.72.3. Returns
+#### 2.76.3. Returns
 
 - `data_buffer`: *int* — Receives the stored Device memory handle.
 - `size`: *int* — Receives the stored buffer size in bytes.
 - `ret`: *int* — The stored binding was returned successfully. Failure.
 
-#### 2.72.4. Note
+#### 2.76.4. Note
 
 Return type: `tuple[int, int, int]`.
 
-#### 2.72.5. Example
+#### 2.76.5. Example
 
 ```python
 data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_name(io, name)
@@ -3226,11 +3443,11 @@ data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_name(io, name)
 
 <a id="axcl.rt.engine_get_output_buffer_by_name"></a>
 
-### 2.73. axcl.rt.engine_get_output_buffer_by_name
+### 2.77. axcl.rt.engine_get_output_buffer_by_name
 
 Get the buffer binding stored for an output tensor name.
 
-#### 2.73.1. Function
+#### 2.77.1. Function
 
 **Python Call**
 
@@ -3244,24 +3461,24 @@ data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_name(io, name)
 axclError axclrtEngineGetOutputBufferByName(axclrtEngineIO io, const char *name, void **dataBuffer, uint64_t *size);
 ```
 
-#### 2.73.2. Parameters
+#### 2.77.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io | int &#124; None | Valid IO binding handle. |
 | name | str &#124; bytes &#124; None | Output tensor name. |
 
-#### 2.73.3. Returns
+#### 2.77.3. Returns
 
 - `data_buffer`: *int* — Receives the stored Device memory handle.
 - `size`: *int* — Receives the stored buffer size in bytes.
 - `ret`: *int* — The stored binding was returned successfully. Failure.
 
-#### 2.73.4. Note
+#### 2.77.4. Note
 
 Return type: `tuple[int, int, int]`.
 
-#### 2.73.5. Example
+#### 2.77.5. Example
 
 ```python
 data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_name(io, name)
@@ -3271,11 +3488,11 @@ data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_name(io, name)
 
 <a id="axcl.rt.engine_set_dynamic_batch_size"></a>
 
-### 2.74. axcl.rt.engine_set_dynamic_batch_size
+### 2.78. axcl.rt.engine_set_dynamic_batch_size
 
 Store the dynamic batch size used for later execution with an IO binding object.
 
-#### 2.74.1. Function
+#### 2.78.1. Function
 
 **Python Call**
 
@@ -3289,22 +3506,22 @@ ret = axcl.rt.engine_set_dynamic_batch_size(io, batch_size)
 axclError axclrtEngineSetDynamicBatchSize(axclrtEngineIO io, uint32_t batchSize);
 ```
 
-#### 2.74.2. Parameters
+#### 2.78.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | io | int &#124; None | Valid IO binding handle. |
 | batch_size | int | Batch size to store. |
 
-#### 2.74.3. Returns
+#### 2.78.3. Returns
 
 - `ret`: *int* — The batch size was stored successfully. Failure.
 
-#### 2.74.4. Note
+#### 2.78.4. Note
 
 Return type: `int`.
 
-#### 2.74.5. Example
+#### 2.78.5. Example
 
 ```python
 ret = axcl.rt.engine_set_dynamic_batch_size(io, batch_size)
@@ -3314,11 +3531,11 @@ ret = axcl.rt.engine_set_dynamic_batch_size(io, batch_size)
 
 <a id="axcl.rt.engine_create_context"></a>
 
-### 2.75. axcl.rt.engine_create_context
+### 2.79. axcl.rt.engine_create_context
 
 Create an independent Engine execution Context for a loaded model.
 
-#### 2.75.1. Function
+#### 2.79.1. Function
 
 **Python Call**
 
@@ -3332,22 +3549,22 @@ context_id, ret = axcl.rt.engine_create_context(model_id)
 axclError axclrtEngineCreateContext(uint64_t modelId, uint64_t *contextId);
 ```
 
-#### 2.75.2. Parameters
+#### 2.79.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
 
-#### 2.75.3. Returns
+#### 2.79.3. Returns
 
 - `context_id`: *int* — Receives the created Engine Context ID.
 - `ret`: *int* — The Engine Context was created successfully. Failure.
 
-#### 2.75.4. Note
+#### 2.79.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.75.5. Example
+#### 2.79.5. Example
 
 ```python
 context_id, ret = axcl.rt.engine_create_context(model_id)
@@ -3357,11 +3574,11 @@ context_id, ret = axcl.rt.engine_create_context(model_id)
 
 <a id="axcl.rt.engine_execute"></a>
 
-### 2.76. axcl.rt.engine_execute
+### 2.80. axcl.rt.engine_execute
 
 Execute model inference synchronously on the current runtime Context's default Stream.
 
-#### 2.76.1. Function
+#### 2.80.1. Function
 
 **Python Call**
 
@@ -3375,24 +3592,24 @@ ret = axcl.rt.engine_execute(model_id, context_id, group, io)
 axclError axclrtEngineExecute(uint64_t modelId, uint64_t contextId, uint32_t group, axclrtEngineIO io);
 ```
 
-#### 2.76.2. Parameters
+#### 2.80.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
-| context_id | int | Engine Context ID created for |
+| context_id | int | Engine Context ID created for `model_id`. |
 | group | int | Shape-group index, starting at 0. |
 | io | int &#124; None | IO binding object containing all required Device buffers. |
 
-#### 2.76.3. Returns
+#### 2.80.3. Returns
 
 - `ret`: *int* — Inference completed successfully. Failure.
 
-#### 2.76.4. Note
+#### 2.80.4. Note
 
 Return type: `int`.
 
-#### 2.76.5. Example
+#### 2.80.5. Example
 
 ```python
 ret = axcl.rt.engine_execute(model_id, context_id, group, io)
@@ -3402,11 +3619,11 @@ ret = axcl.rt.engine_execute(model_id, context_id, group, io)
 
 <a id="axcl.rt.engine_execute_async"></a>
 
-### 2.77. axcl.rt.engine_execute_async
+### 2.81. axcl.rt.engine_execute_async
 
 Submit a model inference task to a Stream.
 
-#### 2.77.1. Function
+#### 2.81.1. Function
 
 **Python Call**
 
@@ -3420,25 +3637,25 @@ ret = axcl.rt.engine_execute_async(model_id, context_id, group, io, stream)
 axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contextId, uint32_t group, axclrtEngineIO io, axclrtStream stream);
 ```
 
-#### 2.77.2. Parameters
+#### 2.81.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | model_id | int | Loaded model ID. |
-| context_id | int | Engine Context ID created for |
+| context_id | int | Engine Context ID created for `model_id`. |
 | group | int | Shape-group index, starting at 0. |
 | io | int &#124; None | IO binding object containing all required Device buffers. |
 | stream | int &#124; None | Stream that receives the inference request. Pass NULL to use the current runtime Context's default Stream. |
 
-#### 2.77.3. Returns
+#### 2.81.3. Returns
 
 - `ret`: *int* — The inference request was submitted successfully. Failure.
 
-#### 2.77.4. Note
+#### 2.81.4. Note
 
 Return type: `int`.
 
-#### 2.77.5. Example
+#### 2.81.5. Example
 
 ```python
 ret = axcl.rt.engine_execute_async(model_id, context_id, group, io, stream)
@@ -3448,11 +3665,11 @@ ret = axcl.rt.engine_execute_async(model_id, context_id, group, io, stream)
 
 <a id="axcl.rt.create_event"></a>
 
-### 2.78. axcl.rt.create_event
+### 2.82. axcl.rt.create_event
 
 Create an Event with timing enabled on the device associated with the current Context.
 
-#### 2.78.1. Function
+#### 2.82.1. Function
 
 **Python Call**
 
@@ -3466,20 +3683,20 @@ event, ret = axcl.rt.create_event()
 axclError axclrtCreateEvent(axclrtEvent *event);
 ```
 
-#### 2.78.2. Parameters
+#### 2.82.2. Parameters
 
 N/A
 
-#### 2.78.3. Returns
+#### 2.82.3. Returns
 
 - `event`: *int* — Receives the created Event handle on success.
 - `ret`: *int* — The Event was created successfully. Failure.
 
-#### 2.78.4. Note
+#### 2.82.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.78.5. Example
+#### 2.82.5. Example
 
 ```python
 event, ret = axcl.rt.create_event()
@@ -3489,11 +3706,11 @@ event, ret = axcl.rt.create_event()
 
 <a id="axcl.rt.destroy_event"></a>
 
-### 2.79. axcl.rt.destroy_event
+### 2.83. axcl.rt.destroy_event
 
-Destroy an Event created by
+Destroy an Event created by axclrtCreateEvent or axclrtCreateEventWithFlags.
 
-#### 2.79.1. Function
+#### 2.83.1. Function
 
 **Python Call**
 
@@ -3507,21 +3724,21 @@ ret = axcl.rt.destroy_event(event)
 axclError axclrtDestroyEvent(axclrtEvent event);
 ```
 
-#### 2.79.2. Parameters
+#### 2.83.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | event | int &#124; None | Event handle to destroy. |
 
-#### 2.79.3. Returns
+#### 2.83.3. Returns
 
 - `ret`: *int* — The Event was destroyed successfully. Failure.
 
-#### 2.79.4. Note
+#### 2.83.4. Note
 
 Return type: `int`.
 
-#### 2.79.5. Example
+#### 2.83.5. Example
 
 ```python
 ret = axcl.rt.destroy_event(event)
@@ -3531,11 +3748,11 @@ ret = axcl.rt.destroy_event(event)
 
 <a id="axcl.rt.record_event"></a>
 
-### 2.80. axcl.rt.record_event
+### 2.84. axcl.rt.record_event
 
 Asynchronously submit an Event record point to the specified Stream.
 
-#### 2.80.1. Function
+#### 2.84.1. Function
 
 **Python Call**
 
@@ -3549,22 +3766,22 @@ ret = axcl.rt.record_event(event, stream)
 axclError axclrtRecordEvent(axclrtEvent event, axclrtStream stream);
 ```
 
-#### 2.80.2. Parameters
+#### 2.84.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | event | int &#124; None | Event to record. |
 | stream | int &#124; None | Stream that receives the record point. |
 
-#### 2.80.3. Returns
+#### 2.84.3. Returns
 
 - `ret`: *int* — The record point was submitted successfully. Failure.
 
-#### 2.80.4. Note
+#### 2.84.4. Note
 
 Return type: `int`.
 
-#### 2.80.5. Example
+#### 2.84.5. Example
 
 ```python
 ret = axcl.rt.record_event(event, stream)
@@ -3574,11 +3791,11 @@ ret = axcl.rt.record_event(event, stream)
 
 <a id="axcl.rt.stream_wait_event"></a>
 
-### 2.81. axcl.rt.stream_wait_event
+### 2.85. axcl.rt.stream_wait_event
 
 Asynchronously submit an Event wait point to the specified Stream so that the Stream continues only after the Event is signaled.
 
-#### 2.81.1. Function
+#### 2.85.1. Function
 
 **Python Call**
 
@@ -3592,22 +3809,22 @@ ret = axcl.rt.stream_wait_event(stream, event)
 axclError axclrtStreamWaitEvent(axclrtStream stream, axclrtEvent event);
 ```
 
-#### 2.81.2. Parameters
+#### 2.85.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | stream | int &#124; None | Stream that waits for the Event. |
 | event | int &#124; None | Event to wait for. |
 
-#### 2.81.3. Returns
+#### 2.85.3. Returns
 
 - `ret`: *int* — The wait point was submitted successfully. Failure.
 
-#### 2.81.4. Note
+#### 2.85.4. Note
 
 Return type: `int`.
 
-#### 2.81.5. Example
+#### 2.85.5. Example
 
 ```python
 ret = axcl.rt.stream_wait_event(stream, event)
@@ -3617,11 +3834,11 @@ ret = axcl.rt.stream_wait_event(stream, event)
 
 <a id="axcl.rt.stream_wait_event_with_timeout"></a>
 
-### 2.82. axcl.rt.stream_wait_event_with_timeout
+### 2.86. axcl.rt.stream_wait_event_with_timeout
 
 Asynchronously submit an Event wait point with a timeout to the specified Stream.
 
-#### 2.82.1. Function
+#### 2.86.1. Function
 
 **Python Call**
 
@@ -3635,7 +3852,7 @@ ret = axcl.rt.stream_wait_event_with_timeout(stream, event, timeout)
 axclError axclrtStreamWaitEventWithTimeout(axclrtStream stream, axclrtEvent event, int32_t timeout);
 ```
 
-#### 2.82.2. Parameters
+#### 2.86.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -3643,15 +3860,15 @@ axclError axclrtStreamWaitEventWithTimeout(axclrtStream stream, axclrtEvent even
 | event | int &#124; None | Event to wait for. |
 | timeout | int | Timeout in milliseconds. -1 waits indefinitely. |
 
-#### 2.82.3. Returns
+#### 2.86.3. Returns
 
 - `ret`: *int* — The wait point was submitted successfully. Failure.
 
-#### 2.82.4. Note
+#### 2.86.4. Note
 
 Return type: `int`.
 
-#### 2.82.5. Example
+#### 2.86.5. Example
 
 ```python
 ret = axcl.rt.stream_wait_event_with_timeout(stream, event, timeout)
@@ -3661,11 +3878,11 @@ ret = axcl.rt.stream_wait_event_with_timeout(stream, event, timeout)
 
 <a id="axcl.rt.synchronize_event"></a>
 
-### 2.83. axcl.rt.synchronize_event
+### 2.87. axcl.rt.synchronize_event
 
 Block the current Host thread until an Event is signaled.
 
-#### 2.83.1. Function
+#### 2.87.1. Function
 
 **Python Call**
 
@@ -3679,21 +3896,21 @@ ret = axcl.rt.synchronize_event(event)
 axclError axclrtSynchronizeEvent(axclrtEvent event);
 ```
 
-#### 2.83.2. Parameters
+#### 2.87.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | event | int &#124; None | Event to wait for. |
 
-#### 2.83.3. Returns
+#### 2.87.3. Returns
 
 - `ret`: *int* — The Event was signaled. Failure.
 
-#### 2.83.4. Note
+#### 2.87.4. Note
 
 Return type: `int`.
 
-#### 2.83.5. Example
+#### 2.87.5. Example
 
 ```python
 ret = axcl.rt.synchronize_event(event)
@@ -3703,11 +3920,11 @@ ret = axcl.rt.synchronize_event(event)
 
 <a id="axcl.rt.synchronize_event_with_timeout"></a>
 
-### 2.84. axcl.rt.synchronize_event_with_timeout
+### 2.88. axcl.rt.synchronize_event_with_timeout
 
 Block the current Host thread until an Event is signaled or the timeout expires.
 
-#### 2.84.1. Function
+#### 2.88.1. Function
 
 **Python Call**
 
@@ -3721,22 +3938,22 @@ ret = axcl.rt.synchronize_event_with_timeout(event, timeout)
 axclError axclrtSynchronizeEventWithTimeout(axclrtEvent event, int32_t timeout);
 ```
 
-#### 2.84.2. Parameters
+#### 2.88.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | event | int &#124; None | Event to wait for. |
 | timeout | int | Timeout in milliseconds. -1 waits indefinitely. |
 
-#### 2.84.3. Returns
+#### 2.88.3. Returns
 
 - `ret`: *int* — The Event was signaled within the timeout. Failure.
 
-#### 2.84.4. Note
+#### 2.88.4. Note
 
 Return type: `int`.
 
-#### 2.84.5. Example
+#### 2.88.5. Example
 
 ```python
 ret = axcl.rt.synchronize_event_with_timeout(event, timeout)
@@ -3746,11 +3963,11 @@ ret = axcl.rt.synchronize_event_with_timeout(event, timeout)
 
 <a id="axcl.rt.create_event_with_flags"></a>
 
-### 2.85. axcl.rt.create_event_with_flags
+### 2.89. axcl.rt.create_event_with_flags
 
 Create an Event on the device associated with the current Context according to the specified timing flags.
 
-#### 2.85.1. Function
+#### 2.89.1. Function
 
 **Python Call**
 
@@ -3764,22 +3981,22 @@ event, ret = axcl.rt.create_event_with_flags(flags)
 axclError axclrtCreateEventWithFlags(axclrtEvent *event, uint32_t flags);
 ```
 
-#### 2.85.2. Parameters
+#### 2.89.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | flags | int | Flags argument. |
 
-#### 2.85.3. Returns
+#### 2.89.3. Returns
 
 - `event`: *int* — Receives the created Event handle on success.
 - `ret`: *int* — The Event was created successfully. Failure.
 
-#### 2.85.4. Note
+#### 2.89.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.85.5. Example
+#### 2.89.5. Example
 
 ```python
 event, ret = axcl.rt.create_event_with_flags(flags)
@@ -3789,11 +4006,11 @@ event, ret = axcl.rt.create_event_with_flags(flags)
 
 <a id="axcl.rt.event_elapsed_time"></a>
 
-### 2.86. axcl.rt.event_elapsed_time
+### 2.90. axcl.rt.event_elapsed_time
 
 Calculate the elapsed device time between the latest completed records of two Events.
 
-#### 2.86.1. Function
+#### 2.90.1. Function
 
 **Python Call**
 
@@ -3807,23 +4024,23 @@ ms, ret = axcl.rt.event_elapsed_time(start_event, end_event)
 axclError axclrtEventElapsedTime(float *ms, axclrtEvent startEvent, axclrtEvent endEvent);
 ```
 
-#### 2.86.2. Parameters
+#### 2.90.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | start_event | int &#124; None | Event marking the start point. |
 | end_event | int &#124; None | Event marking the end point. |
 
-#### 2.86.3. Returns
+#### 2.90.3. Returns
 
 - `ms`: *float* — Receives the elapsed time in milliseconds.
 - `ret`: *int* — The elapsed time was returned successfully. Failure.
 
-#### 2.86.4. Note
+#### 2.90.4. Note
 
 Return type: `tuple[float, int]`.
 
-#### 2.86.5. Example
+#### 2.90.5. Example
 
 ```python
 ms, ret = axcl.rt.event_elapsed_time(start_event, end_event)
@@ -3833,11 +4050,11 @@ ms, ret = axcl.rt.event_elapsed_time(start_event, end_event)
 
 <a id="axcl.rt.event_query"></a>
 
-### 2.87. axcl.rt.event_query
+### 2.91. axcl.rt.event_query
 
 Query whether tasks captured by an Event have completed without blocking.
 
-#### 2.87.1. Function
+#### 2.91.1. Function
 
 **Python Call**
 
@@ -3851,22 +4068,22 @@ status, ret = axcl.rt.event_query(event)
 axclError axclrtEventQuery(axclrtEvent event, axclrtEventStatus *status);
 ```
 
-#### 2.87.2. Parameters
+#### 2.91.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | event | int &#124; None | Event handle. |
 
-#### 2.87.3. Returns
+#### 2.91.3. Returns
 
 - `status`: *int* — Receives the Event completion status on success.
 - `ret`: *int* — The status was returned successfully. Failure.
 
-#### 2.87.4. Note
+#### 2.91.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.87.5. Example
+#### 2.91.5. Example
 
 ```python
 status, ret = axcl.rt.event_query(event)
@@ -3876,11 +4093,11 @@ status, ret = axcl.rt.event_query(event)
 
 <a id="axcl.rt.transfer_file"></a>
 
-### 2.88. axcl.rt.transfer_file
+### 2.92. axcl.rt.transfer_file
 
 Transfer one file or remove one Device file.
 
-#### 2.88.1. Function
+#### 2.92.1. Function
 
 **Python Call**
 
@@ -3894,23 +4111,23 @@ ret = axcl.rt.transfer_file(src_path, dst_path, policy)
 axclError axclrtTransferFile(const char *src_path, const char *dst_path, axclrtFileTransferPolicy policy);
 ```
 
-#### 2.88.2. Parameters
+#### 2.92.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | src_path | str &#124; bytes &#124; None | Source path, or the Device path to remove. |
-| dst_path | str &#124; bytes &#124; None | Destination path. This parameter may be NULL only when |
+| dst_path | str &#124; bytes &#124; None | Destination path. This parameter may be None only when `policy` is FILE_TRANSFER_REMOVE_DEVICE_FILE; otherwise it must not be None or empty. |
 | policy | int | File transfer operation. |
 
-#### 2.88.3. Returns
+#### 2.92.3. Returns
 
 - `ret`: *int* — The requested operation completed successfully. Failure.
 
-#### 2.88.4. Note
+#### 2.92.4. Note
 
 Return type: `int`.
 
-#### 2.88.5. Example
+#### 2.92.5. Example
 
 ```python
 ret = axcl.rt.transfer_file(src_path, dst_path, policy)
@@ -3920,11 +4137,11 @@ ret = axcl.rt.transfer_file(src_path, dst_path, policy)
 
 <a id="axcl.rt.transfer_directory"></a>
 
-### 2.89. axcl.rt.transfer_directory
+### 2.93. axcl.rt.transfer_directory
 
 Recursively transfer one directory.
 
-#### 2.89.1. Function
+#### 2.93.1. Function
 
 **Python Call**
 
@@ -3938,7 +4155,7 @@ ret = axcl.rt.transfer_directory(src_dir, dst_dir, policy)
 axclError axclrtTransferDirectory(const char *src_dir, const char *dst_dir, axclrtFileTransferPolicy policy);
 ```
 
-#### 2.89.2. Parameters
+#### 2.93.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -3946,15 +4163,15 @@ axclError axclrtTransferDirectory(const char *src_dir, const char *dst_dir, axcl
 | dst_dir | str &#124; bytes &#124; None | Destination directory path. |
 | policy | int | Directory transfer direction. Removing directories is not supported. |
 
-#### 2.89.3. Returns
+#### 2.93.3. Returns
 
 - `ret`: *int* — The requested operation completed successfully. Failure.
 
-#### 2.89.4. Note
+#### 2.93.4. Note
 
 Return type: `int`.
 
-#### 2.89.5. Example
+#### 2.93.5. Example
 
 ```python
 ret = axcl.rt.transfer_directory(src_dir, dst_dir, policy)
@@ -3964,11 +4181,11 @@ ret = axcl.rt.transfer_directory(src_dir, dst_dir, policy)
 
 <a id="axcl.rt.get_mem_info"></a>
 
-### 2.90. axcl.rt.get_mem_info
+### 2.94. axcl.rt.get_mem_info
 
 Get a snapshot of memory capacity on the device associated with the calling thread's current Context.
 
-#### 2.90.1. Function
+#### 2.94.1. Function
 
 **Python Call**
 
@@ -3982,23 +4199,23 @@ free, total, ret = axcl.rt.get_mem_info(attr)
 axclError axclrtGetMemInfo(axclrtMemAttr attr, size_t *free, size_t *total);
 ```
 
-#### 2.90.2. Parameters
+#### 2.94.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | attr | int | Memory pool to query. |
 
-#### 2.90.3. Returns
+#### 2.94.3. Returns
 
 - `free`: *int* — Optional pointer that receives the number of free bytes.
 - `total`: *int* — Optional pointer that receives the total number of bytes.
 - `ret`: *int* — The requested memory information was returned successfully. Failure.
 
-#### 2.90.4. Note
+#### 2.94.4. Note
 
 Return type: `tuple[int, int, int]`.
 
-#### 2.90.5. Example
+#### 2.94.5. Example
 
 ```python
 free, total, ret = axcl.rt.get_mem_info(attr)
@@ -4008,11 +4225,11 @@ free, total, ret = axcl.rt.get_mem_info(attr)
 
 <a id="axcl.rt.pointer_get_attributes"></a>
 
-### 2.91. axcl.rt.pointer_get_attributes
+### 2.95. axcl.rt.pointer_get_attributes
 
 Get memory allocation attributes.
 
-#### 2.91.1. Function
+#### 2.95.1. Function
 
 **Python Call**
 
@@ -4026,22 +4243,22 @@ attributes, ret = axcl.rt.pointer_get_attributes(ptr)
 axclError axclrtPointerGetAttributes(const void *ptr, axclrtPtrAttributes *attributes);
 ```
 
-#### 2.91.2. Parameters
+#### 2.95.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| ptr | int &#124; None | Pointer to the beginning or an interior byte of an allocation. |
+| ptr | int &#124; None | Address of the beginning or an interior byte of an allocation. Must not be None. |
 
-#### 2.91.3. Returns
+#### 2.95.3. Returns
 
 - `attributes`: *dict* — Receives the pointer attributes.
 - `ret`: *int* — The attributes were returned successfully. Failure.
 
-#### 2.91.4. Note
+#### 2.95.4. Note
 
 Return type: `tuple[dict, int]`.
 
-#### 2.91.5. Example
+#### 2.95.5. Example
 
 ```python
 attributes, ret = axcl.rt.pointer_get_attributes(ptr)
@@ -4051,11 +4268,11 @@ attributes, ret = axcl.rt.pointer_get_attributes(ptr)
 
 <a id="axcl.rt.malloc"></a>
 
-### 2.92. axcl.rt.malloc
+### 2.96. axcl.rt.malloc
 
 Allocate physically contiguous memory on the device associated with the calling thread's current Context.
 
-#### 2.92.1. Function
+#### 2.96.1. Function
 
 **Python Call**
 
@@ -4069,23 +4286,23 @@ dev_ptr, ret = axcl.rt.malloc(size, policy)
 axclError axclrtMalloc(void **devPtr, size_t size, axclrtMemMallocPolicy policy);
 ```
 
-#### 2.92.2. Parameters
+#### 2.96.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | size | int | Number of bytes to allocate. It must be at least 1 and must not exceed the Device CMM single-allocation limit. |
 | policy | int | Device memory allocation policy. |
 
-#### 2.92.3. Returns
+#### 2.96.3. Returns
 
-- `dev_ptr`: *int* — Receives the base address of the Device physical memory on success.
+- `dev_ptr`: *int* — Receives an opaque handle representing Device memory on success.
 - `ret`: *int* — Device memory was allocated successfully. Failure.
 
-#### 2.92.4. Note
+#### 2.96.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.92.5. Example
+#### 2.96.5. Example
 
 ```python
 dev_ptr, ret = axcl.rt.malloc(size, policy)
@@ -4095,11 +4312,11 @@ dev_ptr, ret = axcl.rt.malloc(size, policy)
 
 <a id="axcl.rt.malloc_cached"></a>
 
-### 2.93. axcl.rt.malloc_cached
+### 2.97. axcl.rt.malloc_cached
 
 Allocate cached, physically contiguous memory on the device associated with the current Context.
 
-#### 2.93.1. Function
+#### 2.97.1. Function
 
 **Python Call**
 
@@ -4113,23 +4330,23 @@ dev_ptr, ret = axcl.rt.malloc_cached(size, policy)
 axclError axclrtMallocCached(void **devPtr, size_t size, axclrtMemMallocPolicy policy);
 ```
 
-#### 2.93.2. Parameters
+#### 2.97.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | size | int | Number of bytes to allocate. It must be at least 1 and must not exceed the Device CMM single-allocation limit. |
 | policy | int | Device memory allocation policy. |
 
-#### 2.93.3. Returns
+#### 2.97.3. Returns
 
-- `dev_ptr`: *int* — Receives the Device address handle on success.
+- `dev_ptr`: *int* — Receives an opaque handle representing cached Device memory on success.
 - `ret`: *int* — Device memory was allocated successfully. Failure.
 
-#### 2.93.4. Note
+#### 2.97.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.93.5. Example
+#### 2.97.5. Example
 
 ```python
 dev_ptr, ret = axcl.rt.malloc_cached(size, policy)
@@ -4139,11 +4356,11 @@ dev_ptr, ret = axcl.rt.malloc_cached(size, policy)
 
 <a id="axcl.rt.free"></a>
 
-### 2.94. axcl.rt.free
+### 2.98. axcl.rt.free
 
 Free Device memory.
 
-#### 2.94.1. Function
+#### 2.98.1. Function
 
 **Python Call**
 
@@ -4157,21 +4374,21 @@ ret = axcl.rt.free(dev_ptr)
 axclError axclrtFree(void *devPtr);
 ```
 
-#### 2.94.2. Parameters
+#### 2.98.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| dev_ptr | int &#124; None | Base Device memory address returned by a memory allocation function. |
+| dev_ptr | int &#124; None | Base Device memory address returned by axclrtMalloc, axclrtMallocCached, or imported via axclrtIpcMemImportByKey. |
 
-#### 2.94.3. Returns
+#### 2.98.3. Returns
 
 - `ret`: *int* — Device memory was freed successfully. Failure.
 
-#### 2.94.4. Note
+#### 2.98.4. Note
 
 Return type: `int`.
 
-#### 2.94.5. Example
+#### 2.98.5. Example
 
 ```python
 ret = axcl.rt.free(dev_ptr)
@@ -4181,11 +4398,11 @@ ret = axcl.rt.free(dev_ptr)
 
 <a id="axcl.rt.mem_flush"></a>
 
-### 2.95. axcl.rt.mem_flush
+### 2.99. axcl.rt.mem_flush
 
 Write cached data for a Device memory range back to DDR.
 
-#### 2.95.1. Function
+#### 2.99.1. Function
 
 **Python Call**
 
@@ -4199,22 +4416,22 @@ ret = axcl.rt.mem_flush(dev_ptr, size)
 axclError axclrtMemFlush(void *devPtr, size_t size);
 ```
 
-#### 2.95.2. Parameters
+#### 2.99.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| dev_ptr | int &#124; None | Device memory address at which the range begins. |
+| dev_ptr | int &#124; None | Device memory handle at which the range begins. |
 | size | int | Number of bytes to flush. It must be at least 1 and the range must lie within one allocated Device memory block. |
 
-#### 2.95.3. Returns
+#### 2.99.3. Returns
 
 - `ret`: *int* — The cache range was flushed successfully. Failure.
 
-#### 2.95.4. Note
+#### 2.99.4. Note
 
 Return type: `int`.
 
-#### 2.95.5. Example
+#### 2.99.5. Example
 
 ```python
 ret = axcl.rt.mem_flush(dev_ptr, size)
@@ -4224,11 +4441,11 @@ ret = axcl.rt.mem_flush(dev_ptr, size)
 
 <a id="axcl.rt.mem_invalidate"></a>
 
-### 2.96. axcl.rt.mem_invalidate
+### 2.100. axcl.rt.mem_invalidate
 
 Invalidate cached data for a Device memory range.
 
-#### 2.96.1. Function
+#### 2.100.1. Function
 
 **Python Call**
 
@@ -4242,22 +4459,22 @@ ret = axcl.rt.mem_invalidate(dev_ptr, size)
 axclError axclrtMemInvalidate(void *devPtr, size_t size);
 ```
 
-#### 2.96.2. Parameters
+#### 2.100.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| dev_ptr | int &#124; None | Device physical memory address at which the range to invalidate begins. |
+| dev_ptr | int &#124; None | Device memory handle at which the range to invalidate begins. |
 | size | int | Number of bytes to process. It must be at least 1 and the range must lie within one allocated Device memory block. |
 
-#### 2.96.3. Returns
+#### 2.100.3. Returns
 
 - `ret`: *int* — The cache range was invalidated successfully. Failure.
 
-#### 2.96.4. Note
+#### 2.100.4. Note
 
 Return type: `int`.
 
-#### 2.96.5. Example
+#### 2.100.5. Example
 
 ```python
 ret = axcl.rt.mem_invalidate(dev_ptr, size)
@@ -4267,11 +4484,11 @@ ret = axcl.rt.mem_invalidate(dev_ptr, size)
 
 <a id="axcl.rt.malloc_host"></a>
 
-### 2.97. axcl.rt.malloc_host
+### 2.101. axcl.rt.malloc_host
 
 Allocate Host virtual memory.
 
-#### 2.97.1. Function
+#### 2.101.1. Function
 
 **Python Call**
 
@@ -4285,22 +4502,22 @@ host_ptr, ret = axcl.rt.malloc_host(size)
 axclError axclrtMallocHost(void **hostPtr, size_t size);
 ```
 
-#### 2.97.2. Parameters
+#### 2.101.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | size | int | Number of bytes to allocate. Must be greater than 0. |
 
-#### 2.97.3. Returns
+#### 2.101.3. Returns
 
 - `host_ptr`: *int* — Receives a Host-accessible virtual address on success.
 - `ret`: *int* — Host memory was allocated successfully. Failure.
 
-#### 2.97.4. Note
+#### 2.101.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.97.5. Example
+#### 2.101.5. Example
 
 ```python
 host_ptr, ret = axcl.rt.malloc_host(size)
@@ -4310,11 +4527,11 @@ host_ptr, ret = axcl.rt.malloc_host(size)
 
 <a id="axcl.rt.free_host"></a>
 
-### 2.98. axcl.rt.free_host
+### 2.102. axcl.rt.free_host
 
-Free Host virtual memory allocated by
+Free Host virtual memory allocated by axclrtMallocHost.
 
-#### 2.98.1. Function
+#### 2.102.1. Function
 
 **Python Call**
 
@@ -4328,21 +4545,21 @@ ret = axcl.rt.free_host(host_ptr)
 axclError axclrtFreeHost(void *hostPtr);
 ```
 
-#### 2.98.2. Parameters
+#### 2.102.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| host_ptr | int &#124; None | Base Host virtual address returned by |
+| host_ptr | int &#124; None | Base Host virtual address returned by axclrtMallocHost. Must not be None. |
 
-#### 2.98.3. Returns
+#### 2.102.3. Returns
 
 - `ret`: *int* — Host memory was freed successfully. Failure.
 
-#### 2.98.4. Note
+#### 2.102.4. Note
 
 Return type: `int`.
 
-#### 2.98.5. Example
+#### 2.102.5. Example
 
 ```python
 ret = axcl.rt.free_host(host_ptr)
@@ -4352,11 +4569,11 @@ ret = axcl.rt.free_host(host_ptr)
 
 <a id="axcl.rt.memset"></a>
 
-### 2.99. axcl.rt.memset
+### 2.103. axcl.rt.memset
 
 Synchronously set bytes in Device memory to a value.
 
-#### 2.99.1. Function
+#### 2.103.1. Function
 
 **Python Call**
 
@@ -4370,7 +4587,7 @@ ret = axcl.rt.memset(dev_ptr, value, count)
 axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 ```
 
-#### 2.99.2. Parameters
+#### 2.103.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -4378,15 +4595,15 @@ axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 | value | int | Byte value to write. |
 | count | int | Number of bytes to set. It must be at least 1 and the range must lie within one allocated Device memory block. |
 
-#### 2.99.3. Returns
+#### 2.103.3. Returns
 
 - `ret`: *int* — The Device memory was set successfully. Failure.
 
-#### 2.99.4. Note
+#### 2.103.4. Note
 
 Return type: `int`.
 
-#### 2.99.5. Example
+#### 2.103.5. Example
 
 ```python
 ret = axcl.rt.memset(dev_ptr, value, count)
@@ -4396,11 +4613,11 @@ ret = axcl.rt.memset(dev_ptr, value, count)
 
 <a id="axcl.rt.memcpy"></a>
 
-### 2.100. axcl.rt.memcpy
+### 2.104. axcl.rt.memcpy
 
 Synchronously copy bytes between Host or Device memory.
 
-#### 2.100.1. Function
+#### 2.104.1. Function
 
 **Python Call**
 
@@ -4414,24 +4631,24 @@ ret = axcl.rt.memcpy(dst_ptr, src_ptr, count, kind)
 axclError axclrtMemcpy(void *dstPtr, const void *srcPtr, size_t count, axclrtMemcpyKind kind);
 ```
 
-#### 2.100.2. Parameters
+#### 2.104.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| dst_ptr | int &#124; None | Destination address interpreted according to |
-| src_ptr | int &#124; None | Source address interpreted according to |
+| dst_ptr | int &#124; None | Destination address interpreted according to `kind`. |
+| src_ptr | int &#124; None | Source address interpreted according to `kind`. |
 | count | int | Number of bytes to copy. Must be greater than 0. |
 | kind | int | Copy direction and address types. |
 
-#### 2.100.3. Returns
+#### 2.104.3. Returns
 
 - `ret`: *int* — The copy completed successfully. Failure.
 
-#### 2.100.4. Note
+#### 2.104.4. Note
 
 Return type: `int`.
 
-#### 2.100.5. Example
+#### 2.104.5. Example
 
 ```python
 ret = axcl.rt.memcpy(dst_ptr, src_ptr, count, kind)
@@ -4441,11 +4658,11 @@ ret = axcl.rt.memcpy(dst_ptr, src_ptr, count, kind)
 
 <a id="axcl.rt.memcmp"></a>
 
-### 2.101. axcl.rt.memcmp
+### 2.105. axcl.rt.memcmp
 
 Synchronously determine whether two Device memory ranges contain identical bytes.
 
-#### 2.101.1. Function
+#### 2.105.1. Function
 
 **Python Call**
 
@@ -4459,7 +4676,7 @@ ret = axcl.rt.memcmp(dev_ptr1, dev_ptr2, count)
 axclError axclrtMemcmp(const void *devPtr1, const void *devPtr2, size_t count);
 ```
 
-#### 2.101.2. Parameters
+#### 2.105.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -4467,15 +4684,15 @@ axclError axclrtMemcmp(const void *devPtr1, const void *devPtr2, size_t count);
 | dev_ptr2 | int &#124; None | Address of the second Device memory range. |
 | count | int | Number of bytes to compare. It must be at least 1 and each range must lie within one allocated Device memory block. |
 
-#### 2.101.3. Returns
+#### 2.105.3. Returns
 
 - `ret`: *int* — The compared bytes are equal. The bytes are different or the comparison failed.
 
-#### 2.101.4. Note
+#### 2.105.4. Note
 
 Return type: `int`.
 
-#### 2.101.5. Example
+#### 2.105.5. Example
 
 ```python
 ret = axcl.rt.memcmp(dev_ptr1, dev_ptr2, count)
@@ -4485,11 +4702,14 @@ ret = axcl.rt.memcmp(dev_ptr1, dev_ptr2, count)
 
 <a id="axcl.rt.memset_async"></a>
 
-### 2.102. axcl.rt.memset_async
+### 2.106. axcl.rt.memset_async
 
 Asynchronously submit a Device memory set operation to a specified Stream.
 
-#### 2.102.1. Function
+The binding does not retain the Device buffer. `dev_ptr` must remain valid until
+`axcl.rt.synchronize_stream(stream)` returns successfully.
+
+#### 2.106.1. Function
 
 **Python Call**
 
@@ -4503,7 +4723,7 @@ ret = axcl.rt.memset_async(dev_ptr, value, count, stream)
 axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t count, axclrtStream stream);
 ```
 
-#### 2.102.2. Parameters
+#### 2.106.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -4512,19 +4732,15 @@ axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t count, axclrtStr
 | count | int | Number of bytes to set. It must be at least 1 and the range must lie within one allocated Device memory block. |
 | stream | int &#124; None | Stream that receives the operation. |
 
-#### 2.102.3. Returns
+#### 2.106.3. Returns
 
 - `ret`: *int* — The operation was submitted successfully. Failure.
 
-.. note::
-    The binding does not retain the Device buffer. `dev_ptr` must remain valid until
-    `axcl.rt.synchronize_stream(stream)` returns successfully.
-
-#### 2.102.4. Note
+#### 2.106.4. Note
 
 Return type: `int`.
 
-#### 2.102.5. Example
+#### 2.106.5. Example
 
 ```python
 ret = axcl.rt.memset_async(dev_ptr, value, count, stream)
@@ -4534,11 +4750,15 @@ ret = axcl.rt.memset_async(dev_ptr, value, count, stream)
 
 <a id="axcl.rt.memcpy_async"></a>
 
-### 2.103. axcl.rt.memcpy_async
+### 2.107. axcl.rt.memcpy_async
 
 Asynchronously submit a Host or Device memory copy to a specified Stream.
 
-#### 2.103.1. Function
+The binding does not retain the source or destination buffer. `dst_ptr` and
+`src_ptr` must remain valid until `axcl.rt.synchronize_stream(stream)` returns
+successfully. Pass integer addresses; the binding does not copy Python buffers.
+
+#### 2.107.1. Function
 
 **Python Call**
 
@@ -4552,30 +4772,25 @@ ret = axcl.rt.memcpy_async(dst_ptr, src_ptr, count, kind, stream)
 axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t count, axclrtMemcpyKind kind, axclrtStream stream);
 ```
 
-#### 2.103.2. Parameters
+#### 2.107.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| dst_ptr | int &#124; None | Destination address interpreted according to |
-| src_ptr | int &#124; None | Source address interpreted according to |
+| dst_ptr | int &#124; None | Destination address interpreted according to `kind`. |
+| src_ptr | int &#124; None | Source address interpreted according to `kind`. |
 | count | int | Number of bytes to copy. Must be greater than 0. |
-| kind | int | Copy direction and address types. |
+| kind | int | Copy direction and address types. AXCL_MEMCPY_DEVICE_TO_DEVICE is supported within the same device and between different devices on the same card. |
 | stream | int &#124; None | Stream that receives the copy operation. |
 
-#### 2.103.3. Returns
+#### 2.107.3. Returns
 
 - `ret`: *int* — The copy was submitted successfully. Failure.
 
-.. note::
-    The binding does not retain the source or destination buffer. `dst_ptr` and
-    `src_ptr` must remain valid until `axcl.rt.synchronize_stream(stream)` returns
-    successfully. Pass integer addresses; the binding does not copy Python buffers.
-
-#### 2.103.4. Note
+#### 2.107.4. Note
 
 Return type: `int`.
 
-#### 2.103.5. Example
+#### 2.107.5. Example
 
 ```python
 ret = axcl.rt.memcpy_async(dst_ptr, src_ptr, count, kind, stream)
@@ -4585,11 +4800,14 @@ ret = axcl.rt.memcpy_async(dst_ptr, src_ptr, count, kind, stream)
 
 <a id="axcl.rt.memcmp_async"></a>
 
-### 2.104. axcl.rt.memcmp_async
+### 2.108. axcl.rt.memcmp_async
 
 Asynchronously submit a comparison of two Device memory ranges to a specified Stream.
 
-#### 2.104.1. Function
+The binding does not retain the Device ranges. `dev_ptr1` and `dev_ptr2` must remain
+valid until `axcl.rt.synchronize_stream(stream)` returns successfully.
+
+#### 2.108.1. Function
 
 **Python Call**
 
@@ -4603,7 +4821,7 @@ ret = axcl.rt.memcmp_async(dev_ptr1, dev_ptr2, count, stream)
 axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2, size_t count, axclrtStream stream);
 ```
 
-#### 2.104.2. Parameters
+#### 2.108.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
@@ -4612,19 +4830,15 @@ axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2, size_t cou
 | count | int | Number of bytes to compare. It must be at least 1 and each range must lie within one allocated Device memory block. |
 | stream | int &#124; None | Stream that receives the comparison operation. |
 
-#### 2.104.3. Returns
+#### 2.108.3. Returns
 
 - `ret`: *int* — The comparison was submitted successfully. Failure.
 
-.. note::
-    The binding does not retain the Device ranges. `dev_ptr1` and `dev_ptr2` must remain
-    valid until `axcl.rt.synchronize_stream(stream)` returns successfully.
-
-#### 2.104.4. Note
+#### 2.108.4. Note
 
 Return type: `int`.
 
-#### 2.104.5. Example
+#### 2.108.5. Example
 
 ```python
 ret = axcl.rt.memcmp_async(dev_ptr1, dev_ptr2, count, stream)
@@ -4632,13 +4846,125 @@ ret = axcl.rt.memcmp_async(dev_ptr1, dev_ptr2, count, stream)
 
 <br>
 
+<a id="axcl.rt.memcpy2d"></a>
+
+### 2.109. axcl.rt.memcpy2d
+
+Synchronously copy a 2D rectangle between Host and Device memory.
+
+#### 2.109.1. Function
+
+**Python Call**
+
+```python
+ret = axcl.rt.memcpy2d(dst_ptr, dpitch, src_ptr, spitch, width, height, kind)
+```
+
+**C++ Prototype**
+
+```cpp
+axclError axclrtMemcpy2d(void *dstPtr, size_t dpitch, const void *srcPtr, size_t spitch, size_t width, size_t height, axclrtMemcpyKind kind);
+```
+
+#### 2.109.2. Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| dst_ptr | int &#124; None | Destination address of the first row, interpreted according to `kind`. |
+| dpitch | int | Bytes between the starts of consecutive destination rows. Must be at least `width`. |
+| src_ptr | int &#124; None | Source address of the first row, interpreted according to `kind`. |
+| spitch | int | Bytes between the starts of consecutive source rows. Must be at least `width`. |
+| width | int | Bytes copied per row. Must be greater than 0. |
+| height | int | Number of rows. Must be greater than 0 and not exceed UINT32_MAX. |
+| kind | int | `AXCL_MEMCPY_HOST_TO_DEVICE` or `AXCL_MEMCPY_DEVICE_TO_HOST`. |
+
+#### 2.109.3. Returns
+
+- `ret`: *int* — The copy completed successfully. Failure.
+
+.. note::
+
+    - Addresses are integers; Python buffer objects are not accepted. The caller keeps the memory alive
+      until the call returns.
+    - On devices that are not DMA coherent, a Device-to-Host copy into plain Host memory requires memory
+      from `axcl.rt.malloc_host` unless both pitches equal `width` or `height` is 1.
+
+#### 2.109.4. Note
+
+Return type: `int`.
+
+#### 2.109.5. Example
+
+```python
+ret = axcl.rt.memcpy2d(dev_ptr, 2048, host_ptr, 1024, 1000, 256, AXCL_MEMCPY_HOST_TO_DEVICE)
+```
+
+<br>
+
+<a id="axcl.rt.memcpy2d_async"></a>
+
+### 2.110. axcl.rt.memcpy2d_async
+
+Asynchronously submit a 2D rectangle copy between Host and Device memory to a specified Stream.
+
+#### 2.110.1. Function
+
+**Python Call**
+
+```python
+ret = axcl.rt.memcpy2d_async(dst_ptr, dpitch, src_ptr, spitch, width, height, kind, stream)
+```
+
+**C++ Prototype**
+
+```cpp
+axclError axclrtMemcpy2dAsync(void *dstPtr, size_t dpitch, const void *srcPtr, size_t spitch, size_t width, size_t height, axclrtMemcpyKind kind, axclrtStream stream);
+```
+
+#### 2.110.2. Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| dst_ptr | int &#124; None | Destination address of the first row, interpreted according to `kind`. |
+| dpitch | int | Bytes between the starts of consecutive destination rows. Must be at least `width`. |
+| src_ptr | int &#124; None | Source address of the first row, interpreted according to `kind`. |
+| spitch | int | Bytes between the starts of consecutive source rows. Must be at least `width`. |
+| width | int | Bytes copied per row. Must be greater than 0. |
+| height | int | Number of rows. Must be greater than 0 and not exceed UINT32_MAX. |
+| kind | int | `AXCL_MEMCPY_HOST_TO_DEVICE` or `AXCL_MEMCPY_DEVICE_TO_HOST`. |
+| stream | int &#124; None | Stream that receives the copy operation. Must not be None. |
+
+#### 2.110.3. Returns
+
+- `ret`: *int* — The copy was submitted successfully. Failure.
+
+.. note::
+
+    - A successful return means only that the copy was submitted. Errors raised while it executes are
+      reported by the next `axcl.rt.synchronize_stream` on `stream`.
+    - Both memory ranges must stay valid, and the Host range must not be accessed, until `stream` is
+      synchronized.
+
+#### 2.110.4. Note
+
+Return type: `int`.
+
+#### 2.110.5. Example
+
+```python
+ret = axcl.rt.memcpy2d_async(host_ptr, 1024, dev_ptr, 2048, 1000, 256, AXCL_MEMCPY_DEVICE_TO_HOST, stream)
+ret = axcl.rt.synchronize_stream(stream)
+```
+
+<br>
+
 <a id="axcl.rt.mem_get_address_range"></a>
 
-### 2.105. axcl.rt.mem_get_address_range
+### 2.111. axcl.rt.mem_get_address_range
 
-Get base address and allocation size for a pointer managed by AXCL runtime.
+Get the base handle and size of an allocation or external registration managed by AXCL runtime.
 
-#### 2.105.1. Function
+#### 2.111.1. Function
 
 **Python Call**
 
@@ -4652,23 +4978,23 @@ base, size, ret = axcl.rt.mem_get_address_range(ptr)
 axclError axclrtMemGetAddressRange(void *ptr, void **base, size_t *size);
 ```
 
-#### 2.105.2. Parameters
+#### 2.111.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| ptr | int &#124; None | Pointer to the beginning or an interior byte of an allocation. |
+| ptr | int &#124; None | Address of the beginning or an interior byte of an allocation or registration. |
 
-#### 2.105.3. Returns
+#### 2.111.3. Returns
 
-- `base`: *int* — Receives the base address of the allocation block.
-- `size`: *int* — Receives the total allocation size in bytes.
-- `ret`: *int* — 0 on success, failure code otherwise.
+- `base`: *int* — Receives its base handle.
+- `size`: *int* — Receives its total allocated or registered size in bytes.
+- `ret`: *int* — The base address and size were returned successfully. Failure.
 
-#### 2.105.4. Note
+#### 2.111.4. Note
 
 Return type: `tuple[int, int, int]`.
 
-#### 2.105.5. Example
+#### 2.111.5. Example
 
 ```python
 base, size, ret = axcl.rt.mem_get_address_range(ptr)
@@ -4678,11 +5004,11 @@ base, size, ret = axcl.rt.mem_get_address_range(ptr)
 
 <a id="axcl.rt.mem_get_dev_addr"></a>
 
-### 2.106. axcl.rt.mem_get_dev_addr
+### 2.112. axcl.rt.mem_get_dev_addr
 
-Export underlying device physical and virtual addresses from a device pointer.
+Export underlying device physical and virtual addresses from a device memory handle.
 
-#### 2.106.1. Function
+#### 2.112.1. Function
 
 **Python Call**
 
@@ -4696,23 +5022,23 @@ desc, ret = axcl.rt.mem_get_dev_addr(dev_ptr, access_size)
 axclError axclrtMemGetDevAddr(const void *devPtr, uint64_t access_size, axclrtDevMemDesc *desc);
 ```
 
-#### 2.106.2. Parameters
+#### 2.112.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| dev_ptr | int &#124; None | Valid device pointer (base pointer or interior slice). |
-| access_size | int | Expected byte span to access. If 0, remaining slice length is exported. Default: `0`. |
+| dev_ptr | int &#124; None | Valid device memory handle (base handle or interior slice) managed by the AXCL runtime. |
+| access_size | int | Expected byte span to access. If 0, remaining slice length is exported. Must not exceed the number of bytes from `dev_ptr` to the end of its allocation or registration. Default: `0`. |
 
-#### 2.106.3. Returns
+#### 2.112.3. Returns
 
 - `desc`: *dict* — Receives physical/virtual address descriptor.
-- `ret`: *int* — 0 on success, failure code otherwise.
+- `ret`: *int* — The device addresses were returned successfully. Failure.
 
-#### 2.106.4. Note
+#### 2.112.4. Note
 
 Return type: `tuple[dict, int]`.
 
-#### 2.106.5. Example
+#### 2.112.5. Example
 
 ```python
 desc, ret = axcl.rt.mem_get_dev_addr(dev_ptr, access_size)
@@ -4722,11 +5048,11 @@ desc, ret = axcl.rt.mem_get_dev_addr(dev_ptr, access_size)
 
 <a id="axcl.rt.mem_map_dev_addr"></a>
 
-### 2.107. axcl.rt.mem_map_dev_addr
+### 2.113. axcl.rt.mem_map_dev_addr
 
 Register external device memory as a temporary mapped device pointer.
 
-#### 2.107.1. Function
+#### 2.113.1. Function
 
 **Python Call**
 
@@ -4740,22 +5066,22 @@ dev_ptr, ret = axcl.rt.mem_map_dev_addr(desc)
 axclError axclrtMemMapDevAddr(const axclrtDevMemDesc *desc, void **devPtr);
 ```
 
-#### 2.107.2. Parameters
+#### 2.113.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| desc | dict &#124; None | Descriptor describing the device physical address, size, and device ID. |
+| desc | dict &#124; None | Descriptor describing the interval's Device PA, optional Native Device VA, size, and device ID. Must not be None. `size` and `device_pa` must be nonzero, `flags` must be 0, and `device_id` must identify a device that is active in the calling process. |
 
-#### 2.107.3. Returns
+#### 2.113.3. Returns
 
-- `dev_ptr`: *int* — Receives the mapped device pointer handle.
-- `ret`: *int* — 0 on success, failure code otherwise.
+- `dev_ptr`: *int* — Receives the base handle of this registration, whose offset 0 corresponds to `device_pa`. Pass this exact value to axclrtMemUnmapDevAddr.
+- `ret`: *int* — The external device memory was registered successfully. Failure.
 
-#### 2.107.4. Note
+#### 2.113.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.107.5. Example
+#### 2.113.5. Example
 
 ```python
 dev_ptr, ret = axcl.rt.mem_map_dev_addr(desc)
@@ -4765,11 +5091,11 @@ dev_ptr, ret = axcl.rt.mem_map_dev_addr(desc)
 
 <a id="axcl.rt.mem_unmap_dev_addr"></a>
 
-### 2.108. axcl.rt.mem_unmap_dev_addr
+### 2.114. axcl.rt.mem_unmap_dev_addr
 
 Unregister an external device memory registered via axclrtMemMapDevAddr.
 
-#### 2.108.1. Function
+#### 2.114.1. Function
 
 **Python Call**
 
@@ -4783,21 +5109,21 @@ ret = axcl.rt.mem_unmap_dev_addr(dev_ptr)
 axclError axclrtMemUnmapDevAddr(void *devPtr);
 ```
 
-#### 2.108.2. Parameters
+#### 2.114.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| dev_ptr | int &#124; None | Base device pointer returned by axclrtMemMapDevAddr. |
+| dev_ptr | int &#124; None | Base device pointer returned by axclrtMemMapDevAddr. Must not be None. |
 
-#### 2.108.3. Returns
+#### 2.114.3. Returns
 
-- `ret`: *int* — 0 on success, failure code otherwise.
+- `ret`: *int* — The external device memory was unregistered successfully. Failure.
 
-#### 2.108.4. Note
+#### 2.114.4. Note
 
 Return type: `int`.
 
-#### 2.108.5. Example
+#### 2.114.5. Example
 
 ```python
 ret = axcl.rt.mem_unmap_dev_addr(dev_ptr)
@@ -4807,11 +5133,11 @@ ret = axcl.rt.mem_unmap_dev_addr(dev_ptr)
 
 <a id="axcl.rt.ipc_mem_get_export_key"></a>
 
-### 2.109. axcl.rt.ipc_mem_get_export_key
+### 2.115. axcl.rt.ipc_mem_get_export_key
 
 Export an IPC memory sharing key for a device memory allocation.
 
-#### 2.109.1. Function
+#### 2.115.1. Function
 
 **Python Call**
 
@@ -4825,24 +5151,24 @@ key, ret = axcl.rt.ipc_mem_get_export_key(dev_ptr, len, flags)
 axclError axclrtIpcMemGetExportKey(void *devPtr, char *key, size_t len, uint32_t flags);
 ```
 
-#### 2.109.2. Parameters
+#### 2.115.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| dev_ptr | int &#124; None | Base Device memory address. |
-| len | int | Length of key string buffer, must be AXCL_IPC_KEY_MAX_LEN (65). Default: `65`. |
-| flags | int | IPC export flags: AXCL_IPC_EXPORT_FLAG_DEFAULT or AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION. Default: `0`. |
+| dev_ptr | int &#124; None | Base device memory address to export. Must not be None. |
+| len | int | Length of the key buffer in bytes, must be exactly AXCL_IPC_KEY_MAX_LEN. Default: `65`. |
+| flags | int | Export flags. Must be either AXCL_IPC_EXPORT_FLAG_DEFAULT or AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION. Default: `0`. |
 
-#### 2.109.3. Returns
+#### 2.115.3. Returns
 
 - `key`: *str* — Exported IPC key string.
-- `ret`: *int* — 0 on success, failure code otherwise.
+- `ret`: *int* — The device memory was exported and its IPC key was returned. Failure.
 
-#### 2.109.4. Note
+#### 2.115.4. Note
 
 Return type: `tuple[str, int]`.
 
-#### 2.109.5. Example
+#### 2.115.5. Example
 
 ```python
 key, ret = axcl.rt.ipc_mem_get_export_key(dev_ptr, len, flags)
@@ -4852,11 +5178,11 @@ key, ret = axcl.rt.ipc_mem_get_export_key(dev_ptr, len, flags)
 
 <a id="axcl.rt.ipc_mem_set_import_pid"></a>
 
-### 2.110. axcl.rt.ipc_mem_set_import_pid
+### 2.116. axcl.rt.ipc_mem_set_import_pid
 
 Set target TGID whitelist for an exported IPC memory key.
 
-#### 2.110.1. Function
+#### 2.116.1. Function
 
 **Python Call**
 
@@ -4870,23 +5196,23 @@ ret = axcl.rt.ipc_mem_set_import_pid(key, tgid_list, num)
 axclError axclrtIpcMemSetImportPid(const char *key, const int32_t *tgid_list, uint32_t num);
 ```
 
-#### 2.110.2. Parameters
+#### 2.116.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| key | str &#124; bytes &#124; None | Null-terminated IPC key string. |
-| tgid_list | int | Pointer to array of bare TGIDs allowed to import. |
-| num | int | Number of TGID entries in tgid_list. |
+| key | str &#124; bytes &#124; None | Null-terminated IPC key string returned by axclrtIpcMemGetExportKey. Must not be None. |
+| tgid_list | int | Array of target process Host TGIDs (bare TGIDs). |
+| num | int | Number of target Host TGIDs in `tgid_list` (1 <= num <= AXCL_IPC_MAX_TARGETS). |
 
-#### 2.110.3. Returns
+#### 2.116.3. Returns
 
-- `ret`: *int* — 0 on success, failure code otherwise.
+- `ret`: *int* — The import whitelist for `key` was set successfully. Failure.
 
-#### 2.110.4. Note
+#### 2.116.4. Note
 
 Return type: `int`.
 
-#### 2.110.5. Example
+#### 2.116.5. Example
 
 ```python
 ret = axcl.rt.ipc_mem_set_import_pid(key, tgid_list, num)
@@ -4896,11 +5222,11 @@ ret = axcl.rt.ipc_mem_set_import_pid(key, tgid_list, num)
 
 <a id="axcl.rt.ipc_mem_import_by_key"></a>
 
-### 2.111. axcl.rt.ipc_mem_import_by_key
+### 2.117. axcl.rt.ipc_mem_import_by_key
 
 Import an IPC memory handle into the calling process by key.
 
-#### 2.111.1. Function
+#### 2.117.1. Function
 
 **Python Call**
 
@@ -4914,22 +5240,22 @@ dev_ptr, ret = axcl.rt.ipc_mem_import_by_key(key)
 axclError axclrtIpcMemImportByKey(void **devPtr, const char *key);
 ```
 
-#### 2.111.2. Parameters
+#### 2.117.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| key | str &#124; bytes &#124; None | Null-terminated IPC key string. |
+| key | str &#124; bytes &#124; None | Null-terminated IPC key string returned by axclrtIpcMemGetExportKey. Must not be None. |
 
-#### 2.111.3. Returns
+#### 2.117.3. Returns
 
-- `dev_ptr`: *int* — Receives the mapped local device memory pointer.
-- `ret`: *int* — 0 on success, failure code otherwise.
+- `dev_ptr`: *int* — Receives the imported device memory handle in the caller's address space.
+- `ret`: *int* — The shared device memory was imported and its handle was returned. Failure.
 
-#### 2.111.4. Note
+#### 2.117.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.111.5. Example
+#### 2.117.5. Example
 
 ```python
 dev_ptr, ret = axcl.rt.ipc_mem_import_by_key(key)
@@ -4939,11 +5265,11 @@ dev_ptr, ret = axcl.rt.ipc_mem_import_by_key(key)
 
 <a id="axcl.rt.ipc_mem_close"></a>
 
-### 2.112. axcl.rt.ipc_mem_close
+### 2.118. axcl.rt.ipc_mem_close
 
 Close an inter-process shared memory key.
 
-#### 2.112.1. Function
+#### 2.118.1. Function
 
 **Python Call**
 
@@ -4957,21 +5283,21 @@ ret = axcl.rt.ipc_mem_close(key)
 axclError axclrtIpcMemClose(const char *key);
 ```
 
-#### 2.112.2. Parameters
+#### 2.118.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| key | str &#124; bytes &#124; None | Null-terminated IPC key string. |
+| key | str &#124; bytes &#124; None | Null-terminated IPC key string. Must not be None. |
 
-#### 2.112.3. Returns
+#### 2.118.3. Returns
 
-- `ret`: *int* — 0 on success, failure code otherwise.
+- `ret`: *int* — The IPC reference held by the calling process for `key` was released successfully. Failure.
 
-#### 2.112.4. Note
+#### 2.118.4. Note
 
 Return type: `int`.
 
-#### 2.112.5. Example
+#### 2.118.5. Example
 
 ```python
 ret = axcl.rt.ipc_mem_close(key)
@@ -4981,11 +5307,11 @@ ret = axcl.rt.ipc_mem_close(key)
 
 <a id="axcl.rt.create_stream"></a>
 
-### 2.113. axcl.rt.create_stream
+### 2.119. axcl.rt.create_stream
 
 Create a Stream.
 
-#### 2.113.1. Function
+#### 2.119.1. Function
 
 **Python Call**
 
@@ -4999,20 +5325,20 @@ stream, ret = axcl.rt.create_stream()
 axclError axclrtCreateStream(axclrtStream *stream);
 ```
 
-#### 2.113.2. Parameters
+#### 2.119.2. Parameters
 
 N/A
 
-#### 2.113.3. Returns
+#### 2.119.3. Returns
 
 - `stream`: *int* — Receives the created Stream handle on success.
 - `ret`: *int* — The Stream was created successfully. Failure.
 
-#### 2.113.4. Note
+#### 2.119.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.113.5. Example
+#### 2.119.5. Example
 
 ```python
 stream, ret = axcl.rt.create_stream()
@@ -5022,11 +5348,11 @@ stream, ret = axcl.rt.create_stream()
 
 <a id="axcl.rt.destroy_stream"></a>
 
-### 2.114. axcl.rt.destroy_stream
+### 2.120. axcl.rt.destroy_stream
 
-Destroy a Stream created by
+Destroy a Stream created by axclrtCreateStream.
 
-#### 2.114.1. Function
+#### 2.120.1. Function
 
 **Python Call**
 
@@ -5040,21 +5366,21 @@ ret = axcl.rt.destroy_stream(stream)
 axclError axclrtDestroyStream(axclrtStream stream);
 ```
 
-#### 2.114.2. Parameters
+#### 2.120.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| stream | int &#124; None | Stream handle returned by |
+| stream | int &#124; None | Stream handle returned by axclrtCreateStream. |
 
-#### 2.114.3. Returns
+#### 2.120.3. Returns
 
 - `ret`: *int* — The Stream was synchronized and destroyed successfully. Failure.
 
-#### 2.114.4. Note
+#### 2.120.4. Note
 
 Return type: `int`.
 
-#### 2.114.5. Example
+#### 2.120.5. Example
 
 ```python
 ret = axcl.rt.destroy_stream(stream)
@@ -5064,11 +5390,11 @@ ret = axcl.rt.destroy_stream(stream)
 
 <a id="axcl.rt.destroy_stream_force"></a>
 
-### 2.115. axcl.rt.destroy_stream_force
+### 2.121. axcl.rt.destroy_stream_force
 
 Destroy a Stream immediately without waiting for submitted tasks to complete.
 
-#### 2.115.1. Function
+#### 2.121.1. Function
 
 **Python Call**
 
@@ -5082,21 +5408,21 @@ ret = axcl.rt.destroy_stream_force(stream)
 axclError axclrtDestroyStreamForce(axclrtStream stream);
 ```
 
-#### 2.115.2. Parameters
+#### 2.121.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| stream | int &#124; None | Stream handle returned by |
+| stream | int &#124; None | Stream handle returned by axclrtCreateStream. |
 
-#### 2.115.3. Returns
+#### 2.121.3. Returns
 
 - `ret`: *int* — The Stream was destroyed successfully. Failure.
 
-#### 2.115.4. Note
+#### 2.121.4. Note
 
 Return type: `int`.
 
-#### 2.115.5. Example
+#### 2.121.5. Example
 
 ```python
 ret = axcl.rt.destroy_stream_force(stream)
@@ -5106,11 +5432,11 @@ ret = axcl.rt.destroy_stream_force(stream)
 
 <a id="axcl.rt.stream_query"></a>
 
-### 2.116. axcl.rt.stream_query
+### 2.122. axcl.rt.stream_query
 
 Query whether a specified Stream has unfinished tasks.
 
-#### 2.116.1. Function
+#### 2.122.1. Function
 
 **Python Call**
 
@@ -5124,22 +5450,22 @@ status, ret = axcl.rt.stream_query(stream)
 axclError axclrtStreamQuery(axclrtStream stream, axclrtStreamStatus *status);
 ```
 
-#### 2.116.2. Parameters
+#### 2.122.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| stream | int &#124; None | Stream handle returned by |
+| stream | int &#124; None | Stream handle returned by axclrtCreateStream. |
 
-#### 2.116.3. Returns
+#### 2.122.3. Returns
 
 - `status`: *int* — Receives the task completion status of the Stream on success.
 - `ret`: *int* — The task completion status of the Stream was returned successfully. Failure.
 
-#### 2.116.4. Note
+#### 2.122.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.116.5. Example
+#### 2.122.5. Example
 
 ```python
 status, ret = axcl.rt.stream_query(stream)
@@ -5149,11 +5475,11 @@ status, ret = axcl.rt.stream_query(stream)
 
 <a id="axcl.rt.synchronize_stream"></a>
 
-### 2.117. axcl.rt.synchronize_stream
+### 2.123. axcl.rt.synchronize_stream
 
 Block until all tasks submitted to a Stream before this call have completed.
 
-#### 2.117.1. Function
+#### 2.123.1. Function
 
 **Python Call**
 
@@ -5167,21 +5493,21 @@ ret = axcl.rt.synchronize_stream(stream)
 axclError axclrtSynchronizeStream(axclrtStream stream);
 ```
 
-#### 2.117.2. Parameters
+#### 2.123.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| stream | int &#124; None | Stream handle returned by |
+| stream | int &#124; None | Stream handle returned by axclrtCreateStream. |
 
-#### 2.117.3. Returns
+#### 2.123.3. Returns
 
 - `ret`: *int* — All previously submitted tasks in the Stream completed successfully. Failure.
 
-#### 2.117.4. Note
+#### 2.123.4. Note
 
 Return type: `int`.
 
-#### 2.117.5. Example
+#### 2.123.5. Example
 
 ```python
 ret = axcl.rt.synchronize_stream(stream)
@@ -5191,11 +5517,11 @@ ret = axcl.rt.synchronize_stream(stream)
 
 <a id="axcl.rt.synchronize_stream_with_timeout"></a>
 
-### 2.118. axcl.rt.synchronize_stream_with_timeout
+### 2.124. axcl.rt.synchronize_stream_with_timeout
 
 Block for up to the specified timeout until all tasks submitted to a Stream before this call have completed.
 
-#### 2.118.1. Function
+#### 2.124.1. Function
 
 **Python Call**
 
@@ -5209,22 +5535,22 @@ ret = axcl.rt.synchronize_stream_with_timeout(stream, timeout)
 axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, int32_t timeout);
 ```
 
-#### 2.118.2. Parameters
+#### 2.124.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| stream | int &#124; None | Stream handle returned by |
+| stream | int &#124; None | Stream handle returned by axclrtCreateStream. |
 | timeout | int | Timeout in milliseconds. `-1` waits indefinitely. |
 
-#### 2.118.3. Returns
+#### 2.124.3. Returns
 
 - `ret`: *int* — All previously submitted tasks in the Stream completed successfully within the timeout. Failure.
 
-#### 2.118.4. Note
+#### 2.124.4. Note
 
 Return type: `int`.
 
-#### 2.118.5. Example
+#### 2.124.5. Example
 
 ```python
 ret = axcl.rt.synchronize_stream_with_timeout(stream, timeout)
@@ -5234,11 +5560,11 @@ ret = axcl.rt.synchronize_stream_with_timeout(stream, timeout)
 
 <a id="axcl.rt.exec_worker"></a>
 
-### 2.119. axcl.rt.exec_worker
+### 2.125. axcl.rt.exec_worker
 
 Start a userworker process on the Device associated with the current Context.
 
-#### 2.119.1. Function
+#### 2.125.1. Function
 
 **Python Call**
 
@@ -5252,23 +5578,23 @@ pid, ret = axcl.rt.exec_worker(path, argv)
 axclError axclrtExecWorker(const char *path, const int32_t *argc, const char *argv[], uint32_t *pid);
 ```
 
-#### 2.119.2. Parameters
+#### 2.125.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | path | str &#124; bytes &#124; None | Device path of the userworker executable. |
-| argv | list | Optional argument array. Required when |
+| argv | list | Optional list of arguments. None or an empty list means zero arguments. Entries must not be None. They are passed to the userworker after its program name, so the userworker receives `path` as `argv[0]`. |
 
-#### 2.119.3. Returns
+#### 2.125.3. Returns
 
 - `pid`: *int* — Receives the Device process ID on success.
 - `ret`: *int* — The userworker was started and initialized successfully. Failure.
 
-#### 2.119.4. Note
+#### 2.125.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.119.5. Example
+#### 2.125.5. Example
 
 ```python
 pid, ret = axcl.rt.exec_worker(path, argv)
@@ -5278,11 +5604,11 @@ pid, ret = axcl.rt.exec_worker(path, argv)
 
 <a id="axcl.rt.kill_worker"></a>
 
-### 2.120. axcl.rt.kill_worker
+### 2.126. axcl.rt.kill_worker
 
 Terminate and reap a userworker process.
 
-#### 2.120.1. Function
+#### 2.126.1. Function
 
 **Python Call**
 
@@ -5296,21 +5622,21 @@ ret = axcl.rt.kill_worker(pid)
 axclError axclrtKillWorker(uint32_t pid);
 ```
 
-#### 2.120.2. Parameters
+#### 2.126.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| pid | int | Device process ID returned by |
+| pid | int | Device process ID returned by axclrtExecWorker. |
 
-#### 2.120.3. Returns
+#### 2.126.3. Returns
 
 - `ret`: *int* — The process and its Host-side communication resources were released. Failure.
 
-#### 2.120.4. Note
+#### 2.126.4. Note
 
 Return type: `int`.
 
-#### 2.120.5. Example
+#### 2.126.5. Example
 
 ```python
 ret = axcl.rt.kill_worker(pid)
@@ -5320,11 +5646,11 @@ ret = axcl.rt.kill_worker(pid)
 
 <a id="axcl.rt.worker_send"></a>
 
-### 2.121. axcl.rt.worker_send
+### 2.127. axcl.rt.worker_send
 
 Send one complete message to a userworker process.
 
-#### 2.121.1. Function
+#### 2.127.1. Function
 
 **Python Call**
 
@@ -5338,24 +5664,24 @@ ret = axcl.rt.worker_send(pid, buf, size, timeout)
 axclError axclrtWorkerSend(uint32_t pid, const void *buf, uint32_t size, int32_t timeout);
 ```
 
-#### 2.121.2. Parameters
+#### 2.127.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| pid | int | Device process ID returned by |
+| pid | int | Device process ID returned by axclrtExecWorker. |
 | buf | int &#124; None | Message data. |
 | size | int | Message size in bytes. Must be greater than zero. |
-| timeout | int | Timeout in milliseconds. Use |
+| timeout | int | Timeout in milliseconds. Use NO_TIMEOUT to wait indefinitely; other negative values are invalid. |
 
-#### 2.121.3. Returns
+#### 2.127.3. Returns
 
 - `ret`: *int* — The complete message was sent successfully. Failure.
 
-#### 2.121.4. Note
+#### 2.127.4. Note
 
 Return type: `int`.
 
-#### 2.121.5. Example
+#### 2.127.5. Example
 
 ```python
 ret = axcl.rt.worker_send(pid, buf, size, timeout)
@@ -5365,11 +5691,11 @@ ret = axcl.rt.worker_send(pid, buf, size, timeout)
 
 <a id="axcl.rt.worker_recv"></a>
 
-### 2.122. axcl.rt.worker_recv
+### 2.128. axcl.rt.worker_recv
 
 Receive one complete message from a userworker process.
 
-#### 2.122.1. Function
+#### 2.128.1. Function
 
 **Python Call**
 
@@ -5383,25 +5709,25 @@ recvlen, ret = axcl.rt.worker_recv(pid, buf, bufsize, timeout)
 axclError axclrtWorkerRecv(uint32_t pid, void *buf, uint32_t bufsize, uint32_t *recvlen, int32_t timeout);
 ```
 
-#### 2.122.2. Parameters
+#### 2.128.2. Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| pid | int | Device process ID returned by |
+| pid | int | Device process ID returned by axclrtExecWorker. |
 | buf | int | Buffer that receives the message. |
-| bufsize | int | Capacity of |
-| timeout | int | Timeout in milliseconds. Use |
+| bufsize | int | Capacity of `buf` in bytes. Must be greater than zero. |
+| timeout | int | Timeout in milliseconds. Use NO_TIMEOUT to wait indefinitely; zero returns immediately if no complete message is available. Other negative values are invalid. |
 
-#### 2.122.3. Returns
+#### 2.128.3. Returns
 
 - `recvlen`: *int* — Actual full message length; the message content is written to the caller-provided buf.
 - `ret`: *int* — The complete message was received successfully. Failure.
 
-#### 2.122.4. Note
+#### 2.128.4. Note
 
 Return type: `tuple[int, int]`.
 
-#### 2.122.5. Example
+#### 2.128.5. Example
 
 ```python
 recvlen, ret = axcl.rt.worker_recv(pid, buf, bufsize, timeout)

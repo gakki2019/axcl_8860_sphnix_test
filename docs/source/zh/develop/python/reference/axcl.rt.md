@@ -12,7 +12,7 @@
 - [axcl.rt.set_log_level](#axcl.rt.set_log_level): 在运行时设置目标组件的日志级别。
 - [axcl.rt.get_log_level](#axcl.rt.get_log_level): 获取目标组件的日志级别。
 - [axcl.rt.create_context](#axcl.rt.create_context): 显式创建 Context，并将其绑定到调用线程。
-- [axcl.rt.destroy_context](#axcl.rt.destroy_context): 销毁显式创建的 Context（源码未提供创建接口引用）。
+- [axcl.rt.destroy_context](#axcl.rt.destroy_context): 销毁由 axclrtCreateContext 显式创建的 Context。
 - [axcl.rt.set_current_context](#axcl.rt.set_current_context): 将 Context 设为调用线程的当前 Context。
 - [axcl.rt.get_current_context](#axcl.rt.get_current_context): 获取调用线程的当前 Context。
 - [axcl.rt.control_execute_shell_cmd](#axcl.rt.control_execute_shell_cmd): 在调用线程当前 Context 关联的设备上执行 shell 命令。
@@ -25,12 +25,16 @@
 - [axcl.rt.get_device](#axcl.rt.get_device): 获取调用线程当前使用的虚拟设备 ID。
 - [axcl.rt.get_device_count](#axcl.rt.get_device_count): 获取当前进程可见的设备数量。
 - [axcl.rt.device_can_access_peer](#axcl.rt.device_can_access_peer): 查询设备之间是否支持数据交互。
-- [axcl.rt.device_enable_peer_access](#axcl.rt.device_enable_peer_access): 启用当前设备到指定设备的数据交互。本函数启用的数据交互是单向的。例如：当前设备 ID 为 0 且（源码示例不完整）。
+- [axcl.rt.device_enable_peer_access](#axcl.rt.device_enable_peer_access): 启用当前设备到指定设备的数据交互。
 - [axcl.rt.device_disable_peer_access](#axcl.rt.device_disable_peer_access): 禁用当前设备到指定设备的数据交互。
 - [axcl.rt.device_peer_access_status](#axcl.rt.device_peer_access_status): 查询源设备到指定设备的数据交互启用状态。
 - [axcl.rt.synchronize_device](#axcl.rt.synchronize_device): 阻塞等待提交到调用线程关联设备的所有任务完成。
 - [axcl.rt.synchronize_device_with_timeout](#axcl.rt.synchronize_device_with_timeout): 阻塞等待提交到调用线程关联设备的任务完成，或等待超时。
 - [axcl.rt.device_get_bare_tgid](#axcl.rt.device_get_bare_tgid): 获取调用进程在初始 PID 命名空间中的 Host 原始 TGID。
+- [axcl.rt.engine_get_io_info_v2](#axcl.rt.engine_get_io_info_v2): 以独立字典返回全部 IO 元数据，并自动释放 C 元数据。
+- [axcl.rt.engine_destroy_io_info_v2](#axcl.rt.engine_destroy_io_info_v2): 释放直接通过 C API 获取的原始元数据指针。
+- [axcl.rt.engine_execute_v2](#axcl.rt.engine_execute_v2): 一次 C 调用执行完整的 IO 绑定，无需 CreateIO 或逐个缓冲区的 setter。
+- [axcl.rt.engine_execute_async_v2](#axcl.rt.engine_execute_async_v2): 一次提交完整的 IO 绑定；通过 Stream 同步观察完成情况和错误。
 - [axcl.rt.engine_init](#axcl.rt.engine_init): 初始化调用线程当前 Context 关联设备上的 Engine。
 - [axcl.rt.engine_get_vnpu_kind](#axcl.rt.engine_get_vnpu_kind): 获取当前 Context 关联设备上 Engine 的 VNPU 模式。
 - [axcl.rt.engine_finalize](#axcl.rt.engine_finalize): 去初始化当前 Context 关联设备上的 Engine。
@@ -49,7 +53,7 @@
 - [axcl.rt.engine_get_model_type_from_mem](#axcl.rt.engine_get_model_type_from_mem): 获取存放在 Device 内存中的模型数据的核数分类。
 - [axcl.rt.engine_get_model_type_from_model_id](#axcl.rt.engine_get_model_type_from_model_id): 获取已加载模型的核数分类。
 - [axcl.rt.engine_get_io_info](#axcl.rt.engine_get_io_info): 创建 Host 端元数据对象，用于描述已加载模型的输入和输出。
-- [axcl.rt.engine_destroy_io_info](#axcl.rt.engine_destroy_io_info): 销毁已创建的 IO 元数据对象（源码未提供创建接口引用）。
+- [axcl.rt.engine_destroy_io_info](#axcl.rt.engine_destroy_io_info): 销毁由 axclrtEngineGetIOInfo 创建的 IO 元数据对象。
 - [axcl.rt.engine_get_shape_groups_count](#axcl.rt.engine_get_shape_groups_count): 获取 IO 元数据对象描述的 shape 组数量。
 - [axcl.rt.engine_get_num_inputs](#axcl.rt.engine_get_num_inputs): 获取 IO 元数据对象中的模型输入数量。
 - [axcl.rt.engine_get_num_outputs](#axcl.rt.engine_get_num_outputs): 获取 IO 元数据对象中的模型输出数量。
@@ -66,7 +70,7 @@
 - [axcl.rt.engine_get_output_data_layout](#axcl.rt.engine_get_output_data_layout): 获取输出张量的数据布局。
 - [axcl.rt.engine_get_output_dims](#axcl.rt.engine_get_output_dims): 获取指定 shape 组中输出张量的维度。
 - [axcl.rt.engine_create_io](#axcl.rt.engine_create_io): 根据模型 IO 元数据创建 Host 端 IO 绑定对象。
-- [axcl.rt.engine_destroy_io](#axcl.rt.engine_destroy_io): 销毁已创建的 IO 绑定对象（源码未提供创建接口引用）。
+- [axcl.rt.engine_destroy_io](#axcl.rt.engine_destroy_io): 销毁由 axclrtEngineCreateIO 创建的 IO 绑定对象。
 - [axcl.rt.engine_set_input_buffer_by_index](#axcl.rt.engine_set_input_buffer_by_index): 按索引将 Device 缓冲区绑定到输入。
 - [axcl.rt.engine_set_output_buffer_by_index](#axcl.rt.engine_set_output_buffer_by_index): 按索引将 Device 缓冲区绑定到输出。
 - [axcl.rt.engine_set_input_buffer_by_name](#axcl.rt.engine_set_input_buffer_by_name): 按张量名称将 Device 缓冲区绑定到输入。
@@ -80,7 +84,7 @@
 - [axcl.rt.engine_execute](#axcl.rt.engine_execute): 在当前 runtime Context 的默认 Stream 上同步执行模型推理。
 - [axcl.rt.engine_execute_async](#axcl.rt.engine_execute_async): 向 Stream 提交模型推理任务。
 - [axcl.rt.create_event](#axcl.rt.create_event): 在当前 Context 关联的设备上创建启用计时的 Event。
-- [axcl.rt.destroy_event](#axcl.rt.destroy_event): 销毁已创建的 Event（源码未提供创建接口引用）。
+- [axcl.rt.destroy_event](#axcl.rt.destroy_event): 销毁由 axclrtCreateEvent 或 axclrtCreateEventWithFlags 创建的 Event。
 - [axcl.rt.record_event](#axcl.rt.record_event): 向指定 Stream 异步提交 Event 记录点。
 - [axcl.rt.stream_wait_event](#axcl.rt.stream_wait_event): 向指定 Stream 异步提交 Event 等待点，使 Stream 仅在 Event 被触发后继续执行。
 - [axcl.rt.stream_wait_event_with_timeout](#axcl.rt.stream_wait_event_with_timeout): 向指定 Stream 异步提交带超时的 Event 等待点。
@@ -99,15 +103,17 @@
 - [axcl.rt.mem_flush](#axcl.rt.mem_flush): 将 Device 内存范围内的缓存数据写回 DDR。
 - [axcl.rt.mem_invalidate](#axcl.rt.mem_invalidate): 使 Device 内存范围内的缓存数据失效。
 - [axcl.rt.malloc_host](#axcl.rt.malloc_host): 分配 Host 虚拟内存。
-- [axcl.rt.free_host](#axcl.rt.free_host): 释放已分配的 Host 虚拟内存（源码未提供分配接口引用）。
+- [axcl.rt.free_host](#axcl.rt.free_host): 释放由 axclrtMallocHost 分配的 Host 虚拟内存。
 - [axcl.rt.memset](#axcl.rt.memset): 同步将 Device 内存中的字节设置为指定值。
 - [axcl.rt.memcpy](#axcl.rt.memcpy): 同步在 Host 或 Device 内存之间拷贝字节。
 - [axcl.rt.memcmp](#axcl.rt.memcmp): 同步判断两个 Device 内存范围内的字节是否相同。
 - [axcl.rt.memset_async](#axcl.rt.memset_async): 向指定 Stream 异步提交 Device 内存设置操作。
 - [axcl.rt.memcpy_async](#axcl.rt.memcpy_async): 向指定 Stream 异步提交 Host 或 Device 内存拷贝。
 - [axcl.rt.memcmp_async](#axcl.rt.memcmp_async): 向指定 Stream 异步提交两个 Device 内存范围的比较操作。
-- [axcl.rt.mem_get_address_range](#axcl.rt.mem_get_address_range): 获取 AXCL runtime 管理的指针对应的基地址和分配大小。
-- [axcl.rt.mem_get_dev_addr](#axcl.rt.mem_get_dev_addr): 从设备指针导出底层设备物理地址和虚拟地址。
+- [axcl.rt.memcpy2d](#axcl.rt.memcpy2d): 同步在 Host 与 Device 内存之间拷贝一个二维矩形。
+- [axcl.rt.memcpy2d_async](#axcl.rt.memcpy2d_async): 向指定 Stream 异步提交 Host 与 Device 内存之间的二维矩形拷贝。
+- [axcl.rt.mem_get_address_range](#axcl.rt.mem_get_address_range): 获取 AXCL runtime 管理的分配或外部注册对应的基句柄和大小。
+- [axcl.rt.mem_get_dev_addr](#axcl.rt.mem_get_dev_addr): 从设备内存句柄导出底层设备物理地址和虚拟地址。
 - [axcl.rt.mem_map_dev_addr](#axcl.rt.mem_map_dev_addr): 将外部设备内存注册为临时映射的设备指针。
 - [axcl.rt.mem_unmap_dev_addr](#axcl.rt.mem_unmap_dev_addr): 注销通过 axclrtMemMapDevAddr 注册的外部设备内存。
 - [axcl.rt.ipc_mem_get_export_key](#axcl.rt.ipc_mem_get_export_key): 为设备内存分配导出 IPC 内存共享密钥。
@@ -115,7 +121,7 @@
 - [axcl.rt.ipc_mem_import_by_key](#axcl.rt.ipc_mem_import_by_key): 通过密钥将 IPC 内存句柄导入调用进程。
 - [axcl.rt.ipc_mem_close](#axcl.rt.ipc_mem_close): 关闭进程间共享内存密钥。
 - [axcl.rt.create_stream](#axcl.rt.create_stream): 创建 Stream。
-- [axcl.rt.destroy_stream](#axcl.rt.destroy_stream): 销毁已创建的 Stream（源码未提供创建接口引用）。
+- [axcl.rt.destroy_stream](#axcl.rt.destroy_stream): 销毁由 axclrtCreateStream 创建的 Stream。
 - [axcl.rt.destroy_stream_force](#axcl.rt.destroy_stream_force): 立即销毁 Stream，不等待已提交任务完成。
 - [axcl.rt.stream_query](#axcl.rt.stream_query): 查询指定 Stream 是否有未完成的任务。
 - [axcl.rt.synchronize_stream](#axcl.rt.synchronize_stream): 阻塞等待调用本函数前提交到 Stream 的所有任务完成。
@@ -164,8 +170,6 @@ axclError axclrtGetVersion(int32_t *major, int32_t *minor, int32_t *patch);
 
 返回类型：`tuple[int, int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt.py:216`。
-
 #### 2.1.5. 示例
 
 ```python
@@ -198,8 +202,8 @@ axclError axclrtGetVersionStr(const char *name, char *buf, uint32_t size);
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| name | str &#124; bytes &#124; None | 版本来源，支持的值为 `driver` 和 `firmware`。`driver` 返回 SDK 构建版本字符串。`firmware` 返回与当前线程绑定的 runtime 上下文关联设备的固件版本。线程必须先将上下文绑定到已激活的设备，例如通过（源码说明不完整）。 |
-| size | int | 大小（源码未说明对象）。 |
+| name | str &#124; bytes &#124; None | 版本来源，支持的值为 `driver` 和 `firmware`。`driver` 返回 SDK 构建版本字符串。`firmware` 返回与当前线程绑定的 runtime 上下文关联设备的固件版本。线程必须先将上下文绑定到已激活的设备，例如通过 axclrtSetDevice 或 axclrtCreateContext。 |
+| size | int | `buf` 的大小，单位为字节。必须大于零。如果缓冲区过小，成功结果会被截断以适配缓冲区，包括结尾的 NUL。 |
 
 #### 2.2.3. 返回值
 
@@ -209,8 +213,6 @@ axclError axclrtGetVersionStr(const char *name, char *buf, uint32_t size);
 #### 2.2.4. 说明
 
 返回类型：`tuple[str, int]`。
-
-源码：`python/axcl/rt/axcl_rt.py:251`。
 
 #### 2.2.5. 示例
 
@@ -252,8 +254,6 @@ const char * axclrtGetSocName(void);
 
 返回类型：`str`。
 
-源码：`python/axcl/rt/axcl_rt.py:288`。
-
 #### 2.3.5. 示例
 
 ```python
@@ -294,8 +294,6 @@ axclError axclrtGetLastError(void);
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt.py:316`。
-
 #### 2.4.5. 示例
 
 ```python
@@ -335,8 +333,6 @@ axclError axclrtPeekAtLastError(void);
 #### 2.5.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/rt/axcl_rt.py:344`。
 
 #### 2.5.5. 示例
 
@@ -380,8 +376,6 @@ void axclrtSetLastError(axclError error);
 
 返回类型：`None`。
 
-源码：`python/axcl/rt/axcl_rt.py:372`。
-
 #### 2.6.5. 示例
 
 ```python
@@ -424,8 +418,6 @@ const char * axclrtGetErrorString(axclError error);
 
 返回类型：`str`。
 
-源码：`python/axcl/rt/axcl_rt.py:403`。
-
 #### 2.7.5. 示例
 
 ```python
@@ -458,7 +450,7 @@ axclError axclrtSetLogLevel(axclrtLogTarget target, int32_t lv);
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| target | int | 日志目标。参见（源码未提供引用目标）。 |
+| target | int | 日志目标。参见 axclrtLogTarget。不得为 AXCL_LOG_TARGET_BUTT。 |
 | lv | int | 日志级别：0 trace、1 debug、2 info、3 warning、4 error、5 critical、6 off。超出 0 至 6 范围的值映射为 warning。 |
 
 #### 2.8.3. 返回值
@@ -468,8 +460,6 @@ axclError axclrtSetLogLevel(axclrtLogTarget target, int32_t lv);
 #### 2.8.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/rt/axcl_rt.py:434`。
 
 #### 2.8.5. 示例
 
@@ -503,7 +493,7 @@ axclError axclrtGetLogLevel(axclrtLogTarget target, int32_t *lv);
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| target | int | 日志目标。参见（源码未提供引用目标）。 |
+| target | int | 日志目标。参见 axclrtLogTarget。不得为 AXCL_LOG_TARGET_BUTT。 |
 
 #### 2.9.3. 返回值
 
@@ -513,8 +503,6 @@ axclError axclrtGetLogLevel(axclrtLogTarget target, int32_t *lv);
 #### 2.9.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/rt/axcl_rt.py:467`。
 
 #### 2.9.5. 示例
 
@@ -548,7 +536,7 @@ axclError axclrtCreateContext(axclrtContext *context, int32_t deviceId);
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| device_id | int | 当前进程可见的虚拟设备 ID。有效 ID 范围为 [0, count - 1]，其中 count 的获取方式见（源码说明不完整）。 |
+| device_id | int | 当前进程可见的虚拟设备 ID。有效 ID 范围为 [0, count - 1]，其中 count 由 axclrtGetDeviceCount 返回。 |
 
 #### 2.10.3. 返回值
 
@@ -558,8 +546,6 @@ axclError axclrtCreateContext(axclrtContext *context, int32_t deviceId);
 #### 2.10.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/rt/axcl_rt_context.py:114`。
 
 #### 2.10.5. 示例
 
@@ -573,7 +559,7 @@ context, ret = axcl.rt.create_context(device_id)
 
 ### 2.11. axcl.rt.destroy_context
 
-销毁显式创建的 Context（源码未提供创建接口引用）。
+销毁由 axclrtCreateContext 显式创建的 Context。
 
 #### 2.11.1. 函数
 
@@ -593,7 +579,7 @@ axclError axclrtDestroyContext(axclrtContext context);
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| context | int &#124; None | 返回的 Context 句柄（源码未提供接口引用）。 |
+| context | int &#124; None | axclrtCreateContext 返回的 Context 句柄。不得为 None，且必须指向已存在的 Context；已销毁的 Context 不再存在。 |
 
 #### 2.11.3. 返回值
 
@@ -602,8 +588,6 @@ axclError axclrtDestroyContext(axclrtContext context);
 #### 2.11.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/rt/axcl_rt_context.py:148`。
 
 #### 2.11.5. 示例
 
@@ -647,8 +631,6 @@ axclError axclrtSetCurrentContext(axclrtContext context);
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_context.py:179`。
-
 #### 2.12.5. 示例
 
 ```python
@@ -690,8 +672,6 @@ axclError axclrtGetCurrentContext(axclrtContext *context);
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_context.py:210`。
-
 #### 2.13.5. 示例
 
 ```python
@@ -730,14 +710,12 @@ axclError axclrtControlExecuteShellCmd(const char *cmd, const char *const args[]
 
 #### 2.14.3. 返回值
 
-- `output`: *str* — 可选指针，以 C 字符串形式接收合并后的标准输出和标准错误。输出受 AXCL_SHELL_CMD_OUTPUT_LIMIT 限制（默认 1 MiB，最大 16 MiB）。
-- `ret`: *int* — 命令已完成，退出状态为 0。shell 异常退出、被信号终止、无法启动或无法监控。命令在设备上执行超时，或 Host RPC 等待超时。失败。
+- `output`: *str* — 合并后的标准输出和标准错误。输出受 AXCL_SHELL_CMD_OUTPUT_LIMIT 限制（默认 1 MiB，最大 16 MiB）。如果调用在获得任何文本前失败，则为空字符串。
+- `ret`: *int* — 命令已完成，退出状态为 0。失败。shell 以非零状态退出、被信号终止、无法启动或无法监控时返回 AXCL_ERR_RT_SHELL_FAIL，`output` 接收捕获的输出或失败说明；命令在设备上执行超时或 Host RPC 等待超时时返回 AXCL_ERR_RT_TIMEOUT，`output` 接收追加在已捕获输出之后的超时消息。Host RPC 等待超时后，设备上命令的状态未知。
 
 #### 2.14.4. 说明
 
 返回类型：`tuple[str, int]`。
-
-源码：`python/axcl/rt/axcl_rt_control.py:93`。
 
 #### 2.14.5. 示例
 
@@ -771,7 +749,7 @@ axclError axclrtSetDevice(int32_t deviceId);
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| device_id | int | 当前进程可见的虚拟设备 ID。有效 ID 范围为 [0, count - 1]，其中 count 的获取方式见（源码说明不完整）。 |
+| device_id | int | 当前进程可见的虚拟设备 ID。有效 ID 范围为 [0, count - 1]，其中 count 由 axclrtGetDeviceCount 返回。 |
 
 #### 2.15.3. 返回值
 
@@ -780,8 +758,6 @@ axclError axclrtSetDevice(int32_t deviceId);
 #### 2.15.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/rt/axcl_rt_device.py:373`。
 
 #### 2.15.5. 示例
 
@@ -825,8 +801,6 @@ axclError axclrtResetDevice(int32_t deviceId);
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_device.py:404`。
-
 #### 2.16.5. 示例
 
 ```python
@@ -869,8 +843,6 @@ axclError axclrtResetDeviceForce(int32_t deviceId);
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_device.py:435`。
-
 #### 2.17.5. 示例
 
 ```python
@@ -904,7 +876,7 @@ axclError axclrtRegDeviceStateCallback(axclrtDeviceStateCallback callback, void 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | callback | object | 回调函数。传入 NULL 以注销当前回调函数。 |
-| args | int &#124; None | 传递给回调的用户数据（源码说明不完整）。 |
+| args | int &#124; None | 传递给 `callback` 的用户数据。`callback` 为 None 时忽略。 |
 
 #### 2.18.3. 返回值
 
@@ -913,8 +885,6 @@ axclError axclrtRegDeviceStateCallback(axclrtDeviceStateCallback callback, void 
 #### 2.18.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/rt/axcl_rt_device.py:466`。
 
 #### 2.18.5. 示例
 
@@ -958,8 +928,6 @@ axclError axclrtQueryDeviceStatus(int32_t deviceId, axclrtDeviceStatus *deviceSt
 #### 2.19.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/rt/axcl_rt_device.py:503`。
 
 #### 2.19.5. 示例
 
@@ -1005,8 +973,6 @@ axclError axclrtGetDeviceInfo(int32_t deviceId, axclrtDevAttr attr, uint64_t *va
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_device.py:537`。
-
 #### 2.20.5. 示例
 
 ```python
@@ -1048,8 +1014,6 @@ axclError axclrtGetDevice(int32_t *deviceId);
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_device.py:573`。
-
 #### 2.21.5. 示例
 
 ```python
@@ -1090,8 +1054,6 @@ axclError axclrtGetDeviceCount(uint32_t *count);
 #### 2.22.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/rt/axcl_rt_device.py:604`。
 
 #### 2.22.5. 示例
 
@@ -1137,8 +1099,6 @@ axclError axclrtDeviceCanAccessPeer(int32_t *canAccessPeer, int32_t deviceId, in
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_device.py:635`。
-
 #### 2.23.5. 示例
 
 ```python
@@ -1151,7 +1111,9 @@ can_access_peer, ret = axcl.rt.device_can_access_peer(device_id, peer_device_id)
 
 ### 2.24. axcl.rt.device_enable_peer_access
 
-启用当前设备到指定设备的数据交互。本函数启用的数据交互是单向的。例如：当前设备 ID 为 0 且（源码示例不完整）。
+启用当前设备到指定设备的数据交互。
+
+本函数启用的数据交互是单向的。例如，当前设备 ID 为 0 且 `peer_device_id` 为 1 时，设备 0 可以访问设备 1 上的数据，但设备 1 不能访问设备 0 上的数据。若要允许设备 1 访问设备 0 上的数据，切换到设备 1，并将 `peer_device_id` 设为 0 调用本函数。
 
 #### 2.24.1. 函数
 
@@ -1171,18 +1133,16 @@ axclError axclrtDeviceEnablePeerAccess(int32_t peerDeviceId, uint32_t flags);
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| peer_device_id | int | 目标虚拟设备 ID。 |
-| flags | int | 保留，必须为 0。 |
+| peer_device_id | int | 当前进程可见的目标虚拟设备 ID。必须不同于当前设备。 |
+| flags | int | 保留；必须为 0。 |
 
 #### 2.24.3. 返回值
 
-- `ret`: *int* — 成功。失败。
+- `ret`: *int* — 已成功启用当前设备到 `peer_device_id` 的数据交互。失败。
 
 #### 2.24.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/rt/axcl_rt_device.py:671`。
 
 #### 2.24.5. 示例
 
@@ -1225,8 +1185,6 @@ axclError axclrtDeviceDisablePeerAccess(int32_t peerDeviceId);
 #### 2.25.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/rt/axcl_rt_device.py:704`。
 
 #### 2.25.5. 示例
 
@@ -1272,8 +1230,6 @@ axclError axclrtDevicePeerAccessStatus(int32_t deviceId, int32_t peerDeviceId, i
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_device.py:735`。
-
 #### 2.26.5. 示例
 
 ```python
@@ -1313,8 +1269,6 @@ axclError axclrtSynchronizeDevice(void);
 #### 2.27.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/rt/axcl_rt_device.py:771`。
 
 #### 2.27.5. 示例
 
@@ -1358,8 +1312,6 @@ axclError axclrtSynchronizeDeviceWithTimeout(int32_t timeout);
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_device.py:799`。
-
 #### 2.28.5. 示例
 
 ```python
@@ -1395,13 +1347,11 @@ axclError axclrtDeviceGetBareTgid(int32_t *bareTgid);
 #### 2.29.3. 返回值
 
 - `bare_tgid`: *int* — 接收 Host 层级的原始 TGID。
-- `ret`: *int* — 成功返回 0，否则返回错误码。
+- `ret`: *int* — 已成功返回原始 TGID。失败。
 
 #### 2.29.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/rt/axcl_rt_device.py:830`。
 
 #### 2.29.5. 示例
 
@@ -1411,13 +1361,217 @@ bare_tgid, ret = axcl.rt.device_get_bare_tgid()
 
 <br>
 
+<a id="axcl.rt.engine_get_io_info_v2"></a>
+
+### 2.30. axcl.rt.engine_get_io_info_v2
+
+以独立字典返回全部 IO 元数据，并自动释放 C 元数据。
+
+使用 AX_ENGINE_IO_INFO_T 的别名，包括 input_size/output_size 和
+dynamic_batch_size。Tensor 包含 name、size、shape、stride、data_type、
+layout、memory_type 和 extra_meta。枚举值为 Native Engine 的值。
+不会逐个调用 Tensor getter。该字典无需显式释放。
+需要支持独立 GET_INFOV2 协议的 Device Worker。
+
+#### 2.30.1. 函数
+
+**Python 调用**
+
+```python
+io_info, ret = axcl.rt.engine_get_io_info_v2(model_id)
+```
+
+**C++ 原型**
+
+```cpp
+axclError axclrtEngineGetIOInfoV2(uint64_t modelId, AX_ENGINE_IO_INFO_T **ioInfo);
+```
+
+#### 2.30.2. 参数
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| model_id | int | 已加载的模型 ID。 |
+
+#### 2.30.3. 返回值
+
+- `io_info`: *dict* — 成功时为完整的默认 group Tensor 元数据；失败时为空字典。
+- `ret`: *int* — 已成功返回元数据。失败。
+
+#### 2.30.4. 说明
+
+返回类型：`tuple[dict, int]`。
+
+#### 2.30.5. 示例
+
+```python
+io_info, ret = axcl.rt.engine_get_io_info_v2(model_id)
+```
+
+<br>
+
+<a id="axcl.rt.engine_destroy_io_info_v2"></a>
+
+### 2.31. axcl.rt.engine_destroy_io_info_v2
+
+释放直接通过 C API 获取的原始元数据指针。
+
+不要传入 engine_get_io_info_v2 返回的字典：该字典已复制，
+其 C 元数据已释放。此处只能释放原始的 Runtime 分配。
+
+#### 2.31.1. 函数
+
+**Python 调用**
+
+```python
+ret = axcl.rt.engine_destroy_io_info_v2(io_info)
+```
+
+**C++ 原型**
+
+```cpp
+axclError axclrtEngineDestroyIOInfoV2(AX_ENGINE_IO_INFO_T *ioInfo);
+```
+
+#### 2.31.2. 参数
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| io_info | Unannotated | axclrtEngineGetIOInfoV2 返回的、由 Runtime 持有的 `POINTER(AX_ENGINE_IO_INFO_T)`。只能释放一次。其他类型会引发 `TypeError`。 |
+
+#### 2.31.3. 返回值
+
+- `ret`: *int* — 元数据已成功释放。失败。
+
+#### 2.31.4. 说明
+
+返回类型：`int`。
+
+#### 2.31.5. 示例
+
+```python
+ret = axcl.rt.engine_destroy_io_info_v2(io_info)
+```
+
+<br>
+
+<a id="axcl.rt.engine_execute_v2"></a>
+
+### 2.32. axcl.rt.engine_execute_v2
+
+一次 C 调用执行完整的 IO 绑定，无需 CreateIO 或逐个缓冲区的 setter。
+
+phy_addr 必须为零（或省略）；vir_addr 保存非空的 RT Token VA。
+Host 根据 Token 解析地址、边界和设备归属。
+支持 RT 分配和 IPC 导入；不支持 mem_map_dev_addr Token。
+内存操作需保留 RT 句柄。不要将 Token IO 直接传给 Native Engine。
+自定义 stride 和 IO 设置必须为零/NULL。缓冲区须保持有效直到返回。
+调用方必须确保所有地址属于默认 Stream 所在设备，且属于有效分配。
+
+#### 2.32.1. 函数
+
+**Python 调用**
+
+```python
+ret = axcl.rt.engine_execute_v2(model_id, context_id, group, io)
+```
+
+**C++ 原型**
+
+```cpp
+axclError axclrtEngineExecuteV2(uint64_t modelId, uint64_t contextId, uint32_t group, const AX_ENGINE_IO_T *io);
+```
+
+#### 2.32.2. 参数
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| model_id | int | 已加载的模型 ID。 |
+| context_id | int | 为该模型创建的 Engine Context ID。 |
+| group | int | shape 组索引。当前被忽略，与 axclrtEngineExecute 相同。 |
+| io | Unannotated | 按模型顺序包含全部输入和输出的描述：字典、AX_ENGINE_IO_T 或指向该结构体的指针。字典键：inputs/outputs（phy_addr/vir_addr/size 字典的列表）、可选的 input_size/output_size（由列表推断）和 batch_size。 |
+
+#### 2.32.3. 返回值
+
+- `ret`: *int* — 推理已成功完成。失败。
+
+#### 2.32.4. 说明
+
+返回类型：`int`。
+
+#### 2.32.5. 示例
+
+```python
+ret = axcl.rt.engine_execute_v2(model_id, context_id, group, io)
+```
+
+<br>
+
+<a id="axcl.rt.engine_execute_async_v2"></a>
+
+### 2.33. axcl.rt.engine_execute_async_v2
+
+一次提交完整的 IO 绑定；通过 Stream 同步观察完成情况和错误。
+
+描述数组在返回前已被读取；Device 缓冲区、模型和 Engine Context
+必须保持有效，直到推理完成。
+地址解析期间由输出 Token 提供 cached 标志。RT 持有的内存
+通过 RT 释放。Native 拒绝没有 Device VA 的输出 Token，该错误在
+同步时报告。
+需要配套的支持聚合 IO 的 Worker。
+Native RunAsync 只支持单 group 模型。推理结束前，后续 Stream 命令可能先执行：
+在依赖输出的拷贝前使用 record_event + stream_wait_event，或在 Host 同步。
+Event 完成不代表推理成功；需检查 synchronize_stream（默认 Stream 则检查 synchronize_device）。
+如果 Device 无法为该请求获取其 Context 或 Stream（例如资源耗尽），
+请求会被丢弃而不执行，后续同步也不会报告错误。
+
+#### 2.33.1. 函数
+
+**Python 调用**
+
+```python
+ret = axcl.rt.engine_execute_async_v2(model_id, context_id, group, io, stream)
+```
+
+**C++ 原型**
+
+```cpp
+axclError axclrtEngineExecuteAsyncV2(uint64_t modelId, uint64_t contextId, uint32_t group, const AX_ENGINE_IO_T *io, axclrtStream stream);
+```
+
+#### 2.33.2. 参数
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| model_id | int | 已加载的模型 ID。 |
+| context_id | int | 为 `model_id` 创建的 Engine Context ID。 |
+| group | int | shape 组索引。必须为 0：只支持默认 shape 组。 |
+| io | Unannotated | 带 RT Token 的完整 IO 描述，格式与 engine_execute_v2 相同。 |
+| stream | int &#124; None | 接收推理请求的 Stream。传入 None 时使用当前 runtime Context 的默认 Stream，此时用 synchronize_device 等待；synchronize_stream 不接受 None。 |
+
+#### 2.33.3. 返回值
+
+- `ret`: *int* — 推理请求已成功提交。失败。
+
+#### 2.33.4. 说明
+
+返回类型：`int`。
+
+#### 2.33.5. 示例
+
+```python
+ret = axcl.rt.engine_execute_async_v2(model_id, context_id, group, io, stream)
+```
+
+<br>
+
 <a id="axcl.rt.engine_init"></a>
 
-### 2.30. axcl.rt.engine_init
+### 2.34. axcl.rt.engine_init
 
 初始化调用线程当前 Context 关联设备上的 Engine。
 
-#### 2.30.1. 函数
+#### 2.34.1. 函数
 
 **Python 调用**
 
@@ -1431,23 +1585,21 @@ ret = axcl.rt.engine_init(npu_kind)
 axclError axclrtEngineInit(axclrtEngineVNpuKind npuKind);
 ```
 
-#### 2.30.2. 参数
+#### 2.34.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | npu_kind | int | 用于初始化设备 Engine 的 VNPU 模式。 |
 
-#### 2.30.3. 返回值
+#### 2.34.3. 返回值
 
 - `ret`: *int* — Engine 已成功初始化。失败。
 
-#### 2.30.4. 说明
+#### 2.34.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1621`。
-
-#### 2.30.5. 示例
+#### 2.34.5. 示例
 
 ```python
 ret = axcl.rt.engine_init(npu_kind)
@@ -1457,11 +1609,11 @@ ret = axcl.rt.engine_init(npu_kind)
 
 <a id="axcl.rt.engine_get_vnpu_kind"></a>
 
-### 2.31. axcl.rt.engine_get_vnpu_kind
+### 2.35. axcl.rt.engine_get_vnpu_kind
 
 获取当前 Context 关联设备上 Engine 的 VNPU 模式。
 
-#### 2.31.1. 函数
+#### 2.35.1. 函数
 
 **Python 调用**
 
@@ -1475,22 +1627,20 @@ npu_kind, ret = axcl.rt.engine_get_vnpu_kind()
 axclError axclrtEngineGetVNpuKind(axclrtEngineVNpuKind *npuKind);
 ```
 
-#### 2.31.2. 参数
+#### 2.35.2. 参数
 
 不适用
 
-#### 2.31.3. 返回值
+#### 2.35.3. 返回值
 
 - `npu_kind`: *int* — 接收初始化后的 VNPU 模式。
 - `ret`: *int* — 已成功返回 VNPU 模式。失败。
 
-#### 2.31.4. 说明
+#### 2.35.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1652`。
-
-#### 2.31.5. 示例
+#### 2.35.5. 示例
 
 ```python
 npu_kind, ret = axcl.rt.engine_get_vnpu_kind()
@@ -1500,11 +1650,11 @@ npu_kind, ret = axcl.rt.engine_get_vnpu_kind()
 
 <a id="axcl.rt.engine_finalize"></a>
 
-### 2.32. axcl.rt.engine_finalize
+### 2.36. axcl.rt.engine_finalize
 
 去初始化当前 Context 关联设备上的 Engine。
 
-#### 2.32.1. 函数
+#### 2.36.1. 函数
 
 **Python 调用**
 
@@ -1518,21 +1668,19 @@ ret = axcl.rt.engine_finalize()
 axclError axclrtEngineFinalize(void);
 ```
 
-#### 2.32.2. 参数
+#### 2.36.2. 参数
 
 不适用
 
-#### 2.32.3. 返回值
+#### 2.36.3. 返回值
 
 - `ret`: *int* — Engine 已成功去初始化。失败。
 
-#### 2.32.4. 说明
+#### 2.36.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1683`。
-
-#### 2.32.5. 示例
+#### 2.36.5. 示例
 
 ```python
 ret = axcl.rt.engine_finalize()
@@ -1542,11 +1690,11 @@ ret = axcl.rt.engine_finalize()
 
 <a id="axcl.rt.engine_load_from_file"></a>
 
-### 2.33. axcl.rt.engine_load_from_file
+### 2.37. axcl.rt.engine_load_from_file
 
 从 Host 文件加载离线模型到当前设备的 Engine。
 
-#### 2.33.1. 函数
+#### 2.37.1. 函数
 
 **Python 调用**
 
@@ -1560,24 +1708,22 @@ model_id, ret = axcl.rt.engine_load_from_file(model_path)
 axclError axclrtEngineLoadFromFile(const char *modelPath, uint64_t *modelId);
 ```
 
-#### 2.33.2. 参数
+#### 2.37.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_path | str &#124; bytes &#124; None | Host 上可读的普通模型文件路径。 |
 
-#### 2.33.3. 返回值
+#### 2.37.3. 返回值
 
 - `model_id`: *int* — 接收后续 Engine 接口使用的模型 ID。
 - `ret`: *int* — 模型已成功加载。失败。
 
-#### 2.33.4. 说明
+#### 2.37.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1711`。
-
-#### 2.33.5. 示例
+#### 2.37.5. 示例
 
 ```python
 model_id, ret = axcl.rt.engine_load_from_file(model_path)
@@ -1587,11 +1733,11 @@ model_id, ret = axcl.rt.engine_load_from_file(model_path)
 
 <a id="axcl.rt.engine_load_from_mem"></a>
 
-### 2.34. axcl.rt.engine_load_from_mem
+### 2.38. axcl.rt.engine_load_from_mem
 
 从 Device 内存加载离线模型到当前设备的 Engine。
 
-#### 2.34.1. 函数
+#### 2.38.1. 函数
 
 **Python 调用**
 
@@ -1605,25 +1751,23 @@ model_id, ret = axcl.rt.engine_load_from_mem(model, model_size)
 axclError axclrtEngineLoadFromMem(const void *model, uint64_t modelSize, uint64_t *modelId);
 ```
 
-#### 2.34.2. 参数
+#### 2.38.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model | int &#124; None | 包含模型数据的 Device 内存句柄。 |
 | model_size | int | 模型数据大小，单位为字节。必须大于 0。 |
 
-#### 2.34.3. 返回值
+#### 2.38.3. 返回值
 
 - `model_id`: *int* — 接收后续 Engine 接口使用的模型 ID。
 - `ret`: *int* — 模型已成功加载。失败。
 
-#### 2.34.4. 说明
+#### 2.38.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1745`。
-
-#### 2.34.5. 示例
+#### 2.38.5. 示例
 
 ```python
 model_id, ret = axcl.rt.engine_load_from_mem(model, model_size)
@@ -1633,11 +1777,11 @@ model_id, ret = axcl.rt.engine_load_from_mem(model, model_size)
 
 <a id="axcl.rt.engine_unload"></a>
 
-### 2.35. axcl.rt.engine_unload
+### 2.39. axcl.rt.engine_unload
 
 从当前设备的 Engine 卸载模型。
 
-#### 2.35.1. 函数
+#### 2.39.1. 函数
 
 **Python 调用**
 
@@ -1651,23 +1795,21 @@ ret = axcl.rt.engine_unload(model_id)
 axclError axclrtEngineUnload(uint64_t modelId);
 ```
 
-#### 2.35.2. 参数
+#### 2.39.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 加载函数返回的模型 ID。 |
 
-#### 2.35.3. 返回值
+#### 2.39.3. 返回值
 
 - `ret`: *int* — 模型已成功卸载。失败。
 
-#### 2.35.4. 说明
+#### 2.39.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1781`。
-
-#### 2.35.5. 示例
+#### 2.39.5. 示例
 
 ```python
 ret = axcl.rt.engine_unload(model_id)
@@ -1677,11 +1819,11 @@ ret = axcl.rt.engine_unload(model_id)
 
 <a id="axcl.rt.engine_get_model_compiler_version"></a>
 
-### 2.36. axcl.rt.engine_get_model_compiler_version
+### 2.40. axcl.rt.engine_get_model_compiler_version
 
 获取已加载模型中保存的编译工具链版本。
 
-#### 2.36.1. 函数
+#### 2.40.1. 函数
 
 **Python 调用**
 
@@ -1695,23 +1837,21 @@ result = axcl.rt.engine_get_model_compiler_version(model_id)
 const char * axclrtEngineGetModelCompilerVersion(uint64_t modelId);
 ```
 
-#### 2.36.2. 参数
+#### 2.40.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
 
-#### 2.36.3. 返回值
+#### 2.40.3. 返回值
 
 - `result`: *str* — 成功时返回线程局部、以空字符结尾的版本字符串；失败时返回 NULL。该指针可能被同一线程的后续调用覆盖，调用者不得释放它。
 
-#### 2.36.4. 说明
+#### 2.40.4. 说明
 
 返回类型：`str`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1812`。
-
-#### 2.36.5. 示例
+#### 2.40.5. 示例
 
 ```python
 result = axcl.rt.engine_get_model_compiler_version(model_id)
@@ -1721,11 +1861,11 @@ result = axcl.rt.engine_get_model_compiler_version(model_id)
 
 <a id="axcl.rt.engine_set_affinity"></a>
 
-### 2.37. axcl.rt.engine_set_affinity
+### 2.41. axcl.rt.engine_set_affinity
 
 设置已加载模型的 NPU 核亲和性掩码。
 
-#### 2.37.1. 函数
+#### 2.41.1. 函数
 
 **Python 调用**
 
@@ -1739,24 +1879,22 @@ ret = axcl.rt.engine_set_affinity(model_id, set)
 axclError axclrtEngineSetAffinity(uint64_t modelId, axclrtEngineSet set);
 ```
 
-#### 2.37.2. 参数
+#### 2.41.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
 | set | int | 使用位索引 0 至 7 的非零亲和性掩码；有效值为 0x1 至 0xFF。设备可能根据芯片模式或模型类型施加额外限制。 |
 
-#### 2.37.3. 返回值
+#### 2.41.3. 返回值
 
 - `ret`: *int* — 亲和性已成功设置。失败。
 
-#### 2.37.4. 说明
+#### 2.41.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1843`。
-
-#### 2.37.5. 示例
+#### 2.41.5. 示例
 
 ```python
 ret = axcl.rt.engine_set_affinity(model_id, set)
@@ -1766,11 +1904,11 @@ ret = axcl.rt.engine_set_affinity(model_id, set)
 
 <a id="axcl.rt.engine_get_affinity"></a>
 
-### 2.38. axcl.rt.engine_get_affinity
+### 2.42. axcl.rt.engine_get_affinity
 
 获取已加载模型的 NPU 核亲和性掩码。
 
-#### 2.38.1. 函数
+#### 2.42.1. 函数
 
 **Python 调用**
 
@@ -1784,24 +1922,22 @@ set, ret = axcl.rt.engine_get_affinity(model_id)
 axclError axclrtEngineGetAffinity(uint64_t modelId, axclrtEngineSet *set);
 ```
 
-#### 2.38.2. 参数
+#### 2.42.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
 
-#### 2.38.3. 返回值
+#### 2.42.3. 返回值
 
 - `set`: *int* — 接收亲和性掩码。
 - `ret`: *int* — 已成功返回亲和性。失败。
 
-#### 2.38.4. 说明
+#### 2.42.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1876`。
-
-#### 2.38.5. 示例
+#### 2.42.5. 示例
 
 ```python
 set, ret = axcl.rt.engine_get_affinity(model_id)
@@ -1811,11 +1947,11 @@ set, ret = axcl.rt.engine_get_affinity(model_id)
 
 <a id="axcl.rt.engine_set_context_affinity"></a>
 
-### 2.39. axcl.rt.engine_set_context_affinity
+### 2.43. axcl.rt.engine_set_context_affinity
 
 设置单个 Engine Context 的亲和性；当前不支持此操作。
 
-#### 2.39.1. 函数
+#### 2.43.1. 函数
 
 **Python 调用**
 
@@ -1829,7 +1965,7 @@ ret = axcl.rt.engine_set_context_affinity(model_id, context_id, set)
 axclError axclrtEngineSetContextAffinity(uint64_t modelId, uint64_t contextId, axclrtEngineSet set);
 ```
 
-#### 2.39.2. 参数
+#### 2.43.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -1837,17 +1973,15 @@ axclError axclrtEngineSetContextAffinity(uint64_t modelId, uint64_t contextId, a
 | context_id | int | Engine Context ID。 |
 | set | int | 0x1 至 0x7 范围内的非零亲和性掩码。 |
 
-#### 2.39.3. 返回值
+#### 2.43.3. 返回值
 
 - `ret`: *int* — 当前不支持此操作，或参数无效。
 
-#### 2.39.4. 说明
+#### 2.43.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1910`。
-
-#### 2.39.5. 示例
+#### 2.43.5. 示例
 
 ```python
 ret = axcl.rt.engine_set_context_affinity(model_id, context_id, set)
@@ -1857,11 +1991,11 @@ ret = axcl.rt.engine_set_context_affinity(model_id, context_id, set)
 
 <a id="axcl.rt.engine_get_context_affinity"></a>
 
-### 2.40. axcl.rt.engine_get_context_affinity
+### 2.44. axcl.rt.engine_get_context_affinity
 
 获取单个 Engine Context 的亲和性；当前不支持此操作。
 
-#### 2.40.1. 函数
+#### 2.44.1. 函数
 
 **Python 调用**
 
@@ -1875,25 +2009,23 @@ set, ret = axcl.rt.engine_get_context_affinity(model_id, context_id)
 axclError axclrtEngineGetContextAffinity(uint64_t modelId, uint64_t contextId, axclrtEngineSet *set);
 ```
 
-#### 2.40.2. 参数
+#### 2.44.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
 | context_id | int | Engine Context ID。 |
 
-#### 2.40.3. 返回值
+#### 2.44.3. 返回值
 
 - `set`: *int* — 输出亲和性掩码；不支持此操作时不返回值。
 - `ret`: *int* — 当前不支持此操作，或参数无效。
 
-#### 2.40.4. 说明
+#### 2.44.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1945`。
-
-#### 2.40.5. 示例
+#### 2.44.5. 示例
 
 ```python
 set, ret = axcl.rt.engine_get_context_affinity(model_id, context_id)
@@ -1903,11 +2035,11 @@ set, ret = axcl.rt.engine_get_context_affinity(model_id, context_id)
 
 <a id="axcl.rt.engine_get_usage"></a>
 
-### 2.41. axcl.rt.engine_get_usage
+### 2.45. axcl.rt.engine_get_usage
 
 获取模型文件的 Engine 内存使用情况。
 
-#### 2.41.1. 函数
+#### 2.45.1. 函数
 
 **Python 调用**
 
@@ -1921,25 +2053,23 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage(model_path)
 axclError axclrtEngineGetUsage(const char *modelPath, int64_t *sysSize, int64_t *cmmSize);
 ```
 
-#### 2.41.2. 参数
+#### 2.45.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_path | str &#124; bytes &#124; None | Host 上可读的普通模型文件路径。 |
 
-#### 2.41.3. 返回值
+#### 2.45.3. 返回值
 
 - `sys_size`: *int* — 接收系统内存使用量，单位为字节。当前实现返回 0。
 - `cmm_size`: *int* — 接收 CMM 内存使用量，单位为字节。
 - `ret`: *int* — 已成功返回内存使用量。失败。
 
-#### 2.41.4. 说明
+#### 2.45.4. 说明
 
 返回类型：`tuple[int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:1981`。
-
-#### 2.41.5. 示例
+#### 2.45.5. 示例
 
 ```python
 sys_size, cmm_size, ret = axcl.rt.engine_get_usage(model_path)
@@ -1949,11 +2079,11 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage(model_path)
 
 <a id="axcl.rt.engine_get_usage_from_mem"></a>
 
-### 2.42. axcl.rt.engine_get_usage_from_mem
+### 2.46. axcl.rt.engine_get_usage_from_mem
 
 获取存放在 Device 内存中的模型数据的 Engine 内存使用情况。
 
-#### 2.42.1. 函数
+#### 2.46.1. 函数
 
 **Python 调用**
 
@@ -1967,26 +2097,24 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_mem(model, model_size)
 axclError axclrtEngineGetUsageFromMem(const void *model, uint64_t modelSize, int64_t *sysSize, int64_t *cmmSize);
 ```
 
-#### 2.42.2. 参数
+#### 2.46.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model | int &#124; None | 包含模型数据的 Device 内存句柄。 |
 | model_size | int | 模型数据大小，单位为字节。必须大于 0。 |
 
-#### 2.42.3. 返回值
+#### 2.46.3. 返回值
 
 - `sys_size`: *int* — 接收系统内存使用量，单位为字节。当前实现返回 0。
 - `cmm_size`: *int* — 接收 CMM 内存使用量，单位为字节。
 - `ret`: *int* — 已成功返回内存使用量。失败。
 
-#### 2.42.4. 说明
+#### 2.46.4. 说明
 
 返回类型：`tuple[int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2017`。
-
-#### 2.42.5. 示例
+#### 2.46.5. 示例
 
 ```python
 sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_mem(model, model_size)
@@ -1996,11 +2124,11 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_mem(model, model_size)
 
 <a id="axcl.rt.engine_get_usage_from_model_id"></a>
 
-### 2.43. axcl.rt.engine_get_usage_from_model_id
+### 2.47. axcl.rt.engine_get_usage_from_model_id
 
 获取已加载模型的 Engine 内存使用情况。
 
-#### 2.43.1. 函数
+#### 2.47.1. 函数
 
 **Python 调用**
 
@@ -2014,25 +2142,23 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_model_id(model_id)
 axclError axclrtEngineGetUsageFromModelId(uint64_t modelId, int64_t *sysSize, int64_t *cmmSize);
 ```
 
-#### 2.43.2. 参数
+#### 2.47.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
 
-#### 2.43.3. 返回值
+#### 2.47.3. 返回值
 
 - `sys_size`: *int* — 接收系统内存使用量，单位为字节。当前实现返回 0。
 - `cmm_size`: *int* — 接收 CMM 内存使用量，单位为字节。
 - `ret`: *int* — 已成功返回内存使用量。失败。
 
-#### 2.43.4. 说明
+#### 2.47.4. 说明
 
 返回类型：`tuple[int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2055`。
-
-#### 2.43.5. 示例
+#### 2.47.5. 示例
 
 ```python
 sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_model_id(model_id)
@@ -2042,11 +2168,11 @@ sys_size, cmm_size, ret = axcl.rt.engine_get_usage_from_model_id(model_id)
 
 <a id="axcl.rt.engine_get_model_type"></a>
 
-### 2.44. axcl.rt.engine_get_model_type
+### 2.48. axcl.rt.engine_get_model_type
 
 获取模型文件的核数分类。
 
-#### 2.44.1. 函数
+#### 2.48.1. 函数
 
 **Python 调用**
 
@@ -2060,24 +2186,22 @@ model_type, ret = axcl.rt.engine_get_model_type(model_path)
 axclError axclrtEngineGetModelType(const char *modelPath, axclrtEngineModelKind *modelType);
 ```
 
-#### 2.44.2. 参数
+#### 2.48.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_path | str &#124; bytes &#124; None | Host 上可读的普通模型文件路径。 |
 
-#### 2.44.3. 返回值
+#### 2.48.3. 返回值
 
 - `model_type`: *int* — 接收模型类型。
 - `ret`: *int* — 已成功返回模型类型。失败。
 
-#### 2.44.4. 说明
+#### 2.48.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2091`。
-
-#### 2.44.5. 示例
+#### 2.48.5. 示例
 
 ```python
 model_type, ret = axcl.rt.engine_get_model_type(model_path)
@@ -2087,11 +2211,11 @@ model_type, ret = axcl.rt.engine_get_model_type(model_path)
 
 <a id="axcl.rt.engine_get_model_type_from_mem"></a>
 
-### 2.45. axcl.rt.engine_get_model_type_from_mem
+### 2.49. axcl.rt.engine_get_model_type_from_mem
 
 获取存放在 Device 内存中的模型数据的核数分类。
 
-#### 2.45.1. 函数
+#### 2.49.1. 函数
 
 **Python 调用**
 
@@ -2105,25 +2229,23 @@ model_type, ret = axcl.rt.engine_get_model_type_from_mem(model, model_size)
 axclError axclrtEngineGetModelTypeFromMem(const void *model, uint64_t modelSize, axclrtEngineModelKind *modelType);
 ```
 
-#### 2.45.2. 参数
+#### 2.49.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model | int &#124; None | 包含模型数据的 Device 内存句柄。 |
 | model_size | int | 模型数据大小，单位为字节。必须大于 0。 |
 
-#### 2.45.3. 返回值
+#### 2.49.3. 返回值
 
 - `model_type`: *int* — 接收模型类型。
 - `ret`: *int* — 已成功返回模型类型。失败。
 
-#### 2.45.4. 说明
+#### 2.49.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2125`。
-
-#### 2.45.5. 示例
+#### 2.49.5. 示例
 
 ```python
 model_type, ret = axcl.rt.engine_get_model_type_from_mem(model, model_size)
@@ -2133,11 +2255,11 @@ model_type, ret = axcl.rt.engine_get_model_type_from_mem(model, model_size)
 
 <a id="axcl.rt.engine_get_model_type_from_model_id"></a>
 
-### 2.46. axcl.rt.engine_get_model_type_from_model_id
+### 2.50. axcl.rt.engine_get_model_type_from_model_id
 
 获取已加载模型的核数分类。
 
-#### 2.46.1. 函数
+#### 2.50.1. 函数
 
 **Python 调用**
 
@@ -2151,24 +2273,22 @@ model_type, ret = axcl.rt.engine_get_model_type_from_model_id(model_id)
 axclError axclrtEngineGetModelTypeFromModelId(uint64_t modelId, axclrtEngineModelKind *modelType);
 ```
 
-#### 2.46.2. 参数
+#### 2.50.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
 
-#### 2.46.3. 返回值
+#### 2.50.3. 返回值
 
 - `model_type`: *int* — 接收模型类型。
 - `ret`: *int* — 已成功返回模型类型。失败。
 
-#### 2.46.4. 说明
+#### 2.50.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2161`。
-
-#### 2.46.5. 示例
+#### 2.50.5. 示例
 
 ```python
 model_type, ret = axcl.rt.engine_get_model_type_from_model_id(model_id)
@@ -2178,11 +2298,11 @@ model_type, ret = axcl.rt.engine_get_model_type_from_model_id(model_id)
 
 <a id="axcl.rt.engine_get_io_info"></a>
 
-### 2.47. axcl.rt.engine_get_io_info
+### 2.51. axcl.rt.engine_get_io_info
 
 创建 Host 端元数据对象，用于描述已加载模型的输入和输出。
 
-#### 2.47.1. 函数
+#### 2.51.1. 函数
 
 **Python 调用**
 
@@ -2196,24 +2316,22 @@ io_info, ret = axcl.rt.engine_get_io_info(model_id)
 axclError axclrtEngineGetIOInfo(uint64_t modelId, axclrtEngineIOInfo *ioInfo);
 ```
 
-#### 2.47.2. 参数
+#### 2.51.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
 
-#### 2.47.3. 返回值
+#### 2.51.3. 返回值
 
 - `io_info`: *int* — 接收创建的 IO 元数据句柄。
 - `ret`: *int* — IO 元数据已成功创建。失败。
 
-#### 2.47.4. 说明
+#### 2.51.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2195`。
-
-#### 2.47.5. 示例
+#### 2.51.5. 示例
 
 ```python
 io_info, ret = axcl.rt.engine_get_io_info(model_id)
@@ -2223,11 +2341,11 @@ io_info, ret = axcl.rt.engine_get_io_info(model_id)
 
 <a id="axcl.rt.engine_destroy_io_info"></a>
 
-### 2.48. axcl.rt.engine_destroy_io_info
+### 2.52. axcl.rt.engine_destroy_io_info
 
-销毁已创建的 IO 元数据对象（源码未提供创建接口引用）。
+销毁由 axclrtEngineGetIOInfo 创建的 IO 元数据对象。
 
-#### 2.48.1. 函数
+#### 2.52.1. 函数
 
 **Python 调用**
 
@@ -2241,23 +2359,21 @@ ret = axcl.rt.engine_destroy_io_info(io_info)
 axclError axclrtEngineDestroyIOInfo(axclrtEngineIOInfo ioInfo);
 ```
 
-#### 2.48.2. 参数
+#### 2.52.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 要销毁的 IO 元数据句柄。 |
 
-#### 2.48.3. 返回值
+#### 2.52.3. 返回值
 
 - `ret`: *int* — IO 元数据已成功销毁。失败。
 
-#### 2.48.4. 说明
+#### 2.52.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2229`。
-
-#### 2.48.5. 示例
+#### 2.52.5. 示例
 
 ```python
 ret = axcl.rt.engine_destroy_io_info(io_info)
@@ -2267,11 +2383,11 @@ ret = axcl.rt.engine_destroy_io_info(io_info)
 
 <a id="axcl.rt.engine_get_shape_groups_count"></a>
 
-### 2.49. axcl.rt.engine_get_shape_groups_count
+### 2.53. axcl.rt.engine_get_shape_groups_count
 
 获取 IO 元数据对象描述的 shape 组数量。
 
-#### 2.49.1. 函数
+#### 2.53.1. 函数
 
 **Python 调用**
 
@@ -2285,24 +2401,22 @@ count, ret = axcl.rt.engine_get_shape_groups_count(io_info)
 axclError axclrtEngineGetShapeGroupsCount(axclrtEngineIOInfo ioInfo, int32_t *count);
 ```
 
-#### 2.49.2. 参数
+#### 2.53.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 
-#### 2.49.3. 返回值
+#### 2.53.3. 返回值
 
 - `count`: *int* — 接收 shape 组数量；模型无输入时为 0。
 - `ret`: *int* — 已成功返回数量。失败。
 
-#### 2.49.4. 说明
+#### 2.53.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2260`。
-
-#### 2.49.5. 示例
+#### 2.53.5. 示例
 
 ```python
 count, ret = axcl.rt.engine_get_shape_groups_count(io_info)
@@ -2312,11 +2426,11 @@ count, ret = axcl.rt.engine_get_shape_groups_count(io_info)
 
 <a id="axcl.rt.engine_get_num_inputs"></a>
 
-### 2.50. axcl.rt.engine_get_num_inputs
+### 2.54. axcl.rt.engine_get_num_inputs
 
 获取 IO 元数据对象中的模型输入数量。
 
-#### 2.50.1. 函数
+#### 2.54.1. 函数
 
 **Python 调用**
 
@@ -2330,23 +2444,21 @@ ret = axcl.rt.engine_get_num_inputs(io_info)
 uint32_t axclrtEngineGetNumInputs(axclrtEngineIOInfo ioInfo);
 ```
 
-#### 2.50.2. 参数
+#### 2.54.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 
-#### 2.50.3. 返回值
+#### 2.54.3. 返回值
 
-- `ret`: *int* — 输入数量。如果（源码条件不完整）。
+- `ret`: *int* — 输入数量。如果 `io_info` 为 None，返回值为编码后的错误值，且 axclrtGetLastError 会报告该失败。
 
-#### 2.50.4. 说明
+#### 2.54.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2294`。
-
-#### 2.50.5. 示例
+#### 2.54.5. 示例
 
 ```python
 ret = axcl.rt.engine_get_num_inputs(io_info)
@@ -2356,11 +2468,11 @@ ret = axcl.rt.engine_get_num_inputs(io_info)
 
 <a id="axcl.rt.engine_get_num_outputs"></a>
 
-### 2.51. axcl.rt.engine_get_num_outputs
+### 2.55. axcl.rt.engine_get_num_outputs
 
 获取 IO 元数据对象中的模型输出数量。
 
-#### 2.51.1. 函数
+#### 2.55.1. 函数
 
 **Python 调用**
 
@@ -2374,23 +2486,21 @@ ret = axcl.rt.engine_get_num_outputs(io_info)
 uint32_t axclrtEngineGetNumOutputs(axclrtEngineIOInfo ioInfo);
 ```
 
-#### 2.51.2. 参数
+#### 2.55.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 
-#### 2.51.3. 返回值
+#### 2.55.3. 返回值
 
-- `ret`: *int* — 输出数量。如果（源码条件不完整）。
+- `ret`: *int* — 输出数量。如果 `io_info` 为 None，返回值为编码后的错误值，且 axclrtGetLastError 会报告该失败。
 
-#### 2.51.4. 说明
+#### 2.55.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2325`。
-
-#### 2.51.5. 示例
+#### 2.55.5. 示例
 
 ```python
 ret = axcl.rt.engine_get_num_outputs(io_info)
@@ -2400,11 +2510,11 @@ ret = axcl.rt.engine_get_num_outputs(io_info)
 
 <a id="axcl.rt.engine_get_input_size_by_index"></a>
 
-### 2.52. axcl.rt.engine_get_input_size_by_index
+### 2.56. axcl.rt.engine_get_input_size_by_index
 
 获取指定 shape 组中模型输入所需的缓冲区大小。
 
-#### 2.52.1. 函数
+#### 2.56.1. 函数
 
 **Python 调用**
 
@@ -2418,7 +2528,7 @@ ret = axcl.rt.engine_get_input_size_by_index(io_info, group, index)
 uint64_t axclrtEngineGetInputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t group, uint32_t index);
 ```
 
-#### 2.52.2. 参数
+#### 2.56.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -2426,17 +2536,15 @@ uint64_t axclrtEngineGetInputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t gro
 | group | int | shape 组索引，从 0 开始。 |
 | index | int | 输入索引，从 0 开始。 |
 
-#### 2.52.3. 返回值
+#### 2.56.3. 返回值
 
 - `ret`: *int* — 所需大小，单位为字节。失败时返回编码后的错误值，并设置最近一次错误。
 
-#### 2.52.4. 说明
+#### 2.56.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2356`。
-
-#### 2.52.5. 示例
+#### 2.56.5. 示例
 
 ```python
 ret = axcl.rt.engine_get_input_size_by_index(io_info, group, index)
@@ -2446,11 +2554,11 @@ ret = axcl.rt.engine_get_input_size_by_index(io_info, group, index)
 
 <a id="axcl.rt.engine_get_output_size_by_index"></a>
 
-### 2.53. axcl.rt.engine_get_output_size_by_index
+### 2.57. axcl.rt.engine_get_output_size_by_index
 
 获取指定 shape 组中模型输出所需的缓冲区大小。
 
-#### 2.53.1. 函数
+#### 2.57.1. 函数
 
 **Python 调用**
 
@@ -2464,7 +2572,7 @@ ret = axcl.rt.engine_get_output_size_by_index(io_info, group, index)
 uint64_t axclrtEngineGetOutputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t group, uint32_t index);
 ```
 
-#### 2.53.2. 参数
+#### 2.57.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -2472,17 +2580,15 @@ uint64_t axclrtEngineGetOutputSizeByIndex(axclrtEngineIOInfo ioInfo, uint32_t gr
 | group | int | shape 组索引，从 0 开始。 |
 | index | int | 输出索引，从 0 开始。 |
 
-#### 2.53.3. 返回值
+#### 2.57.3. 返回值
 
 - `ret`: *int* — 所需大小，单位为字节。失败时返回编码后的错误值，并设置最近一次错误。
 
-#### 2.53.4. 说明
+#### 2.57.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2391`。
-
-#### 2.53.5. 示例
+#### 2.57.5. 示例
 
 ```python
 ret = axcl.rt.engine_get_output_size_by_index(io_info, group, index)
@@ -2492,11 +2598,11 @@ ret = axcl.rt.engine_get_output_size_by_index(io_info, group, index)
 
 <a id="axcl.rt.engine_get_input_name_by_index"></a>
 
-### 2.54. axcl.rt.engine_get_input_name_by_index
+### 2.58. axcl.rt.engine_get_input_name_by_index
 
 按索引获取输入张量名称。
 
-#### 2.54.1. 函数
+#### 2.58.1. 函数
 
 **Python 调用**
 
@@ -2510,24 +2616,22 @@ result = axcl.rt.engine_get_input_name_by_index(io_info, index)
 const char * axclrtEngineGetInputNameByIndex(axclrtEngineIOInfo ioInfo, uint32_t index);
 ```
 
-#### 2.54.2. 参数
+#### 2.58.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 | index | int | 输入索引，从 0 开始。 |
 
-#### 2.54.3. 返回值
+#### 2.58.3. 返回值
 
-- `result`: *str* — 成功时返回张量名称；失败时返回 NULL。返回指针的所有者为（源码说明不完整）。
+- `result`: *str* — 成功时返回张量名称；失败时返回空字符串。
 
-#### 2.54.4. 说明
+#### 2.58.4. 说明
 
 返回类型：`str`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2426`。
-
-#### 2.54.5. 示例
+#### 2.58.5. 示例
 
 ```python
 result = axcl.rt.engine_get_input_name_by_index(io_info, index)
@@ -2537,11 +2641,11 @@ result = axcl.rt.engine_get_input_name_by_index(io_info, index)
 
 <a id="axcl.rt.engine_get_output_name_by_index"></a>
 
-### 2.55. axcl.rt.engine_get_output_name_by_index
+### 2.59. axcl.rt.engine_get_output_name_by_index
 
 按索引获取输出张量名称。
 
-#### 2.55.1. 函数
+#### 2.59.1. 函数
 
 **Python 调用**
 
@@ -2555,24 +2659,22 @@ result = axcl.rt.engine_get_output_name_by_index(io_info, index)
 const char * axclrtEngineGetOutputNameByIndex(axclrtEngineIOInfo ioInfo, uint32_t index);
 ```
 
-#### 2.55.2. 参数
+#### 2.59.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 | index | int | 输出索引，从 0 开始。 |
 
-#### 2.55.3. 返回值
+#### 2.59.3. 返回值
 
-- `result`: *str* — 成功时返回张量名称；失败时返回 NULL。返回指针的所有者为（源码说明不完整）。
+- `result`: *str* — 成功时返回张量名称；失败时返回空字符串。
 
-#### 2.55.4. 说明
+#### 2.59.4. 说明
 
 返回类型：`str`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2459`。
-
-#### 2.55.5. 示例
+#### 2.59.5. 示例
 
 ```python
 result = axcl.rt.engine_get_output_name_by_index(io_info, index)
@@ -2582,11 +2684,11 @@ result = axcl.rt.engine_get_output_name_by_index(io_info, index)
 
 <a id="axcl.rt.engine_get_input_index_by_name"></a>
 
-### 2.56. axcl.rt.engine_get_input_index_by_name
+### 2.60. axcl.rt.engine_get_input_index_by_name
 
 按名称查找输入张量索引。
 
-#### 2.56.1. 函数
+#### 2.60.1. 函数
 
 **Python 调用**
 
@@ -2600,24 +2702,22 @@ ret = axcl.rt.engine_get_input_index_by_name(io_info, name)
 int32_t axclrtEngineGetInputIndexByName(axclrtEngineIOInfo ioInfo, const char *name);
 ```
 
-#### 2.56.2. 参数
+#### 2.60.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 | name | str &#124; bytes &#124; None | 输入张量名称。 |
 
-#### 2.56.3. 返回值
+#### 2.60.3. 返回值
 
-- `ret`: *int* — 成功时返回非负输入索引；失败时返回 Engine 错误值。使用（源码说明不完整）。
+- `ret`: *int* — 成功时返回非负输入索引；失败时返回负的 Engine 错误值，包括没有输入与 `name` 匹配的情况。axclrtGetLastError 也会报告该失败。
 
-#### 2.56.4. 说明
+#### 2.60.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2492`。
-
-#### 2.56.5. 示例
+#### 2.60.5. 示例
 
 ```python
 ret = axcl.rt.engine_get_input_index_by_name(io_info, name)
@@ -2627,11 +2727,11 @@ ret = axcl.rt.engine_get_input_index_by_name(io_info, name)
 
 <a id="axcl.rt.engine_get_output_index_by_name"></a>
 
-### 2.57. axcl.rt.engine_get_output_index_by_name
+### 2.61. axcl.rt.engine_get_output_index_by_name
 
 按名称查找输出张量索引。
 
-#### 2.57.1. 函数
+#### 2.61.1. 函数
 
 **Python 调用**
 
@@ -2645,24 +2745,22 @@ ret = axcl.rt.engine_get_output_index_by_name(io_info, name)
 int32_t axclrtEngineGetOutputIndexByName(axclrtEngineIOInfo ioInfo, const char *name);
 ```
 
-#### 2.57.2. 参数
+#### 2.61.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 | name | str &#124; bytes &#124; None | 输出张量名称。 |
 
-#### 2.57.3. 返回值
+#### 2.61.3. 返回值
 
-- `ret`: *int* — 成功时返回非负输出索引；失败时返回 Engine 错误值。使用（源码说明不完整）。
+- `ret`: *int* — 成功时返回非负输出索引；失败时返回负的 Engine 错误值，包括没有输出与 `name` 匹配的情况。axclrtGetLastError 也会报告该失败。
 
-#### 2.57.4. 说明
+#### 2.61.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2525`。
-
-#### 2.57.5. 示例
+#### 2.61.5. 示例
 
 ```python
 ret = axcl.rt.engine_get_output_index_by_name(io_info, name)
@@ -2672,11 +2770,11 @@ ret = axcl.rt.engine_get_output_index_by_name(io_info, name)
 
 <a id="axcl.rt.engine_get_input_dims"></a>
 
-### 2.58. axcl.rt.engine_get_input_dims
+### 2.62. axcl.rt.engine_get_input_dims
 
 获取指定 shape 组中输入张量的维度。
 
-#### 2.58.1. 函数
+#### 2.62.1. 函数
 
 **Python 调用**
 
@@ -2690,7 +2788,7 @@ dims, ret = axcl.rt.engine_get_input_dims(io_info, group, index)
 axclError axclrtEngineGetInputDims(axclrtEngineIOInfo ioInfo, uint32_t group, uint32_t index, axclrtEngineIODims *dims);
 ```
 
-#### 2.58.2. 参数
+#### 2.62.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -2698,18 +2796,16 @@ axclError axclrtEngineGetInputDims(axclrtEngineIOInfo ioInfo, uint32_t group, ui
 | group | int | shape 组索引，从 0 开始。 |
 | index | int | 输入索引，从 0 开始。 |
 
-#### 2.58.3. 返回值
+#### 2.62.3. 返回值
 
 - `dims`: *dict* — 调用者提供的结构体，用于接收维度。
 - `ret`: *int* — 已成功返回维度。失败。
 
-#### 2.58.4. 说明
+#### 2.62.4. 说明
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2558`。
-
-#### 2.58.5. 示例
+#### 2.62.5. 示例
 
 ```python
 dims, ret = axcl.rt.engine_get_input_dims(io_info, group, index)
@@ -2719,11 +2815,11 @@ dims, ret = axcl.rt.engine_get_input_dims(io_info, group, index)
 
 <a id="axcl.rt.engine_get_input_data_type"></a>
 
-### 2.59. axcl.rt.engine_get_input_data_type
+### 2.63. axcl.rt.engine_get_input_data_type
 
 获取输入张量的数据类型。
 
-#### 2.59.1. 函数
+#### 2.63.1. 函数
 
 **Python 调用**
 
@@ -2737,25 +2833,23 @@ type, ret = axcl.rt.engine_get_input_data_type(io_info, index)
 axclError axclrtEngineGetInputDataType(axclrtEngineIOInfo ioInfo, uint32_t index, axclrtEngineDataType *type);
 ```
 
-#### 2.59.2. 参数
+#### 2.63.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 | index | int | 输入索引，从 0 开始。 |
 
-#### 2.59.3. 返回值
+#### 2.63.3. 返回值
 
 - `type`: *int* — 接收输入数据类型。
 - `ret`: *int* — 已成功返回数据类型。失败。
 
-#### 2.59.4. 说明
+#### 2.63.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2596`。
-
-#### 2.59.5. 示例
+#### 2.63.5. 示例
 
 ```python
 type, ret = axcl.rt.engine_get_input_data_type(io_info, index)
@@ -2765,11 +2859,11 @@ type, ret = axcl.rt.engine_get_input_data_type(io_info, index)
 
 <a id="axcl.rt.engine_get_output_data_type"></a>
 
-### 2.60. axcl.rt.engine_get_output_data_type
+### 2.64. axcl.rt.engine_get_output_data_type
 
 获取输出张量的数据类型。
 
-#### 2.60.1. 函数
+#### 2.64.1. 函数
 
 **Python 调用**
 
@@ -2783,25 +2877,23 @@ type, ret = axcl.rt.engine_get_output_data_type(io_info, index)
 axclError axclrtEngineGetOutputDataType(axclrtEngineIOInfo ioInfo, uint32_t index, axclrtEngineDataType *type);
 ```
 
-#### 2.60.2. 参数
+#### 2.64.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 | index | int | 输出索引，从 0 开始。 |
 
-#### 2.60.3. 返回值
+#### 2.64.3. 返回值
 
 - `type`: *int* — 接收输出数据类型。
 - `ret`: *int* — 已成功返回数据类型。失败。
 
-#### 2.60.4. 说明
+#### 2.64.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2632`。
-
-#### 2.60.5. 示例
+#### 2.64.5. 示例
 
 ```python
 type, ret = axcl.rt.engine_get_output_data_type(io_info, index)
@@ -2811,11 +2903,11 @@ type, ret = axcl.rt.engine_get_output_data_type(io_info, index)
 
 <a id="axcl.rt.engine_get_input_data_layout"></a>
 
-### 2.61. axcl.rt.engine_get_input_data_layout
+### 2.65. axcl.rt.engine_get_input_data_layout
 
 获取输入张量的数据布局。
 
-#### 2.61.1. 函数
+#### 2.65.1. 函数
 
 **Python 调用**
 
@@ -2829,25 +2921,23 @@ layout, ret = axcl.rt.engine_get_input_data_layout(io_info, index)
 axclError axclrtEngineGetInputDataLayout(axclrtEngineIOInfo ioInfo, uint32_t index, axclrtEngineDataLayout *layout);
 ```
 
-#### 2.61.2. 参数
+#### 2.65.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 | index | int | 输入索引，从 0 开始。 |
 
-#### 2.61.3. 返回值
+#### 2.65.3. 返回值
 
 - `layout`: *int* — 接收输入数据布局。
 - `ret`: *int* — 已成功返回数据布局。失败。
 
-#### 2.61.4. 说明
+#### 2.65.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2668`。
-
-#### 2.61.5. 示例
+#### 2.65.5. 示例
 
 ```python
 layout, ret = axcl.rt.engine_get_input_data_layout(io_info, index)
@@ -2857,11 +2947,11 @@ layout, ret = axcl.rt.engine_get_input_data_layout(io_info, index)
 
 <a id="axcl.rt.engine_get_output_data_layout"></a>
 
-### 2.62. axcl.rt.engine_get_output_data_layout
+### 2.66. axcl.rt.engine_get_output_data_layout
 
 获取输出张量的数据布局。
 
-#### 2.62.1. 函数
+#### 2.66.1. 函数
 
 **Python 调用**
 
@@ -2875,25 +2965,23 @@ layout, ret = axcl.rt.engine_get_output_data_layout(io_info, index)
 axclError axclrtEngineGetOutputDataLayout(axclrtEngineIOInfo ioInfo, uint32_t index, axclrtEngineDataLayout *layout);
 ```
 
-#### 2.62.2. 参数
+#### 2.66.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 | index | int | 输出索引，从 0 开始。 |
 
-#### 2.62.3. 返回值
+#### 2.66.3. 返回值
 
 - `layout`: *int* — 接收输出数据布局。
 - `ret`: *int* — 已成功返回数据布局。失败。
 
-#### 2.62.4. 说明
+#### 2.66.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2704`。
-
-#### 2.62.5. 示例
+#### 2.66.5. 示例
 
 ```python
 layout, ret = axcl.rt.engine_get_output_data_layout(io_info, index)
@@ -2903,11 +2991,11 @@ layout, ret = axcl.rt.engine_get_output_data_layout(io_info, index)
 
 <a id="axcl.rt.engine_get_output_dims"></a>
 
-### 2.63. axcl.rt.engine_get_output_dims
+### 2.67. axcl.rt.engine_get_output_dims
 
 获取指定 shape 组中输出张量的维度。
 
-#### 2.63.1. 函数
+#### 2.67.1. 函数
 
 **Python 调用**
 
@@ -2921,7 +3009,7 @@ dims, ret = axcl.rt.engine_get_output_dims(io_info, group, index)
 axclError axclrtEngineGetOutputDims(axclrtEngineIOInfo ioInfo, uint32_t group, uint32_t index, axclrtEngineIODims *dims);
 ```
 
-#### 2.63.2. 参数
+#### 2.67.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -2929,18 +3017,16 @@ axclError axclrtEngineGetOutputDims(axclrtEngineIOInfo ioInfo, uint32_t group, u
 | group | int | shape 组索引，从 0 开始。 |
 | index | int | 输出索引，从 0 开始。 |
 
-#### 2.63.3. 返回值
+#### 2.67.3. 返回值
 
 - `dims`: *dict* — 调用者提供的结构体，用于接收维度。
 - `ret`: *int* — 已成功返回维度。失败。
 
-#### 2.63.4. 说明
+#### 2.67.4. 说明
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2740`。
-
-#### 2.63.5. 示例
+#### 2.67.5. 示例
 
 ```python
 dims, ret = axcl.rt.engine_get_output_dims(io_info, group, index)
@@ -2950,11 +3036,11 @@ dims, ret = axcl.rt.engine_get_output_dims(io_info, group, index)
 
 <a id="axcl.rt.engine_create_io"></a>
 
-### 2.64. axcl.rt.engine_create_io
+### 2.68. axcl.rt.engine_create_io
 
 根据模型 IO 元数据创建 Host 端 IO 绑定对象。
 
-#### 2.64.1. 函数
+#### 2.68.1. 函数
 
 **Python 调用**
 
@@ -2968,24 +3054,22 @@ io, ret = axcl.rt.engine_create_io(io_info)
 axclError axclrtEngineCreateIO(axclrtEngineIOInfo ioInfo, axclrtEngineIO *io);
 ```
 
-#### 2.64.2. 参数
+#### 2.68.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io_info | int &#124; None | 有效的 IO 元数据句柄。 |
 
-#### 2.64.3. 返回值
+#### 2.68.3. 返回值
 
 - `io`: *int* — 接收创建的 IO 绑定句柄。
 - `ret`: *int* — IO 绑定对象已成功创建。失败。
 
-#### 2.64.4. 说明
+#### 2.68.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2778`。
-
-#### 2.64.5. 示例
+#### 2.68.5. 示例
 
 ```python
 io, ret = axcl.rt.engine_create_io(io_info)
@@ -2995,11 +3079,11 @@ io, ret = axcl.rt.engine_create_io(io_info)
 
 <a id="axcl.rt.engine_destroy_io"></a>
 
-### 2.65. axcl.rt.engine_destroy_io
+### 2.69. axcl.rt.engine_destroy_io
 
-销毁已创建的 IO 绑定对象（源码未提供创建接口引用）。
+销毁由 axclrtEngineCreateIO 创建的 IO 绑定对象。
 
-#### 2.65.1. 函数
+#### 2.69.1. 函数
 
 **Python 调用**
 
@@ -3013,23 +3097,21 @@ ret = axcl.rt.engine_destroy_io(io)
 axclError axclrtEngineDestroyIO(axclrtEngineIO io);
 ```
 
-#### 2.65.2. 参数
+#### 2.69.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io | int &#124; None | 要销毁的 IO 绑定句柄。 |
 
-#### 2.65.3. 返回值
+#### 2.69.3. 返回值
 
 - `ret`: *int* — IO 绑定对象已成功销毁。失败。
 
-#### 2.65.4. 说明
+#### 2.69.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2812`。
-
-#### 2.65.5. 示例
+#### 2.69.5. 示例
 
 ```python
 ret = axcl.rt.engine_destroy_io(io)
@@ -3039,11 +3121,11 @@ ret = axcl.rt.engine_destroy_io(io)
 
 <a id="axcl.rt.engine_set_input_buffer_by_index"></a>
 
-### 2.66. axcl.rt.engine_set_input_buffer_by_index
+### 2.70. axcl.rt.engine_set_input_buffer_by_index
 
 按索引将 Device 缓冲区绑定到输入。
 
-#### 2.66.1. 函数
+#### 2.70.1. 函数
 
 **Python 调用**
 
@@ -3057,7 +3139,7 @@ ret = axcl.rt.engine_set_input_buffer_by_index(io, index, data_buffer, size)
 axclError axclrtEngineSetInputBufferByIndex(axclrtEngineIO io, uint32_t index, const void *dataBuffer, uint64_t size);
 ```
 
-#### 2.66.2. 参数
+#### 2.70.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -3066,17 +3148,15 @@ axclError axclrtEngineSetInputBufferByIndex(axclrtEngineIO io, uint32_t index, c
 | data_buffer | int &#124; None | 要绑定的 Device 内存句柄。 |
 | size | int | 绑定缓冲区的大小，单位为字节。必须大于 0。 |
 
-#### 2.66.3. 返回值
+#### 2.70.3. 返回值
 
 - `ret`: *int* — 缓冲区绑定已成功保存。失败。
 
-#### 2.66.4. 说明
+#### 2.70.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2843`。
-
-#### 2.66.5. 示例
+#### 2.70.5. 示例
 
 ```python
 ret = axcl.rt.engine_set_input_buffer_by_index(io, index, data_buffer, size)
@@ -3086,11 +3166,11 @@ ret = axcl.rt.engine_set_input_buffer_by_index(io, index, data_buffer, size)
 
 <a id="axcl.rt.engine_set_output_buffer_by_index"></a>
 
-### 2.67. axcl.rt.engine_set_output_buffer_by_index
+### 2.71. axcl.rt.engine_set_output_buffer_by_index
 
 按索引将 Device 缓冲区绑定到输出。
 
-#### 2.67.1. 函数
+#### 2.71.1. 函数
 
 **Python 调用**
 
@@ -3104,7 +3184,7 @@ ret = axcl.rt.engine_set_output_buffer_by_index(io, index, data_buffer, size)
 axclError axclrtEngineSetOutputBufferByIndex(axclrtEngineIO io, uint32_t index, const void *dataBuffer, uint64_t size);
 ```
 
-#### 2.67.2. 参数
+#### 2.71.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -3113,17 +3193,15 @@ axclError axclrtEngineSetOutputBufferByIndex(axclrtEngineIO io, uint32_t index, 
 | data_buffer | int &#124; None | 要绑定的 Device 内存句柄。 |
 | size | int | 绑定缓冲区的大小，单位为字节。必须大于 0。 |
 
-#### 2.67.3. 返回值
+#### 2.71.3. 返回值
 
 - `ret`: *int* — 缓冲区绑定已成功保存。失败。
 
-#### 2.67.4. 说明
+#### 2.71.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2880`。
-
-#### 2.67.5. 示例
+#### 2.71.5. 示例
 
 ```python
 ret = axcl.rt.engine_set_output_buffer_by_index(io, index, data_buffer, size)
@@ -3133,11 +3211,11 @@ ret = axcl.rt.engine_set_output_buffer_by_index(io, index, data_buffer, size)
 
 <a id="axcl.rt.engine_set_input_buffer_by_name"></a>
 
-### 2.68. axcl.rt.engine_set_input_buffer_by_name
+### 2.72. axcl.rt.engine_set_input_buffer_by_name
 
 按张量名称将 Device 缓冲区绑定到输入。
 
-#### 2.68.1. 函数
+#### 2.72.1. 函数
 
 **Python 调用**
 
@@ -3151,7 +3229,7 @@ ret = axcl.rt.engine_set_input_buffer_by_name(io, name, data_buffer, size)
 axclError axclrtEngineSetInputBufferByName(axclrtEngineIO io, const char *name, const void *dataBuffer, uint64_t size);
 ```
 
-#### 2.68.2. 参数
+#### 2.72.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -3160,17 +3238,15 @@ axclError axclrtEngineSetInputBufferByName(axclrtEngineIO io, const char *name, 
 | data_buffer | int &#124; None | 要绑定的 Device 内存句柄。 |
 | size | int | 绑定缓冲区的大小，单位为字节。必须大于 0。 |
 
-#### 2.68.3. 返回值
+#### 2.72.3. 返回值
 
 - `ret`: *int* — 缓冲区绑定已成功保存。失败。
 
-#### 2.68.4. 说明
+#### 2.72.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2917`。
-
-#### 2.68.5. 示例
+#### 2.72.5. 示例
 
 ```python
 ret = axcl.rt.engine_set_input_buffer_by_name(io, name, data_buffer, size)
@@ -3180,11 +3256,11 @@ ret = axcl.rt.engine_set_input_buffer_by_name(io, name, data_buffer, size)
 
 <a id="axcl.rt.engine_set_output_buffer_by_name"></a>
 
-### 2.69. axcl.rt.engine_set_output_buffer_by_name
+### 2.73. axcl.rt.engine_set_output_buffer_by_name
 
 按张量名称将 Device 缓冲区绑定到输出。
 
-#### 2.69.1. 函数
+#### 2.73.1. 函数
 
 **Python 调用**
 
@@ -3198,7 +3274,7 @@ ret = axcl.rt.engine_set_output_buffer_by_name(io, name, data_buffer, size)
 axclError axclrtEngineSetOutputBufferByName(axclrtEngineIO io, const char *name, const void *dataBuffer, uint64_t size);
 ```
 
-#### 2.69.2. 参数
+#### 2.73.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -3207,17 +3283,15 @@ axclError axclrtEngineSetOutputBufferByName(axclrtEngineIO io, const char *name,
 | data_buffer | int &#124; None | 要绑定的 Device 内存句柄。 |
 | size | int | 绑定缓冲区的大小，单位为字节。必须大于 0。 |
 
-#### 2.69.3. 返回值
+#### 2.73.3. 返回值
 
 - `ret`: *int* — 缓冲区绑定已成功保存。失败。
 
-#### 2.69.4. 说明
+#### 2.73.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2956`。
-
-#### 2.69.5. 示例
+#### 2.73.5. 示例
 
 ```python
 ret = axcl.rt.engine_set_output_buffer_by_name(io, name, data_buffer, size)
@@ -3227,11 +3301,11 @@ ret = axcl.rt.engine_set_output_buffer_by_name(io, name, data_buffer, size)
 
 <a id="axcl.rt.engine_get_input_buffer_by_index"></a>
 
-### 2.70. axcl.rt.engine_get_input_buffer_by_index
+### 2.74. axcl.rt.engine_get_input_buffer_by_index
 
 获取输入索引对应的已保存缓冲区绑定。
 
-#### 2.70.1. 函数
+#### 2.74.1. 函数
 
 **Python 调用**
 
@@ -3245,26 +3319,24 @@ data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_index(io, index)
 axclError axclrtEngineGetInputBufferByIndex(axclrtEngineIO io, uint32_t index, void **dataBuffer, uint64_t *size);
 ```
 
-#### 2.70.2. 参数
+#### 2.74.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io | int &#124; None | 有效的 IO 绑定句柄。 |
 | index | int | 输入索引，从 0 开始。 |
 
-#### 2.70.3. 返回值
+#### 2.74.3. 返回值
 
 - `data_buffer`: *int* — 接收已保存的 Device 内存句柄。
 - `size`: *int* — 接收已保存的缓冲区大小，单位为字节。
 - `ret`: *int* — 已成功返回保存的绑定。失败。
 
-#### 2.70.4. 说明
+#### 2.74.4. 说明
 
 返回类型：`tuple[int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:2995`。
-
-#### 2.70.5. 示例
+#### 2.74.5. 示例
 
 ```python
 data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_index(io, index)
@@ -3274,11 +3346,11 @@ data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_index(io, index)
 
 <a id="axcl.rt.engine_get_output_buffer_by_index"></a>
 
-### 2.71. axcl.rt.engine_get_output_buffer_by_index
+### 2.75. axcl.rt.engine_get_output_buffer_by_index
 
 获取输出索引对应的已保存缓冲区绑定。
 
-#### 2.71.1. 函数
+#### 2.75.1. 函数
 
 **Python 调用**
 
@@ -3292,26 +3364,24 @@ data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_index(io, index)
 axclError axclrtEngineGetOutputBufferByIndex(axclrtEngineIO io, uint32_t index, void **dataBuffer, uint64_t *size);
 ```
 
-#### 2.71.2. 参数
+#### 2.75.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io | int &#124; None | 有效的 IO 绑定句柄。 |
 | index | int | 输出索引，从 0 开始。 |
 
-#### 2.71.3. 返回值
+#### 2.75.3. 返回值
 
 - `data_buffer`: *int* — 接收已保存的 Device 内存句柄。
 - `size`: *int* — 接收已保存的缓冲区大小，单位为字节。
 - `ret`: *int* — 已成功返回保存的绑定。失败。
 
-#### 2.71.4. 说明
+#### 2.75.4. 说明
 
 返回类型：`tuple[int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:3033`。
-
-#### 2.71.5. 示例
+#### 2.75.5. 示例
 
 ```python
 data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_index(io, index)
@@ -3321,11 +3391,11 @@ data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_index(io, index)
 
 <a id="axcl.rt.engine_get_input_buffer_by_name"></a>
 
-### 2.72. axcl.rt.engine_get_input_buffer_by_name
+### 2.76. axcl.rt.engine_get_input_buffer_by_name
 
 获取输入张量名称对应的已保存缓冲区绑定。
 
-#### 2.72.1. 函数
+#### 2.76.1. 函数
 
 **Python 调用**
 
@@ -3339,26 +3409,24 @@ data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_name(io, name)
 axclError axclrtEngineGetInputBufferByName(axclrtEngineIO io, const char *name, void **dataBuffer, uint64_t *size);
 ```
 
-#### 2.72.2. 参数
+#### 2.76.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io | int &#124; None | 有效的 IO 绑定句柄。 |
 | name | str &#124; bytes &#124; None | 输入张量名称。 |
 
-#### 2.72.3. 返回值
+#### 2.76.3. 返回值
 
 - `data_buffer`: *int* — 接收已保存的 Device 内存句柄。
 - `size`: *int* — 接收已保存的缓冲区大小，单位为字节。
 - `ret`: *int* — 已成功返回保存的绑定。失败。
 
-#### 2.72.4. 说明
+#### 2.76.4. 说明
 
 返回类型：`tuple[int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:3071`。
-
-#### 2.72.5. 示例
+#### 2.76.5. 示例
 
 ```python
 data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_name(io, name)
@@ -3368,11 +3436,11 @@ data_buffer, size, ret = axcl.rt.engine_get_input_buffer_by_name(io, name)
 
 <a id="axcl.rt.engine_get_output_buffer_by_name"></a>
 
-### 2.73. axcl.rt.engine_get_output_buffer_by_name
+### 2.77. axcl.rt.engine_get_output_buffer_by_name
 
 获取输出张量名称对应的已保存缓冲区绑定。
 
-#### 2.73.1. 函数
+#### 2.77.1. 函数
 
 **Python 调用**
 
@@ -3386,26 +3454,24 @@ data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_name(io, name)
 axclError axclrtEngineGetOutputBufferByName(axclrtEngineIO io, const char *name, void **dataBuffer, uint64_t *size);
 ```
 
-#### 2.73.2. 参数
+#### 2.77.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io | int &#124; None | 有效的 IO 绑定句柄。 |
 | name | str &#124; bytes &#124; None | 输出张量名称。 |
 
-#### 2.73.3. 返回值
+#### 2.77.3. 返回值
 
 - `data_buffer`: *int* — 接收已保存的 Device 内存句柄。
 - `size`: *int* — 接收已保存的缓冲区大小，单位为字节。
 - `ret`: *int* — 已成功返回保存的绑定。失败。
 
-#### 2.73.4. 说明
+#### 2.77.4. 说明
 
 返回类型：`tuple[int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:3109`。
-
-#### 2.73.5. 示例
+#### 2.77.5. 示例
 
 ```python
 data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_name(io, name)
@@ -3415,11 +3481,11 @@ data_buffer, size, ret = axcl.rt.engine_get_output_buffer_by_name(io, name)
 
 <a id="axcl.rt.engine_set_dynamic_batch_size"></a>
 
-### 2.74. axcl.rt.engine_set_dynamic_batch_size
+### 2.78. axcl.rt.engine_set_dynamic_batch_size
 
 保存 IO 绑定对象后续执行所使用的动态批大小。
 
-#### 2.74.1. 函数
+#### 2.78.1. 函数
 
 **Python 调用**
 
@@ -3433,24 +3499,22 @@ ret = axcl.rt.engine_set_dynamic_batch_size(io, batch_size)
 axclError axclrtEngineSetDynamicBatchSize(axclrtEngineIO io, uint32_t batchSize);
 ```
 
-#### 2.74.2. 参数
+#### 2.78.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | io | int &#124; None | 有效的 IO 绑定句柄。 |
 | batch_size | int | 要保存的批大小。 |
 
-#### 2.74.3. 返回值
+#### 2.78.3. 返回值
 
 - `ret`: *int* — 批大小已成功保存。失败。
 
-#### 2.74.4. 说明
+#### 2.78.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:3147`。
-
-#### 2.74.5. 示例
+#### 2.78.5. 示例
 
 ```python
 ret = axcl.rt.engine_set_dynamic_batch_size(io, batch_size)
@@ -3460,11 +3524,11 @@ ret = axcl.rt.engine_set_dynamic_batch_size(io, batch_size)
 
 <a id="axcl.rt.engine_create_context"></a>
 
-### 2.75. axcl.rt.engine_create_context
+### 2.79. axcl.rt.engine_create_context
 
 为已加载模型创建独立的 Engine 执行 Context。
 
-#### 2.75.1. 函数
+#### 2.79.1. 函数
 
 **Python 调用**
 
@@ -3478,24 +3542,22 @@ context_id, ret = axcl.rt.engine_create_context(model_id)
 axclError axclrtEngineCreateContext(uint64_t modelId, uint64_t *contextId);
 ```
 
-#### 2.75.2. 参数
+#### 2.79.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
 
-#### 2.75.3. 返回值
+#### 2.79.3. 返回值
 
 - `context_id`: *int* — 接收创建的 Engine Context ID。
 - `ret`: *int* — Engine Context 已成功创建。失败。
 
-#### 2.75.4. 说明
+#### 2.79.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:3180`。
-
-#### 2.75.5. 示例
+#### 2.79.5. 示例
 
 ```python
 context_id, ret = axcl.rt.engine_create_context(model_id)
@@ -3505,11 +3567,11 @@ context_id, ret = axcl.rt.engine_create_context(model_id)
 
 <a id="axcl.rt.engine_execute"></a>
 
-### 2.76. axcl.rt.engine_execute
+### 2.80. axcl.rt.engine_execute
 
 在当前 runtime Context 的默认 Stream 上同步执行模型推理。
 
-#### 2.76.1. 函数
+#### 2.80.1. 函数
 
 **Python 调用**
 
@@ -3523,26 +3585,24 @@ ret = axcl.rt.engine_execute(model_id, context_id, group, io)
 axclError axclrtEngineExecute(uint64_t modelId, uint64_t contextId, uint32_t group, axclrtEngineIO io);
 ```
 
-#### 2.76.2. 参数
+#### 2.80.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
-| context_id | int | 为模型创建的 Engine Context ID（源码说明不完整）。 |
+| context_id | int | 为 `model_id` 创建的 Engine Context ID。 |
 | group | int | shape 组索引，从 0 开始。 |
 | io | int &#124; None | 包含所有必需 Device 缓冲区的 IO 绑定对象。 |
 
-#### 2.76.3. 返回值
+#### 2.80.3. 返回值
 
 - `ret`: *int* — 推理已成功完成。失败。
 
-#### 2.76.4. 说明
+#### 2.80.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:3214`。
-
-#### 2.76.5. 示例
+#### 2.80.5. 示例
 
 ```python
 ret = axcl.rt.engine_execute(model_id, context_id, group, io)
@@ -3552,11 +3612,11 @@ ret = axcl.rt.engine_execute(model_id, context_id, group, io)
 
 <a id="axcl.rt.engine_execute_async"></a>
 
-### 2.77. axcl.rt.engine_execute_async
+### 2.81. axcl.rt.engine_execute_async
 
 向 Stream 提交模型推理任务。
 
-#### 2.77.1. 函数
+#### 2.81.1. 函数
 
 **Python 调用**
 
@@ -3570,27 +3630,25 @@ ret = axcl.rt.engine_execute_async(model_id, context_id, group, io, stream)
 axclError axclrtEngineExecuteAsync(uint64_t modelId, uint64_t contextId, uint32_t group, axclrtEngineIO io, axclrtStream stream);
 ```
 
-#### 2.77.2. 参数
+#### 2.81.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | model_id | int | 已加载的模型 ID。 |
-| context_id | int | 为模型创建的 Engine Context ID（源码说明不完整）。 |
+| context_id | int | 为 `model_id` 创建的 Engine Context ID。 |
 | group | int | shape 组索引，从 0 开始。 |
 | io | int &#124; None | 包含所有必需 Device 缓冲区的 IO 绑定对象。 |
 | stream | int &#124; None | 接收推理请求的 Stream。传入 NULL 以使用当前 runtime Context 的默认 Stream。 |
 
-#### 2.77.3. 返回值
+#### 2.81.3. 返回值
 
 - `ret`: *int* — 推理请求已成功提交。失败。
 
-#### 2.77.4. 说明
+#### 2.81.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_engine.py:3251`。
-
-#### 2.77.5. 示例
+#### 2.81.5. 示例
 
 ```python
 ret = axcl.rt.engine_execute_async(model_id, context_id, group, io, stream)
@@ -3600,11 +3658,11 @@ ret = axcl.rt.engine_execute_async(model_id, context_id, group, io, stream)
 
 <a id="axcl.rt.create_event"></a>
 
-### 2.78. axcl.rt.create_event
+### 2.82. axcl.rt.create_event
 
 在当前 Context 关联的设备上创建启用计时的 Event。
 
-#### 2.78.1. 函数
+#### 2.82.1. 函数
 
 **Python 调用**
 
@@ -3618,22 +3676,20 @@ event, ret = axcl.rt.create_event()
 axclError axclrtCreateEvent(axclrtEvent *event);
 ```
 
-#### 2.78.2. 参数
+#### 2.82.2. 参数
 
 不适用
 
-#### 2.78.3. 返回值
+#### 2.82.3. 返回值
 
 - `event`: *int* — 成功时接收创建的 Event 句柄。
 - `ret`: *int* — Event 已成功创建。失败。
 
-#### 2.78.4. 说明
+#### 2.82.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:296`。
-
-#### 2.78.5. 示例
+#### 2.82.5. 示例
 
 ```python
 event, ret = axcl.rt.create_event()
@@ -3643,11 +3699,11 @@ event, ret = axcl.rt.create_event()
 
 <a id="axcl.rt.destroy_event"></a>
 
-### 2.79. axcl.rt.destroy_event
+### 2.83. axcl.rt.destroy_event
 
-销毁已创建的 Event（源码未提供创建接口引用）。
+销毁由 axclrtCreateEvent 或 axclrtCreateEventWithFlags 创建的 Event。
 
-#### 2.79.1. 函数
+#### 2.83.1. 函数
 
 **Python 调用**
 
@@ -3661,23 +3717,21 @@ ret = axcl.rt.destroy_event(event)
 axclError axclrtDestroyEvent(axclrtEvent event);
 ```
 
-#### 2.79.2. 参数
+#### 2.83.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | event | int &#124; None | 要销毁的 Event 句柄。 |
 
-#### 2.79.3. 返回值
+#### 2.83.3. 返回值
 
 - `ret`: *int* — Event 已成功销毁。失败。
 
-#### 2.79.4. 说明
+#### 2.83.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:327`。
-
-#### 2.79.5. 示例
+#### 2.83.5. 示例
 
 ```python
 ret = axcl.rt.destroy_event(event)
@@ -3687,11 +3741,11 @@ ret = axcl.rt.destroy_event(event)
 
 <a id="axcl.rt.record_event"></a>
 
-### 2.80. axcl.rt.record_event
+### 2.84. axcl.rt.record_event
 
 向指定 Stream 异步提交 Event 记录点。
 
-#### 2.80.1. 函数
+#### 2.84.1. 函数
 
 **Python 调用**
 
@@ -3705,24 +3759,22 @@ ret = axcl.rt.record_event(event, stream)
 axclError axclrtRecordEvent(axclrtEvent event, axclrtStream stream);
 ```
 
-#### 2.80.2. 参数
+#### 2.84.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | event | int &#124; None | 要记录的 Event。 |
 | stream | int &#124; None | 接收记录点的 Stream。 |
 
-#### 2.80.3. 返回值
+#### 2.84.3. 返回值
 
 - `ret`: *int* — 记录点已成功提交。失败。
 
-#### 2.80.4. 说明
+#### 2.84.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:358`。
-
-#### 2.80.5. 示例
+#### 2.84.5. 示例
 
 ```python
 ret = axcl.rt.record_event(event, stream)
@@ -3732,11 +3784,11 @@ ret = axcl.rt.record_event(event, stream)
 
 <a id="axcl.rt.stream_wait_event"></a>
 
-### 2.81. axcl.rt.stream_wait_event
+### 2.85. axcl.rt.stream_wait_event
 
 向指定 Stream 异步提交 Event 等待点，使 Stream 仅在 Event 被触发后继续执行。
 
-#### 2.81.1. 函数
+#### 2.85.1. 函数
 
 **Python 调用**
 
@@ -3750,24 +3802,22 @@ ret = axcl.rt.stream_wait_event(stream, event)
 axclError axclrtStreamWaitEvent(axclrtStream stream, axclrtEvent event);
 ```
 
-#### 2.81.2. 参数
+#### 2.85.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | stream | int &#124; None | 等待 Event 的 Stream。 |
 | event | int &#124; None | 要等待的 Event。 |
 
-#### 2.81.3. 返回值
+#### 2.85.3. 返回值
 
 - `ret`: *int* — 等待点已成功提交。失败。
 
-#### 2.81.4. 说明
+#### 2.85.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:391`。
-
-#### 2.81.5. 示例
+#### 2.85.5. 示例
 
 ```python
 ret = axcl.rt.stream_wait_event(stream, event)
@@ -3777,11 +3827,11 @@ ret = axcl.rt.stream_wait_event(stream, event)
 
 <a id="axcl.rt.stream_wait_event_with_timeout"></a>
 
-### 2.82. axcl.rt.stream_wait_event_with_timeout
+### 2.86. axcl.rt.stream_wait_event_with_timeout
 
 向指定 Stream 异步提交带超时的 Event 等待点。
 
-#### 2.82.1. 函数
+#### 2.86.1. 函数
 
 **Python 调用**
 
@@ -3795,7 +3845,7 @@ ret = axcl.rt.stream_wait_event_with_timeout(stream, event, timeout)
 axclError axclrtStreamWaitEventWithTimeout(axclrtStream stream, axclrtEvent event, int32_t timeout);
 ```
 
-#### 2.82.2. 参数
+#### 2.86.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -3803,17 +3853,15 @@ axclError axclrtStreamWaitEventWithTimeout(axclrtStream stream, axclrtEvent even
 | event | int &#124; None | 要等待的 Event。 |
 | timeout | int | 超时时间，单位为毫秒。-1 表示无限等待。 |
 
-#### 2.82.3. 返回值
+#### 2.86.3. 返回值
 
 - `ret`: *int* — 等待点已成功提交。失败。
 
-#### 2.82.4. 说明
+#### 2.86.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:424`。
-
-#### 2.82.5. 示例
+#### 2.86.5. 示例
 
 ```python
 ret = axcl.rt.stream_wait_event_with_timeout(stream, event, timeout)
@@ -3823,11 +3871,11 @@ ret = axcl.rt.stream_wait_event_with_timeout(stream, event, timeout)
 
 <a id="axcl.rt.synchronize_event"></a>
 
-### 2.83. axcl.rt.synchronize_event
+### 2.87. axcl.rt.synchronize_event
 
 阻塞当前 Host 线程，直到 Event 被触发。
 
-#### 2.83.1. 函数
+#### 2.87.1. 函数
 
 **Python 调用**
 
@@ -3841,23 +3889,21 @@ ret = axcl.rt.synchronize_event(event)
 axclError axclrtSynchronizeEvent(axclrtEvent event);
 ```
 
-#### 2.83.2. 参数
+#### 2.87.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | event | int &#124; None | 要等待的 Event。 |
 
-#### 2.83.3. 返回值
+#### 2.87.3. 返回值
 
 - `ret`: *int* — Event 已被触发。失败。
 
-#### 2.83.4. 说明
+#### 2.87.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:459`。
-
-#### 2.83.5. 示例
+#### 2.87.5. 示例
 
 ```python
 ret = axcl.rt.synchronize_event(event)
@@ -3867,11 +3913,11 @@ ret = axcl.rt.synchronize_event(event)
 
 <a id="axcl.rt.synchronize_event_with_timeout"></a>
 
-### 2.84. axcl.rt.synchronize_event_with_timeout
+### 2.88. axcl.rt.synchronize_event_with_timeout
 
 阻塞当前 Host 线程，直到 Event 被触发或超时。
 
-#### 2.84.1. 函数
+#### 2.88.1. 函数
 
 **Python 调用**
 
@@ -3885,24 +3931,22 @@ ret = axcl.rt.synchronize_event_with_timeout(event, timeout)
 axclError axclrtSynchronizeEventWithTimeout(axclrtEvent event, int32_t timeout);
 ```
 
-#### 2.84.2. 参数
+#### 2.88.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | event | int &#124; None | 要等待的 Event。 |
 | timeout | int | 超时时间，单位为毫秒。-1 表示无限等待。 |
 
-#### 2.84.3. 返回值
+#### 2.88.3. 返回值
 
 - `ret`: *int* — Event 已在超时时间内被触发。失败。
 
-#### 2.84.4. 说明
+#### 2.88.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:490`。
-
-#### 2.84.5. 示例
+#### 2.88.5. 示例
 
 ```python
 ret = axcl.rt.synchronize_event_with_timeout(event, timeout)
@@ -3912,11 +3956,11 @@ ret = axcl.rt.synchronize_event_with_timeout(event, timeout)
 
 <a id="axcl.rt.create_event_with_flags"></a>
 
-### 2.85. axcl.rt.create_event_with_flags
+### 2.89. axcl.rt.create_event_with_flags
 
 按指定计时标志，在当前 Context 关联的设备上创建 Event。
 
-#### 2.85.1. 函数
+#### 2.89.1. 函数
 
 **Python 调用**
 
@@ -3930,24 +3974,22 @@ event, ret = axcl.rt.create_event_with_flags(flags)
 axclError axclrtCreateEventWithFlags(axclrtEvent *event, uint32_t flags);
 ```
 
-#### 2.85.2. 参数
+#### 2.89.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | flags | int | 标志参数。 |
 
-#### 2.85.3. 返回值
+#### 2.89.3. 返回值
 
 - `event`: *int* — 成功时接收创建的 Event 句柄。
 - `ret`: *int* — Event 已成功创建。失败。
 
-#### 2.85.4. 说明
+#### 2.89.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:523`。
-
-#### 2.85.5. 示例
+#### 2.89.5. 示例
 
 ```python
 event, ret = axcl.rt.create_event_with_flags(flags)
@@ -3957,11 +3999,11 @@ event, ret = axcl.rt.create_event_with_flags(flags)
 
 <a id="axcl.rt.event_elapsed_time"></a>
 
-### 2.86. axcl.rt.event_elapsed_time
+### 2.90. axcl.rt.event_elapsed_time
 
 计算两个 Event 最近完成的记录点之间的设备时间差。
 
-#### 2.86.1. 函数
+#### 2.90.1. 函数
 
 **Python 调用**
 
@@ -3975,25 +4017,23 @@ ms, ret = axcl.rt.event_elapsed_time(start_event, end_event)
 axclError axclrtEventElapsedTime(float *ms, axclrtEvent startEvent, axclrtEvent endEvent);
 ```
 
-#### 2.86.2. 参数
+#### 2.90.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | start_event | int &#124; None | 标记起点的 Event。 |
 | end_event | int &#124; None | 标记终点的 Event。 |
 
-#### 2.86.3. 返回值
+#### 2.90.3. 返回值
 
 - `ms`: *float* — 接收时间差，单位为毫秒。
 - `ret`: *int* — 已成功返回时间差。失败。
 
-#### 2.86.4. 说明
+#### 2.90.4. 说明
 
 返回类型：`tuple[float, int]`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:557`。
-
-#### 2.86.5. 示例
+#### 2.90.5. 示例
 
 ```python
 ms, ret = axcl.rt.event_elapsed_time(start_event, end_event)
@@ -4003,11 +4043,11 @@ ms, ret = axcl.rt.event_elapsed_time(start_event, end_event)
 
 <a id="axcl.rt.event_query"></a>
 
-### 2.87. axcl.rt.event_query
+### 2.91. axcl.rt.event_query
 
 以非阻塞方式查询 Event 所记录的任务是否完成。
 
-#### 2.87.1. 函数
+#### 2.91.1. 函数
 
 **Python 调用**
 
@@ -4021,24 +4061,22 @@ status, ret = axcl.rt.event_query(event)
 axclError axclrtEventQuery(axclrtEvent event, axclrtEventStatus *status);
 ```
 
-#### 2.87.2. 参数
+#### 2.91.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | event | int &#124; None | Event 句柄。 |
 
-#### 2.87.3. 返回值
+#### 2.91.3. 返回值
 
 - `status`: *int* — 成功时接收 Event 完成状态。
 - `ret`: *int* — 已成功返回状态。失败。
 
-#### 2.87.4. 说明
+#### 2.91.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_event.py:593`。
-
-#### 2.87.5. 示例
+#### 2.91.5. 示例
 
 ```python
 status, ret = axcl.rt.event_query(event)
@@ -4048,11 +4086,11 @@ status, ret = axcl.rt.event_query(event)
 
 <a id="axcl.rt.transfer_file"></a>
 
-### 2.88. axcl.rt.transfer_file
+### 2.92. axcl.rt.transfer_file
 
 传输单个文件或删除单个 Device 文件。
 
-#### 2.88.1. 函数
+#### 2.92.1. 函数
 
 **Python 调用**
 
@@ -4066,25 +4104,23 @@ ret = axcl.rt.transfer_file(src_path, dst_path, policy)
 axclError axclrtTransferFile(const char *src_path, const char *dst_path, axclrtFileTransferPolicy policy);
 ```
 
-#### 2.88.2. 参数
+#### 2.92.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | src_path | str &#124; bytes &#124; None | 源路径，或要删除的 Device 路径。 |
-| dst_path | str &#124; bytes &#124; None | 目标路径。仅在以下条件下，此参数可为 NULL（源码条件不完整）。 |
+| dst_path | str &#124; bytes &#124; None | 目标路径。仅当 `policy` 为 FILE_TRANSFER_REMOVE_DEVICE_FILE 时此参数可为 None；否则不得为 None 或空。 |
 | policy | int | 文件传输操作。 |
 
-#### 2.88.3. 返回值
+#### 2.92.3. 返回值
 
 - `ret`: *int* — 请求的操作已成功完成。失败。
 
-#### 2.88.4. 说明
+#### 2.92.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_file.py:110`。
-
-#### 2.88.5. 示例
+#### 2.92.5. 示例
 
 ```python
 ret = axcl.rt.transfer_file(src_path, dst_path, policy)
@@ -4094,11 +4130,11 @@ ret = axcl.rt.transfer_file(src_path, dst_path, policy)
 
 <a id="axcl.rt.transfer_directory"></a>
 
-### 2.89. axcl.rt.transfer_directory
+### 2.93. axcl.rt.transfer_directory
 
 递归传输单个目录。
 
-#### 2.89.1. 函数
+#### 2.93.1. 函数
 
 **Python 调用**
 
@@ -4112,7 +4148,7 @@ ret = axcl.rt.transfer_directory(src_dir, dst_dir, policy)
 axclError axclrtTransferDirectory(const char *src_dir, const char *dst_dir, axclrtFileTransferPolicy policy);
 ```
 
-#### 2.89.2. 参数
+#### 2.93.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -4120,17 +4156,15 @@ axclError axclrtTransferDirectory(const char *src_dir, const char *dst_dir, axcl
 | dst_dir | str &#124; bytes &#124; None | 目标目录路径。 |
 | policy | int | 目录传输方向。不支持删除目录。 |
 
-#### 2.89.3. 返回值
+#### 2.93.3. 返回值
 
 - `ret`: *int* — 请求的操作已成功完成。失败。
 
-#### 2.89.4. 说明
+#### 2.93.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_file.py:145`。
-
-#### 2.89.5. 示例
+#### 2.93.5. 示例
 
 ```python
 ret = axcl.rt.transfer_directory(src_dir, dst_dir, policy)
@@ -4140,11 +4174,11 @@ ret = axcl.rt.transfer_directory(src_dir, dst_dir, policy)
 
 <a id="axcl.rt.get_mem_info"></a>
 
-### 2.90. axcl.rt.get_mem_info
+### 2.94. axcl.rt.get_mem_info
 
 获取调用线程当前 Context 关联设备的内存容量快照。
 
-#### 2.90.1. 函数
+#### 2.94.1. 函数
 
 **Python 调用**
 
@@ -4158,25 +4192,23 @@ free, total, ret = axcl.rt.get_mem_info(attr)
 axclError axclrtGetMemInfo(axclrtMemAttr attr, size_t *free, size_t *total);
 ```
 
-#### 2.90.2. 参数
+#### 2.94.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | attr | int | 要查询的内存池。 |
 
-#### 2.90.3. 返回值
+#### 2.94.3. 返回值
 
 - `free`: *int* — 可选指针，接收空闲字节数。
 - `total`: *int* — 可选指针，接收总字节数。
 - `ret`: *int* — 已成功返回请求的内存信息。失败。
 
-#### 2.90.4. 说明
+#### 2.94.4. 说明
 
 返回类型：`tuple[int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:807`。
-
-#### 2.90.5. 示例
+#### 2.94.5. 示例
 
 ```python
 free, total, ret = axcl.rt.get_mem_info(attr)
@@ -4186,11 +4218,11 @@ free, total, ret = axcl.rt.get_mem_info(attr)
 
 <a id="axcl.rt.pointer_get_attributes"></a>
 
-### 2.91. axcl.rt.pointer_get_attributes
+### 2.95. axcl.rt.pointer_get_attributes
 
 获取内存分配属性。
 
-#### 2.91.1. 函数
+#### 2.95.1. 函数
 
 **Python 调用**
 
@@ -4204,24 +4236,22 @@ attributes, ret = axcl.rt.pointer_get_attributes(ptr)
 axclError axclrtPointerGetAttributes(const void *ptr, axclrtPtrAttributes *attributes);
 ```
 
-#### 2.91.2. 参数
+#### 2.95.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| ptr | int &#124; None | 指向已分配内存起始位置或内部任意字节的指针。 |
+| ptr | int &#124; None | 已分配内存起始位置或内部任意字节的地址。不得为 None。 |
 
-#### 2.91.3. 返回值
+#### 2.95.3. 返回值
 
 - `attributes`: *dict* — 接收指针属性。
 - `ret`: *int* — 已成功返回属性。失败。
 
-#### 2.91.4. 说明
+#### 2.95.4. 说明
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:843`。
-
-#### 2.91.5. 示例
+#### 2.95.5. 示例
 
 ```python
 attributes, ret = axcl.rt.pointer_get_attributes(ptr)
@@ -4231,11 +4261,11 @@ attributes, ret = axcl.rt.pointer_get_attributes(ptr)
 
 <a id="axcl.rt.malloc"></a>
 
-### 2.92. axcl.rt.malloc
+### 2.96. axcl.rt.malloc
 
 在调用线程当前 Context 关联的设备上分配物理连续内存。
 
-#### 2.92.1. 函数
+#### 2.96.1. 函数
 
 **Python 调用**
 
@@ -4249,25 +4279,23 @@ dev_ptr, ret = axcl.rt.malloc(size, policy)
 axclError axclrtMalloc(void **devPtr, size_t size, axclrtMemMallocPolicy policy);
 ```
 
-#### 2.92.2. 参数
+#### 2.96.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | size | int | 要分配的字节数，至少为 1，且不得超过 Device 侧 CMM 单次分配上限。 |
 | policy | int | Device 内存分配策略。 |
 
-#### 2.92.3. 返回值
+#### 2.96.3. 返回值
 
-- `dev_ptr`: *int* — 成功时接收 Device 物理内存基地址。
+- `dev_ptr`: *int* — 成功时接收表示 Device 内存的不透明句柄。
 - `ret`: *int* — Device 内存已成功分配。失败。
 
-#### 2.92.4. 说明
+#### 2.96.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:877`。
-
-#### 2.92.5. 示例
+#### 2.96.5. 示例
 
 ```python
 dev_ptr, ret = axcl.rt.malloc(size, policy)
@@ -4277,11 +4305,11 @@ dev_ptr, ret = axcl.rt.malloc(size, policy)
 
 <a id="axcl.rt.malloc_cached"></a>
 
-### 2.93. axcl.rt.malloc_cached
+### 2.97. axcl.rt.malloc_cached
 
 在当前 Context 关联的设备上分配可缓存的物理连续内存。
 
-#### 2.93.1. 函数
+#### 2.97.1. 函数
 
 **Python 调用**
 
@@ -4295,25 +4323,23 @@ dev_ptr, ret = axcl.rt.malloc_cached(size, policy)
 axclError axclrtMallocCached(void **devPtr, size_t size, axclrtMemMallocPolicy policy);
 ```
 
-#### 2.93.2. 参数
+#### 2.97.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | size | int | 要分配的字节数，至少为 1，且不得超过 Device 侧 CMM 单次分配上限。 |
 | policy | int | Device 内存分配策略。 |
 
-#### 2.93.3. 返回值
+#### 2.97.3. 返回值
 
-- `dev_ptr`: *int* — 成功时接收 Device 地址句柄。
+- `dev_ptr`: *int* — 成功时接收表示可缓存 Device 内存的不透明句柄。
 - `ret`: *int* — Device 内存已成功分配。失败。
 
-#### 2.93.4. 说明
+#### 2.97.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:913`。
-
-#### 2.93.5. 示例
+#### 2.97.5. 示例
 
 ```python
 dev_ptr, ret = axcl.rt.malloc_cached(size, policy)
@@ -4323,11 +4349,11 @@ dev_ptr, ret = axcl.rt.malloc_cached(size, policy)
 
 <a id="axcl.rt.free"></a>
 
-### 2.94. axcl.rt.free
+### 2.98. axcl.rt.free
 
 释放 Device 内存。
 
-#### 2.94.1. 函数
+#### 2.98.1. 函数
 
 **Python 调用**
 
@@ -4341,23 +4367,21 @@ ret = axcl.rt.free(dev_ptr)
 axclError axclrtFree(void *devPtr);
 ```
 
-#### 2.94.2. 参数
+#### 2.98.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dev_ptr | int &#124; None | 内存分配函数返回的 Device 内存基地址。 |
+| dev_ptr | int &#124; None | axclrtMalloc、axclrtMallocCached 返回的或通过 axclrtIpcMemImportByKey 导入的 Device 内存基地址。 |
 
-#### 2.94.3. 返回值
+#### 2.98.3. 返回值
 
 - `ret`: *int* — Device 内存已成功释放。失败。
 
-#### 2.94.4. 说明
+#### 2.98.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:949`。
-
-#### 2.94.5. 示例
+#### 2.98.5. 示例
 
 ```python
 ret = axcl.rt.free(dev_ptr)
@@ -4367,11 +4391,11 @@ ret = axcl.rt.free(dev_ptr)
 
 <a id="axcl.rt.mem_flush"></a>
 
-### 2.95. axcl.rt.mem_flush
+### 2.99. axcl.rt.mem_flush
 
 将 Device 内存范围内的缓存数据写回 DDR。
 
-#### 2.95.1. 函数
+#### 2.99.1. 函数
 
 **Python 调用**
 
@@ -4385,24 +4409,22 @@ ret = axcl.rt.mem_flush(dev_ptr, size)
 axclError axclrtMemFlush(void *devPtr, size_t size);
 ```
 
-#### 2.95.2. 参数
+#### 2.99.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dev_ptr | int &#124; None | 范围起始处的 Device 内存地址。 |
+| dev_ptr | int &#124; None | 范围起始处的 Device 内存句柄。 |
 | size | int | 要刷新的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 
-#### 2.95.3. 返回值
+#### 2.99.3. 返回值
 
 - `ret`: *int* — 缓存范围已成功刷新。失败。
 
-#### 2.95.4. 说明
+#### 2.99.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:980`。
-
-#### 2.95.5. 示例
+#### 2.99.5. 示例
 
 ```python
 ret = axcl.rt.mem_flush(dev_ptr, size)
@@ -4412,11 +4434,11 @@ ret = axcl.rt.mem_flush(dev_ptr, size)
 
 <a id="axcl.rt.mem_invalidate"></a>
 
-### 2.96. axcl.rt.mem_invalidate
+### 2.100. axcl.rt.mem_invalidate
 
 使 Device 内存范围内的缓存数据失效。
 
-#### 2.96.1. 函数
+#### 2.100.1. 函数
 
 **Python 调用**
 
@@ -4430,24 +4452,22 @@ ret = axcl.rt.mem_invalidate(dev_ptr, size)
 axclError axclrtMemInvalidate(void *devPtr, size_t size);
 ```
 
-#### 2.96.2. 参数
+#### 2.100.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dev_ptr | int &#124; None | 待失效范围起始处的 Device 物理内存地址。 |
+| dev_ptr | int &#124; None | 待失效范围起始处的 Device 内存句柄。 |
 | size | int | 要处理的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 
-#### 2.96.3. 返回值
+#### 2.100.3. 返回值
 
 - `ret`: *int* — 缓存范围已成功失效。失败。
 
-#### 2.96.4. 说明
+#### 2.100.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1013`。
-
-#### 2.96.5. 示例
+#### 2.100.5. 示例
 
 ```python
 ret = axcl.rt.mem_invalidate(dev_ptr, size)
@@ -4457,11 +4477,11 @@ ret = axcl.rt.mem_invalidate(dev_ptr, size)
 
 <a id="axcl.rt.malloc_host"></a>
 
-### 2.97. axcl.rt.malloc_host
+### 2.101. axcl.rt.malloc_host
 
 分配 Host 虚拟内存。
 
-#### 2.97.1. 函数
+#### 2.101.1. 函数
 
 **Python 调用**
 
@@ -4475,24 +4495,22 @@ host_ptr, ret = axcl.rt.malloc_host(size)
 axclError axclrtMallocHost(void **hostPtr, size_t size);
 ```
 
-#### 2.97.2. 参数
+#### 2.101.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | size | int | 要分配的字节数。必须大于 0。 |
 
-#### 2.97.3. 返回值
+#### 2.101.3. 返回值
 
 - `host_ptr`: *int* — 成功时接收 Host 可访问的虚拟地址。
 - `ret`: *int* — Host 内存已成功分配。失败。
 
-#### 2.97.4. 说明
+#### 2.101.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1046`。
-
-#### 2.97.5. 示例
+#### 2.101.5. 示例
 
 ```python
 host_ptr, ret = axcl.rt.malloc_host(size)
@@ -4502,11 +4520,11 @@ host_ptr, ret = axcl.rt.malloc_host(size)
 
 <a id="axcl.rt.free_host"></a>
 
-### 2.98. axcl.rt.free_host
+### 2.102. axcl.rt.free_host
 
-释放已分配的 Host 虚拟内存（源码未提供分配接口引用）。
+释放由 axclrtMallocHost 分配的 Host 虚拟内存。
 
-#### 2.98.1. 函数
+#### 2.102.1. 函数
 
 **Python 调用**
 
@@ -4520,23 +4538,21 @@ ret = axcl.rt.free_host(host_ptr)
 axclError axclrtFreeHost(void *hostPtr);
 ```
 
-#### 2.98.2. 参数
+#### 2.102.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| host_ptr | int &#124; None | 返回的 Host 虚拟基地址（源码未提供接口引用）。 |
+| host_ptr | int &#124; None | axclrtMallocHost 返回的 Host 虚拟基地址。不得为 None。 |
 
-#### 2.98.3. 返回值
+#### 2.102.3. 返回值
 
 - `ret`: *int* — Host 内存已成功释放。失败。
 
-#### 2.98.4. 说明
+#### 2.102.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1080`。
-
-#### 2.98.5. 示例
+#### 2.102.5. 示例
 
 ```python
 ret = axcl.rt.free_host(host_ptr)
@@ -4546,11 +4562,11 @@ ret = axcl.rt.free_host(host_ptr)
 
 <a id="axcl.rt.memset"></a>
 
-### 2.99. axcl.rt.memset
+### 2.103. axcl.rt.memset
 
 同步将 Device 内存中的字节设置为指定值。
 
-#### 2.99.1. 函数
+#### 2.103.1. 函数
 
 **Python 调用**
 
@@ -4564,7 +4580,7 @@ ret = axcl.rt.memset(dev_ptr, value, count)
 axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 ```
 
-#### 2.99.2. 参数
+#### 2.103.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -4572,17 +4588,15 @@ axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 | value | int | 要写入的字节值。 |
 | count | int | 要设置的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 
-#### 2.99.3. 返回值
+#### 2.103.3. 返回值
 
 - `ret`: *int* — Device 内存已成功设置。失败。
 
-#### 2.99.4. 说明
+#### 2.103.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1111`。
-
-#### 2.99.5. 示例
+#### 2.103.5. 示例
 
 ```python
 ret = axcl.rt.memset(dev_ptr, value, count)
@@ -4592,11 +4606,11 @@ ret = axcl.rt.memset(dev_ptr, value, count)
 
 <a id="axcl.rt.memcpy"></a>
 
-### 2.100. axcl.rt.memcpy
+### 2.104. axcl.rt.memcpy
 
 同步在 Host 或 Device 内存之间拷贝字节。
 
-#### 2.100.1. 函数
+#### 2.104.1. 函数
 
 **Python 调用**
 
@@ -4610,26 +4624,24 @@ ret = axcl.rt.memcpy(dst_ptr, src_ptr, count, kind)
 axclError axclrtMemcpy(void *dstPtr, const void *srcPtr, size_t count, axclrtMemcpyKind kind);
 ```
 
-#### 2.100.2. 参数
+#### 2.104.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dst_ptr | int &#124; None | 目标地址，其解释依据为（源码说明不完整）。 |
-| src_ptr | int &#124; None | 源地址，其解释依据为（源码说明不完整）。 |
+| dst_ptr | int &#124; None | 目标地址，按 `kind` 解释。 |
+| src_ptr | int &#124; None | 源地址，按 `kind` 解释。 |
 | count | int | 要拷贝的字节数。必须大于 0。 |
 | kind | int | 拷贝方向和地址类型。 |
 
-#### 2.100.3. 返回值
+#### 2.104.3. 返回值
 
 - `ret`: *int* — 拷贝已成功完成。失败。
 
-#### 2.100.4. 说明
+#### 2.104.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1146`。
-
-#### 2.100.5. 示例
+#### 2.104.5. 示例
 
 ```python
 ret = axcl.rt.memcpy(dst_ptr, src_ptr, count, kind)
@@ -4639,11 +4651,11 @@ ret = axcl.rt.memcpy(dst_ptr, src_ptr, count, kind)
 
 <a id="axcl.rt.memcmp"></a>
 
-### 2.101. axcl.rt.memcmp
+### 2.105. axcl.rt.memcmp
 
 同步判断两个 Device 内存范围内的字节是否相同。
 
-#### 2.101.1. 函数
+#### 2.105.1. 函数
 
 **Python 调用**
 
@@ -4657,7 +4669,7 @@ ret = axcl.rt.memcmp(dev_ptr1, dev_ptr2, count)
 axclError axclrtMemcmp(const void *devPtr1, const void *devPtr2, size_t count);
 ```
 
-#### 2.101.2. 参数
+#### 2.105.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -4665,17 +4677,15 @@ axclError axclrtMemcmp(const void *devPtr1, const void *devPtr2, size_t count);
 | dev_ptr2 | int &#124; None | 第二个 Device 内存范围的地址。 |
 | count | int | 要比较的字节数，至少为 1，且每个范围都必须位于一块已分配的 Device 内存内。 |
 
-#### 2.101.3. 返回值
+#### 2.105.3. 返回值
 
 - `ret`: *int* — 比较的字节相同。字节不同，或比较失败。
 
-#### 2.101.4. 说明
+#### 2.105.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1183`。
-
-#### 2.101.5. 示例
+#### 2.105.5. 示例
 
 ```python
 ret = axcl.rt.memcmp(dev_ptr1, dev_ptr2, count)
@@ -4685,11 +4695,13 @@ ret = axcl.rt.memcmp(dev_ptr1, dev_ptr2, count)
 
 <a id="axcl.rt.memset_async"></a>
 
-### 2.102. axcl.rt.memset_async
+### 2.106. axcl.rt.memset_async
 
 向指定 Stream 异步提交 Device 内存设置操作。
 
-#### 2.102.1. 函数
+绑定不会保留 Device 缓冲区。`dev_ptr` 必须保持有效，直到 `axcl.rt.synchronize_stream(stream)` 成功返回。
+
+#### 2.106.1. 函数
 
 **Python 调用**
 
@@ -4703,7 +4715,7 @@ ret = axcl.rt.memset_async(dev_ptr, value, count, stream)
 axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t count, axclrtStream stream);
 ```
 
-#### 2.102.2. 参数
+#### 2.106.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -4712,20 +4724,15 @@ axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t count, axclrtStr
 | count | int | 要设置的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 | stream | int &#124; None | 接收操作的 Stream。 |
 
-#### 2.102.3. 返回值
+#### 2.106.3. 返回值
 
 - `ret`: *int* — 操作已成功提交。失败。
 
-.. note::
-    绑定不会保留 Device 缓冲区。`dev_ptr` 必须保持有效，直到 `axcl.rt.synchronize_stream(stream)` 成功返回。
-
-#### 2.102.4. 说明
+#### 2.106.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1218`。
-
-#### 2.102.5. 示例
+#### 2.106.5. 示例
 
 ```python
 ret = axcl.rt.memset_async(dev_ptr, value, count, stream)
@@ -4735,11 +4742,13 @@ ret = axcl.rt.memset_async(dev_ptr, value, count, stream)
 
 <a id="axcl.rt.memcpy_async"></a>
 
-### 2.103. axcl.rt.memcpy_async
+### 2.107. axcl.rt.memcpy_async
 
 向指定 Stream 异步提交 Host 或 Device 内存拷贝。
 
-#### 2.103.1. 函数
+绑定不会保留源缓冲区或目标缓冲区。`dst_ptr` 和 `src_ptr` 必须保持有效，直到 `axcl.rt.synchronize_stream(stream)` 成功返回。传入整数地址；绑定不会拷贝 Python 缓冲区。
+
+#### 2.107.1. 函数
 
 **Python 调用**
 
@@ -4753,30 +4762,25 @@ ret = axcl.rt.memcpy_async(dst_ptr, src_ptr, count, kind, stream)
 axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t count, axclrtMemcpyKind kind, axclrtStream stream);
 ```
 
-#### 2.103.2. 参数
+#### 2.107.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dst_ptr | int &#124; None | 目标地址，其解释依据为（源码说明不完整）。 |
-| src_ptr | int &#124; None | 源地址，其解释依据为（源码说明不完整）。 |
+| dst_ptr | int &#124; None | 目标地址，按 `kind` 解释。 |
+| src_ptr | int &#124; None | 源地址，按 `kind` 解释。 |
 | count | int | 要拷贝的字节数。必须大于 0。 |
-| kind | int | 拷贝方向和地址类型。 |
+| kind | int | 拷贝方向和地址类型。AXCL_MEMCPY_DEVICE_TO_DEVICE 支持同一设备内以及同一卡内不同设备之间的拷贝。 |
 | stream | int &#124; None | 接收拷贝操作的 Stream。 |
 
-#### 2.103.3. 返回值
+#### 2.107.3. 返回值
 
 - `ret`: *int* — 拷贝已成功提交。失败。
 
-.. note::
-    绑定不会保留源缓冲区或目标缓冲区。`dst_ptr` 和 `src_ptr` 必须保持有效，直到 `axcl.rt.synchronize_stream(stream)` 成功返回。传入整数地址；绑定不会拷贝 Python 缓冲区。
-
-#### 2.103.4. 说明
+#### 2.107.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1259`。
-
-#### 2.103.5. 示例
+#### 2.107.5. 示例
 
 ```python
 ret = axcl.rt.memcpy_async(dst_ptr, src_ptr, count, kind, stream)
@@ -4786,11 +4790,13 @@ ret = axcl.rt.memcpy_async(dst_ptr, src_ptr, count, kind, stream)
 
 <a id="axcl.rt.memcmp_async"></a>
 
-### 2.104. axcl.rt.memcmp_async
+### 2.108. axcl.rt.memcmp_async
 
 向指定 Stream 异步提交两个 Device 内存范围的比较操作。
 
-#### 2.104.1. 函数
+绑定不会保留 Device 内存范围。`dev_ptr1` 和 `dev_ptr2` 必须保持有效，直到 `axcl.rt.synchronize_stream(stream)` 成功返回。
+
+#### 2.108.1. 函数
 
 **Python 调用**
 
@@ -4804,7 +4810,7 @@ ret = axcl.rt.memcmp_async(dev_ptr1, dev_ptr2, count, stream)
 axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2, size_t count, axclrtStream stream);
 ```
 
-#### 2.104.2. 参数
+#### 2.108.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
@@ -4813,20 +4819,15 @@ axclError axclrtMemcmpAsync(const void *devPtr1, const void *devPtr2, size_t cou
 | count | int | 要比较的字节数，至少为 1，且每个范围都必须位于一块已分配的 Device 内存内。 |
 | stream | int &#124; None | 接收比较操作的 Stream。 |
 
-#### 2.104.3. 返回值
+#### 2.108.3. 返回值
 
 - `ret`: *int* — 比较已成功提交。失败。
 
-.. note::
-    绑定不会保留 Device 内存范围。`dev_ptr1` 和 `dev_ptr2` 必须保持有效，直到 `axcl.rt.synchronize_stream(stream)` 成功返回。
-
-#### 2.104.4. 说明
+#### 2.108.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1303`。
-
-#### 2.104.5. 示例
+#### 2.108.5. 示例
 
 ```python
 ret = axcl.rt.memcmp_async(dev_ptr1, dev_ptr2, count, stream)
@@ -4834,13 +4835,122 @@ ret = axcl.rt.memcmp_async(dev_ptr1, dev_ptr2, count, stream)
 
 <br>
 
+<a id="axcl.rt.memcpy2d"></a>
+
+### 2.109. axcl.rt.memcpy2d
+
+同步在 Host 与 Device 内存之间拷贝一个二维矩形。
+
+#### 2.109.1. 函数
+
+**Python 调用**
+
+```python
+ret = axcl.rt.memcpy2d(dst_ptr, dpitch, src_ptr, spitch, width, height, kind)
+```
+
+**C++ 原型**
+
+```cpp
+axclError axclrtMemcpy2d(void *dstPtr, size_t dpitch, const void *srcPtr, size_t spitch, size_t width, size_t height, axclrtMemcpyKind kind);
+```
+
+#### 2.109.2. 参数
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| dst_ptr | int &#124; None | 目标矩形第一行的地址，其含义由 `kind` 决定。 |
+| dpitch | int | 目标内存中相邻两行起始地址之间的字节数，不能小于 `width`。 |
+| src_ptr | int &#124; None | 源矩形第一行的地址，其含义由 `kind` 决定。 |
+| spitch | int | 源内存中相邻两行起始地址之间的字节数，不能小于 `width`。 |
+| width | int | 每行拷贝的字节数，必须大于 0。 |
+| height | int | 拷贝的行数，必须大于 0，且不超过 UINT32_MAX。 |
+| kind | int | `AXCL_MEMCPY_HOST_TO_DEVICE` 或 `AXCL_MEMCPY_DEVICE_TO_HOST`。 |
+
+#### 2.109.3. 返回值
+
+- `ret`: *int* — 拷贝已成功完成。失败。
+
+.. note::
+
+    - 地址参数传入整数，不接受 Python 缓冲区对象。调用方需保证内存在调用返回前一直有效。
+    - 在非 DMA coherent 的设备上，把 Device 数据拷贝到普通 Host 内存时，需要使用 `axcl.rt.malloc_host`
+      分配的内存，除非两端 pitch 都等于 `width`，或 `height` 为 1。
+
+#### 2.109.4. 说明
+
+返回类型：`int`。
+
+#### 2.109.5. 示例
+
+```python
+ret = axcl.rt.memcpy2d(dev_ptr, 2048, host_ptr, 1024, 1000, 256, AXCL_MEMCPY_HOST_TO_DEVICE)
+```
+
+<br>
+
+<a id="axcl.rt.memcpy2d_async"></a>
+
+### 2.110. axcl.rt.memcpy2d_async
+
+向指定 Stream 异步提交 Host 与 Device 内存之间的二维矩形拷贝。
+
+#### 2.110.1. 函数
+
+**Python 调用**
+
+```python
+ret = axcl.rt.memcpy2d_async(dst_ptr, dpitch, src_ptr, spitch, width, height, kind, stream)
+```
+
+**C++ 原型**
+
+```cpp
+axclError axclrtMemcpy2dAsync(void *dstPtr, size_t dpitch, const void *srcPtr, size_t spitch, size_t width, size_t height, axclrtMemcpyKind kind, axclrtStream stream);
+```
+
+#### 2.110.2. 参数
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| dst_ptr | int &#124; None | 目标矩形第一行的地址，其含义由 `kind` 决定。 |
+| dpitch | int | 目标内存中相邻两行起始地址之间的字节数，不能小于 `width`。 |
+| src_ptr | int &#124; None | 源矩形第一行的地址，其含义由 `kind` 决定。 |
+| spitch | int | 源内存中相邻两行起始地址之间的字节数，不能小于 `width`。 |
+| width | int | 每行拷贝的字节数，必须大于 0。 |
+| height | int | 拷贝的行数，必须大于 0，且不超过 UINT32_MAX。 |
+| kind | int | `AXCL_MEMCPY_HOST_TO_DEVICE` 或 `AXCL_MEMCPY_DEVICE_TO_HOST`。 |
+| stream | int &#124; None | 接收拷贝操作的 Stream，不能为 None。 |
+
+#### 2.110.3. 返回值
+
+- `ret`: *int* — 拷贝已成功提交。失败。
+
+.. note::
+
+    - 成功返回只表示拷贝已提交。执行时产生的错误由 `stream` 上的下一次 `axcl.rt.synchronize_stream` 返回。
+    - 同步 `stream` 之前，两端内存必须保持有效，且不能访问 Host 端范围。
+
+#### 2.110.4. 说明
+
+返回类型：`int`。
+
+#### 2.110.5. 示例
+
+```python
+ret = axcl.rt.memcpy2d_async(host_ptr, 1024, dev_ptr, 2048, 1000, 256, AXCL_MEMCPY_DEVICE_TO_HOST, stream)
+ret = axcl.rt.synchronize_stream(stream)
+```
+
+<br>
+
 <a id="axcl.rt.mem_get_address_range"></a>
 
-### 2.105. axcl.rt.mem_get_address_range
+### 2.111. axcl.rt.mem_get_address_range
 
-获取 AXCL runtime 管理的指针对应的基地址和分配大小。
+获取 AXCL runtime 管理的分配或外部注册对应的基句柄和大小。
 
-#### 2.105.1. 函数
+#### 2.111.1. 函数
 
 **Python 调用**
 
@@ -4854,25 +4964,23 @@ base, size, ret = axcl.rt.mem_get_address_range(ptr)
 axclError axclrtMemGetAddressRange(void *ptr, void **base, size_t *size);
 ```
 
-#### 2.105.2. 参数
+#### 2.111.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| ptr | int &#124; None | 指向已分配内存起始位置或内部任意字节的指针。 |
+| ptr | int &#124; None | 分配或注册的起始位置或内部任意字节的地址。 |
 
-#### 2.105.3. 返回值
+#### 2.111.3. 返回值
 
-- `base`: *int* — 接收已分配内存块的基地址。
-- `size`: *int* — 接收总分配大小，单位为字节。
-- `ret`: *int* — 成功返回 0，否则返回错误码。
+- `base`: *int* — 接收其基句柄。
+- `size`: *int* — 接收其总分配或注册大小，单位为字节。
+- `ret`: *int* — 已成功返回基地址和大小。失败。
 
-#### 2.105.4. 说明
+#### 2.111.4. 说明
 
 返回类型：`tuple[int, int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1344`。
-
-#### 2.105.5. 示例
+#### 2.111.5. 示例
 
 ```python
 base, size, ret = axcl.rt.mem_get_address_range(ptr)
@@ -4882,11 +4990,11 @@ base, size, ret = axcl.rt.mem_get_address_range(ptr)
 
 <a id="axcl.rt.mem_get_dev_addr"></a>
 
-### 2.106. axcl.rt.mem_get_dev_addr
+### 2.112. axcl.rt.mem_get_dev_addr
 
-从设备指针导出底层设备物理地址和虚拟地址。
+从设备内存句柄导出底层设备物理地址和虚拟地址。
 
-#### 2.106.1. 函数
+#### 2.112.1. 函数
 
 **Python 调用**
 
@@ -4900,25 +5008,23 @@ desc, ret = axcl.rt.mem_get_dev_addr(dev_ptr, access_size)
 axclError axclrtMemGetDevAddr(const void *devPtr, uint64_t access_size, axclrtDevMemDesc *desc);
 ```
 
-#### 2.106.2. 参数
+#### 2.112.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dev_ptr | int &#124; None | 有效的设备指针（基指针或内部切片）。 |
-| access_size | int | 预期访问的字节跨度。为 0 时导出剩余切片长度。默认值：`0`。 |
+| dev_ptr | int &#124; None | 由 AXCL runtime 管理的有效设备内存句柄（基句柄或内部切片）。 |
+| access_size | int | 预期访问的字节跨度。为 0 时导出剩余切片长度。不得超过从 `dev_ptr` 到其分配或注册末尾的字节数。默认值：`0`。 |
 
-#### 2.106.3. 返回值
+#### 2.112.3. 返回值
 
 - `desc`: *dict* — 接收物理/虚拟地址描述符。
-- `ret`: *int* — 成功返回 0，否则返回错误码。
+- `ret`: *int* — 已成功返回设备地址。失败。
 
-#### 2.106.4. 说明
+#### 2.112.4. 说明
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1380`。
-
-#### 2.106.5. 示例
+#### 2.112.5. 示例
 
 ```python
 desc, ret = axcl.rt.mem_get_dev_addr(dev_ptr, access_size)
@@ -4928,11 +5034,11 @@ desc, ret = axcl.rt.mem_get_dev_addr(dev_ptr, access_size)
 
 <a id="axcl.rt.mem_map_dev_addr"></a>
 
-### 2.107. axcl.rt.mem_map_dev_addr
+### 2.113. axcl.rt.mem_map_dev_addr
 
 将外部设备内存注册为临时映射的设备指针。
 
-#### 2.107.1. 函数
+#### 2.113.1. 函数
 
 **Python 调用**
 
@@ -4946,24 +5052,22 @@ dev_ptr, ret = axcl.rt.mem_map_dev_addr(desc)
 axclError axclrtMemMapDevAddr(const axclrtDevMemDesc *desc, void **devPtr);
 ```
 
-#### 2.107.2. 参数
+#### 2.113.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| desc | dict &#124; None | 描述设备物理地址、大小和设备 ID 的描述符。 |
+| desc | dict &#124; None | 描述该区间 Device PA、可选 Native Device VA、大小和设备 ID 的描述符。不得为 None。`size` 和 `device_pa` 必须非零，`flags` 必须为 0，`device_id` 必须标识调用进程中已激活的设备。 |
 
-#### 2.107.3. 返回值
+#### 2.113.3. 返回值
 
-- `dev_ptr`: *int* — 接收映射后的设备指针句柄。
-- `ret`: *int* — 成功返回 0，否则返回错误码。
+- `dev_ptr`: *int* — 接收此注册的基句柄，其偏移 0 对应 `device_pa`。将该值原样传给 axclrtMemUnmapDevAddr。
+- `ret`: *int* — 已成功注册外部设备内存。失败。
 
-#### 2.107.4. 说明
+#### 2.113.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1416`。
-
-#### 2.107.5. 示例
+#### 2.113.5. 示例
 
 ```python
 dev_ptr, ret = axcl.rt.mem_map_dev_addr(desc)
@@ -4973,11 +5077,11 @@ dev_ptr, ret = axcl.rt.mem_map_dev_addr(desc)
 
 <a id="axcl.rt.mem_unmap_dev_addr"></a>
 
-### 2.108. axcl.rt.mem_unmap_dev_addr
+### 2.114. axcl.rt.mem_unmap_dev_addr
 
 注销通过 axclrtMemMapDevAddr 注册的外部设备内存。
 
-#### 2.108.1. 函数
+#### 2.114.1. 函数
 
 **Python 调用**
 
@@ -4991,23 +5095,21 @@ ret = axcl.rt.mem_unmap_dev_addr(dev_ptr)
 axclError axclrtMemUnmapDevAddr(void *devPtr);
 ```
 
-#### 2.108.2. 参数
+#### 2.114.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dev_ptr | int &#124; None | axclrtMemMapDevAddr 返回的设备基指针。 |
+| dev_ptr | int &#124; None | axclrtMemMapDevAddr 返回的设备基指针。不得为 None。 |
 
-#### 2.108.3. 返回值
+#### 2.114.3. 返回值
 
-- `ret`: *int* — 成功返回 0，否则返回错误码。
+- `ret`: *int* — 已成功注销外部设备内存。失败。
 
-#### 2.108.4. 说明
+#### 2.114.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1450`。
-
-#### 2.108.5. 示例
+#### 2.114.5. 示例
 
 ```python
 ret = axcl.rt.mem_unmap_dev_addr(dev_ptr)
@@ -5017,11 +5119,11 @@ ret = axcl.rt.mem_unmap_dev_addr(dev_ptr)
 
 <a id="axcl.rt.ipc_mem_get_export_key"></a>
 
-### 2.109. axcl.rt.ipc_mem_get_export_key
+### 2.115. axcl.rt.ipc_mem_get_export_key
 
 为设备内存分配导出 IPC 内存共享密钥。
 
-#### 2.109.1. 函数
+#### 2.115.1. 函数
 
 **Python 调用**
 
@@ -5035,26 +5137,24 @@ key, ret = axcl.rt.ipc_mem_get_export_key(dev_ptr, len, flags)
 axclError axclrtIpcMemGetExportKey(void *devPtr, char *key, size_t len, uint32_t flags);
 ```
 
-#### 2.109.2. 参数
+#### 2.115.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| dev_ptr | int &#124; None | Device 内存基地址。 |
-| len | int | 密钥字符串缓冲区长度，必须为 AXCL_IPC_KEY_MAX_LEN（65）。默认值：`65`。 |
-| flags | int | IPC 导出标志：AXCL_IPC_EXPORT_FLAG_DEFAULT 或 AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION。默认值：`0`。 |
+| dev_ptr | int &#124; None | 要导出的设备内存基地址。不得为 None。 |
+| len | int | 密钥缓冲区长度，单位为字节，必须正好为 AXCL_IPC_KEY_MAX_LEN。默认值：`65`。 |
+| flags | int | 导出标志。必须为 AXCL_IPC_EXPORT_FLAG_DEFAULT 或 AXCL_IPC_EXPORT_FLAG_DISABLE_PID_VALIDATION。默认值：`0`。 |
 
-#### 2.109.3. 返回值
+#### 2.115.3. 返回值
 
 - `key`: *str* — 导出的 IPC 密钥字符串。
-- `ret`: *int* — 成功返回 0，否则返回错误码。
+- `ret`: *int* — 设备内存已导出，并已返回其 IPC 密钥。失败。
 
-#### 2.109.4. 说明
+#### 2.115.4. 说明
 
 返回类型：`tuple[str, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1481`。
-
-#### 2.109.5. 示例
+#### 2.115.5. 示例
 
 ```python
 key, ret = axcl.rt.ipc_mem_get_export_key(dev_ptr, len, flags)
@@ -5064,11 +5164,11 @@ key, ret = axcl.rt.ipc_mem_get_export_key(dev_ptr, len, flags)
 
 <a id="axcl.rt.ipc_mem_set_import_pid"></a>
 
-### 2.110. axcl.rt.ipc_mem_set_import_pid
+### 2.116. axcl.rt.ipc_mem_set_import_pid
 
 为导出的 IPC 内存密钥设置目标 TGID 白名单。
 
-#### 2.110.1. 函数
+#### 2.116.1. 函数
 
 **Python 调用**
 
@@ -5082,25 +5182,23 @@ ret = axcl.rt.ipc_mem_set_import_pid(key, tgid_list, num)
 axclError axclrtIpcMemSetImportPid(const char *key, const int32_t *tgid_list, uint32_t num);
 ```
 
-#### 2.110.2. 参数
+#### 2.116.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| key | str &#124; bytes &#124; None | 以空字符结尾的 IPC 密钥字符串。 |
-| tgid_list | int | 指向允许导入的原始 TGID 数组的指针。 |
-| num | int | tgid_list 中的 TGID 条目数。 |
+| key | str &#124; bytes &#124; None | axclrtIpcMemGetExportKey 返回的以空字符结尾的 IPC 密钥字符串。不得为 None。 |
+| tgid_list | int | 目标进程 Host TGID（原始 TGID）数组。 |
+| num | int | `tgid_list` 中目标 Host TGID 的数量（1 <= num <= AXCL_IPC_MAX_TARGETS）。 |
 
-#### 2.110.3. 返回值
+#### 2.116.3. 返回值
 
-- `ret`: *int* — 成功返回 0，否则返回错误码。
+- `ret`: *int* — 已成功为 `key` 设置导入白名单。失败。
 
-#### 2.110.4. 说明
+#### 2.116.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1520`。
-
-#### 2.110.5. 示例
+#### 2.116.5. 示例
 
 ```python
 ret = axcl.rt.ipc_mem_set_import_pid(key, tgid_list, num)
@@ -5110,11 +5208,11 @@ ret = axcl.rt.ipc_mem_set_import_pid(key, tgid_list, num)
 
 <a id="axcl.rt.ipc_mem_import_by_key"></a>
 
-### 2.111. axcl.rt.ipc_mem_import_by_key
+### 2.117. axcl.rt.ipc_mem_import_by_key
 
 通过密钥将 IPC 内存句柄导入调用进程。
 
-#### 2.111.1. 函数
+#### 2.117.1. 函数
 
 **Python 调用**
 
@@ -5128,24 +5226,22 @@ dev_ptr, ret = axcl.rt.ipc_mem_import_by_key(key)
 axclError axclrtIpcMemImportByKey(void **devPtr, const char *key);
 ```
 
-#### 2.111.2. 参数
+#### 2.117.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| key | str &#124; bytes &#124; None | 以空字符结尾的 IPC 密钥字符串。 |
+| key | str &#124; bytes &#124; None | axclrtIpcMemGetExportKey 返回的以空字符结尾的 IPC 密钥字符串。不得为 None。 |
 
-#### 2.111.3. 返回值
+#### 2.117.3. 返回值
 
-- `dev_ptr`: *int* — 接收映射后的本地设备内存指针。
-- `ret`: *int* — 成功返回 0，否则返回错误码。
+- `dev_ptr`: *int* — 接收调用者地址空间中导入的设备内存句柄。
+- `ret`: *int* — 已导入共享设备内存并返回其句柄。失败。
 
-#### 2.111.4. 说明
+#### 2.117.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1555`。
-
-#### 2.111.5. 示例
+#### 2.117.5. 示例
 
 ```python
 dev_ptr, ret = axcl.rt.ipc_mem_import_by_key(key)
@@ -5155,11 +5251,11 @@ dev_ptr, ret = axcl.rt.ipc_mem_import_by_key(key)
 
 <a id="axcl.rt.ipc_mem_close"></a>
 
-### 2.112. axcl.rt.ipc_mem_close
+### 2.118. axcl.rt.ipc_mem_close
 
 关闭进程间共享内存密钥。
 
-#### 2.112.1. 函数
+#### 2.118.1. 函数
 
 **Python 调用**
 
@@ -5173,23 +5269,21 @@ ret = axcl.rt.ipc_mem_close(key)
 axclError axclrtIpcMemClose(const char *key);
 ```
 
-#### 2.112.2. 参数
+#### 2.118.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| key | str &#124; bytes &#124; None | 以空字符结尾的 IPC 密钥字符串。 |
+| key | str &#124; bytes &#124; None | 以空字符结尾的 IPC 密钥字符串。不得为 None。 |
 
-#### 2.112.3. 返回值
+#### 2.118.3. 返回值
 
-- `ret`: *int* — 成功返回 0，否则返回错误码。
+- `ret`: *int* — 已成功释放调用进程为 `key` 持有的 IPC 引用。失败。
 
-#### 2.112.4. 说明
+#### 2.118.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_memory.py:1589`。
-
-#### 2.112.5. 示例
+#### 2.118.5. 示例
 
 ```python
 ret = axcl.rt.ipc_mem_close(key)
@@ -5199,11 +5293,11 @@ ret = axcl.rt.ipc_mem_close(key)
 
 <a id="axcl.rt.create_stream"></a>
 
-### 2.113. axcl.rt.create_stream
+### 2.119. axcl.rt.create_stream
 
 创建 Stream。
 
-#### 2.113.1. 函数
+#### 2.119.1. 函数
 
 **Python 调用**
 
@@ -5217,22 +5311,20 @@ stream, ret = axcl.rt.create_stream()
 axclError axclrtCreateStream(axclrtStream *stream);
 ```
 
-#### 2.113.2. 参数
+#### 2.119.2. 参数
 
 不适用
 
-#### 2.113.3. 返回值
+#### 2.119.3. 返回值
 
 - `stream`: *int* — 成功时接收创建的 Stream 句柄。
 - `ret`: *int* — Stream 已成功创建。失败。
 
-#### 2.113.4. 说明
+#### 2.119.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_stream.py:158`。
-
-#### 2.113.5. 示例
+#### 2.119.5. 示例
 
 ```python
 stream, ret = axcl.rt.create_stream()
@@ -5242,11 +5334,11 @@ stream, ret = axcl.rt.create_stream()
 
 <a id="axcl.rt.destroy_stream"></a>
 
-### 2.114. axcl.rt.destroy_stream
+### 2.120. axcl.rt.destroy_stream
 
-销毁已创建的 Stream（源码未提供创建接口引用）。
+销毁由 axclrtCreateStream 创建的 Stream。
 
-#### 2.114.1. 函数
+#### 2.120.1. 函数
 
 **Python 调用**
 
@@ -5260,23 +5352,21 @@ ret = axcl.rt.destroy_stream(stream)
 axclError axclrtDestroyStream(axclrtStream stream);
 ```
 
-#### 2.114.2. 参数
+#### 2.120.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| stream | int &#124; None | 返回的 Stream 句柄（源码未提供接口引用）。 |
+| stream | int &#124; None | axclrtCreateStream 返回的 Stream 句柄。 |
 
-#### 2.114.3. 返回值
+#### 2.120.3. 返回值
 
 - `ret`: *int* — Stream 已成功同步并销毁。失败。
 
-#### 2.114.4. 说明
+#### 2.120.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_stream.py:189`。
-
-#### 2.114.5. 示例
+#### 2.120.5. 示例
 
 ```python
 ret = axcl.rt.destroy_stream(stream)
@@ -5286,11 +5376,11 @@ ret = axcl.rt.destroy_stream(stream)
 
 <a id="axcl.rt.destroy_stream_force"></a>
 
-### 2.115. axcl.rt.destroy_stream_force
+### 2.121. axcl.rt.destroy_stream_force
 
 立即销毁 Stream，不等待已提交任务完成。
 
-#### 2.115.1. 函数
+#### 2.121.1. 函数
 
 **Python 调用**
 
@@ -5304,23 +5394,21 @@ ret = axcl.rt.destroy_stream_force(stream)
 axclError axclrtDestroyStreamForce(axclrtStream stream);
 ```
 
-#### 2.115.2. 参数
+#### 2.121.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| stream | int &#124; None | 返回的 Stream 句柄（源码未提供接口引用）。 |
+| stream | int &#124; None | axclrtCreateStream 返回的 Stream 句柄。 |
 
-#### 2.115.3. 返回值
+#### 2.121.3. 返回值
 
 - `ret`: *int* — Stream 已成功销毁。失败。
 
-#### 2.115.4. 说明
+#### 2.121.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_stream.py:220`。
-
-#### 2.115.5. 示例
+#### 2.121.5. 示例
 
 ```python
 ret = axcl.rt.destroy_stream_force(stream)
@@ -5330,11 +5418,11 @@ ret = axcl.rt.destroy_stream_force(stream)
 
 <a id="axcl.rt.stream_query"></a>
 
-### 2.116. axcl.rt.stream_query
+### 2.122. axcl.rt.stream_query
 
 查询指定 Stream 是否有未完成的任务。
 
-#### 2.116.1. 函数
+#### 2.122.1. 函数
 
 **Python 调用**
 
@@ -5348,24 +5436,22 @@ status, ret = axcl.rt.stream_query(stream)
 axclError axclrtStreamQuery(axclrtStream stream, axclrtStreamStatus *status);
 ```
 
-#### 2.116.2. 参数
+#### 2.122.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| stream | int &#124; None | 返回的 Stream 句柄（源码未提供接口引用）。 |
+| stream | int &#124; None | axclrtCreateStream 返回的 Stream 句柄。 |
 
-#### 2.116.3. 返回值
+#### 2.122.3. 返回值
 
 - `status`: *int* — 成功时接收 Stream 的任务完成状态。
 - `ret`: *int* — 已成功返回 Stream 的任务完成状态。失败。
 
-#### 2.116.4. 说明
+#### 2.122.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_stream.py:251`。
-
-#### 2.116.5. 示例
+#### 2.122.5. 示例
 
 ```python
 status, ret = axcl.rt.stream_query(stream)
@@ -5375,11 +5461,11 @@ status, ret = axcl.rt.stream_query(stream)
 
 <a id="axcl.rt.synchronize_stream"></a>
 
-### 2.117. axcl.rt.synchronize_stream
+### 2.123. axcl.rt.synchronize_stream
 
 阻塞等待调用本函数前提交到 Stream 的所有任务完成。
 
-#### 2.117.1. 函数
+#### 2.123.1. 函数
 
 **Python 调用**
 
@@ -5393,23 +5479,21 @@ ret = axcl.rt.synchronize_stream(stream)
 axclError axclrtSynchronizeStream(axclrtStream stream);
 ```
 
-#### 2.117.2. 参数
+#### 2.123.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| stream | int &#124; None | 返回的 Stream 句柄（源码未提供接口引用）。 |
+| stream | int &#124; None | axclrtCreateStream 返回的 Stream 句柄。 |
 
-#### 2.117.3. 返回值
+#### 2.123.3. 返回值
 
 - `ret`: *int* — 此前提交到 Stream 的所有任务均已成功完成。失败。
 
-#### 2.117.4. 说明
+#### 2.123.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_stream.py:285`。
-
-#### 2.117.5. 示例
+#### 2.123.5. 示例
 
 ```python
 ret = axcl.rt.synchronize_stream(stream)
@@ -5419,11 +5503,11 @@ ret = axcl.rt.synchronize_stream(stream)
 
 <a id="axcl.rt.synchronize_stream_with_timeout"></a>
 
-### 2.118. axcl.rt.synchronize_stream_with_timeout
+### 2.124. axcl.rt.synchronize_stream_with_timeout
 
 在指定超时时间内，阻塞等待调用本函数前提交到 Stream 的所有任务完成。
 
-#### 2.118.1. 函数
+#### 2.124.1. 函数
 
 **Python 调用**
 
@@ -5437,24 +5521,22 @@ ret = axcl.rt.synchronize_stream_with_timeout(stream, timeout)
 axclError axclrtSynchronizeStreamWithTimeout(axclrtStream stream, int32_t timeout);
 ```
 
-#### 2.118.2. 参数
+#### 2.124.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| stream | int &#124; None | 返回的 Stream 句柄（源码未提供接口引用）。 |
+| stream | int &#124; None | axclrtCreateStream 返回的 Stream 句柄。 |
 | timeout | int | 超时时间，单位为毫秒。`-1` 表示无限等待。 |
 
-#### 2.118.3. 返回值
+#### 2.124.3. 返回值
 
 - `ret`: *int* — 此前提交到 Stream 的所有任务均已在超时时间内成功完成。失败。
 
-#### 2.118.4. 说明
+#### 2.124.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_stream.py:316`。
-
-#### 2.118.5. 示例
+#### 2.124.5. 示例
 
 ```python
 ret = axcl.rt.synchronize_stream_with_timeout(stream, timeout)
@@ -5464,11 +5546,11 @@ ret = axcl.rt.synchronize_stream_with_timeout(stream, timeout)
 
 <a id="axcl.rt.exec_worker"></a>
 
-### 2.119. axcl.rt.exec_worker
+### 2.125. axcl.rt.exec_worker
 
 在当前 Context 关联的 Device 上启动 userworker 进程。
 
-#### 2.119.1. 函数
+#### 2.125.1. 函数
 
 **Python 调用**
 
@@ -5482,25 +5564,23 @@ pid, ret = axcl.rt.exec_worker(path, argv)
 axclError axclrtExecWorker(const char *path, const int32_t *argc, const char *argv[], uint32_t *pid);
 ```
 
-#### 2.119.2. 参数
+#### 2.125.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | path | str &#124; bytes &#124; None | userworker 可执行文件的 Device 路径。 |
-| argv | list | 可选参数数组。在以下情况下必需（源码条件不完整）。 |
+| argv | list | 可选参数列表。None 或空列表表示没有参数。条目不得为 None。这些条目在程序名之后传给 userworker，因此 userworker 收到的 `argv[0]` 为 `path`。 |
 
-#### 2.119.3. 返回值
+#### 2.125.3. 返回值
 
 - `pid`: *int* — 成功时接收 Device 进程 ID。
 - `ret`: *int* — userworker 已成功启动并初始化。失败。
 
-#### 2.119.4. 说明
+#### 2.125.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_usrwork.py:204`。
-
-#### 2.119.5. 示例
+#### 2.125.5. 示例
 
 ```python
 pid, ret = axcl.rt.exec_worker(path, argv)
@@ -5510,11 +5590,11 @@ pid, ret = axcl.rt.exec_worker(path, argv)
 
 <a id="axcl.rt.kill_worker"></a>
 
-### 2.120. axcl.rt.kill_worker
+### 2.126. axcl.rt.kill_worker
 
 终止并回收 userworker 进程。
 
-#### 2.120.1. 函数
+#### 2.126.1. 函数
 
 **Python 调用**
 
@@ -5528,23 +5608,21 @@ ret = axcl.rt.kill_worker(pid)
 axclError axclrtKillWorker(uint32_t pid);
 ```
 
-#### 2.120.2. 参数
+#### 2.126.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| pid | int | 返回的 Device 进程 ID（源码未提供接口引用）。 |
+| pid | int | axclrtExecWorker 返回的 Device 进程 ID。 |
 
-#### 2.120.3. 返回值
+#### 2.126.3. 返回值
 
 - `ret`: *int* — 进程及其 Host 端通信资源已释放。失败。
 
-#### 2.120.4. 说明
+#### 2.126.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_usrwork.py:242`。
-
-#### 2.120.5. 示例
+#### 2.126.5. 示例
 
 ```python
 ret = axcl.rt.kill_worker(pid)
@@ -5554,11 +5632,11 @@ ret = axcl.rt.kill_worker(pid)
 
 <a id="axcl.rt.worker_send"></a>
 
-### 2.121. axcl.rt.worker_send
+### 2.127. axcl.rt.worker_send
 
 向 userworker 进程发送一条完整消息。
 
-#### 2.121.1. 函数
+#### 2.127.1. 函数
 
 **Python 调用**
 
@@ -5572,26 +5650,24 @@ ret = axcl.rt.worker_send(pid, buf, size, timeout)
 axclError axclrtWorkerSend(uint32_t pid, const void *buf, uint32_t size, int32_t timeout);
 ```
 
-#### 2.121.2. 参数
+#### 2.127.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| pid | int | 返回的 Device 进程 ID（源码未提供接口引用）。 |
+| pid | int | axclrtExecWorker 返回的 Device 进程 ID。 |
 | buf | int &#124; None | 消息数据。 |
 | size | int | 消息大小，单位为字节。必须大于零。 |
-| timeout | int | 超时时间，单位为毫秒。使用（源码说明不完整）。 |
+| timeout | int | 超时时间，单位为毫秒。使用 NO_TIMEOUT 表示无限等待；其他负值无效。 |
 
-#### 2.121.3. 返回值
+#### 2.127.3. 返回值
 
 - `ret`: *int* — 已成功发送完整消息。失败。
 
-#### 2.121.4. 说明
+#### 2.127.4. 说明
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl_rt_usrwork.py:273`。
-
-#### 2.121.5. 示例
+#### 2.127.5. 示例
 
 ```python
 ret = axcl.rt.worker_send(pid, buf, size, timeout)
@@ -5601,11 +5677,11 @@ ret = axcl.rt.worker_send(pid, buf, size, timeout)
 
 <a id="axcl.rt.worker_recv"></a>
 
-### 2.122. axcl.rt.worker_recv
+### 2.128. axcl.rt.worker_recv
 
 从 userworker 进程接收一条完整消息。
 
-#### 2.122.1. 函数
+#### 2.128.1. 函数
 
 **Python 调用**
 
@@ -5619,27 +5695,25 @@ recvlen, ret = axcl.rt.worker_recv(pid, buf, bufsize, timeout)
 axclError axclrtWorkerRecv(uint32_t pid, void *buf, uint32_t bufsize, uint32_t *recvlen, int32_t timeout);
 ```
 
-#### 2.122.2. 参数
+#### 2.128.2. 参数
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| pid | int | 返回的 Device 进程 ID（源码未提供接口引用）。 |
+| pid | int | axclrtExecWorker 返回的 Device 进程 ID。 |
 | buf | int | 接收消息的缓冲区。 |
-| bufsize | int | 容量（源码未说明对象）。 |
-| timeout | int | 超时时间，单位为毫秒。使用（源码说明不完整）。 |
+| bufsize | int | `buf` 的容量，单位为字节。必须大于零。 |
+| timeout | int | 超时时间，单位为毫秒。使用 NO_TIMEOUT 表示无限等待；为零时，如果没有完整消息可用则立即返回。其他负值无效。 |
 
-#### 2.122.3. 返回值
+#### 2.128.3. 返回值
 
 - `recvlen`: *int* — 实际完整消息长度；消息内容写入调用者提供的 buf。
 - `ret`: *int* — 已成功接收完整消息。失败。
 
-#### 2.122.4. 说明
+#### 2.128.4. 说明
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/rt/axcl_rt_usrwork.py:310`。
-
-#### 2.122.5. 示例
+#### 2.128.5. 示例
 
 ```python
 recvlen, ret = axcl.rt.worker_recv(pid, buf, bufsize, timeout)

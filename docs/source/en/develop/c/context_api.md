@@ -37,7 +37,7 @@ AXCL_EXPORT axclError axclrtCreateContext(axclrtContext *context, int32_t device
 
 #### Note
 
-- If [axclrtSetDevice](device_api.md#axclrtSetDevice) has not been called to activate the specified device, this function activates the device before creating the Context.
+- On success, this function adds one activation reference to the specified device, opening the device first if it is not active. [axclrtDestroyContext](#axclrtDestroyContext) releases that reference.
 - The new Context replaces the calling thread's current Context, including the default Context bound by [axclrtSetDevice](device_api.md#axclrtSetDevice). If this function fails, the binding is unchanged.
 - Each explicitly created Context contains an implicitly created default Stream.
 - Every explicitly created Context must be explicitly destroyed with [axclrtDestroyContext](#axclrtDestroyContext).
@@ -111,7 +111,7 @@ AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
 - Before calling this function, destroy all Streams explicitly created in this Context; otherwise, this function fails and the Context is not destroyed.
 - This function blocks until work in the Context's default Stream completes, and then destroys the default Stream automatically.
 - After the Context is destroyed successfully, the runtime removes all bindings to it from all threads. A thread whose current Context is destroyed becomes unbound: neither an earlier Context nor the default Context becomes current again. Call [axclrtSetCurrentContext](#axclrtSetCurrentContext) or [axclrtSetDevice](device_api.md#axclrtSetDevice) before calling APIs that need a current Context.
-- This function releases the device activation reference held by the Context. If that is the final reference, the device is closed; serialize such a call with [axclrtMallocHost](memory_api.md#axclrtMallocHost) and [axclrtFreeHost](memory_api.md#axclrtFreeHost) calls in the process.
+- This function releases the device activation reference held by the Context. If that is the final reference, the device is closed; serialize such a call with [axclrtMallocHost](memory_api.md#axclrtMallocHost) and [axclrtFreeHost](memory_api.md#axclrtFreeHost) calls in the process. If an unpaired [axclrtResetDevice](device_api.md#axclrtResetDevice) has already released that reference, the Context is destroyed but this function returns an error.
 - This function cannot destroy the default Context created by [axclrtSetDevice](device_api.md#axclrtSetDevice). The default Context is destroyed by [axclrtResetDevice](device_api.md#axclrtResetDevice).
 - If multiple threads destroy the same Context concurrently, exactly one call succeeds; the others fail and release no device activation reference.
 

@@ -37,7 +37,7 @@ AXCL_EXPORT axclError axclrtCreateContext(axclrtContext *context, int32_t device
 
 #### 2.1.4. 说明
 
-- 如果尚未调用 [axclrtSetDevice](device_api.md#axclrtSetDevice) 激活指定设备，本函数将先激活指定设备，再创建 Context。
+- 成功时，本函数为指定设备增加一次激活引用，设备未激活时先打开设备。该引用由 [axclrtDestroyContext](#axclrtDestroyContext) 释放。
 - 新 Context 替换调用线程原来的当前 Context，包括 [axclrtSetDevice](device_api.md#axclrtSetDevice) 绑定的默认 Context。本函数失败时，线程绑定保持不变。
 - 每个显式创建的 Context 都会包含一个隐式创建的默认 Stream。
 - 显式创建的 Context 必须通过 [axclrtDestroyContext](#axclrtDestroyContext) 显式销毁。
@@ -111,7 +111,7 @@ AXCL_EXPORT axclError axclrtDestroyContext(axclrtContext context);
 - 调用本函数前，必须先销毁在该 Context 中显式创建的所有 Stream，否则本函数失败，且 Context 不会被销毁。
 - 本函数会阻塞等待 Context 的默认 Stream 中的任务完成，然后自动销毁默认 Stream。
 - 成功销毁 Context 后，运行时会删除所有线程中指向该 Context 的绑定。当前 Context 被销毁的线程变为未绑定状态：之前的 Context 和默认 Context 都不会重新成为当前 Context。之后调用需要当前 Context 的接口前，须先调用 [axclrtSetCurrentContext](#axclrtSetCurrentContext) 或 [axclrtSetDevice](device_api.md#axclrtSetDevice)。
-- 本函数会释放该 Context 持有的设备激活引用。如果这是最后一个引用，设备将被关闭；此类调用需要与进程内的 [axclrtMallocHost](memory_api.md#axclrtMallocHost) 和 [axclrtFreeHost](memory_api.md#axclrtFreeHost) 调用串行执行。
+- 本函数会释放该 Context 持有的设备激活引用。如果这是最后一个引用，设备将被关闭；此类调用需要与进程内的 [axclrtMallocHost](memory_api.md#axclrtMallocHost) 和 [axclrtFreeHost](memory_api.md#axclrtFreeHost) 调用串行执行。如果该引用已被未配对的 [axclrtResetDevice](device_api.md#axclrtResetDevice) 释放，Context 仍会被销毁，但本函数返回错误。
 - 本函数不能销毁由 [axclrtSetDevice](device_api.md#axclrtSetDevice) 创建的默认 Context。默认 Context 由 [axclrtResetDevice](device_api.md#axclrtResetDevice) 销毁。
 - 多个线程并发销毁同一个 Context 时，只有一次调用成功，其余调用失败，且不释放设备激活引用。
 

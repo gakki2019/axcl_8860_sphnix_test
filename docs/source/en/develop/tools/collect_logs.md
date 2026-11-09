@@ -54,7 +54,7 @@ When calling the tool from a script, check its exit status: `0` means the log pa
 | --- | --- |
 | Host system | Operating system version, CPU, memory, disk space, PCIe device list and topology, and details of the whole PCIe path from the root port to each card (including PCIe switches in between) |
 | AXCL installation | Package version and integrity check, install and uninstall logs, driver build status |
-| Kernel and drivers | Kernel logs (including the previous boot), interrupt statistics, version, parameters and status of the AXCL driver modules |
+| Kernel and drivers | Kernel logs (including the previous boot), interrupt statistics, version, parameters and status of the AXCL driver modules, and the AXCL driver modules installed for each kernel on the system |
 | AXCL runtime | AXCL runtime logs on the host, crash files (minidumps) written when an application crashes, AXCL environment variables |
 | Devices | System logs, AXCL logs, crash files, kernel logs, interrupt statistics, memory information and driver status of every card |
 

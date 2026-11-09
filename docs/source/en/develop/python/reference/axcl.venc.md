@@ -71,6 +71,8 @@
 - [axcl.venc.get_adv_param](#axcl.venc.get_adv_param): Retrieves advanced encoding parameters for a VENC channel. This API queries the current advanced encoder parameters for an encoding channel, such as the motion estimation vertical search range.
 - [axcl.venc.set_cir_param](#axcl.venc.set_cir_param): Sets CIR (Cyclic Intra Refresh) parameters for a VENC channel. This API configures cyclic intra refresh parameters for an encoding channel. CIR refreshes selected MBs or CTBs as intra-coded blocks periodically, which helps improve error resilience without inserting a full I-frame.
 - [axcl.venc.get_cir_param](#axcl.venc.get_cir_param): Retrieves CIR (Cyclic Intra Refresh) parameters for a VENC channel. This API queries the current cyclic intra refresh parameters for an encoding channel, including the start MB or CTB index and refresh interval.
+- [axcl.venc.set_skip_bias](#axcl.venc.set_skip_bias): Sets MB skip bias parameters for a VENC channel. When enabled, the encoder compares each 32x32 block of the input picture with the content at the time the block was last encoded. Blocks judged static are biased to skip mode, which saves bitrate in static areas.
+- [axcl.venc.get_skip_bias](#axcl.venc.get_skip_bias): Retrieves MB skip bias parameters for a VENC channel.
 
 <br>
 
@@ -786,7 +788,7 @@ AX_S32 AX_VENC_ReleaseStream(VENC_CHN VeChn, const AX_VENC_STREAM_T *pstStream);
 | Name | Type | Description |
 |---|---|---|
 | ve_chn | int | VENC channel ID. Valid range: [0, |
-| stream | dict &#124; None | Pointer to stream information returned by |
+| stream | dict &#124; None | Pointer to stream information returned by AX_VENC_GetStream. |
 
 #### 2.17.3. Returns
 
@@ -1947,7 +1949,7 @@ AX_S32 AX_VENC_SetJpegParam(VENC_CHN VeChn, const AX_VENC_JPEG_PARAM_T *pstJpegP
 | Name | Type | Description |
 |---|---|---|
 | ve_chn | int | VENC channel ID. Valid range: [0, |
-| jpeg_param | dict &#124; None | Pointer to JPEG parameter structure. It must not be NULL. For fields that are not being changed, keep the values returned by |
+| jpeg_param | dict &#124; None | Pointer to JPEG parameter structure. It must not be NULL. For fields that are not being changed, keep the values returned by AX_VENC_GetJpegParam. |
 
 #### 2.44.3. Returns
 
@@ -2953,4 +2955,90 @@ Return type: `tuple[dict, int]`.
 
 ```python
 cir_param, ret = axcl.venc.get_cir_param(ve_chn)
+```
+
+<br>
+
+<a id="axcl.venc.set_skip_bias"></a>
+
+### 2.68. axcl.venc.set_skip_bias
+
+Sets MB skip bias parameters for a VENC channel. When enabled, the encoder compares each 32x32 block of the input picture with the content at the time the block was last encoded. Blocks judged static are biased to skip mode, which saves bitrate in static areas.
+
+#### 2.68.1. Function
+
+**Python Call**
+
+```python
+ret = axcl.venc.set_skip_bias(ve_chn, skip_bias_param)
+```
+
+**C++ Prototype**
+
+```cpp
+AX_S32 AX_VENC_SetSkipBias(VENC_CHN VeChn, const AX_VENC_SKIP_BIAS_PARAM_T *pstSkipBiasParam);
+```
+
+#### 2.68.2. Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| ve_chn | int | VENC channel ID. Valid range: [0, |
+| skip_bias_param | dict &#124; None | Pointer to MB skip bias parameter structure. It must not be NULL. |
+
+#### 2.68.3. Returns
+
+- `ret`: *int* — Success. Failure. See VENC error codes.
+
+#### 2.68.4. Note
+
+Return type: `int`.
+
+#### 2.68.5. Example
+
+```python
+ret = axcl.venc.set_skip_bias(ve_chn, skip_bias_param)
+```
+
+<br>
+
+<a id="axcl.venc.get_skip_bias"></a>
+
+### 2.69. axcl.venc.get_skip_bias
+
+Retrieves MB skip bias parameters for a VENC channel.
+
+#### 2.69.1. Function
+
+**Python Call**
+
+```python
+skip_bias_param, ret = axcl.venc.get_skip_bias(ve_chn)
+```
+
+**C++ Prototype**
+
+```cpp
+AX_S32 AX_VENC_GetSkipBias(VENC_CHN VeChn, AX_VENC_SKIP_BIAS_PARAM_T *pstSkipBiasParam);
+```
+
+#### 2.69.2. Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| ve_chn | int | VENC channel ID. Valid range: [0, |
+
+#### 2.69.3. Returns
+
+- `skip_bias_param`: *dict* — Pointer to MB skip bias parameter structure. It must not be NULL.
+- `ret`: *int* — Success. Failure. See VENC error codes.
+
+#### 2.69.4. Note
+
+Return type: `tuple[dict, int]`.
+
+#### 2.69.5. Example
+
+```python
+skip_bias_param, ret = axcl.venc.get_skip_bias(ve_chn)
 ```

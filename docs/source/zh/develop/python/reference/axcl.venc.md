@@ -69,6 +69,8 @@
 - [axcl.venc.get_adv_param](#axcl.venc.get_adv_param): 获取 VENC 通道的高级编码参数。本接口查询编码通道的当前高级编码参数，如运动估计垂直搜索范围。
 - [axcl.venc.set_cir_param](#axcl.venc.set_cir_param): 设置 VENC 通道的 CIR（循环帧内刷新）参数。本接口配置编码通道的循环帧内刷新参数。CIR 周期性地将选定 MB 或 CTB 刷新为帧内编码块，有助于在不插入完整 I 帧的情况下提高容错能力。
 - [axcl.venc.get_cir_param](#axcl.venc.get_cir_param): 获取 VENC 通道的 CIR（循环帧内刷新）参数。本接口查询编码通道的当前循环帧内刷新参数，包括起始 MB 或 CTB 索引和刷新间隔。
+- [axcl.venc.set_skip_bias](#axcl.venc.set_skip_bias): 设置 VENC 通道的 MB skip 偏置参数。使能后编码器将输入图像每个 32x32 块与该块上次编码时的内容比较，判定为静止的块偏向 skip 模式，以节省静止区域的码率。
+- [axcl.venc.get_skip_bias](#axcl.venc.get_skip_bias): 获取 VENC 通道的 MB skip 偏置参数。
 
 <br>
 
@@ -107,8 +109,6 @@ AX_S32 AX_VENC_Init(const AX_VENC_MOD_ATTR_T *pstModAttr);
 #### 2.1.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:1824`。
 
 #### 2.1.5. 示例
 
@@ -149,8 +149,6 @@ AX_S32 AX_VENC_Deinit(void);
 #### 2.2.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:1855`。
 
 #### 2.2.5. 示例
 
@@ -195,8 +193,6 @@ AX_S32 AX_VENC_CreateChn(VENC_CHN VeChn, const AX_VENC_CHN_ATTR_T *pstAttr);
 
 返回类型：`int`。
 
-源码：`python/axcl/venc/ax_venc.py:1883`。
-
 #### 2.3.5. 示例
 
 ```python
@@ -240,8 +236,6 @@ AX_S32 AX_VENC_CreateChnEx(VENC_CHN *pVeChn, const AX_VENC_CHN_ATTR_T *pstAttr);
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:1916`。
-
 #### 2.4.5. 示例
 
 ```python
@@ -283,8 +277,6 @@ AX_S32 AX_VENC_DestroyChn(VENC_CHN VeChn);
 #### 2.5.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:1950`。
 
 #### 2.5.5. 示例
 
@@ -330,8 +322,6 @@ AX_S32 AX_VENC_SendFrame(VENC_CHN VeChn, const AX_VIDEO_FRAME_INFO_T *pstFrame, 
 
 返回类型：`int`。
 
-源码：`python/axcl/venc/ax_venc.py:1981`。
-
 #### 2.6.5. 示例
 
 ```python
@@ -376,8 +366,6 @@ AX_S32 AX_VENC_SendFrameEx(VENC_CHN VeChn, const AX_USER_FRAME_INFO_T *pstFrame,
 
 返回类型：`int`。
 
-源码：`python/axcl/venc/ax_venc.py:2016`。
-
 #### 2.7.5. 示例
 
 ```python
@@ -421,8 +409,6 @@ AX_S32 AX_VENC_SetChnThreadBind(VENC_CHN VeChn, const AX_VENC_CHN_THREAD_BIND_T 
 
 返回类型：`int`。
 
-源码：`python/axcl/venc/ax_venc.py:2051`。
-
 #### 2.8.5. 示例
 
 ```python
@@ -465,8 +451,6 @@ AX_S32 AX_VENC_GetChnThreadBind(VENC_CHN VeChn, AX_VENC_CHN_THREAD_BIND_T *pstTh
 #### 2.9.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/venc/ax_venc.py:2084`。
 
 #### 2.9.5. 示例
 
@@ -512,8 +496,6 @@ AX_S32 AX_VENC_SelectGrp(VENC_GRP grpId, AX_CHN_STREAM_STATUS_T *pstChnStrmState
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2118`。
-
 #### 2.10.5. 示例
 
 ```python
@@ -555,8 +537,6 @@ AX_S32 AX_VENC_SelectClearGrp(VENC_GRP grpId);
 #### 2.11.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2154`。
 
 #### 2.11.5. 示例
 
@@ -601,8 +581,6 @@ AX_S32 AX_VENC_SelectGrpAddChn(VENC_GRP grpId, VENC_CHN VeChn);
 
 返回类型：`int`。
 
-源码：`python/axcl/venc/ax_venc.py:2185`。
-
 #### 2.12.5. 示例
 
 ```python
@@ -645,8 +623,6 @@ AX_S32 AX_VENC_SelectGrpDeleteChn(VENC_GRP grpId, VENC_CHN VeChn);
 #### 2.13.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2218`。
 
 #### 2.13.5. 示例
 
@@ -691,8 +667,6 @@ AX_S32 AX_VENC_SelectGrpQuery(VENC_GRP grpId, AX_VENC_SELECT_GRP_PARAM_T *pstGrp
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2251`。
-
 #### 2.14.5. 示例
 
 ```python
@@ -734,8 +708,6 @@ AX_S32 AX_VENC_GetFd(VENC_CHN VeChn);
 #### 2.15.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2285`。
 
 #### 2.15.5. 示例
 
@@ -781,8 +753,6 @@ AX_S32 AX_VENC_GetStream(VENC_CHN VeChn, AX_VENC_STREAM_T *pstStream, AX_S32 s32
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2316`。
-
 #### 2.16.5. 示例
 
 ```python
@@ -816,7 +786,7 @@ AX_S32 AX_VENC_ReleaseStream(VENC_CHN VeChn, const AX_VENC_STREAM_T *pstStream);
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | ve_chn | int | VENC 通道 ID。有效范围：[0,（源码未提供上限）。 |
-| stream | dict &#124; None | 指向返回的码流信息的指针（源码未提供接口引用）。 |
+| stream | dict &#124; None | 指向 AX_VENC_GetStream 返回的码流信息的指针。 |
 
 #### 2.17.3. 返回值
 
@@ -825,8 +795,6 @@ AX_S32 AX_VENC_ReleaseStream(VENC_CHN VeChn, const AX_VENC_STREAM_T *pstStream);
 #### 2.17.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2352`。
 
 #### 2.17.5. 示例
 
@@ -871,8 +839,6 @@ AX_S32 AX_VENC_GetStreamBufInfo(VENC_CHN VeChn, AX_VENC_STREAM_BUF_INFO_T *pstSt
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2385`。
-
 #### 2.18.5. 示例
 
 ```python
@@ -916,8 +882,6 @@ AX_S32 AX_VENC_StartRecvFrame(VENC_CHN VeChn, const AX_VENC_RECV_PIC_PARAM_T *ps
 
 返回类型：`int`。
 
-源码：`python/axcl/venc/ax_venc.py:2419`。
-
 #### 2.19.5. 示例
 
 ```python
@@ -959,8 +923,6 @@ AX_S32 AX_VENC_StopRecvFrame(VENC_CHN VeChn);
 #### 2.20.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2452`。
 
 #### 2.20.5. 示例
 
@@ -1004,8 +966,6 @@ AX_S32 AX_VENC_ResetChn(VENC_CHN VeChn);
 
 返回类型：`int`。
 
-源码：`python/axcl/venc/ax_venc.py:2483`。
-
 #### 2.21.5. 示例
 
 ```python
@@ -1048,8 +1008,6 @@ AX_S32 AX_VENC_SetRoiAttr(VENC_CHN VeChn, const AX_VENC_ROI_ATTR_T *pstRoiAttr);
 #### 2.22.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2514`。
 
 #### 2.22.5. 示例
 
@@ -1095,8 +1053,6 @@ AX_S32 AX_VENC_GetRoiAttr(VENC_CHN VeChn, AX_U32 u32Index, AX_VENC_ROI_ATTR_T *p
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2547`。
-
 #### 2.23.5. 示例
 
 ```python
@@ -1139,8 +1095,6 @@ AX_S32 AX_VENC_SetRcParam(VENC_CHN VeChn, const AX_VENC_RC_PARAM_T *pstRcParam);
 #### 2.24.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2583`。
 
 #### 2.24.5. 示例
 
@@ -1185,8 +1139,6 @@ AX_S32 AX_VENC_GetRcParam(VENC_CHN VeChn, AX_VENC_RC_PARAM_T *pstRcParam);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2616`。
-
 #### 2.25.5. 示例
 
 ```python
@@ -1229,8 +1181,6 @@ AX_S32 AX_VENC_SetModParam(AX_VENC_ENCODER_TYPE_E enVencType, const AX_VENC_MOD_
 #### 2.26.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2650`。
 
 #### 2.26.5. 示例
 
@@ -1275,8 +1225,6 @@ AX_S32 AX_VENC_GetModParam(AX_VENC_ENCODER_TYPE_E enVencType, AX_VENC_MOD_PARAM_
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2683`。
-
 #### 2.27.5. 示例
 
 ```python
@@ -1319,8 +1267,6 @@ AX_S32 AX_VENC_SetVuiParam(VENC_CHN VeChn, const AX_VENC_VUI_PARAM_T *pstVuiPara
 #### 2.28.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2717`。
 
 #### 2.28.5. 示例
 
@@ -1365,8 +1311,6 @@ AX_S32 AX_VENC_GetVuiParam(VENC_CHN VeChn, AX_VENC_VUI_PARAM_T *pstVuiParam);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2750`。
-
 #### 2.29.5. 示例
 
 ```python
@@ -1409,8 +1353,6 @@ AX_S32 AX_VENC_SetChnAttr(VENC_CHN VeChn, const AX_VENC_CHN_ATTR_T *pstChnAttr);
 #### 2.30.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2784`。
 
 #### 2.30.5. 示例
 
@@ -1455,8 +1397,6 @@ AX_S32 AX_VENC_GetChnAttr(VENC_CHN VeChn, AX_VENC_CHN_ATTR_T *pstChnAttr);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2817`。
-
 #### 2.31.5. 示例
 
 ```python
@@ -1499,8 +1439,6 @@ AX_S32 AX_VENC_SetRateJamStrategy(VENC_CHN VeChn, const AX_VENC_RATE_JAM_CFG_T *
 #### 2.32.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2851`。
 
 #### 2.32.5. 示例
 
@@ -1545,8 +1483,6 @@ AX_S32 AX_VENC_GetRateJamStrategy(VENC_CHN VeChn, AX_VENC_RATE_JAM_CFG_T *pstRat
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2884`。
-
 #### 2.33.5. 示例
 
 ```python
@@ -1589,8 +1525,6 @@ AX_S32 AX_VENC_SetSuperFrameStrategy(VENC_CHN VeChn, const AX_VENC_SUPERFRAME_CF
 #### 2.34.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2918`。
 
 #### 2.34.5. 示例
 
@@ -1635,8 +1569,6 @@ AX_S32 AX_VENC_GetSuperFrameStrategy(VENC_CHN VeChn, AX_VENC_SUPERFRAME_CFG_T *p
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:2951`。
-
 #### 2.35.5. 示例
 
 ```python
@@ -1679,8 +1611,6 @@ AX_S32 AX_VENC_SetIntraRefresh(VENC_CHN VeChn, const AX_VENC_INTRA_REFRESH_T *ps
 #### 2.36.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:2985`。
 
 #### 2.36.5. 示例
 
@@ -1725,8 +1655,6 @@ AX_S32 AX_VENC_GetIntraRefresh(VENC_CHN VeChn, AX_VENC_INTRA_REFRESH_T *pstIntra
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3018`。
-
 #### 2.37.5. 示例
 
 ```python
@@ -1769,8 +1697,6 @@ AX_S32 AX_VENC_SetUsrData(VENC_CHN VeChn, const AX_VENC_USR_DATA_T *pstUsrData);
 #### 2.38.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3052`。
 
 #### 2.38.5. 示例
 
@@ -1816,8 +1742,6 @@ AX_S32 AX_VENC_GetUsrData(VENC_CHN VeChn, AX_VENC_USR_DATA_T *pstUsrData);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3085`。
-
 #### 2.39.5. 示例
 
 ```python
@@ -1860,8 +1784,6 @@ AX_S32 AX_VENC_SetSliceSplit(VENC_CHN VeChn, const AX_VENC_SLICE_SPLIT_T *pstSli
 #### 2.40.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3121`。
 
 #### 2.40.5. 示例
 
@@ -1906,8 +1828,6 @@ AX_S32 AX_VENC_GetSliceSplit(VENC_CHN VeChn, AX_VENC_SLICE_SPLIT_T *pstSliceSpli
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3154`。
-
 #### 2.41.5. 示例
 
 ```python
@@ -1950,8 +1870,6 @@ AX_S32 AX_VENC_RequestIDR(VENC_CHN VeChn, AX_BOOL bInstant);
 #### 2.42.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3188`。
 
 #### 2.42.5. 示例
 
@@ -1996,8 +1914,6 @@ AX_S32 AX_VENC_QueryStatus(VENC_CHN VeChn, AX_VENC_CHN_STATUS_T *pstStatus);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3221`。
-
 #### 2.43.5. 示例
 
 ```python
@@ -2031,7 +1947,7 @@ AX_S32 AX_VENC_SetJpegParam(VENC_CHN VeChn, const AX_VENC_JPEG_PARAM_T *pstJpegP
 | 名称 | 类型 | 说明 |
 |---|---|---|
 | ve_chn | int | VENC 通道 ID。有效范围：[0,（源码未提供上限）。 |
-| jpeg_param | dict &#124; None | 指向 JPEG 参数结构体的指针。不得为 NULL。对于不修改的字段，保留相应接口返回的值（源码未提供接口引用）。 |
+| jpeg_param | dict &#124; None | 指向 JPEG 参数结构体的指针。不得为 NULL。对于不修改的字段，保留 AX_VENC_GetJpegParam 返回的值。 |
 
 #### 2.44.3. 返回值
 
@@ -2040,8 +1956,6 @@ AX_S32 AX_VENC_SetJpegParam(VENC_CHN VeChn, const AX_VENC_JPEG_PARAM_T *pstJpegP
 #### 2.44.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3255`。
 
 #### 2.44.5. 示例
 
@@ -2086,8 +2000,6 @@ AX_S32 AX_VENC_GetJpegParam(VENC_CHN VeChn, AX_VENC_JPEG_PARAM_T *pstJpegParam);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3288`。
-
 #### 2.45.5. 示例
 
 ```python
@@ -2130,8 +2042,6 @@ AX_S32 AX_VENC_JpegEncodeOneFrame(AX_JPEG_ENCODE_ONCE_PARAMS_T *pstJpegParam);
 #### 2.46.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/venc/ax_venc.py:3322`。
 
 #### 2.46.5. 示例
 
@@ -2179,8 +2089,6 @@ AX_S32 AX_VENC_JpegGetThumbnail(const AX_VOID *pRawData, AX_U32 u32RawDataSize, 
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3355`。
-
 #### 2.47.5. 示例
 
 ```python
@@ -2223,8 +2131,6 @@ AX_S32 AX_VENC_SetDblkAttr(VENC_CHN VeChn, const AX_VENC_DBLK_ATTR_T *pstDblkAtt
 #### 2.48.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3398`。
 
 #### 2.48.5. 示例
 
@@ -2269,8 +2175,6 @@ AX_S32 AX_VENC_GetDblkAttr(VENC_CHN VeChn, AX_VENC_DBLK_ATTR_T *pstDblkAttr);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3431`。
-
 #### 2.49.5. 示例
 
 ```python
@@ -2313,8 +2217,6 @@ AX_S32 AX_VENC_SetH265Sao(VENC_CHN VeChn, const AX_VENC_SAO_PARAM_T *pstSaoParam
 #### 2.50.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3465`。
 
 #### 2.50.5. 示例
 
@@ -2359,8 +2261,6 @@ AX_S32 AX_VENC_GetH265Sao(VENC_CHN VeChn, AX_VENC_SAO_PARAM_T *pstSaoParam);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3498`。
-
 #### 2.51.5. 示例
 
 ```python
@@ -2403,8 +2303,6 @@ AX_S32 AX_VENC_SetDeBreathEffect(VENC_CHN VeChn, const AX_VENC_DEBREATH_EFFECT_T
 #### 2.52.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3532`。
 
 #### 2.52.5. 示例
 
@@ -2449,8 +2347,6 @@ AX_S32 AX_VENC_GetDeBreathEffect(VENC_CHN VeChn, AX_VENC_DEBREATH_EFFECT_T *pstD
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3565`。
-
 #### 2.53.5. 示例
 
 ```python
@@ -2493,8 +2389,6 @@ AX_S32 AX_VENC_SetSkinDetectAttr(VENC_CHN VeChn, const AX_VENC_SKIN_DETECT_ATTR_
 #### 2.54.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3599`。
 
 #### 2.54.5. 示例
 
@@ -2539,8 +2433,6 @@ AX_S32 AX_VENC_GetSkinDetectAttr(VENC_CHN VeChn, AX_VENC_SKIN_DETECT_ATTR_T *pst
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3632`。
-
 #### 2.55.5. 示例
 
 ```python
@@ -2583,8 +2475,6 @@ AX_S32 AX_VENC_SetChromaProtectAttr(VENC_CHN VeChn, const AX_VENC_CHROMA_PROTECT
 #### 2.56.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3666`。
 
 #### 2.56.5. 示例
 
@@ -2629,8 +2519,6 @@ AX_S32 AX_VENC_GetChromaProtectAttr(VENC_CHN VeChn, AX_VENC_CHROMA_PROTECT_ATTR_
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3699`。
-
 #### 2.57.5. 示例
 
 ```python
@@ -2673,8 +2561,6 @@ AX_S32 AX_VENC_SetTrailDetectAttr(VENC_CHN VeChn, const AX_VENC_TRAIL_DETECT_ATT
 #### 2.58.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3733`。
 
 #### 2.58.5. 示例
 
@@ -2719,8 +2605,6 @@ AX_S32 AX_VENC_GetTrailDetectAttr(VENC_CHN VeChn, AX_VENC_TRAIL_DETECT_ATTR_T *p
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3768`。
-
 #### 2.59.5. 示例
 
 ```python
@@ -2763,8 +2647,6 @@ AX_S32 AX_VENC_SetSrdParam(VENC_CHN VeChn, const AX_VENC_SRD_PARAM_T *pstSrdPara
 #### 2.60.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3802`。
 
 #### 2.60.5. 示例
 
@@ -2809,8 +2691,6 @@ AX_S32 AX_VENC_GetSrdParam(VENC_CHN VeChn, AX_VENC_SRD_PARAM_T *pstSrdParam);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3835`。
-
 #### 2.61.5. 示例
 
 ```python
@@ -2853,8 +2733,6 @@ AX_S32 AX_VENC_SetAdvEncMapParam(VENC_CHN VeChn, const AX_VENC_ADV_ENC_MAP_PARAM
 #### 2.62.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3869`。
 
 #### 2.62.5. 示例
 
@@ -2899,8 +2777,6 @@ AX_S32 AX_VENC_GetAdvEncMapParam(VENC_CHN VeChn, AX_VENC_ADV_ENC_MAP_PARAM_T *ps
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3904`。
-
 #### 2.63.5. 示例
 
 ```python
@@ -2943,8 +2819,6 @@ AX_S32 AX_VENC_SetAdvParam(VENC_CHN VeChn, const AX_VENC_ADV_PARAM_T *pstAdvPara
 #### 2.64.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:3938`。
 
 #### 2.64.5. 示例
 
@@ -2989,8 +2863,6 @@ AX_S32 AX_VENC_GetAdvParam(VENC_CHN VeChn, AX_VENC_ADV_PARAM_T *pstAdvParam);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:3971`。
-
 #### 2.65.5. 示例
 
 ```python
@@ -3033,8 +2905,6 @@ AX_S32 AX_VENC_SetCirParam(VENC_CHN VeChn, const AX_VENC_CIR_PARAM_T *pstCirPara
 #### 2.66.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/venc/ax_venc.py:4005`。
 
 #### 2.66.5. 示例
 
@@ -3079,10 +2949,94 @@ AX_S32 AX_VENC_GetCirParam(VENC_CHN VeChn, AX_VENC_CIR_PARAM_T *pstCirParam);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/venc/ax_venc.py:4038`。
-
 #### 2.67.5. 示例
 
 ```python
 cir_param, ret = axcl.venc.get_cir_param(ve_chn)
+```
+
+<br>
+
+<a id="axcl.venc.set_skip_bias"></a>
+
+### 2.68. axcl.venc.set_skip_bias
+
+设置 VENC 通道的 MB skip 偏置参数。使能后编码器将输入图像每个 32x32 块与该块上次编码时的内容比较，判定为静止的块偏向 skip 模式，以节省静止区域的码率。
+
+#### 2.68.1. 函数
+
+**Python 调用**
+
+```python
+ret = axcl.venc.set_skip_bias(ve_chn, skip_bias_param)
+```
+
+**C++ 原型**
+
+```cpp
+AX_S32 AX_VENC_SetSkipBias(VENC_CHN VeChn, const AX_VENC_SKIP_BIAS_PARAM_T *pstSkipBiasParam);
+```
+
+#### 2.68.2. 参数
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| ve_chn | int | VENC 通道 ID。有效范围：[0,（源码未提供上限）。 |
+| skip_bias_param | dict &#124; None | 指向 MB skip 偏置参数结构体的指针。不得为 NULL。包含使能开关和 skip 等级。 |
+
+#### 2.68.3. 返回值
+
+- `ret`: *int* — 成功。失败。参见 VENC 错误码。
+
+#### 2.68.4. 说明
+
+返回类型：`int`。
+
+#### 2.68.5. 示例
+
+```python
+ret = axcl.venc.set_skip_bias(ve_chn, skip_bias_param)
+```
+
+<br>
+
+<a id="axcl.venc.get_skip_bias"></a>
+
+### 2.69. axcl.venc.get_skip_bias
+
+获取 VENC 通道的 MB skip 偏置参数。
+
+#### 2.69.1. 函数
+
+**Python 调用**
+
+```python
+skip_bias_param, ret = axcl.venc.get_skip_bias(ve_chn)
+```
+
+**C++ 原型**
+
+```cpp
+AX_S32 AX_VENC_GetSkipBias(VENC_CHN VeChn, AX_VENC_SKIP_BIAS_PARAM_T *pstSkipBiasParam);
+```
+
+#### 2.69.2. 参数
+
+| 名称 | 类型 | 说明 |
+|---|---|---|
+| ve_chn | int | VENC 通道 ID。有效范围：[0,（源码未提供上限）。 |
+
+#### 2.69.3. 返回值
+
+- `skip_bias_param`: *dict* — 指向 MB skip 偏置参数结构体的指针。不得为 NULL。成功时包含当前 skip 偏置配置。
+- `ret`: *int* — 成功。失败。参见 VENC 错误码。
+
+#### 2.69.4. 说明
+
+返回类型：`tuple[dict, int]`。
+
+#### 2.69.5. 示例
+
+```python
+skip_bias_param, ret = axcl.venc.get_skip_bias(ve_chn)
 ```

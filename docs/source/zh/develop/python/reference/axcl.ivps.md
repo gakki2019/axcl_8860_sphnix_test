@@ -82,8 +82,6 @@ AX_S32 AX_IVPS_Init(void);
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1329`。
-
 #### 2.1.5. 示例
 
 ```python
@@ -123,8 +121,6 @@ AX_S32 AX_IVPS_Deinit(void);
 #### 2.2.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:1357`。
 
 #### 2.2.5. 示例
 
@@ -169,8 +165,6 @@ AX_S32 AX_IVPS_CreateGrp(IVPS_GRP IvpsGrp, const AX_IVPS_GRP_ATTR_T *ptGrpAttr);
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1385`。
-
 #### 2.3.5. 示例
 
 ```python
@@ -214,8 +208,6 @@ AX_S32 AX_IVPS_CreateGrpEx(IVPS_GRP *IvpsGrp, const AX_IVPS_GRP_ATTR_T *ptGrpAtt
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1418`。
-
 #### 2.4.5. 示例
 
 ```python
@@ -257,8 +249,6 @@ AX_S32 AX_IVPS_DestroyGrp(IVPS_GRP IvpsGrp);
 #### 2.5.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:1452`。
 
 #### 2.5.5. 示例
 
@@ -302,8 +292,6 @@ AX_S32 AX_IVPS_StartGrp(IVPS_GRP IvpsGrp);
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1483`。
-
 #### 2.6.5. 示例
 
 ```python
@@ -345,8 +333,6 @@ AX_S32 AX_IVPS_StopGrp(IVPS_GRP IvpsGrp);
 #### 2.7.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:1514`。
 
 #### 2.7.5. 示例
 
@@ -391,8 +377,6 @@ AX_S32 AX_IVPS_SendFrame(IVPS_GRP IvpsGrp, const AX_VIDEO_FRAME_T *ptFrame, AX_S
 #### 2.8.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:1545`。
 
 #### 2.8.5. 示例
 
@@ -439,8 +423,6 @@ AX_S32 AX_IVPS_GetChnFrame(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, AX_VIDEO_FRAME_T 
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1580`。
-
 #### 2.9.5. 示例
 
 ```python
@@ -485,8 +467,6 @@ AX_S32 AX_IVPS_ReleaseChnFrame(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, const AX_VIDE
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1618`。
-
 #### 2.10.5. 示例
 
 ```python
@@ -529,8 +509,6 @@ AX_S32 AX_IVPS_EnableChn(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn);
 #### 2.11.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:1653`。
 
 #### 2.11.5. 示例
 
@@ -575,8 +553,6 @@ AX_S32 AX_IVPS_DisableChn(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn);
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1686`。
-
 #### 2.12.5. 示例
 
 ```python
@@ -620,8 +596,6 @@ AX_S32 AX_IVPS_GetChnFd(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn);
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1719`。
-
 #### 2.13.5. 示例
 
 ```python
@@ -661,8 +635,6 @@ AX_S32 AX_IVPS_CloseAllFd(void);
 #### 2.14.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:1752`。
 
 #### 2.14.5. 示例
 
@@ -707,8 +679,6 @@ AX_S32 AX_IVPS_SetGrpAttr(IVPS_GRP IvpsGrp, const AX_IVPS_GRP_ATTR_T *ptGrpAttr)
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1780`。
-
 #### 2.15.5. 示例
 
 ```python
@@ -751,8 +721,6 @@ AX_S32 AX_IVPS_GetGrpAttr(IVPS_GRP IvpsGrp, AX_IVPS_GRP_ATTR_T *ptGrpAttr);
 #### 2.16.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/ivps/ax_ivps.py:1813`。
 
 #### 2.16.5. 示例
 
@@ -798,8 +766,6 @@ AX_S32 AX_IVPS_SetChnAttr(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, const AX_IVPS_CHN_
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1847`。
-
 #### 2.17.5. 示例
 
 ```python
@@ -844,8 +810,6 @@ AX_S32 AX_IVPS_GetChnAttr(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, AX_IVPS_CHN_ATTR_T
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1882`。
-
 #### 2.18.5. 示例
 
 ```python
@@ -889,8 +853,6 @@ AX_S32 AX_IVPS_SetGrpCrop(IVPS_GRP IvpsGrp, const AX_IVPS_CROP_INFO_T *ptCropInf
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1918`。
-
 #### 2.19.5. 示例
 
 ```python
@@ -933,8 +895,6 @@ AX_S32 AX_IVPS_GetGrpCrop(IVPS_GRP IvpsGrp, AX_IVPS_CROP_INFO_T *ptCropInfo);
 #### 2.20.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/ivps/ax_ivps.py:1951`。
 
 #### 2.20.5. 示例
 
@@ -980,8 +940,6 @@ AX_S32 AX_IVPS_SetChnCrop(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, const AX_IVPS_CROP
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:1985`。
-
 #### 2.21.5. 示例
 
 ```python
@@ -1025,8 +983,6 @@ AX_S32 AX_IVPS_GetChnCrop(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, AX_IVPS_CROP_INFO_
 #### 2.22.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/ivps/ax_ivps.py:2020`。
 
 #### 2.22.5. 示例
 
@@ -1072,8 +1028,6 @@ AX_S32 AX_IVPS_SetChnCascade(IVPS_GRP IvpsGrp, IVPS_CHN IvpsChn, AX_BOOL bCascad
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2056`。
-
 #### 2.23.5. 示例
 
 ```python
@@ -1116,8 +1070,6 @@ AX_S32 AX_IVPS_SetScaleCoefLevel(const AX_IVPS_SCALE_RANGE_T *ptScaleRange, cons
 #### 2.24.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:2091`。
 
 #### 2.24.5. 示例
 
@@ -1162,8 +1114,6 @@ AX_S32 AX_IVPS_GetScaleCoefLevel(const AX_IVPS_SCALE_RANGE_T *ptScaleRange, AX_I
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2124`。
-
 #### 2.25.5. 示例
 
 ```python
@@ -1206,8 +1156,6 @@ AX_S32 AX_IVPS_SetPaletteTable(const AX_IVPS_PALETTE_TABLE_T *ptPaletteTable);
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2158`。
-
 #### 2.26.5. 示例
 
 ```python
@@ -1248,8 +1196,6 @@ AX_S32 AX_IVPS_GetPaletteTable(AX_IVPS_PALETTE_TABLE_T *ptPaletteTable);
 #### 2.27.4. 说明
 
 返回类型：`tuple[dict, int]`。
-
-源码：`python/axcl/ivps/ax_ivps.py:2189`。
 
 #### 2.27.5. 示例
 
@@ -1296,8 +1242,6 @@ AX_S32 AX_IVPS_DrawLine(const AX_IVPS_RGN_CANVAS_INFO_T *ptCanvas, AX_IVPS_GDI_A
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2220`。
-
 #### 2.28.5. 示例
 
 ```python
@@ -1343,8 +1287,6 @@ AX_S32 AX_IVPS_DrawPolygon(const AX_IVPS_RGN_CANVAS_INFO_T *ptCanvas, AX_IVPS_GD
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2260`。
-
 #### 2.29.5. 示例
 
 ```python
@@ -1388,8 +1330,6 @@ AX_S32 AX_IVPS_DrawRect(const AX_IVPS_RGN_CANVAS_INFO_T *ptCanvas, AX_IVPS_GDI_A
 #### 2.30.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:2300`。
 
 #### 2.30.5. 示例
 
@@ -1436,8 +1376,6 @@ AX_S32 AX_IVPS_Csc(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSrc, AX_V
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2335`。
-
 #### 2.31.5. 示例
 
 ```python
@@ -1482,8 +1420,6 @@ AX_S32 AX_IVPS_CropResize(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSr
 #### 2.32.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:2372`。
 
 #### 2.32.5. 示例
 
@@ -1532,8 +1468,6 @@ AX_S32 AX_IVPS_CropResizeV2(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *pt
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2409`。
-
 #### 2.33.5. 示例
 
 ```python
@@ -1581,8 +1515,6 @@ AX_S32 AX_IVPS_AlphaBlending(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *p
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2456`。
-
 #### 2.34.5. 示例
 
 ```python
@@ -1627,8 +1559,6 @@ AX_S32 AX_IVPS_DrawOsd(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSrc, 
 #### 2.35.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:2499`。
 
 #### 2.35.5. 示例
 
@@ -1675,8 +1605,6 @@ AX_S32 AX_IVPS_DrawMosaic(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSr
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2539`。
-
 #### 2.36.5. 示例
 
 ```python
@@ -1712,7 +1640,7 @@ AX_S32 AX_IVPS_Rotation(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSrc,
 | engine | int | 处理引擎。当前 AXHELIX 实现支持（源码说明不完整）。 |
 | pt_src | dict &#124; None | 源视频帧。不得为 NULL。 |
 | pt_dst | dict &#124; None | 调用者提供的目标描述符，其地址和布局/容量字段作为输入。引用的数据区域接收输出。 |
-| rotation | int | 旋转角度。参见（源码未提供引用目标）。 |
+| rotation | int | 旋转角度。参见 AX_IVPS_ROTATION_E。 |
 | flip | int | AX_TRUE 启用垂直翻转；AX_FALSE 禁用垂直翻转。 |
 | mirror | int | AX_TRUE 启用水平镜像；AX_FALSE 禁用水平镜像。 |
 
@@ -1723,8 +1651,6 @@ AX_S32 AX_IVPS_Rotation(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSrc,
 #### 2.37.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_ivps.py:2579`。
 
 #### 2.37.5. 示例
 
@@ -1770,8 +1696,6 @@ AX_U64 AX_IVPS_GetBufferSize(AX_U16 uWidth, AX_U16 uHeight, AX_IMG_FORMAT_E eFor
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_ivps.py:2620`。
-
 #### 2.38.5. 示例
 
 ```python
@@ -1812,8 +1736,6 @@ AX_S32 AX_RGN_Create(AX_RGN_HANDLE *hRegion);
 #### 2.39.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/ivps/ax_rgn.py:151`。
 
 #### 2.39.5. 示例
 
@@ -1856,8 +1778,6 @@ AX_S32 AX_RGN_Destroy(AX_RGN_HANDLE hRegion);
 #### 2.40.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_rgn.py:182`。
 
 #### 2.40.5. 示例
 
@@ -1902,8 +1822,6 @@ AX_S32 AX_RGN_AttachToChn(AX_RGN_HANDLE hRegion, const AX_MOD_CHN_T *ptRgnChn);
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_rgn.py:213`。
-
 #### 2.41.5. 示例
 
 ```python
@@ -1947,8 +1865,6 @@ AX_S32 AX_RGN_DetachFromChn(AX_RGN_HANDLE hRegion, const AX_MOD_CHN_T *pRgnChn);
 
 返回类型：`int`。
 
-源码：`python/axcl/ivps/ax_rgn.py:246`。
-
 #### 2.42.5. 示例
 
 ```python
@@ -1991,8 +1907,6 @@ AX_S32 AX_RGN_Update(AX_RGN_HANDLE hRegion, const AX_RGN_DISP_GROUP_T *ptDisp);
 #### 2.43.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/ivps/ax_rgn.py:279`。
 
 #### 2.43.5. 示例
 

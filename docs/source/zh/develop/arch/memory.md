@@ -196,11 +196,31 @@ axclrtResetDevice(0);
 - 在拷贝完成前，源内存和目标内存都必须保持有效；在此之前不得读取目标内存，也不得释放任一缓冲区。
 ```
 
+<a id="memory-2d-copy"></a>
+
+### 2.4. 二维拷贝
+
+[axclrtMemcpy2d](../c/memory_api.md#axclrtMemcpy2d) 和 [axclrtMemcpy2dAsync](../c/memory_api.md#axclrtMemcpy2dAsync) 在 Host 与 Device 内存之间拷贝一个二维矩形：共 `height` 行，每行 `width` 字节，源和目的各自按 `spitch` / `dpitch` 换行，行与行之间的填充区（padding）不读不写。适用于图像行对齐、按固定间距存放的多段数据等场景，一次调用代替逐行拷贝。
+
+二维拷贝只支持 [AXCL_MEMCPY_HOST_TO_DEVICE](../c/reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) 和 [AXCL_MEMCPY_DEVICE_TO_HOST](../c/reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST)。同步、异步接口的完成语义和 Device 归属规则与一维拷贝相同。
+
+```c
+/* 把 Host 上按 1024 字节换行的 1000 x 256 矩形，拷贝到 Device 上按 2048 字节换行的位置。 */
+axclrtMemcpy2d(devMem, 2048, hostMem, 1024, 1000, 256, AXCL_MEMCPY_HOST_TO_DEVICE);
+```
+
+```{important}
+- 每一端的跨度为 `(height - 1) * pitch + width` 字节。Device 端的跨度必须落在同一块 Device 内存分配内；Host 端的跨度（包括 padding）必须是已映射的内存，Device-to-Host 拷贝时还必须可写。
+- 拷贝完成前，CPU 不能读写 Host 端跨度内的任何字节，包括 padding。
+- 在非 DMA coherent 的设备上（例如 AX8860 单板），Device-to-Host 二维拷贝的目的内存需要使用 [axclrtMallocHost](../c/memory_api.md#axclrtMallocHost) 分配；写入普通 `malloc` 内存会返回 `AXCL_ERR_COMM_UNSUPPORT`（两端 pitch 都等于 `width` 或只有一行时不受此限制）。
+- 行很短、行数很多时，拷贝速度明显低于相同数据量的一次连续拷贝。
+```
+
 <a id="memory-inter-device-copy"></a>
 
-### 2.4. 设备间拷贝
+### 2.5. 设备间拷贝
 
-两个 Device 之间的 Device-to-Device 拷贝在当前 Device（[axclrtMemcpy](../c/memory_api.md#axclrtMemcpy)）或 Stream 所属的 Device（[axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync)）上执行。该 Device 必须拥有源内存或目标内存之一，并且必须已通过 [axclrtDeviceEnablePeerAccess](../c/device_api.md#axclrtDeviceEnablePeerAccess) 开启从该 Device 到另一 Device 的 Peer Access。Peer Access 是单向的，作用于整个进程，并在调用 [axclrtDeviceDisablePeerAccess](../c/device_api.md#axclrtDeviceDisablePeerAccess) 之前一直保持开启。[axclrtDeviceCanAccessPeer](../c/device_api.md#axclrtDeviceCanAccessPeer) 用于查询该能力，要求源 Device 已激活。
+两个 Device 之间的 Device-to-Device 拷贝在当前 Device（[axclrtMemcpy](../c/memory_api.md#axclrtMemcpy)）或 Stream 所属的 Device（[axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync)）上执行。该 Device 必须拥有源内存或目标内存之一，并且必须已通过 [axclrtDeviceEnablePeerAccess](../c/device_api.md#axclrtDeviceEnablePeerAccess) 开启从该 Device 到另一 Device 的 Peer Access。Peer Access 是单向的，作用于整个进程，并在调用 [axclrtDeviceDisablePeerAccess](../c/device_api.md#axclrtDeviceDisablePeerAccess) 之前一直保持开启。[axclrtDeviceCanAccessPeer](../c/device_api.md#axclrtDeviceCanAccessPeer) 用于查询该能力，要求源 Device 已激活。设备间直接拷贝只支持同一张加速卡上的 Device；不同加速卡上的 Device 之间直接拷贝返回错误，需经 Host 中转。
 
 以下示例演示将 Device 0 上的内存复制到 Device 1。应用先激活 Device 0，确认两个 Device 之间支持 Peer Access，再分别开启两个方向的访问权限。以下代码省略错误处理。
 
@@ -248,7 +268,7 @@ axclFinalize();
 
 <a id="memory-external-device-memory"></a>
 
-### 2.5. 外部 Device 内存互操作
+### 2.6. 外部 Device 内存互操作
 
 以下示例展示 AXCL 内存与 NATIVE SDK 接口之间互相传递内存的两个方向，`AX_XXX_YYYY` 表示 NATIVE SDK 接口。以下代码省略错误码检查。
 
@@ -307,7 +327,7 @@ axclrtResetDevice(0);
 
 <a id="memory-ipc-shared-memory"></a>
 
-### 2.6. 跨进程共享内存
+### 2.7. 跨进程共享内存
 
 以下示例展示 Producer 进程分配内存，Consumer 进程导入并读取。两个进程之间传递 TGID 和 IPC Key 的方式由应用自行选择，示例中用 `send_to_xxx` / `receive_from_xxx` 表示。以下代码省略错误码检查。
 
@@ -397,6 +417,8 @@ AXCL 还提供 Device 内存置位和比较接口：
 | [axclrtIpcMemClose](../c/memory_api.md#axclrtIpcMemClose) | 关闭 IPC Key 并释放 IPC 引用 | Device 内存 |
 | [axclrtMemcpy](../c/memory_api.md#axclrtMemcpy) | 同步拷贝 Host / Device 数据 | Host 内存、Device 内存 |
 | [axclrtMemcpyAsync](../c/memory_api.md#axclrtMemcpyAsync) | 向 Stream 提交异步拷贝请求 | Host 内存、Device 内存 |
+| [axclrtMemcpy2d](../c/memory_api.md#axclrtMemcpy2d) | 同步拷贝 Host / Device 之间的二维矩形 | Host 内存、Device 内存 |
+| [axclrtMemcpy2dAsync](../c/memory_api.md#axclrtMemcpy2dAsync) | 向 Stream 提交异步二维矩形拷贝请求 | Host 内存、Device 内存 |
 | [axclrtMemset](../c/memory_api.md#axclrtMemset) | 同步设置 Device 内存内容 | Device 内存 |
 | [axclrtMemsetAsync](../c/memory_api.md#axclrtMemsetAsync) | 向 Stream 提交异步 Device 内存设置请求 | Device 内存 |
 | [axclrtMemcmp](../c/memory_api.md#axclrtMemcmp) | 同步比较两段 Device 内存 | Device 内存 |

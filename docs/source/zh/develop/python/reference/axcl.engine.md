@@ -61,8 +61,6 @@ const AX_CHAR * AX_ENGINE_GetVersion(void);
 
 返回类型：`str`。
 
-源码：`python/axcl/engine/ax_engine.py:597`。
-
 #### 2.1.5. 示例
 
 ```python
@@ -102,8 +100,6 @@ AX_VOID AX_ENGINE_NPUReset(void);
 #### 2.2.4. 说明
 
 返回类型：`None`。
-
-源码：`python/axcl/engine/ax_engine.py:625`。
 
 #### 2.2.5. 示例
 
@@ -147,8 +143,6 @@ AX_S32 AX_ENGINE_Init(AX_ENGINE_NPU_ATTR_T* pNpuAttr);
 
 返回类型：`int`。
 
-源码：`python/axcl/engine/ax_engine.py:653`。
-
 #### 2.3.5. 示例
 
 ```python
@@ -190,8 +184,6 @@ AX_S32 AX_ENGINE_GetVNPUAttr(AX_ENGINE_NPU_ATTR_T* pNpuAttr);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/engine/ax_engine.py:684`。
-
 #### 2.4.5. 示例
 
 ```python
@@ -231,8 +223,6 @@ AX_S32 AX_ENGINE_Deinit(void);
 #### 2.5.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/engine/ax_engine.py:715`。
 
 #### 2.5.5. 示例
 
@@ -278,8 +268,6 @@ AX_S32 AX_ENGINE_GetModelType(const AX_VOID* pData, AX_U32 nDataSize, AX_ENGINE_
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/engine/ax_engine.py:743`。
-
 #### 2.6.5. 示例
 
 ```python
@@ -323,8 +311,6 @@ AX_S32 AX_ENGINE_CreateHandle(AX_ENGINE_HANDLE *pHandle, const AX_VOID *pData, A
 #### 2.7.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/engine/ax_engine.py:780`。
 
 #### 2.7.5. 示例
 
@@ -371,8 +357,6 @@ AX_S32 AX_ENGINE_CreateHandleV2(AX_ENGINE_HANDLE* pHandle, const AX_VOID* pData,
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/engine/ax_engine.py:817`。
-
 #### 2.8.5. 示例
 
 ```python
@@ -414,8 +398,6 @@ AX_S32 AX_ENGINE_DestroyHandle(AX_ENGINE_HANDLE nHandle);
 #### 2.9.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/engine/ax_engine.py:856`。
 
 #### 2.9.5. 示例
 
@@ -460,8 +442,6 @@ AX_S32 AX_ENGINE_GetIOInfo(AX_ENGINE_HANDLE nHandle, AX_ENGINE_IO_INFO_T** pIO);
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/engine/ax_engine.py:887`。
-
 #### 2.10.5. 示例
 
 ```python
@@ -504,8 +484,6 @@ AX_S32 AX_ENGINE_GetGroupIOInfoCount(AX_ENGINE_HANDLE nHandle, AX_U32* pCount);
 #### 2.11.4. 说明
 
 返回类型：`tuple[int, int]`。
-
-源码：`python/axcl/engine/ax_engine.py:921`。
 
 #### 2.11.5. 示例
 
@@ -551,8 +529,6 @@ AX_S32 AX_ENGINE_GetGroupIOInfo(AX_ENGINE_HANDLE nHandle, AX_U32 nIndex, AX_ENGI
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/engine/ax_engine.py:955`。
-
 #### 2.12.5. 示例
 
 ```python
@@ -596,8 +572,6 @@ AX_S32 AX_ENGINE_GetHandleModelType(AX_ENGINE_HANDLE nHandle, AX_ENGINE_MODEL_TY
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/engine/ax_engine.py:991`。
-
 #### 2.13.5. 示例
 
 ```python
@@ -639,8 +613,6 @@ AX_S32 AX_ENGINE_CreateContext(AX_ENGINE_HANDLE handle);
 #### 2.14.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/engine/ax_engine.py:1025`。
 
 #### 2.14.5. 示例
 
@@ -685,8 +657,6 @@ AX_S32 AX_ENGINE_CreateContextV2(AX_ENGINE_HANDLE nHandle, AX_ENGINE_CONTEXT_T* 
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/engine/ax_engine.py:1056`。
-
 #### 2.15.5. 示例
 
 ```python
@@ -729,8 +699,6 @@ AX_S32 AX_ENGINE_RunSync(AX_ENGINE_HANDLE handle, AX_ENGINE_IO_T* pIO);
 #### 2.16.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/engine/ax_engine.py:1090`。
 
 #### 2.16.5. 示例
 
@@ -775,8 +743,6 @@ AX_S32 AX_ENGINE_RunSyncV2(AX_ENGINE_HANDLE handle, AX_ENGINE_CONTEXT_T context,
 #### 2.17.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/engine/ax_engine.py:1127`。
 
 #### 2.17.5. 示例
 
@@ -823,8 +789,6 @@ AX_S32 AX_ENGINE_RunGroupIOSync(AX_ENGINE_HANDLE handle, AX_ENGINE_CONTEXT_T con
 
 返回类型：`int`。
 
-源码：`python/axcl/engine/ax_engine.py:1166`。
-
 #### 2.18.5. 示例
 
 ```python
@@ -867,8 +831,6 @@ AX_S32 AX_ENGINE_SetAffinity(AX_ENGINE_HANDLE nHandle, AX_ENGINE_NPU_SET_T nNpuS
 #### 2.19.4. 说明
 
 返回类型：`int`。
-
-源码：`python/axcl/engine/ax_engine.py:1207`。
 
 #### 2.19.5. 示例
 
@@ -913,8 +875,6 @@ AX_S32 AX_ENGINE_GetAffinity(AX_ENGINE_HANDLE nHandle, AX_ENGINE_NPU_SET_T* pNpu
 
 返回类型：`tuple[int, int]`。
 
-源码：`python/axcl/engine/ax_engine.py:1240`。
-
 #### 2.20.5. 示例
 
 ```python
@@ -958,8 +918,6 @@ AX_S32 AX_ENGINE_GetCMMUsage(AX_ENGINE_HANDLE nHandle, AX_ENGINE_CMM_INFO_T* pCM
 
 返回类型：`tuple[dict, int]`。
 
-源码：`python/axcl/engine/ax_engine.py:1274`。
-
 #### 2.21.5. 示例
 
 ```python
@@ -1001,8 +959,6 @@ const AX_CHAR * AX_ENGINE_GetModelToolsVersion(AX_ENGINE_HANDLE nHandle);
 #### 2.22.4. 说明
 
 返回类型：`str`。
-
-源码：`python/axcl/engine/ax_engine.py:1308`。
 
 #### 2.22.5. 示例
 

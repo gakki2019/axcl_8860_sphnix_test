@@ -160,7 +160,7 @@ Get the chip name string.
 #### Function
 
 ```c
-AXCL_EXPORT const char* axclrtGetSocName();
+AXCL_EXPORT const char* axclrtGetSocName(void);
 ```
 
 #### Parameters

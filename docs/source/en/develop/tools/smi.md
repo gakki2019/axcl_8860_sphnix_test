@@ -7,12 +7,12 @@
 
 | Capability      | Description                                                                                         |
 | --------------- | --------------------------------------------------------------------------------------------------- |
-| Device summary  | Lists the firmware version, temperature, CPU/NPU utilization, and memory usage of every card, along with the processes running on it. |
-| Device details  | Shows detailed information about a card, including the UID, module frequencies, per-core NPU utilization, and PCI information. |
-| Live monitoring | Periodically refreshes the temperature, utilization, and memory usage of each card.                 |
+| Device summary  | Lists the firmware version, temperature, CPU/NPU utilization, and memory usage of every device, along with the processes running on it. |
+| Device details  | Shows detailed information about a device, including the UID, module frequencies, per-core NPU utilization, and PCI information. |
+| Live monitoring | Periodically refreshes the temperature, utilization, and memory usage of each device.               |
 | Remote shell    | Runs a shell command on a device and shows its output.                                               |
 | File transfer   | Uploads and downloads files or directories between the host and a device.                            |
-| Log collection  | Packages the device logs and downloads them to the host, for one card or, with `--all`, for every card. |
+| Log collection  | Packages the device logs and downloads them to the host, for one device or, with `--all`, for every device. |
 
 
 ## 2. Command Overview
@@ -35,20 +35,20 @@ Global options:
 
 | Option             | Default | Description                                                                                                                     |
 | ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `-d`, `--device`   | None    | Card index, starting from `0`. Without it, `info`, `watch`, and the summary show every card; `sh`, `push`, and `pull` require one card; `collect-log` requires `-d` or `--all`. |
+| `-d`, `--device`   | None    | Device index, starting from `0`. Without it, `info`, `watch`, and the summary show every device; `sh`, `push`, and `pull` require one device; `collect-log` requires `-d` or `--all`. |
 | `-n`, `--interval` | `2`     | Refresh interval of live monitoring in seconds; `0` is treated as `2`.                                                          |
 | `-v`, `--version`  | --      | Shows the version and exits.                                                                                                    |
 | `-h`, `--help`     | --      | Shows the help and exits.                                                                                                       |
 
 ```{note}
-- Card indexes always cover every device on the host and ignore `AXCL_VISIBLE_DEVICES`.
+- Device indexes always cover every device on the host and ignore `AXCL_VISIBLE_DEVICES`. The `Card` column and `card N` in the output below are also device indexes.
 - To keep the tables readable, `axcl-smi` does not print runtime logs to the terminal by default; set `AXCL_HOST_CONSOLE_LEVEL` to turn them on when troubleshooting, for example `AXCL_HOST_CONSOLE_LEVEL=3 axcl-smi info -d 0`.
 - Press `Ctrl+C` once and `axcl-smi` exits after the current operation or refresh completes. If it does not respond for a long time (for example, the device is unresponsive), press `Ctrl+C` again to force it to quit, which may leave a partially transferred file behind.
 ```
 
 ## 3. Device Summary
 
-Without a command, `axcl-smi` shows the summary of every card and the processes running on it:
+Without a command, `axcl-smi` shows the summary of every device and the processes running on it:
 
 ```bash
 root:/# axcl-smi
@@ -74,13 +74,13 @@ Fields:
 
 | Field                  | Description                                                  |
 | ---------------------- | ------------------------------------------------------------ |
-| `Card`                 | Card index.                                                  |
+| `Card`                 | Device index.                                                |
 | `Name`                 | Chip model.                                                  |
 | `Firmware`             | Device firmware version.                                     |
 | `Driver`               | Host driver version.                                         |
-| `Bus-Id`               | PCIe address of the card on the host.                        |
+| `Bus-Id`               | PCIe address of the device on the host.                      |
 | `Temp`                 | Chip temperature in degrees Celsius.                         |
-| `CPU` / `NPU`          | Device CPU and NPU utilization (NPU is the sum of all cores). |
+| `CPU` / `NPU`          | Device CPU and NPU utilization (NPU is the average of all cores). |
 | `Memory-Usage`         | Used and total device system memory.                         |
 | `CMM-Usage`            | Used and total device CMM memory.                            |
 | `Fan`, `Pwr:Usage/Cap` | Not supported in the current version; shown as `--`.         |
@@ -91,7 +91,7 @@ Fields:
 
 ## 4. Device Details
 
-`info` shows detailed information about a card. Compared with the summary, it adds the UID, module frequencies, per-core NPU utilization, and PCI information (some frequency entries are omitted in the example below):
+`info` shows detailed information about a device. Compared with the summary, it adds the UID, module frequencies, per-core NPU utilization, and PCI information (some frequency entries are omitted in the example below):
 
 ```bash
 root:/# axcl-smi info -d 0
@@ -151,17 +151,19 @@ PCI
     Current Width(x)    : 4
 ```
 
-Without `-d`, every card is shown in turn. Power and fan speed are not supported in the current version and are shown as `--`.
+Without `-d`, every device is shown in turn. Power and fan speed are not supported in the current version and are shown as `--`.
+
+The utilization of each NPU core is the average of its VNPUs, so a task that occupies the whole core counts as 100%.
 
 ## 5. Live Monitoring
 
 `watch` refreshes the display at the interval given by `-n`, which is handy for watching load changes:
 
 ```bash
-# Refresh the status of every card every 2 seconds
+# Refresh the status of every device every 2 seconds
 axcl-smi watch -n 2
 
-# Watch card 0 only, refreshing every second
+# Watch device 0 only, refreshing every second
 axcl-smi watch -d 0 -n 1
 ```
 
@@ -180,7 +182,7 @@ Without a command but with `-n`, `axcl-smi` also enters live monitoring, the sam
 
 ## 6. Remote Shell
 
-`sh` runs a shell command on the specified card and shows the output on the host. Wrap the whole command in double quotes; otherwise arguments starting with `-` are taken as `axcl-smi` options, and characters such as spaces, `*`, `|`, and `>` are handled by the host shell first. Use single quotes when the command contains `$` or backticks; otherwise they are expanded on the host first:
+`sh` runs a shell command on the specified device and shows the output on the host. Wrap the whole command in double quotes; otherwise arguments starting with `-` are taken as `axcl-smi` options, and characters such as spaces, `*`, `|`, and `>` are handled by the host shell first. Use single quotes when the command contains `$` or backticks; otherwise they are expanded on the host first:
 
 ```bash
 axcl-smi sh -d 0 "free"
@@ -225,7 +227,7 @@ axcl-smi pull -d 0 --recursive /tmp/deploy/assets ./download
 
 Notes:
 
-- Each transfer works with a single card.
+- Each transfer works with a single device.
 - Without `-r`, only a single regular file can be transferred, and empty files are not supported; with `-r`, only a directory, and empty files inside it are transferred normally.
 - Without `-r`, when the destination is an existing directory or ends with `/`, the file keeps its name inside that directory. When uploading to a directory on the device, end the destination with `/`; otherwise the tool first checks whether the destination is a directory and does not transfer if the check fails.
 - With `-r`, if the destination directory exists, the source directory is placed inside it as a whole; if it does not exist, it is created and receives the contents of the source directory. In both cases, the parent of the destination directory must already exist.
@@ -248,11 +250,11 @@ axcl-smi collect-log -d 0
 # Download to a given directory
 axcl-smi collect-log -d 0 /tmp/axcl-logs
 
-# Collect every card, one file per card
+# Collect every device, one file per device
 axcl-smi collect-log --all /tmp/axcl-logs
 ```
 
-The file name follows the `device<card>_log_<date>_<time>_<milliseconds>.tar.gz` format and extracts into a directory with the same name:
+The file name follows the `device<index>_log_<date>_<time>_<milliseconds>.tar.gz` format and extracts into a directory with the same name:
 
 ```text
 device0_log_20260923_101530_204.tar.gz
@@ -267,9 +269,9 @@ Notes:
 - Collection does not interrupt logs that are being written on the device; the archive holds their content at the time of collection.
 - `dmesg.txt` is the device kernel log. If it cannot be obtained, a notice is shown and the archive does not include it.
 - Collection fails when neither `AXSyslog` nor `axclLog` exists on the device.
-- Progress and warning messages go to stderr, tagged with the card index. If a log file is rotated or deleted during collection, it is reported there as well, and that file may be incomplete in the archive.
+- Progress and warning messages go to stderr, tagged with the device index. If a log file is rotated or deleted during collection, it is reported there as well, and that file may be incomplete in the archive.
 - If the output directory cannot be written, an error is reported right away. When running in a directory without write permission (such as `/usr/local/axhelix/bin`), specify an output directory, for example `axcl-smi collect-log -d 0 /tmp`.
-- `--all` collects the cards one by one and cannot be combined with `-d`. A failed card does not affect the others. The command ends with `collect-log: <succeeded>/<total> devices succeeded` (cards skipped because they did not respond count toward the total) and returns non-zero if any card failed. Pressing `Ctrl+C` during collection stops after the current card; if cards remain, they are skipped, the summary line ends with `(interrupted)`, and the command returns non-zero.
+- `--all` collects the devices one by one and cannot be combined with `-d`. A failed device does not affect the others. The command ends with `collect-log: <succeeded>/<total> devices succeeded` (devices skipped because they did not respond count toward the total) and returns non-zero if any device failed. Pressing `Ctrl+C` during collection stops after the current device; if devices remain, they are skipped, the summary line ends with `(interrupted)`, and the command returns non-zero.
 - Packaging may time out when there are many logs; increase [AXCL_SMI_SHELL_TIMEOUT](../../appendix/environment_variables.md#AXCL_SMI_SHELL_TIMEOUT) in that case.
 - Temporary files on the device are always cleaned up, whether or not the download succeeds. If packaging times out, a `.collect_*` directory or an unfinished `device*_log_*.tar.gz` may be left under `/opt/data` on the device; after making sure no other collection is running, remove it with `axcl-smi sh`.
 
@@ -289,16 +291,16 @@ When showing device information, an item that cannot be obtained does not stop t
 | Symptom                                                       | Possible cause                                           | Suggested action                                                     |
 | ------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------- |
 | `failed to initialize AXCL, ret = 0x...`                      | The driver is not loaded, no device is detected, or the AXCL environment variables are not set in the current shell | Make sure the driver is loaded, run `source /etc/profile`, and retry. |
-| `no AXCL devices available`                                   | No usable card was found                                 | Make sure the card is installed correctly and powered on.            |
-| `invalid device index: N`                                     | The card given by `-d` does not exist                    | Run `axcl-smi` to see the actual card indexes.                       |
-| `failed to create context for card N` / `... for device N`    | The card cannot be reached                               | Check the runtime log given in the message.                          |
-| `axcl-smi: card N: not responding (no reply within 1000 ms)` | The path from the host to the device is broken, or the device kernel does not respond | Check `dmesg` and `/proc/ax_proc/comm/info` on the host; reboot the card if needed. |
-| `axcl-smi: card N: offline`                                   | The card is offline                                      | Check `dmesg` on the host, confirm the card state, then reboot the card. |
+| `no AXCL devices available`                                   | No usable device was found                               | Make sure the device is installed correctly and powered on.          |
+| `invalid device index: N`                                     | The device given by `-d` does not exist                  | Run `axcl-smi` to see the actual device indexes.                     |
+| `failed to create context for card N` / `... for device N`    | The device cannot be reached                             | Check the runtime log given in the message.                          |
+| `axcl-smi: card N: not responding (no reply within 1000 ms)` | The path from the host to the device is broken, or the device kernel does not respond | Check `dmesg` and `/proc/ax_proc/comm/info` on the host; reboot the device if needed. |
+| `axcl-smi: card N: offline`                                   | The device is offline                                    | Check `dmesg` on the host, confirm the device state, then reboot the device. |
 | `axcl-smi: card N: slave_daemon not running`                  | The path is fine, but `slave_daemon` on the device is not running (not started, exited, or crashed) | Check the `slave_daemon` process and its log on the device. |
 | `axcl-smi: card N: status check failed, ret = 0x...`          | Checking the device status failed                        | Rerun with `AXCL_HOST_CONSOLE_LEVEL=3` and check the runtime log.    |
-| `axcl-smi: card N unavailable: ...`                           | Some information of the card cannot be obtained          | Make sure the device firmware matches the host package; if the problem persists, collect logs with `collect-log` and report it. |
-| `'<command>' requires -d <device>`                            | No card was given for `sh`, `push`, or `pull`            | Add `-d <card>`.                                                     |
-| `'collect-log' requires -d <device> or --all`                 | `collect-log` was given neither `-d` nor `--all`         | Add `-d <card>` or `--all`.                                          |
+| `axcl-smi: card N unavailable: ...`                           | Some information of the device cannot be obtained        | Make sure the device firmware matches the host package; if the problem persists, collect logs with `collect-log` and report it. |
+| `'<command>' requires -d <device>`                            | No device was given for `sh`, `push`, or `pull`          | Add `-d <device>`.                                                   |
+| `'collect-log' requires -d <device> or --all`                 | `collect-log` was given neither `-d` nor `--all`         | Add `-d <device>` or `--all`.                                        |
 | `'collect-log' accepts either -d <device> or --all, not both` | Both `-d` and `--all` were given                         | Keep only one of them.                                               |
 | `collect-log: cannot write to output directory '<dir>': ...`  | No write permission on the output directory (the current directory by default) | Change to a writable directory, or give an output directory such as `/tmp` at the end of the command. |
 | `failed to check whether '<path>' is a directory on device N ...` | The `push` destination does not end with `/` and checking whether it is a directory failed | If the destination is a directory, add `/` at the end. |

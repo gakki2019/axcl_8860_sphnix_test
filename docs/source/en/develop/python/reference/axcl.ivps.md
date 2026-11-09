@@ -1642,7 +1642,7 @@ AX_S32 AX_IVPS_Rotation(AX_IVPS_ENGINE_E eEngine, const AX_VIDEO_FRAME_T *ptSrc,
 | engine | int | Processing engine. The current AXHELIX implementation supports |
 | pt_src | dict &#124; None | Source video frame. Must not be NULL. |
 | pt_dst | dict &#124; None | Caller-provided destination descriptor whose address and layout/capacity fields are inputs. The referenced data receives the output. |
-| rotation | int | Rotation angle. See |
+| rotation | int | Rotation angle. See AX_IVPS_ROTATION_E. |
 | flip | int | AX_TRUE enables vertical flip; AX_FALSE disables it. |
 | mirror | int | AX_TRUE enables horizontal mirror; AX_FALSE disables it. |
 

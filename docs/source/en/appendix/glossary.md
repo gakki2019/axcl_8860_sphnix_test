@@ -4,7 +4,10 @@
 |---|---|
 | AXCL | A Host-side development kit for AXERA AI devices. |
 | HOST | The control system that runs user applications and AXCL Host-side libraries. |
-| DEVICE | An AXERA AI compute device managed by AXCL, and the object that represents it in the Runtime API. |
+| DEVICE | An AXERA AI compute device managed by AXCL, and the object that represents it in the Runtime API. One device is a single AXERA chip. The `deviceId` / `device_id` of AXCL APIs is a logical device ID, mapped to a physical device according to [AXCL_VISIBLE_DEVICES](environment_variables.md#AXCL_VISIBLE_DEVICES). |
+| CARD | An accelerator card: a group of devices connected to each other through C2C. A card can hold several devices; "card" never refers to a single device. Device-to-Device copy between different devices is supported only within the same card. Exception: the `-d` option, the `Card` column and `card N` in messages of `axcl-smi`, and the `-d` option of `axcl-collect-logs` are device indexes. |
+| Device PA | The physical address of Device memory, used by Native APIs and Device hardware. Runtime APIs take an opaque Device memory handle (`devPtr`) instead, which the Host must not dereference and which is not a Device PA. [axclrtMemGetDevAddr](../develop/c/memory_api.md#axclrtMemGetDevAddr) and [axclrtMemMapDevAddr](../develop/c/memory_api.md#axclrtMemMapDevAddr) convert between a handle and Device PA / VA. |
+| Device VA | The virtual address of Device memory in a Device-side process, provided by Native APIs and used by the Device CPU. It may be absent (0), for example for memory imported through IPC. |
 | RUNTIME | The AXCL runtime layer that manages devices, resources, tasks, and synchronization. |
 | CONTEXT | An execution environment bound to one device. It owns the streams created in it and has a default stream. |
 | STREAM | A FIFO task queue in a context. Tasks in one stream run in submission order; tasks in different streams can run in parallel. |

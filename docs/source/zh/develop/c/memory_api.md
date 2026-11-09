@@ -21,6 +21,8 @@
 - [axclrtMemcmp](#axclrtMemcmp)：同步判断两段设备内存中的字节是否完全相同。
 - [axclrtMemcmpAsync](#axclrtMemcmpAsync)：将两段设备内存的比较操作异步提交到指定的 Stream。
 - [axclrtMemcpy](#axclrtMemcpy)：在 Host 或设备内存之间同步复制字节。
+- [axclrtMemcpy2d](#axclrtMemcpy2d)：在 Host 与设备内存之间同步复制一个二维矩形区域。
+- [axclrtMemcpy2dAsync](#axclrtMemcpy2dAsync)：将 Host 与设备内存之间的二维矩形复制操作异步提交到指定的 Stream。
 - [axclrtMemcpyAsync](#axclrtMemcpyAsync)：将 Host 或设备内存复制操作异步提交到指定的 Stream。
 - [axclrtMemset](#axclrtMemset)：同步将设备内存中的字节设置为指定值。
 - [axclrtMemsetAsync](#axclrtMemsetAsync)：将设备内存设置操作异步提交到指定的 Stream。
@@ -335,16 +337,9 @@ AXCL_EXPORT axclError axclrtMalloc(void **devPtr, size_t size, axclrtMemMallocPo
 #### 2.8.5. 示例
 
 ```c
-void *devMem = NULL;
-void *hostMem = NULL;
-const size_t size = 1024 * 1024;
-axclrtMalloc(&devMem, size, AXCL_MEM_MALLOC_HUGE_FIRST);
-axclrtMallocHost(&hostMem, size);
-
-axclrtMemcpy(devMem, hostMem, size, AXCL_MEMCPY_HOST_TO_DEVICE);
-
-axclrtFree(devMem);
-axclrtFreeHost(hostMem);
+ axclrtMalloc(&devMem, size, AXCL_MEM_MALLOC_HUGE_FIRST);
+ axclrtMemcpy(devMem, hostMem, size, AXCL_MEMCPY_HOST_TO_DEVICE);
+ axclrtFree(devMem);
 ```
 
 #### 2.8.6. 参考
@@ -742,36 +737,15 @@ AXCL_EXPORT axclError axclrtMemcpy(void *dstPtr, const void *srcPtr, size_t coun
 - 本函数为同步接口，即在复制完成后返回。
 - 本函数支持 [axclrtMemcpyKind](reference/enum.md#axclrtMemcpyKind) 的全部取值，包括同一设备内和不同设备之间的 Device-to-Device 复制。
 - 调用线程必须已有当前 Context，并且源、目标内存范围在函数返回前必须保持有效。所有设备内存必须属于该 Context 所关联的设备；不同设备之间的 Device-to-Device 复制除外，此时当前设备必须拥有源内存或目标内存之一，并且必须已通过 [axclrtDeviceEnablePeerAccess](device_api.md#axclrtDeviceEnablePeerAccess) 启用到另一设备的 Peer Access。
+- 仅当两个设备位于同一卡上时，才支持不同设备之间的 Device-to-Device 复制；位于不同卡上的设备之间的复制会失败，即使已启用 Peer Access。
 
 #### 2.19.5. 示例
 
-Host 与设备之间的双向内存复制（以下伪代码省略错误处理）：
+以下伪代码将数据从 Host 复制到设备，再复制回 Host。
 
 ```c
-void *hostSrc = NULL;
-void *hostDst = NULL;
-void *devMem = NULL;
-const size_t size = 1024 * 1024;
-
-/* 分配 Host 和设备内存。 */
-axclrtMallocHost(&hostSrc, size);
-axclrtMallocHost(&hostDst, size);
-axclrtMalloc(&devMem, size, AXCL_MEM_MALLOC_HUGE_FIRST);
-
-/* 准备 Host 源数据。 */
-memset(hostSrc, 0x5A, size);
-
-/* Host -> Device。 */
-axclrtMemcpy(devMem, hostSrc, size, AXCL_MEMCPY_HOST_TO_DEVICE);
-
-/* Device -> Host。 */
-axclrtMemcpy(hostDst, devMem, size, AXCL_MEMCPY_DEVICE_TO_HOST);
-
-/* 此时可以在 Host 上读取并校验 hostDst。 */
-
-axclrtFree(devMem);
-axclrtFreeHost(hostDst);
-axclrtFreeHost(hostSrc);
+ axclrtMemcpy(devMem, hostSrc, size, AXCL_MEMCPY_HOST_TO_DEVICE);
+ axclrtMemcpy(hostDst, devMem, size, AXCL_MEMCPY_DEVICE_TO_HOST);
 ```
 
 更完整的同步拷贝流程参见 [同步拷贝](../arch/memory.md#memory-synchronous-copy)，设备间拷贝参见 [设备间拷贝](../arch/memory.md#memory-inter-device-copy)。
@@ -784,19 +758,176 @@ axclrtFreeHost(hostSrc);
 
 <br>
 
+<a id="axclrtMemcpy2d"></a>
+
+### 2.20. axclrtMemcpy2d
+
+在 Host 与设备内存之间同步复制一个二维矩形区域。
+
+复制 `height` 行，每行 `width` 字节：第 y 行从 `srcPtr` + y * `spitch` 复制到 `dstPtr` + y * `dpitch`。一行末尾到下一行起始之间的字节（padding）不会被读取或写入。
+
+#### 2.20.1. 函数
+
+```c
+AXCL_EXPORT axclError axclrtMemcpy2d(void *dstPtr, size_t dpitch, const void *srcPtr, size_t spitch, size_t width, size_t height, axclrtMemcpyKind kind);
+```
+
+#### 2.20.2. 参数
+
+| 名称 | 方向 | 说明 |
+|---|---|---|
+| dstPtr | out | 目标矩形第一行的地址，其含义由 `kind` 决定。 |
+| dpitch | in | 目标内存中相邻两行起始地址之间的字节数，不能小于 `width`。 |
+| srcPtr | in | 源矩形第一行的地址，其含义由 `kind` 决定。 |
+| spitch | in | 源内存中相邻两行起始地址之间的字节数，不能小于 `width`。 |
+| width | in | 每行复制的字节数，必须大于 0。 |
+| height | in | 复制的行数，必须大于 0，且不超过 UINT32_MAX。 |
+| kind | in | 仅支持 [AXCL_MEMCPY_HOST_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) 和 [AXCL_MEMCPY_DEVICE_TO_HOST](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST)。 |
+
+#### 2.20.3. 返回值
+
+- `AXCL_SUCC`：成功完成复制。
+- 其他错误：失败。
+
+#### 2.20.4. 说明
+
+- 本函数为同步接口，即在复制完成后返回。
+- 不支持 [AXCL_MEMCPY_HOST_TO_HOST](reference/enum.md#AXCL_MEMCPY_HOST_TO_HOST) 和 [AXCL_MEMCPY_DEVICE_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE)，传入时返回 AXCL_ERR_RT_UNSUPPORT。
+- 每一端的跨度为 (`height` - 1) * pitch + `width` 字节。设备端的整个跨度必须位于当前 Context 所属设备上的同一块设备内存内，例如同一块由 [axclrtMalloc](#axclrtMalloc) 或 [axclrtMallocCached](#axclrtMallocCached) 分配的内存。
+- Host 端的整个跨度（包括 padding）必须是已映射的内存；Device-to-Host 复制时还必须可写。
+- 复制完成前，CPU 不能读写 Host 端跨度内的任何部分，包括 padding。
+- 在非 DMA coherent 的设备上（所有 AX8860 本地设备都属于此类），把设备数据复制到普通 Host 内存（例如 malloc 分配的内存）会返回 AXCL_ERR_COMM_UNSUPPORT，除非两端的 pitch 都等于 `width`，或 `height` 为 1。请改用 [axclrtMallocHost](#axclrtMallocHost) 分配的内存，它在所有设备上都可用。
+- 行很短、行数很多时，复制速度低于相同数据量的一次连续复制。条件允许时，请合并连续的行。
+- 与 CANN 不同，除 `height` 不超过 UINT32_MAX 外，`width` 和 `height` 没有其他固定上限。
+
+#### 2.20.5. 示例
+
+以下伪代码省略错误处理，把 256 行、每行 1000 字节的数据，从行间距为 1024 字节的 Host 内存复制到行间距为 2048 字节的设备内存，再复制回 Host。
+
+```c
+const size_t width = 1000;
+const size_t height = 256;
+const size_t hostPitch = 1024;
+const size_t devPitch = 2048;
+void *hostSrc = NULL;
+void *hostDst = NULL;
+void *devMem = NULL;
+
+/* 分配 Host 和设备内存；每一端按各自的 pitch 存放 height 行。 */
+axclrtMallocHost(&hostSrc, hostPitch * height);
+axclrtMallocHost(&hostDst, hostPitch * height);
+axclrtMalloc(&devMem, devPitch * height, AXCL_MEM_MALLOC_HUGE_FIRST);
+
+/* Host -> Device：复制每行的前 width 字节，padding 不复制。 */
+axclrtMemcpy2d(devMem, devPitch, hostSrc, hostPitch, width, height, AXCL_MEMCPY_HOST_TO_DEVICE);
+
+/* Device -> Host。 */
+axclrtMemcpy2d(hostDst, hostPitch, devMem, devPitch, width, height, AXCL_MEMCPY_DEVICE_TO_HOST);
+
+axclrtFree(devMem);
+axclrtFreeHost(hostDst);
+axclrtFreeHost(hostSrc);
+```
+
+#### 2.20.6. 参考
+
+- [axclrtMemcpy2dAsync](#axclrtMemcpy2dAsync)
+- [axclrtMemcpy](#axclrtMemcpy)
+- [axclrtMallocHost](#axclrtMallocHost)
+
+<br>
+
+<a id="axclrtMemcpy2dAsync"></a>
+
+### 2.21. axclrtMemcpy2dAsync
+
+将 Host 与设备内存之间的二维矩形复制操作异步提交到指定的 Stream。
+
+矩形、参数和约束与 [axclrtMemcpy2d](#axclrtMemcpy2d) 相同，在 `stream` 上按提交顺序执行。
+
+#### 2.21.1. 函数
+
+```c
+AXCL_EXPORT axclError axclrtMemcpy2dAsync(void *dstPtr, size_t dpitch, const void *srcPtr, size_t spitch, size_t width, size_t height, axclrtMemcpyKind kind, axclrtStream stream);
+```
+
+#### 2.21.2. 参数
+
+| 名称 | 方向 | 说明 |
+|---|---|---|
+| dstPtr | out | 目标矩形第一行的地址，其含义由 `kind` 决定。 |
+| dpitch | in | 目标内存中相邻两行起始地址之间的字节数，不能小于 `width`。 |
+| srcPtr | in | 源矩形第一行的地址，其含义由 `kind` 决定。 |
+| spitch | in | 源内存中相邻两行起始地址之间的字节数，不能小于 `width`。 |
+| width | in | 每行复制的字节数，必须大于 0。 |
+| height | in | 复制的行数，必须大于 0，且不超过 UINT32_MAX。 |
+| kind | in | 仅支持 [AXCL_MEMCPY_HOST_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) 和 [AXCL_MEMCPY_DEVICE_TO_HOST](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST)。 |
+| stream | in | 接收复制操作的 Stream，不能为 NULL。 |
+
+#### 2.21.3. 返回值
+
+- `AXCL_SUCC`：成功提交复制操作。
+- 其他错误：失败。
+
+#### 2.21.4. 说明
+
+- 本函数为异步接口，成功返回只表示复制操作已提交，不表示复制已经完成。复制执行时产生的错误由 `stream` 上的下一次 [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) 返回。例如，在 [axclrtMemcpy2d](#axclrtMemcpy2d) 返回 AXCL_ERR_COMM_UNSUPPORT 的情况下，本函数仍会成功提交复制，同步时返回 AXCL_ERR_COMM_UNSUPPORT。
+- 支持的复制方向和内存要求与 [axclrtMemcpy2d](#axclrtMemcpy2d) 相同，区别是设备端范围必须属于 `stream` 所关联的设备。
+- 与 CANN 不同，即使 Host 内存是 malloc 分配的普通内存，本函数也在提交后返回。同步 `stream` 之前，两端内存必须保持有效，CPU 不能访问 Host 端跨度内的任何部分，包括 padding。
+- 复制操作与 `stream` 上的其他任务按提交顺序执行。
+
+#### 2.21.5. 示例
+
+以下伪代码省略错误处理，把 [axclrtMemcpy2d](#axclrtMemcpy2d) 示例中的两次复制提交到一个 Stream，并等待两者完成。
+
+```c
+const size_t width = 1000;
+const size_t height = 256;
+const size_t hostPitch = 1024;
+const size_t devPitch = 2048;
+void *hostSrc = NULL;
+void *hostDst = NULL;
+void *devMem = NULL;
+axclrtStream stream = NULL;
+
+axclrtCreateStream(&stream);
+axclrtMallocHost(&hostSrc, hostPitch * height);
+axclrtMallocHost(&hostDst, hostPitch * height);
+axclrtMalloc(&devMem, devPitch * height, AXCL_MEM_MALLOC_HUGE_FIRST);
+
+/* 两次复制在 Stream 上按顺序执行。 */
+axclrtMemcpy2dAsync(devMem, devPitch, hostSrc, hostPitch, width, height, AXCL_MEMCPY_HOST_TO_DEVICE, stream);
+axclrtMemcpy2dAsync(hostDst, hostPitch, devMem, devPitch, width, height, AXCL_MEMCPY_DEVICE_TO_HOST, stream);
+
+/* 同步返回之前，不能访问 hostSrc 或 hostDst，包括 padding。 */
+axclrtSynchronizeStream(stream);
+
+axclrtFree(devMem);
+axclrtFreeHost(hostDst);
+axclrtFreeHost(hostSrc);
+axclrtDestroyStream(stream);
+```
+
+#### 2.21.6. 参考
+
+- [axclrtMemcpy2d](#axclrtMemcpy2d)
+- [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
+
+<br>
+
 <a id="axclrtMemcpyAsync"></a>
 
-### 2.20. axclrtMemcpyAsync
+### 2.22. axclrtMemcpyAsync
 
 将 Host 或设备内存复制操作异步提交到指定的 Stream。
 
-#### 2.20.1. 函数
+#### 2.22.1. 函数
 
 ```c
 AXCL_EXPORT axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t count, axclrtMemcpyKind kind, axclrtStream stream);
 ```
 
-#### 2.20.2. 参数
+#### 2.22.2. 参数
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
@@ -806,24 +937,25 @@ AXCL_EXPORT axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t
 | kind | in | 复制方向及地址类型。[AXCL_MEMCPY_DEVICE_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE) 支持同一设备内和不同设备之间的复制。 |
 | stream | in | 接收复制操作的 Stream。不能为 NULL。 |
 
-#### 2.20.3. 返回值
+#### 2.22.3. 返回值
 
 - `AXCL_SUCC`：成功提交复制操作。
 - 其他错误：失败。
 
-#### 2.20.4. 说明
+#### 2.22.4. 说明
 
 - 本函数为异步接口，成功返回只表示复制操作已提交，不表示复制已经完成。使用目标内存或释放任一内存前，必须同步 `stream`，例如调用 [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)。
 - 成功返回表示请求已发送到 Device，不表示 Device 已接受该请求。Device 接受或执行复制操作时产生的错误，由 `stream` 上的下一次 [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) 返回。
 - 本函数支持 Host-to-Host、Host-to-Device、Device-to-Host 复制，以及同一设备内和不同设备之间的 Device-to-Device 复制。
 - 复制操作与 `stream` 上的其他任务（包括 Host-to-Host 复制）按提交顺序执行。
 - 所有设备内存必须属于 `stream` 所关联的设备；不同设备之间的 Device-to-Device 复制除外，此时 `stream` 所关联的设备必须拥有源内存或目标内存之一，并且必须已通过 [axclrtDeviceEnablePeerAccess](device_api.md#axclrtDeviceEnablePeerAccess) 启用该设备到另一设备的 Peer Access。源、目标内存范围在复制完成前必须保持有效。
+- 仅当两个设备位于同一卡上时，才支持不同设备之间的 Device-to-Device 复制；位于不同卡上的设备之间的复制会失败，即使已启用 Peer Access。
 
-#### 2.20.5. 示例
+#### 2.22.5. 示例
 
 有关 H2D 异步拷贝、异步推理、D2H 异步拷贝和 Stream 同步的完整流程，参见 [异步拷贝](../arch/memory.md#memory-asynchronous-copy)。
 
-#### 2.20.6. 参考
+#### 2.22.6. 参考
 
 - [axclrtMemcpy](#axclrtMemcpy)
 - [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
@@ -832,17 +964,17 @@ AXCL_EXPORT axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t
 
 <a id="axclrtMemset"></a>
 
-### 2.21. axclrtMemset
+### 2.23. axclrtMemset
 
 同步将设备内存中的字节设置为指定值。
 
-#### 2.21.1. 函数
+#### 2.23.1. 函数
 
 ```c
 AXCL_EXPORT axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 ```
 
-#### 2.21.2. 参数
+#### 2.23.2. 参数
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
@@ -850,17 +982,17 @@ AXCL_EXPORT axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 | value | in | 要写入的字节值。 |
 | count | in | 要设置的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 
-#### 2.21.3. 返回值
+#### 2.23.3. 返回值
 
 - `AXCL_SUCC`：成功设置设备内存。
 - 其他错误：失败。
 
-#### 2.21.4. 说明
+#### 2.23.4. 说明
 
 - 本函数仅支持设备内存，并在操作完成后返回。
 - 调用线程必须将拥有该内存的设备所对应的 Context 设为当前 Context。
 
-#### 2.21.5. 参考
+#### 2.23.5. 参考
 
 - [axclrtMemsetAsync](#axclrtMemsetAsync)
 
@@ -868,17 +1000,17 @@ AXCL_EXPORT axclError axclrtMemset(void *devPtr, uint8_t value, size_t count);
 
 <a id="axclrtMemsetAsync"></a>
 
-### 2.22. axclrtMemsetAsync
+### 2.24. axclrtMemsetAsync
 
 将设备内存设置操作异步提交到指定的 Stream。
 
-#### 2.22.1. 函数
+#### 2.24.1. 函数
 
 ```c
 AXCL_EXPORT axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t count, axclrtStream stream);
 ```
 
-#### 2.22.2. 参数
+#### 2.24.2. 参数
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
@@ -887,18 +1019,18 @@ AXCL_EXPORT axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t coun
 | count | in | 要设置的字节数，至少为 1，且范围必须位于同一块已分配的 Device 内存内。 |
 | stream | in | 接收该操作的 Stream。 |
 
-#### 2.22.3. 返回值
+#### 2.24.3. 返回值
 
 - `AXCL_SUCC`：成功提交内存设置操作。
 - 其他错误：失败。
 
-#### 2.22.4. 说明
+#### 2.24.4. 说明
 
 - 本接口为异步接口，成功返回不表示内存已经更新。读取或释放内存前，必须同步 `stream`。
 - 成功返回表示请求已发送到 Device，不表示 Device 已接受该请求。Device 接受或执行该操作时产生的错误，由 `stream` 上的下一次 [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) 返回。
 - `devPtr` 必须属于 `stream` 所关联的设备，并且在操作完成前保持有效。
 
-#### 2.22.5. 参考
+#### 2.24.5. 参考
 
 - [axclrtMemset](#axclrtMemset)
 - [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
@@ -907,29 +1039,29 @@ AXCL_EXPORT axclError axclrtMemsetAsync(void *devPtr, uint8_t value, size_t coun
 
 <a id="axclrtPointerGetAttributes"></a>
 
-### 2.23. axclrtPointerGetAttributes
+### 2.25. axclrtPointerGetAttributes
 
 获取内存分配属性。
 
-#### 2.23.1. 函数
+#### 2.25.1. 函数
 
 ```c
 AXCL_EXPORT axclError axclrtPointerGetAttributes(const void *ptr, axclrtPtrAttributes *attributes);
 ```
 
-#### 2.23.2. 参数
+#### 2.25.2. 参数
 
 | 名称 | 方向 | 说明 |
 |---|---|---|
 | ptr | in | 内存分配的起始地址或内部任意字节的地址。不能为 NULL。 |
 | attributes | out | 用于返回指针属性。不能为 NULL。 |
 
-#### 2.23.3. 返回值
+#### 2.25.3. 返回值
 
 - `AXCL_SUCC`：成功返回指针属性。
 - 其他错误：失败。
 
-#### 2.23.4. 说明
+#### 2.25.4. 说明
 
 - 运行时会记录当前进程中通过 [axclrtMalloc](#axclrtMalloc)、[axclrtMallocCached](#axclrtMallocCached) 和 [axclrtMallocHost](#axclrtMallocHost) 创建的内存分配，以及通过 [axclrtMemMapDevAddr](#axclrtMemMapDevAddr) 和 [axclrtIpcMemImportByKey](#axclrtIpcMemImportByKey) 创建的设备内存句柄。
 - 对于已记录的内存，本函数返回其 Host 或设备位置类型。设备内存的位置 ID 为拥有该内存的设备的虚拟设备 ID；Host 内存的位置 ID 为 `-1`。[axclrtMallocCached](#axclrtMallocCached) 分配的内存，以及通过 [axclrtIpcMemImportByKey](#axclrtIpcMemImportByKey) 从此类内存导入的内存，还会设置 [AXCL_POINTER_ATTRIBUTE_FLAG_CACHED](reference/enum.md#AXCL_POINTER_ATTRIBUTE_FLAG_CACHED) 标志。

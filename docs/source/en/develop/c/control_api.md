@@ -37,8 +37,8 @@ AXCL_EXPORT axclError axclrtControlExecuteShellCmd(const char *cmd, const char *
 
 #### Note
 
-- The function fails if the shell exits with a non-zero status, is terminated by a signal, cannot be started, or cannot be monitored. In these cases, `output` receives the captured output, or a failure description if none was captured.
-- The function fails if the command times out on the device or the Host RPC wait times out. In these cases, `output` receives a timeout message, appended to any captured output. After a Host RPC wait timeout, the device command state is unknown.
+- Returns [AXCL_ERR_RT_SHELL_FAIL](reference/error.md#AXCL_ERR_RT_SHELL_FAIL) if the shell exits with a non-zero status, is terminated by a signal, cannot be started, or cannot be monitored. In these cases, `output` receives the captured output, or a failure description if none was captured.
+- Returns [AXCL_ERR_RT_TIMEOUT](reference/error.md#AXCL_ERR_RT_TIMEOUT) if the command times out on the device or the Host RPC wait times out. In these cases, `output` receives a timeout message, appended to any captured output. After a Host RPC wait timeout, the device command state is unknown.
 - `output` points to thread-local storage owned by the calling thread. It may be used only in that thread and must not be freed by the caller. The next call of this function in the same thread overwrites it. Copy the output if it must be retained.
 - The command runs through `/bin/sh -c` with stdin connected to `/dev/null`; interactive commands and TTY use are not supported. stdout and stderr are merged.
 - A finite timeout terminates the shell process group. A process that creates another session or process group may survive. Normal shell exit does not terminate background processes; background jobs should redirect stdout/stderr.

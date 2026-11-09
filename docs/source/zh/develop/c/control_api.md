@@ -37,8 +37,8 @@ AXCL_EXPORT axclError axclrtControlExecuteShellCmd(const char *cmd, const char *
 
 #### 2.1.4. 说明
 
-- shell 非零退出、被信号终止、无法启动或无法正常监控时，本函数失败。此时 `output` 返回已捕获的输出；如果未捕获到输出，则返回失败描述。
-- Device 命令执行超时或 Host RPC 等待超时时，本函数失败。此时 `output` 返回超时信息，该信息追加在已捕获的输出之后。Host RPC 等待超时后，Device 侧命令状态未知。
+- shell 非零退出、被信号终止、无法启动或无法正常监控时，返回 [AXCL_ERR_RT_SHELL_FAIL](reference/error.md#AXCL_ERR_RT_SHELL_FAIL)。此时 `output` 返回已捕获的输出；如果未捕获到输出，则返回失败描述。
+- Device 命令执行超时或 Host RPC 等待超时时，返回 [AXCL_ERR_RT_TIMEOUT](reference/error.md#AXCL_ERR_RT_TIMEOUT)。此时 `output` 返回超时信息，该信息追加在已捕获的输出之后。Host RPC 等待超时后，Device 侧命令状态未知。
 - `output` 指向调用线程内部的线程局部存储（`thread-local storage`），仅可在该线程中使用，调用者不得释放该指针。同一线程下一次调用本函数时会覆盖该内容。如需长期保留输出，调用者应自行复制。
 - 命令通过 `/bin/sh -c` 执行，stdin 连接到 `/dev/null`，stdout 和 stderr 合并；不支持交互命令和 TTY。
 - 有限 timeout 会终止 shell process group。主动创建新 session 或 process group 的进程可能继续存活。shell 正常退出时不终止后台进程，后台任务应重定向 stdout/stderr。

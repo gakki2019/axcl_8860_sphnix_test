@@ -7,12 +7,12 @@
 
 | 能力       | 说明                                                                                     |
 | ---------- | ---------------------------------------------------------------------------------------- |
-| 设备概览   | 列出所有卡的固件版本、温度、CPU/NPU 利用率、内存使用情况，以及卡上运行的进程。           |
-| 设备详情   | 显示单张卡的完整信息，包括 UID、各模块频率、各 NPU 核利用率和 PCI 信息。                 |
-| 实时监控   | 定时刷新显示各卡的温度、利用率和内存占用。                                               |
+| 设备概览   | 列出所有设备的固件版本、温度、CPU/NPU 利用率、内存使用情况，以及设备上运行的进程。           |
+| 设备详情   | 显示单个设备的完整信息，包括 UID、各模块频率、各 NPU 核利用率和 PCI 信息。                 |
+| 实时监控   | 定时刷新显示各设备的温度、利用率和内存占用。                                               |
 | 远端 shell | 在设备上执行一条 shell 命令并显示输出。                                                  |
 | 文件传输   | 在主控和设备之间上传、下载文件或目录。                                                   |
-| 日志收集   | 把设备日志打包下载到主控，可收集单张卡，也可用 `--all` 收集全部卡。                     |
+| 日志收集   | 把设备日志打包下载到主控，可收集单个设备，也可用 `--all` 收集全部设备。                     |
 
 
 ## 2. 命令总览
@@ -35,20 +35,20 @@ axcl-smi [<command> [<args>]] {OPTIONS}
 
 | 选项               | 默认值 | 说明                                                                                                                       |
 | ------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `-d`、`--device`   | 无     | 卡号，从 `0` 开始。`info`、`watch` 和概览不指定时显示所有卡；`sh`、`push`、`pull` 必须指定一张卡；`collect-log` 需指定 `-d` 或 `--all`。 |
+| `-d`、`--device`   | 无     | 设备索引，从 `0` 开始。`info`、`watch` 和概览不指定时显示所有设备；`sh`、`push`、`pull` 必须指定一个设备；`collect-log` 需指定 `-d` 或 `--all`。 |
 | `-n`、`--interval` | `2`    | 实时监控的刷新间隔，单位为秒，`0` 按 `2` 秒处理。                                                                          |
 | `-v`、`--version`  | --     | 显示版本并退出。                                                                                                           |
 | `-h`、`--help`     | --     | 显示帮助并退出。                                                                                                           |
 
 ```{note}
-- 卡号始终按主控上的全部设备编号，不受 `AXCL_VISIBLE_DEVICES` 影响。
+- 设备索引始终按主控上的全部设备编号，不受 `AXCL_VISIBLE_DEVICES` 影响。下文输出中的 `Card` 列和 `card N` 也是设备索引。
 - 为了不打乱表格输出，`axcl-smi` 默认不在终端打印 Runtime 日志；排查问题时可通过 `AXCL_HOST_CONSOLE_LEVEL` 打开，如 `AXCL_HOST_CONSOLE_LEVEL=3 axcl-smi info -d 0`。
 - 按一次 `Ctrl+C`，`axcl-smi` 会在当前操作或当前一轮刷新完成后退出。长时间没有反应时（例如设备无响应）可再按一次强制退出，此时可能留下未传完的文件。
 ```
 
 ## 3. 设备概览
 
-不带命令执行时，显示所有卡的概览和卡上运行的进程：
+不带命令执行时，显示所有设备的概览和设备上运行的进程：
 
 ```bash
 root:/# axcl-smi
@@ -74,13 +74,13 @@ root:/# axcl-smi
 
 | 字段                   | 说明                                               |
 | ---------------------- | -------------------------------------------------- |
-| `Card`                 | 卡号。                                             |
+| `Card`                 | 设备索引。                                         |
 | `Name`                 | 芯片型号。                                         |
 | `Firmware`             | 设备固件版本。                                     |
 | `Driver`               | 主控驱动版本。                                     |
-| `Bus-Id`               | 卡在主控上的 PCIe 地址。                           |
+| `Bus-Id`               | 设备在主控上的 PCIe 地址。                         |
 | `Temp`                 | 芯片温度，单位为摄氏度。                           |
-| `CPU` / `NPU`          | 设备 CPU 和 NPU 利用率（NPU 为各核之和）。         |
+| `CPU` / `NPU`          | 设备 CPU 和 NPU 利用率（NPU 为各核平均值）。       |
 | `Memory-Usage`         | 设备系统内存的已用量和总量。                       |
 | `CMM-Usage`            | 设备 CMM 内存的已用量和总量。                      |
 | `Fan`、`Pwr:Usage/Cap` | 当前版本不支持，显示为 `--`。                      |
@@ -91,7 +91,7 @@ root:/# axcl-smi
 
 ## 4. 设备详情
 
-`info` 显示单张卡的完整信息，比概览多出 UID、各模块频率、各 NPU 核利用率和 PCI 信息（以下示例省略了部分频率项）：
+`info` 显示单个设备的完整信息，比概览多出 UID、各模块频率、各 NPU 核利用率和 PCI 信息（以下示例省略了部分频率项）：
 
 ```bash
 root:/# axcl-smi info -d 0
@@ -151,17 +151,19 @@ PCI
     Current Width(x)    : 4
 ```
 
-不指定 `-d` 时依次显示所有卡。功耗和风扇转速当前版本不支持，显示为 `--`。
+不指定 `-d` 时依次显示所有设备。功耗和风扇转速当前版本不支持，显示为 `--`。
+
+每个 NPU 核的利用率是该核各 VNPU 利用率的平均值，占满整核的任务记为 100%。
 
 ## 5. 实时监控
 
 `watch` 按 `-n` 指定的间隔刷新显示，适合观察负载变化：
 
 ```bash
-# 每 2 秒刷新一次所有卡的状态
+# 每 2 秒刷新一次所有设备的状态
 axcl-smi watch -n 2
 
-# 只看 0 号卡，每 1 秒刷新一次
+# 只看 0 号设备，每 1 秒刷新一次
 axcl-smi watch -d 0 -n 1
 ```
 
@@ -180,7 +182,7 @@ Card     Chip     Pwr(W)     Temp(C)     CPU (%)     NPU(%)     Memory(%)     CM
 
 ## 6. 远端 shell
 
-`sh` 在指定的卡上执行一条 shell 命令，并把输出显示在主控上。请用双引号括起整条命令，否则以 `-` 开头的参数会被 `axcl-smi` 当成自己的选项，空格、`*`、`|`、`>` 等字符也会先被主控的 shell 处理。命令中含 `$` 或反引号时请改用单引号，否则它们会先在主控上展开：
+`sh` 在指定的设备上执行一条 shell 命令，并把输出显示在主控上。请用双引号括起整条命令，否则以 `-` 开头的参数会被 `axcl-smi` 当成自己的选项，空格、`*`、`|`、`>` 等字符也会先被主控的 shell 处理。命令中含 `$` 或反引号时请改用单引号，否则它们会先在主控上展开：
 
 ```bash
 axcl-smi sh -d 0 "free"
@@ -225,7 +227,7 @@ axcl-smi pull -d 0 --recursive /tmp/deploy/assets ./download
 
 注意事项：
 
-- 每次只能对一张卡传输。
+- 每次只能对一个设备传输。
 - 不加 `-r` 时只能传单个普通文件，且不支持空文件；加 `-r` 时只能传目录，目录中的空文件可以正常传输。
 - 不加 `-r` 时，目标是已存在的目录或以 `/` 结尾，文件按原名放入该目录。上传到设备上的目录时建议以 `/` 结尾，否则会先检查目标是否为目录，检查失败则不传输。
 - 加 `-r` 时，目标目录已存在，源目录整个放到它下面；目标目录不存在，则新建该目录并放入源目录的内容。两种情况下，目标目录的上一级目录都必须已存在。
@@ -248,11 +250,11 @@ axcl-smi collect-log -d 0
 # 下载到指定目录
 axcl-smi collect-log -d 0 /tmp/axcl-logs
 
-# 收集全部卡，每张卡生成一个文件
+# 收集全部设备，每个设备生成一个文件
 axcl-smi collect-log --all /tmp/axcl-logs
 ```
 
-文件名格式为 `device<卡号>_log_<日期>_<时间>_<毫秒>.tar.gz`，解压后是一个同名目录：
+文件名格式为 `device<设备索引>_log_<日期>_<时间>_<毫秒>.tar.gz`，解压后是一个同名目录：
 
 ```text
 device0_log_20260923_101530_204.tar.gz
@@ -267,9 +269,9 @@ device0_log_20260923_101530_204.tar.gz
 - 收集不会打断设备上正在写入的日志，归档中的日志为收集时刻的内容。
 - `dmesg.txt` 是设备的内核日志。获取失败时只给出提示，归档中不含该文件。
 - 设备上 `AXSyslog` 和 `axclLog` 都不存在时，收集失败。
-- 收集过程中的提示信息会打印到 stderr，并标明卡号。收集期间若有日志文件被轮转或删除，也会在这里提示，对应文件在归档中可能不完整。
+- 收集过程中的提示信息会打印到 stderr，并标明设备索引。收集期间若有日志文件被轮转或删除，也会在这里提示，对应文件在归档中可能不完整。
 - 输出目录不能写入时直接报错。在没有写权限的目录（如 `/usr/local/axhelix/bin`）下执行时，请指定输出目录，如 `axcl-smi collect-log -d 0 /tmp`。
-- `--all` 逐张卡收集，不能与 `-d` 同时使用。某张卡失败不影响其他卡，结束时显示 `collect-log: <成功数>/<总数> devices succeeded`（无响应而被跳过的卡计入总数），有卡失败时返回非 `0`。收集中按 `Ctrl+C`，会在当前卡完成后停止；若还有未收集的卡，这些卡会被跳过，汇总行末尾带 `(interrupted)` 并返回非 `0`。
+- `--all` 逐个设备收集，不能与 `-d` 同时使用。某个设备失败不影响其他设备，结束时显示 `collect-log: <成功数>/<总数> devices succeeded`（无响应而被跳过的设备计入总数），有设备失败时返回非 `0`。收集中按 `Ctrl+C`，会在当前设备完成后停止；若还有未收集的设备，这些设备会被跳过，汇总行末尾带 `(interrupted)` 并返回非 `0`。
 - 日志较多时打包可能超时，可调大 [AXCL_SMI_SHELL_TIMEOUT](../../appendix/environment_variables.md#AXCL_SMI_SHELL_TIMEOUT)。
 - 无论下载是否成功，设备上的临时文件都会被清理。打包超时时，设备上 `/opt/data` 下可能留下 `.collect_*` 目录或未完成的 `device*_log_*.tar.gz`，确认没有其他收集任务在进行后，可用 `axcl-smi sh` 删除。
 
@@ -289,16 +291,16 @@ device0_log_20260923_101530_204.tar.gz
 | 现象                                                         | 可能原因                                   | 处理建议                                                        |
 | ------------------------------------------------------------ | ------------------------------------------ | --------------------------------------------------------------- |
 | `failed to initialize AXCL, ret = 0x...`                     | 驱动未加载、未识别到设备或环境变量未生效   | 确认驱动已加载，执行 `source /etc/profile` 后重试。             |
-| `no AXCL devices available`                                  | 没有找到可用的卡                           | 确认卡已正确安装并上电。                                        |
-| `invalid device index: N`                                    | `-d` 指定的卡号不存在                      | 先执行 `axcl-smi` 查看实际卡号。                                |
-| `failed to create context for card N` / `... for device N`   | 无法连接该卡                               | 查看提示中的 Runtime 日志。                                     |
-| `axcl-smi: card N: not responding (no reply within 1000 ms)` | 主控到设备的通路不通，或设备内核无响应 | 查看主控 `dmesg` 与 `/proc/ax_proc/comm/info`，必要时重启该卡。 |
-| `axcl-smi: card N: offline`                                  | 该卡已离线                                 | 查看主控 `dmesg`，确认卡状态后重启该卡。                         |
+| `no AXCL devices available`                                  | 没有找到可用的设备                         | 确认设备已正确安装并上电。                                      |
+| `invalid device index: N`                                    | `-d` 指定的设备索引不存在                  | 先执行 `axcl-smi` 查看实际设备索引。                            |
+| `failed to create context for card N` / `... for device N`   | 无法连接该设备                             | 查看提示中的 Runtime 日志。                                     |
+| `axcl-smi: card N: not responding (no reply within 1000 ms)` | 主控到设备的通路不通，或设备内核无响应 | 查看主控 `dmesg` 与 `/proc/ax_proc/comm/info`，必要时重启该设备。 |
+| `axcl-smi: card N: offline`                                  | 该设备已离线                               | 查看主控 `dmesg`，确认设备状态后重启该设备。                     |
 | `axcl-smi: card N: slave_daemon not running`                 | 通路正常，但设备上的 `slave_daemon` 未运行（未启动、已退出或崩溃） | 检查设备上的 `slave_daemon` 进程及其日志。                       |
 | `axcl-smi: card N: status check failed, ret = 0x...`         | 检查设备状态失败                           | 用 `AXCL_HOST_CONSOLE_LEVEL=3` 重新执行，查看 Runtime 日志。    |
-| `axcl-smi: card N unavailable: ...`                          | 该卡的部分信息获取失败                     | 确认设备固件与主控软件包版本配套；仍有问题时用 `collect-log` 收集日志反馈。 |
-| `'<command>' requires -d <device>`                           | `sh`、`push`、`pull` 未指定卡号            | 加上 `-d <卡号>`。                                              |
-| `'collect-log' requires -d <device> or --all`                | `collect-log` 未指定 `-d` 或 `--all`       | 加上 `-d <卡号>` 或 `--all`。                                   |
+| `axcl-smi: card N unavailable: ...`                          | 该设备的部分信息获取失败                   | 确认设备固件与主控软件包版本配套；仍有问题时用 `collect-log` 收集日志反馈。 |
+| `'<command>' requires -d <device>`                           | `sh`、`push`、`pull` 未指定设备            | 加上 `-d <device>`。                                            |
+| `'collect-log' requires -d <device> or --all`                | `collect-log` 未指定 `-d` 或 `--all`       | 加上 `-d <device>` 或 `--all`。                                 |
 | `'collect-log' accepts either -d <device> or --all, not both` | 同时指定了 `-d` 和 `--all`                | 只保留其中一个。                                                |
 | `collect-log: cannot write to output directory '<目录>': ...` | 输出目录（默认为当前目录）没有写权限      | 换到有写权限的目录，或在命令末尾指定输出目录，如 `/tmp`。       |
 | `failed to check whether '<路径>' is a directory on device N ...` | `push` 的目标不以 `/` 结尾，检查目标是否为目录失败 | 目标是目录时在末尾加 `/`。                                      |

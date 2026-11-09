@@ -21,6 +21,8 @@
 - [axclrtMemcmp](#axclrtMemcmp): Synchronously determine whether two Device memory ranges contain identical bytes.
 - [axclrtMemcmpAsync](#axclrtMemcmpAsync): Asynchronously submit a comparison of two Device memory ranges to a specified Stream.
 - [axclrtMemcpy](#axclrtMemcpy): Synchronously copy bytes between Host or Device memory.
+- [axclrtMemcpy2d](#axclrtMemcpy2d): Synchronously copy a 2D rectangle between Host and Device memory.
+- [axclrtMemcpy2dAsync](#axclrtMemcpy2dAsync): Asynchronously submit a 2D rectangle copy between Host and Device memory to a specified Stream.
 - [axclrtMemcpyAsync](#axclrtMemcpyAsync): Asynchronously submit a Host or Device memory copy to a specified Stream.
 - [axclrtMemset](#axclrtMemset): Synchronously set bytes in Device memory to a value.
 - [axclrtMemsetAsync](#axclrtMemsetAsync): Asynchronously submit a Device memory set operation to a specified Stream.
@@ -335,16 +337,9 @@ AXCL_EXPORT axclError axclrtMalloc(void **devPtr, size_t size, axclrtMemMallocPo
 #### Example
 
 ```c
- void *devMem = NULL;
- void *hostMem = NULL;
- const size_t size = 1024 * 1024;
  axclrtMalloc(&devMem, size, AXCL_MEM_MALLOC_HUGE_FIRST);
- axclrtMallocHost(&hostMem, size);
-
  axclrtMemcpy(devMem, hostMem, size, AXCL_MEMCPY_HOST_TO_DEVICE);
-
  axclrtFree(devMem);
- axclrtFreeHost(hostMem);
 ```
 
 #### Remark
@@ -742,36 +737,15 @@ AXCL_EXPORT axclError axclrtMemcpy(void *dstPtr, const void *srcPtr, size_t coun
 - This is a synchronous function and returns after the copy completes.
 - This function supports all [axclrtMemcpyKind](reference/enum.md#axclrtMemcpyKind) values, including Device-to-Device copies within the same device and between different devices.
 - The calling thread must have a current Context, and the source and destination ranges must remain valid until this function returns. All Device memory must belong to the device associated with that Context, except for a Device-to-Device copy between different devices: the current device must then own either the source or the destination, and peer access to the other device must have been enabled with [axclrtDeviceEnablePeerAccess](device_api.md#axclrtDeviceEnablePeerAccess).
+- A Device-to-Device copy between different devices is supported only when both devices are on the same card. A copy between devices on different cards fails, even if peer access has been enabled.
 
 #### Example
 
-The following pseudocode omits error handling and copies data from the Host to a Device and back to the Host.
+The following pseudocode copies data from the Host to a Device and back to the Host.
 
 ```c
- void *hostSrc = NULL;
- void *hostDst = NULL;
- void *devMem = NULL;
- const size_t size = 1024 * 1024;
-
- // Allocate Host and Device memory.
- axclrtMallocHost(&hostSrc, size);
- axclrtMallocHost(&hostDst, size);
- axclrtMalloc(&devMem, size, AXCL_MEM_MALLOC_HUGE_FIRST);
-
- // Prepare the source data on the Host.
- memset(hostSrc, 0x5A, size);
-
- // Host -> Device.
  axclrtMemcpy(devMem, hostSrc, size, AXCL_MEMCPY_HOST_TO_DEVICE);
-
- // Device -> Host.
  axclrtMemcpy(hostDst, devMem, size, AXCL_MEMCPY_DEVICE_TO_HOST);
-
- // hostDst can now be read and verified on the Host.
-
- axclrtFree(devMem);
- axclrtFreeHost(hostDst);
- axclrtFreeHost(hostSrc);
 ```
 
 For a complete synchronous copy flow, see [Synchronous Copy](../arch/memory.md#memory-synchronous-copy). For an inter-device copy, see [Inter-Device Copy](../arch/memory.md#memory-inter-device-copy).
@@ -781,6 +755,163 @@ For a complete synchronous copy flow, see [Synchronous Copy](../arch/memory.md#m
 - [axclrtMemcpyAsync](#axclrtMemcpyAsync)
 - [axclrtMalloc](#axclrtMalloc)
 - [axclrtMallocHost](#axclrtMallocHost)
+
+<br>
+
+<a id="axclrtMemcpy2d"></a>
+
+### axclrtMemcpy2d
+
+Synchronously copy a 2D rectangle between Host and Device memory.
+
+Copies `height` rows of `width` bytes: row y goes from `srcPtr` + y * `spitch` to `dstPtr` + y * `dpitch`. Bytes between the end of a row and the start of the next (padding) are neither read nor written by the copy.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtMemcpy2d(void *dstPtr, size_t dpitch, const void *srcPtr, size_t spitch, size_t width, size_t height, axclrtMemcpyKind kind);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| dstPtr | out | Destination address of the first row, interpreted according to `kind`. |
+| dpitch | in | Bytes between the starts of consecutive destination rows. Must be at least `width`. |
+| srcPtr | in | Source address of the first row, interpreted according to `kind`. |
+| spitch | in | Bytes between the starts of consecutive source rows. Must be at least `width`. |
+| width | in | Bytes copied per row. Must be greater than 0. |
+| height | in | Number of rows. Must be greater than 0 and not exceed UINT32_MAX. |
+| kind | in | Only [AXCL_MEMCPY_HOST_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) and [AXCL_MEMCPY_DEVICE_TO_HOST](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST) are supported. |
+
+#### Returns
+
+- `AXCL_SUCC`: The copy completed successfully.
+- `others`: Failure.
+
+#### Note
+
+- This is a synchronous function and returns after the copy completes.
+- [AXCL_MEMCPY_HOST_TO_HOST](reference/enum.md#AXCL_MEMCPY_HOST_TO_HOST) and [AXCL_MEMCPY_DEVICE_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_DEVICE) are not supported and return AXCL_ERR_RT_UNSUPPORT.
+- The span of each side is (`height` - 1) * pitch + `width` bytes. The whole Device span must lie inside one Device memory block on the device of the current Context, for example one allocation from [axclrtMalloc](#axclrtMalloc) or [axclrtMallocCached](#axclrtMallocCached).
+- The whole Host span, padding included, must be mapped, and writable for a Device-to-Host copy.
+- Until the copy completes, the CPU must not read or write any part of the Host span, padding included.
+- On devices that are not DMA coherent, which includes every AX8860 local device, a Device-to-Host copy into plain Host memory (for example from malloc) returns AXCL_ERR_COMM_UNSUPPORT, unless both pitches equal `width` or `height` is 1. Use memory from [axclrtMallocHost](#axclrtMallocHost) instead; it works on every device.
+- Many short rows are slower than one contiguous copy of the same size. Merge contiguous rows where possible.
+- Unlike CANN, `width` and `height` have no fixed upper bound other than the UINT32_MAX limit on `height`.
+
+#### Example
+
+The following pseudocode omits error handling. It copies 256 rows of 1000 bytes from Host rows 1024 bytes apart to Device rows 2048 bytes apart, and back to the Host.
+
+```c
+ const size_t width = 1000;
+ const size_t height = 256;
+ const size_t hostPitch = 1024;
+ const size_t devPitch = 2048;
+ void *hostSrc = NULL;
+ void *hostDst = NULL;
+ void *devMem = NULL;
+
+ // Allocate Host and Device memory; each side holds height rows at its own pitch.
+ axclrtMallocHost(&hostSrc, hostPitch * height);
+ axclrtMallocHost(&hostDst, hostPitch * height);
+ axclrtMalloc(&devMem, devPitch * height, AXCL_MEM_MALLOC_HUGE_FIRST);
+
+ // Host -> Device: the first width bytes of each row are copied; the padding is not.
+ axclrtMemcpy2d(devMem, devPitch, hostSrc, hostPitch, width, height, AXCL_MEMCPY_HOST_TO_DEVICE);
+
+ // Device -> Host.
+ axclrtMemcpy2d(hostDst, hostPitch, devMem, devPitch, width, height, AXCL_MEMCPY_DEVICE_TO_HOST);
+
+ axclrtFree(devMem);
+ axclrtFreeHost(hostDst);
+ axclrtFreeHost(hostSrc);
+```
+
+#### Remark
+
+- [axclrtMemcpy2dAsync](#axclrtMemcpy2dAsync)
+- [axclrtMemcpy](#axclrtMemcpy)
+- [axclrtMallocHost](#axclrtMallocHost)
+
+<br>
+
+<a id="axclrtMemcpy2dAsync"></a>
+
+### axclrtMemcpy2dAsync
+
+Asynchronously submit a 2D rectangle copy between Host and Device memory to a specified Stream.
+
+Same rectangle, parameters and constraints as [axclrtMemcpy2d](#axclrtMemcpy2d), executed in submission order on `stream`.
+
+#### Function
+
+```c
+AXCL_EXPORT axclError axclrtMemcpy2dAsync(void *dstPtr, size_t dpitch, const void *srcPtr, size_t spitch, size_t width, size_t height, axclrtMemcpyKind kind, axclrtStream stream);
+```
+
+#### Parameters
+
+| Name | Direction | Description |
+|---|---|---|
+| dstPtr | out | Destination address of the first row, interpreted according to `kind`. |
+| dpitch | in | Bytes between the starts of consecutive destination rows. Must be at least `width`. |
+| srcPtr | in | Source address of the first row, interpreted according to `kind`. |
+| spitch | in | Bytes between the starts of consecutive source rows. Must be at least `width`. |
+| width | in | Bytes copied per row. Must be greater than 0. |
+| height | in | Number of rows. Must be greater than 0 and not exceed UINT32_MAX. |
+| kind | in | Only [AXCL_MEMCPY_HOST_TO_DEVICE](reference/enum.md#AXCL_MEMCPY_HOST_TO_DEVICE) and [AXCL_MEMCPY_DEVICE_TO_HOST](reference/enum.md#AXCL_MEMCPY_DEVICE_TO_HOST) are supported. |
+| stream | in | Stream that receives the copy operation. Must not be NULL. |
+
+#### Returns
+
+- `AXCL_SUCC`: The copy was submitted successfully.
+- `others`: Failure.
+
+#### Note
+
+- This is an asynchronous function. A successful return means only that the copy was submitted, not that it completed. Errors raised while the copy executes are reported by the next [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream) on `stream`. For example, where [axclrtMemcpy2d](#axclrtMemcpy2d) returns AXCL_ERR_COMM_UNSUPPORT, this function still submits the copy successfully, and the synchronization returns AXCL_ERR_COMM_UNSUPPORT.
+- Supported kinds and memory requirements are the same as for [axclrtMemcpy2d](#axclrtMemcpy2d), except that the Device range must belong to the device associated with `stream`.
+- Unlike CANN, this function returns after submission even when the Host memory is plain memory from malloc. Both memory ranges must stay valid, and the CPU must not access the Host span, padding included, until `stream` is synchronized.
+- Copies run in submission order with other tasks on `stream`.
+
+#### Example
+
+The following pseudocode omits error handling. It submits the copies of the [axclrtMemcpy2d](#axclrtMemcpy2d) example to a Stream and waits for both to complete.
+
+```c
+ const size_t width = 1000;
+ const size_t height = 256;
+ const size_t hostPitch = 1024;
+ const size_t devPitch = 2048;
+ void *hostSrc = NULL;
+ void *hostDst = NULL;
+ void *devMem = NULL;
+ axclrtStream stream = NULL;
+
+ axclrtCreateStream(&stream);
+ axclrtMallocHost(&hostSrc, hostPitch * height);
+ axclrtMallocHost(&hostDst, hostPitch * height);
+ axclrtMalloc(&devMem, devPitch * height, AXCL_MEM_MALLOC_HUGE_FIRST);
+
+ // Both copies run in order on the Stream.
+ axclrtMemcpy2dAsync(devMem, devPitch, hostSrc, hostPitch, width, height, AXCL_MEMCPY_HOST_TO_DEVICE, stream);
+ axclrtMemcpy2dAsync(hostDst, hostPitch, devMem, devPitch, width, height, AXCL_MEMCPY_DEVICE_TO_HOST, stream);
+
+ // Do not access hostSrc or hostDst, padding included, until the synchronization returns.
+ axclrtSynchronizeStream(stream);
+
+ axclrtFree(devMem);
+ axclrtFreeHost(hostDst);
+ axclrtFreeHost(hostSrc);
+ axclrtDestroyStream(stream);
+```
+
+#### Remark
+
+- [axclrtMemcpy2d](#axclrtMemcpy2d)
+- [axclrtSynchronizeStream](stream_api.md#axclrtSynchronizeStream)
 
 <br>
 
@@ -818,6 +949,7 @@ AXCL_EXPORT axclError axclrtMemcpyAsync(void *dstPtr, const void *srcPtr, size_t
 - This function supports Host-to-Host, Host-to-Device, Device-to-Host, and Device-to-Device copies, both within the same device and between different devices.
 - Copies run in submission order with other tasks on `stream`, including Host-to-Host copies.
 - Any Device memory must belong to the device associated with `stream`, except for a Device-to-Device copy between different devices: the device associated with `stream` must then own either the source or the destination, and peer access from that device to the other device must have been enabled with [axclrtDeviceEnablePeerAccess](device_api.md#axclrtDeviceEnablePeerAccess). All source and destination ranges must remain valid until the copy completes.
+- A Device-to-Device copy between different devices is supported only when both devices are on the same card. A copy between devices on different cards fails, even if peer access has been enabled.
 
 #### Example
 

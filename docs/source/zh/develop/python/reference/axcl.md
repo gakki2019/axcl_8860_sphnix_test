@@ -44,8 +44,6 @@ axclError axclInit(const char *json);
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl.py:116`。
-
 #### 2.1.5. 示例
 
 ```python
@@ -86,8 +84,6 @@ axclError axclFinalize(void);
 
 返回类型：`int`。
 
-源码：`python/axcl/rt/axcl.py:147`。
-
 #### 2.2.5. 示例
 
 ```python
@@ -120,12 +116,12 @@ void axclAppLog(int32_t lv, const char *func, const char *file, uint32_t line, c
 
 | 名称 | 类型 | 说明 |
 |---|---|---|
-| lv | int | 日志级别。参见（源码未提供引用目标）。 |
+| lv | int | 日志级别。参见 axclrtSetLogLevel。 |
 | func | str &#124; bytes &#124; None | 函数名。为 NULL 时不打印函数名。 |
 | file | str &#124; bytes &#124; None | 文件名。为 NULL 时不打印文件名。 |
 | line | int | 行号。 |
 | fmt | str &#124; bytes &#124; None | 非 NULL 的 `printf` 风格格式字符串。格式化后的消息存储在 1024 字节的内部缓冲区中，包括结尾的 NUL。超过 1023 字节的消息会被截断。格式说明符必须与参数匹配。 |
-| args | object | 源码未提供参数说明。 |
+| args | object | 按 `fmt` 格式化的参数。整数按 C `int` 传递，浮点数按 `double` 传递，字符串或 bytes 按 `char *` 传递；需要其他 C 类型时传入 ctypes 实例。 |
 
 #### 2.3.3. 返回值
 
@@ -134,8 +130,6 @@ void axclAppLog(int32_t lv, const char *func, const char *file, uint32_t line, c
 #### 2.3.4. 说明
 
 返回类型：`None`。
-
-源码：`python/axcl/rt/axcl.py:175`。
 
 #### 2.3.5. 示例
 

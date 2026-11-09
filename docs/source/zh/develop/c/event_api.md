@@ -289,7 +289,7 @@ AXCL_EXPORT axclError axclrtStreamWaitEvent(axclrtStream stream, axclrtEvent eve
 
 - `stream` 和 `event` 必须属于同一设备，否则本函数失败。
 - 等待点针对提交时事件的最近一次记录，之后再次记录事件不会改变它。
-- 事件从未记录、最近一次记录已经结束，或该记录就在 `stream` 上时，不插入等待点。
+- 事件从未记录或最近一次记录已经结束时，不插入等待点。尚未结束的记录即使就在 `stream` 上，也会被等待。
 - 本接口成功返回仅表示等待点已提交，不会阻塞 Host 线程。指定 Stream 执行到等待点后，后续任务必须等到该记录结束后才能继续执行。
 - 记录未执行就结束（被拒绝或所在 Stream 被销毁）时，同样放行等待点；该失败由记录所在的 Stream 报告，而不是 `stream`。
 - 支持多个 Stream 等待同一个事件，参阅 [事件语义](../arch/concept.md#EVENT)。
